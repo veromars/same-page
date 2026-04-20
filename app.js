@@ -734,7 +734,7 @@ function formatUserHeader(p, context) {
   if (context === 'list') {
     return `${p.name} <span class="card-age" style="font-size:16px; font-weight:400; color:var(--text-muted);">${age}</span>`;
   }
-  return `${p.name} <span class="card-age" style="font-size:18px; font-weight:400; opacity:0.9;">${age}세 (${yearShort}년생)</span>`;
+  return `${p.name} <span class="card-age" style="font-size:16px; font-weight:400; color:var(--text-muted);">${age}세 (${yearShort}년생)</span>`;
 }
 
 
@@ -2130,16 +2130,16 @@ document.addEventListener('touchstart', function (e) {
   ` : `<div class="prof-modal-photo" style="background-image:url('${p.image}'); height:450px; background-size:cover; background-position:center;"></div>`;
 
     const locationStr = p.location || userLocation;
-    const locationSpan = `<span style="font-size:18px; font-weight:400; opacity:0.9;"> · ${locationStr}</span>`;
+    const locationSpan = `<span style="font-size:16px; font-weight:400; color:var(--text-muted);"> · ${locationStr}</span>`;
     const headerContent = isMine ? `${formatUserHeader(p, 'detail')}${locationSpan} ${getRoleBadgeHTML(p.role)}` : 
-      `${p.name} <span style="font-size:18px; font-weight:400; opacity:0.9;"> ${age}세 (${yearSuffix}년생) · ${locationStr}</span> ${getRoleBadgeHTML(p.role)}`;
+      `${p.name} <span style="font-size:16px; font-weight:400; color:var(--text-muted);"> ${age}세 (${yearSuffix}년생) · ${locationStr}</span> ${getRoleBadgeHTML(p.role)}`;
 
     return `
     <div style="padding-bottom:120px;">
       ${photoSectionHTML}
       
       <div style="padding: 24px;">
-        <div class="card-name" style="font-size:${(isMine || isPreview) ? '28px' : '18px'}; display:flex; align-items:center; gap:8px; font-weight:${(isMine || isPreview) ? '700' : '400'}; color:${(isMine || isPreview) ? 'var(--text-dark)' : '#777'}; flex-wrap:wrap;">
+        <div class="card-name" style="font-size:${(isMine || isPreview) ? '28px' : '22px'}; display:flex; align-items:center; gap:8px; font-weight:${(isMine || isPreview) ? '700' : '600'}; color:${(isMine || isPreview) ? 'var(--text-dark)' : 'var(--text-dark)'}; flex-wrap:wrap;">
           ${headerContent}
         </div>
 
