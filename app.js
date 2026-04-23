@@ -1,4 +1,13 @@
 console.log('app loaded');
+let myAnswers = window.myAnswers || window.currentUser?.answers || {};
+let dailyProfiles = [];
+let browseQueue = [];
+let pagedSet = new Set();
+let passedSet = new Set();
+let savedBooks = [];
+window.isQurated = false;
+
+
 
 function getAge(birthInput) {
   if (!birthInput) return '';
@@ -27,35 +36,62 @@ window.getYearLabel = function (year) {
 
 const QUESTIONS = [
   // Chapter 1 · 나
-  { id: 1, chapter: 1, text: "상대를 설레게 하는 나의 매력" },
-  { id: 2, chapter: 1, text: "나의 하루 그리고 나의 휴일" },
-  { id: 3, chapter: 1, text: "나의 소울 푸드" },
-  { id: 4, chapter: 1, text: "나의 힐링 스팟" },
-  { id: 5, chapter: 1, text: "나만의 초능력" },
-  { id: 6, chapter: 1, text: "내가 사랑하는 영화/드라마와 그 속의 한 장면" },
-  { id: 7, chapter: 1, text: "연인에게 들려주고 싶은 나의 플레이리스트" },
-  { id: 8, chapter: 1, text: "어린시절, 가장 행복했던 기억의 한 장면" },
-  { id: 9, chapter: 1, text: "5년 뒤, 내가 그리는 나의 모습" },
+  { id: 1, chapter: 1, text: "상대를 설레게 하는 나의 매력", type: "text" },
+  { id: 2, chapter: 1, text: "나의 하루 그리고 나의 휴일", type: "text" },
+  { id: 3, chapter: 1, text: "나의 소울 푸드", type: "text" },
+  { id: 4, chapter: 1, text: "나의 힐링 스팟", type: "text" },
+  { id: 5, chapter: 1, text: "나만의 초능력", type: "text" },
+  { id: 6, chapter: 1, text: "내가 사랑하는 영화/드라마와 그 속의 한 장면", type: "text" },
+  { id: 7, chapter: 1, text: "연인에게 들려주고 싶은 나의 플레이리스트", type: "text" },
+  { id: 8, chapter: 1, text: "어린시절, 가장 행복했던 기억의 한 장면", type: "text" },
+  { id: 9, chapter: 1, text: "5년 뒤, 내가 그리는 나의 모습", type: "text" },
+  
   // Chapter 2 · 사랑
-  { id: 10, chapter: 2, text: "나를 설레게 하는 상대의 매력" },
-  { id: 11, chapter: 2, text: "나만 아는 나의 플러팅 스킬" },
-  { id: 12, chapter: 2, text: "연애 성향 체크 (연락/만남 빈도)" },
-  { id: 13, chapter: 2, text: "연애 가치관 체크 (애정표현/파트너 친구)" },
-  { id: 14, chapter: 2, text: "사랑하고 있다고 느끼는 순간 & 사랑받고 있다고 느끼는 순간" },
-  { id: 15, chapter: 2, text: "연애 안정기, 우리 관계의 필수 요소 3가지" },
-  { id: 16, chapter: 2, text: "다투었을 때 내가 원하는 해결 방법" },
-  { id: 17, chapter: 2, text: "이 사람과 헤어질 수도 있겠다고 느끼는 순간" },
-  { id: 18, chapter: 2, text: "이 사람과 함께하는 미래를 떠올리게 되는 순간" },
+  { id: 10, chapter: 2, text: "나를 설레게 하는 상대의 매력", type: "text" },
+  { id: 11, chapter: 2, text: "나만 아는 나의 플러팅 스킬", type: "text" },
+  { 
+    id: 12, chapter: 2, text: "연애 성향 체크", type: "compound",
+    subQuestions: [
+      { id: "12-1", text: "하루 연락 빈도는?", type: "choice", options: ["짧은 통화 1번", "메시지 5번 이하, 잠들기 전 통화 1번", "이동할 때마다 메시지나 통화", "메시지만 자주", "영상통화로 일상 공유"] },
+      { id: "12-2", text: "만남 빈도는?", type: "choice", options: ["주말 중 1회", "주말 이틀 함께", "주중 1~2회, 주말 1회", "주말 포함 4회 이상", "가능한 매일"] }
+    ]
+  },
+  { 
+    id: 13, chapter: 2, text: "연애 가치관 체크", type: "compound",
+    subQuestions: [
+      { id: "13-1", text: "내가 원하는 애정 표현 방식은?", type: "choice", options: ["스킨십", "인정하는 말", "함께하는 시간", "선물", "봉사"] },
+      { id: "13-2", text: "파트너의 친구들과의 단둘 만남, 어디까지 괜찮아?", type: "choice", options: ["단둘 만남 자체 불가", "단체 모임은 가능", "카페/식사는 가능", "영화/노래방도 가능", "술자리도 가능"] }
+    ]
+  },
+  { id: 14, chapter: 2, text: "내가 사랑하고 있다고 느끼는 순간 & 사랑받고 있다고 느끼는 순간", type: "text" },
+  { 
+    id: 15, chapter: 2, text: "연애 안정기, 우리 관계의 필수 요소 3가지", type: "multiple-choice", 
+    options: ["설렘", "스킨십", "성의 있는 데이트", "편안함", "신뢰감", "속 깊은 대화", "미래에 대한 약속", "서로를 위한 배려"],
+    limit: 3
+  },
+  { id: 16, chapter: 2, text: "다투었을 때 내가 원하는 해결 방법", type: "choice", options: ["서로 마음이 풀릴 때까지 이야기한다", "화가 가라앉을 때까지 잠시 시간을 갖는다"] },
+  { id: 17, chapter: 2, text: "이 사람과 헤어질 수도 있겠다고 느끼는 순간", type: "text" },
+  { id: 18, chapter: 2, text: "이 사람과 함께하는 미래를 떠올리게 되는 순간", type: "text" },
+  
   // Chapter 3 · 관계
-  { id: 19, chapter: 3, text: "파트너로서 나의 매력" },
-  { id: 20, chapter: 3, text: "내가 파트너에게 원하는 3가지" },
-  { id: 21, chapter: 3, text: "함께하기 전 꼭 확인하고 싶은 3가지" },
-  { id: 22, chapter: 3, text: "함께하는 삶 (집/경제관리/수면/반려동물/아이)" },
-  { id: 23, chapter: 3, text: "살고 싶은 동네는?" },
-  { id: 24, chapter: 3, text: "차/소파/신발에 쓸 수 있는 최대 금액" },
-  { id: 25, chapter: 3, text: "내가 원하는 집안일 분담" },
-  { id: 26, chapter: 3, text: "파트너와 꼭 함께하고 싶은 일상의 한 장면" },
-  { id: 27, chapter: 3, text: "내가 생각하는 함께하는 삶이란" }
+  { id: 19, chapter: 3, text: "파트너로서 나의 매력", type: "text" },
+  { id: 20, chapter: 3, text: "내가 파트너에게 원하는 3가지", type: "text" },
+  { id: 21, chapter: 3, text: "함께하기 전 꼭 확인하고 싶은 3가지", type: "text" },
+  { 
+    id: 22, chapter: 3, text: "함께하는 삶 — 스피드 Q&A", type: "compound",
+    subQuestions: [
+      { id: "22-1", text: "같이 살 집은?", type: "choice", options: ["빚 안고 자가", "빚 없이 전세"] },
+      { id: "22-2", text: "경제 관리는?", type: "choice", options: ["각자 벌어서 각자 관리", "생활비만 각출", "모든 수입 공개, 함께 관리"] },
+      { id: "22-3", text: "수면 형태는?", type: "choice", options: ["같은 방 한 침대", "같은 방 침대 따로", "각자 방에서 숙면"] },
+      { id: "22-4", text: "반려동물은?", type: "choice", options: ["없다", "반려견", "반려묘", "둘 다", "기타"] },
+      { id: "22-5", text: "아이를 원하나요? 원한다면 계획은? 어떤 부모가 되고 싶어요?", type: "text" }
+    ]
+  },
+  { id: 23, chapter: 3, text: "살고 싶은 동네는?", type: "text" },
+  { id: 24, chapter: 3, text: "차 한 대, 소파 하나, 신발 한 켤레에 쓸 수 있는 최대 금액", type: "text" },
+  { id: 25, chapter: 3, text: "내가 원하는 집안일 분담", type: "text" },
+  { id: 26, chapter: 3, text: "파트너와 꼭 함께하고 싶은 일상의 한 장면", type: "text" },
+  { id: 27, chapter: 3, text: "내가 생각하는 함께하는 삶이란", type: "text" }
 ];
 
 const MOCK_PROFILES = [
@@ -80,8 +116,9 @@ const MOCK_PROFILES = [
       8: { text: "할머니 댁 마당에서 혼자 놀던 여름 오후" },
       9: { text: "지금보다 덜 바쁘고, 더 나다운 사람" },
       10: { text: "나를 오래 바라보는 사람" },
-      13: { text: "연락은 자주보단 깊게. 만남은 질 중심" },
-      14: { text: "같이 걷다가 손 잡아줄 때요 🤍" },
+      12: { text: { "12-1": "이동할 때마다 메시지나 통화", "12-2": "주중 1~2회, 주말 1회" } },
+      15: { text: ["편안함", "신뢰감", "속 깊은 대화"] },
+      16: { text: "서로 마음이 풀릴 때까지 이야기한다" },
       19: { text: "솔직한 것. 불편해도 말할 수 있는 사람" },
       26: { text: "아침에 각자 커피 내려서 같이 마시는 것" }
     }
@@ -432,6 +469,114 @@ const MOCK_PROFILES = [
       1: { text: "무대 위에서 에너지가 좋다는 얘기를 들어요" },
       3: { text: "공연 끝나고 마시는 시원한 생맥주" }
     }
+  },
+  {
+    id: 16, name: "zoe", birthYear: 1997, role: 'F', score: "94% 매칭", tags: ["와인", "카페", "여행"],
+    bio: "홍대 앞 단골 와인바 있어요",
+    image: "https://images.unsplash.com/photo-1565150860083-2257da1fbf23?w=400",
+    intent: "연애를 기대해요 ❤️",
+    aboutMe: { style: "차분한 세련된 무드", ideal: "취향이 뚜렷한 사람", drink: "와인 애호가", smoke: "비흡연", mbti: "ENFJ", saju: "임진일주" },
+    answers: {
+      4: { text: "단골 와인바 구석자리요. 사장님이 제 취향을 알아서 추천해주시는 와인 마실 때요." },
+      7: { text: "검정치마, 혁오, 그리고 이름 모를 프렌치 팝들. 와인이랑 잘 어울려요." },
+      26: { text: "퇴근길에 들러서 딱 한 잔만 하고 집에 가는 노을 지는 저녁." }
+    }
+  },
+  {
+    id: 17, name: "하람", birthYear: 2000, role: 'V', score: "92% 매칭", tags: ["독서", "영화", "자연"],
+    bio: "책 읽다 잠드는 게 루틴",
+    image: "https://images.unsplash.com/photo-1572288236082-e363d5121568?w=400",
+    intent: "친구, 연애 둘 다 열려 있어요 ✨",
+    aboutMe: { style: "편안하고 내추럴한 스타일", ideal: "다정한 사람", drink: "비음주", smoke: "비흡연", mbti: "INFP", saju: "을해일주" },
+    answers: {
+      2: { text: "휴일엔 침대에서 책 보다가 깜빡 잠드는 게 제일 큰 사치예요." },
+      6: { text: "'리틀 포레스트'요. 마음이 복잡할 때 보면 요리하는 소리에 차분해져요." },
+      8: { text: "여름 방학 때 할머니 댁 마루에서 수박 먹으며 동화책 보던 오후." }
+    }
+  },
+  {
+    id: 18, name: "kira", birthYear: 1995, role: 'B', score: "89% 매칭", tags: ["여행", "맛집", "음악"],
+    bio: "이태원 골목을 제일 잘 알아요",
+    image: "https://images.unsplash.com/photo-1698252980771-4bbf18c4439a?w=400",
+    intent: "연애를 기대해요 ❤️",
+    aboutMe: { style: "도시적이고 힙한 스타일", ideal: "에너지 넘치는 사람", drink: "가끔", smoke: "비흡연", mbti: "ENTP", saju: "경오일주" },
+    answers: {
+      4: { text: "이태원 해방촌의 루프탑 바. 남산타워가 보이면 마음이 뻥 뚫려요." },
+      5: { text: "한 번 가본 골목은 절대 안 잊어버리는 인간 네비게이터 능력!" },
+      19: { text: "길 잃어도 당황하지 않고 새로운 곳을 발견하는 재미를 아는 것." }
+    }
+  },
+  {
+    id: 19, name: "🌿", birthYear: 1998, role: 'F', score: "86% 매칭", tags: ["반려동물", "식물", "집순이"],
+    bio: "고양이 한 마리, 식물 열 개",
+    image: "https://images.unsplash.com/photo-1762954419103-43708f0cf893?w=400",
+    intent: "친구, 연애 둘 다 열려 있어요 ✨",
+    aboutMe: { style: "청초하고 맑은 느낌", ideal: "섬세하고 배려심 깊은 사람", drink: "차 한 잔", smoke: "비흡연", mbti: "ISFJ", saju: "갑인일주" },
+    answers: {
+      2: { text: "식물 물 주고 고양이 털 빗겨주다 보면 휴일이 다 가요. 평화로워요." },
+      22: { text: { "22-1": "빚 없이 전세", "22-2": "각자 벌어서 각자 관리", "22-3": "같은 방 한 침대", "22-4": "반려묘", "22-5": "아이는 없어도 괜찮아요. 고양이랑 식물들이면 충분해요." } },
+      4: { text: "창가에 화분들 모아둔 저만의 작은 정원." }
+    }
+  },
+  {
+    id: 20, name: "luna", birthYear: 1993, role: 'V', score: "83% 매칭", tags: ["운동", "수영", "자연"],
+    bio: "주말엔 무조건 수영",
+    image: "https://images.unsplash.com/photo-1620216977705-df5ba73ca1a1?w=400",
+    intent: "연애를 기대해요 ❤️",
+    aboutMe: { style: "건강하고 활동적인 스타일", ideal: "자신감 있는 사람", drink: "비음주", smoke: "비흡연", mbti: "ESTJ", saju: "무오일주" },
+    answers: {
+      2: { text: "토요일 아침 일찍 수영장 가서 1km 돌고 오면 한 주 스트레스가 다 풀려요." },
+      5: { text: "물속에서만큼은 중력을 잊고 자유로울 수 있는 능력." },
+      9: { text: "바다 근처에 살면서 매일 아침 수영으로 시작하는 삶." }
+    }
+  },
+  {
+    id: 21, name: "은유", birthYear: 1999, role: 'F', score: "81% 매칭", tags: ["카페", "디저트", "독서"],
+    bio: "조용한 카페 맛집 수집 중",
+    image: "https://images.unsplash.com/photo-1523177311887-ad300abe97cc?w=400",
+    intent: "친구, 연애 둘 다 열려 있어요 ✨",
+    aboutMe: { style: "단아하고 정돈된 스타일", ideal: "말이 잘 통하는 사람", drink: "커피 한 잔", smoke: "비흡연", mbti: "INFJ", saju: "을사일주" },
+    answers: {
+      3: { text: "갓 구운 따뜻한 스콘에 클로티드 크림과 잼." },
+      4: { text: "아직 유명해지지 않은, 골목 깊숙이 숨어있는 조용한 카페." },
+      14: { text: "말하지 않아도 제 컨디션을 알아채고 따뜻한 차 한 잔 내어줄 때." }
+    }
+  },
+  {
+    id: 22, name: "tori", birthYear: 1996, role: 'B', score: "78% 매칭", tags: ["전시", "카페", "사진"],
+    bio: "을지로 구석구석 탐험가",
+    image: "https://images.unsplash.com/photo-1739010577139-6f904e57fe41?w=400",
+    intent: "연애를 기대해요 ❤️",
+    aboutMe: { style: "자유롭고 개성 있는 스타일", ideal: "감수성이 풍부한 사람", drink: "맥주 500", smoke: "비흡연", mbti: "ISFP", saju: "신미일주" },
+    answers: {
+      4: { text: "을지로의 낡은 건물 옥상. 시끄러운 도시 위에서 혼자 조용한 시간." },
+      8: { text: "아빠 손 잡고 시장 골목 구경하며 떡볶이 먹던 주말." },
+      26: { text: "우연히 발견한 좁은 골목 끝에서 노을을 마주하는 순간." }
+    }
+  },
+  {
+    id: 23, name: "솔아", birthYear: 2001, role: 'V', score: "75% 매칭", tags: ["음악", "악기", "공연"],
+    bio: "악기 셋, 음악 취향 하나",
+    image: "https://images.unsplash.com/photo-1565050831300-833bcdc08d3b?w=400",
+    intent: "친구, 연애 둘 다 열려 있어요 ✨",
+    aboutMe: { style: "예술적이고 몽환적인 스타일", ideal: "음악을 사랑하는 사람", drink: "비음주", smoke: "비흡연", mbti: "INFP", saju: "정유일주" },
+    answers: {
+      6: { text: "'위플래쉬'요. 무언가에 미칠 듯이 몰입하는 에너지가 전해져서 좋아해요." },
+      7: { text: "쇼팽부터 최신 인디 밴드까지. 악기 소리가 잘 들리는 음악들이요." },
+      5: { text: "어떤 곡이든 한 번 들으면 피아노로 바로 연주할 수 있는 절대음감." }
+    }
+  },
+  {
+    id: 24, name: "nara", birthYear: 1994, role: 'F', score: "72% 매칭", tags: ["요리", "맛집", "영화"],
+    bio: "요리 잘한다는 말 자주 들어요",
+    image: "https://images.unsplash.com/photo-1543204607-75cad6df85c3?w=400",
+    intent: "연애를 기대해요 ❤️",
+    aboutMe: { style: "세련되고 지적인 무드", ideal: "정직하고 따뜻한 사람", drink: "와인 조금", smoke: "비흡연", mbti: "ESTJ", saju: "계묘일주" },
+    answers: {
+      3: { text: "제가 정성껏 끓인 해물 파스타. 화이트 와인이랑 같이요." },
+      26: { text: "파트너가 제가 만든 요리를 맛있게 먹어주는 주말 저녁의 식탁." },
+      2: { text: "휴일엔 시장 가서 제철 식재료 장 보는 걸로 시작해요. 요리하는 게 명상 같아요." }
+    }
   }
 ];
 
@@ -468,15 +613,15 @@ const USER_PHOTOS = [
   "https://images.unsplash.com/photo-1704731268191-e744c6d96b26?w=400", // 13
   "https://images.unsplash.com/photo-1691068013523-0f653e498f10?w=400", // 14
   "https://images.unsplash.com/photo-1669026481679-268f2fd919bf?w=400", // 15
-  "https://images.unsplash.com/photo-1565150860083-2257da1fbf23?w=400", // 16
-  "https://images.unsplash.com/photo-1572288236082-e363d5121568?w=400", // 17
-  "https://images.unsplash.com/photo-1698252980771-4bbf18c4439a?w=400", // 18
-  "https://images.unsplash.com/photo-1762954419103-43708f0cf893?w=400", // 19
-  "https://images.unsplash.com/photo-1620216977705-df5ba73ca1a1?w=400", // 20
-  "https://images.unsplash.com/photo-1523177311887-ad300abe97cc?w=400", // 21
-  "https://images.unsplash.com/photo-1739010577139-6f904e57fe41?w=400", // 22
-  "https://images.unsplash.com/photo-1543204607-75cad6df85c3?w=400", // 23
-  "https://images.unsplash.com/photo-1565050831300-833bcdc08d3b?w=400", // 24
+  "https://images.unsplash.com/photo-1565150860083-2257da1fbf23?w=400", // 16 zoe
+  "https://images.unsplash.com/photo-1572288236082-e363d5121568?w=400", // 17 하람
+  "https://images.unsplash.com/photo-1698252980771-4bbf18c4439a?w=400", // 18 kira
+  "https://images.unsplash.com/photo-1762954419103-43708f0cf893?w=400", // 19 🌿
+  "https://images.unsplash.com/photo-1620216977705-df5ba73ca1a1?w=400", // 20 luna
+  "https://images.unsplash.com/photo-1523177311887-ad300abe97cc?w=400", // 21 은유
+  "https://images.unsplash.com/photo-1739010577139-6f904e57fe41?w=400", // 22 tori
+  "https://images.unsplash.com/photo-1565050831300-833bcdc08d3b?w=400", // 23 솔아
+  "https://images.unsplash.com/photo-1543204607-75cad6df85c3?w=400", // 24 nara
 ];
 
 const MOCK_MEETUPS = [
@@ -615,7 +760,8 @@ let userSaju = '';
 let userReligion = '';
 let userJob = '';
 let currentTab = 'discover';
-let MY_ANSWERS = {
+let MY_ANSWERS = myAnswers; 
+Object.assign(MY_ANSWERS, {
   1: { text: "눈웃음이요. 모르는 척하다가 터지는 웃음" },
   2: { text: "출근 전 커피 한 잔은 필수예요. 휴일엔 늦잠 자고 브런치 🥐" },
   3: { text: "엄마표 된장찌개. 냄새만 맡아도 집 생각나요" },
@@ -625,14 +771,12 @@ let MY_ANSWERS = {
   14: { text: "같이 걷다가 손 잡아줄 때요 🤍" },
   18: { text: "별것 아닌 일상을 같이 기억하고 싶을 때요" },
   26: { text: "아침에 각자 커피 내려서 같이 마시는 것" }
-};
+});
 
-let swipeHistory = [];
 window.likedPages = window.likedPages || {};
 const chapterColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
 
 window.discoverFilterType = '전체';
-let discoverFeedList = [];
 window.showLikedCollection = false;
 window.showSavedMeetups = false;
 window.bookmarkedMoims = {};
@@ -646,19 +790,10 @@ function handleLike(pageId, chapterNum) {
   if (!pageId) return;
   window.likedPages[pageId] = !window.likedPages[pageId];
   const isLiked = window.likedPages[pageId];
-  const path = document.getElementById('heart-' + pageId);
-  const color = chapterColors[chapterNum] || '#E8FF90';
-  if (path) {
-    if (isLiked) {
-      path.setAttribute('fill', color);
-      path.setAttribute('stroke', 'none');
-    } else {
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', '#ccc');
-    }
-  }
-  const badges = document.querySelectorAll(`[data-page-id="${pageId}"] .card-liked-badge`);
-  badges.forEach(badge => { badge.style.visibility = isLiked ? 'visible' : 'hidden'; });
+  
+  // Update UI without re-rendering
+  updateHeartOnly(pageId, isLiked, chapterNum);
+
   const btn = document.getElementById('like-btn-' + pageId);
   if (btn) {
     btn.style.transform = 'scale(1.4)';
@@ -689,42 +824,41 @@ window.openCard = function (pageId) {
   openAnswerRevealModal(profileId, qId);
 };
 
-window.bindCardInteractions = function () {
-  // 1. Answer Cards / Teasers (via pageId)
-  document.querySelectorAll('[data-page-id]').forEach(el => {
-    const pid = el.dataset.pageId;
-    el.style.cursor = 'pointer';
-    // Remove if already exists to avoid doubles
-    el.onclick = null;
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openCard(pid);
-    });
-  });
+// Delegated event listener for all profile and answer card interactions
+document.addEventListener('click', (e) => {
+  // 1. Answer Reveal (data-page-id)
+  const pageCard = e.target.closest('[data-page-id]');
+  if (pageCard) {
+    e.stopPropagation();
+    const parts = pageCard.dataset.pageId.split('_Q');
+    const profileIdRaw = parts[0].replace('user', '');
+    const profileId = profileIdRaw === 'myProfile' ? 'myProfile' : parseInt(profileIdRaw);
+    const qId = parseInt(parts[1]);
+    openAnswerRevealModal(profileId, qId);
+    return;
+  }
 
-  // 2. Profile Cards in Discover (via profile-id)
-  document.querySelectorAll('[data-profile-id]').forEach(el => {
-    if (el.dataset.pageId) return; // skip answer cards which have both
-    const pid = el.dataset.profileId;
-    el.style.cursor = 'pointer';
-    el.onclick = null;
-    el.addEventListener('click', (e) => {
-      e.stopPropagation();
-      openProfileModal(parseInt(pid));
-    });
-  });
+  // 2. Question Input (data-input-qid)
+  const inputCard = e.target.closest('[data-input-qid]');
+  if (inputCard) {
+    e.stopPropagation();
+    openInputModal(parseInt(inputCard.dataset.inputQid));
+    return;
+  }
 
-  // 3. Unanswered Grid Squares
-  document.querySelectorAll('[data-input-qid]').forEach(el => {
-    const qid = parseInt(el.dataset.inputQid);
-    el.style.cursor = 'pointer';
-    el.onclick = null;
-    el.addEventListener('click', (e) => {
+  // 3. Profile Card In Discover (data-profile-id)
+  const profCard = e.target.closest('[data-profile-id]');
+  if (profCard) {
+    // Only if it doesn't also have data-page-id (handled above)
+    if (!profCard.dataset.pageId) {
       e.stopPropagation();
-      openInputModal(qid);
-    });
-  });
-};
+      openProfileModal(parseInt(profCard.dataset.profileId));
+    }
+  }
+});
+
+// Mocking bindCardInteractions to no-op since we use delegation
+window.bindCardInteractions = function () {};
 
 // Age formatting: List -> "Name 26", Detail -> "26세 (01년생)"
 function formatUserHeader(p, context) {
@@ -1334,9 +1468,18 @@ window.openAnswerRevealModal = function (profileId, qId) {
     MOCK_PROFILES.find(x => x.id === profileId);
 
   if (!p) return;
+  window.__lastAnswerProfileId = profileId;
+  window.currentOpenProfileId = profileId;
 
-  const mc = getModalContainer();
-  mc.style.display = 'block';
+  let amc = document.getElementById('answer-modal-container');
+  if (!amc) {
+    amc = document.createElement('div');
+    amc.id = 'answer-modal-container';
+    // Higher z-index than main modal (which is 1000)
+    amc.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:2000; pointer-events:auto;';
+    document.body.appendChild(amc);
+  }
+  amc.style.display = 'block';
 
   let pages = [];
   const answeredQIds = Object.keys(p.answers || {}).map(Number).sort((a, b) => a - b);
@@ -1439,11 +1582,11 @@ window.openAnswerRevealModal = function (profileId, qId) {
       </button>
     ` : '';
 
-    mc.innerHTML = `
-      <div id="nb-modal" class="book-page-modal" style="background: ${bgGradient};">
+    amc.innerHTML = `
+      <div id="nb-modal" class="book-page-modal" style="background: ${bgGradient}; touch-action: pan-y;">
         <!-- Header -->
         <div class="book-page-header">
-          <button onclick="${isMyProfile ? 'closeModal()' : `openProfileModal(${p.id})`}" style="background:none;border:none;cursor:pointer;padding:4px;color:#bbb;display:flex;align-items:center;">
+          <button class="answer-card-close" style="background:none;border:none;cursor:pointer;padding:4px;color:#bbb;display:flex;align-items:center;z-index:9999;pointer-events:auto;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
           <div style="flex:1;"></div>
@@ -1489,10 +1632,92 @@ window.openAnswerRevealModal = function (profileId, qId) {
         handleLike(pageId, chapterNum);
       });
     }
+
+    // Attach interaction listeners ONCE after render
+    setTimeout(() => {
+      const closeBtn = modal.querySelector('.answer-card-close');
+      
+      // X button
+      closeBtn?.addEventListener('click', () => {
+        console.log('X button clicked');
+        console.log('closeAnswerCard exists:', typeof closeAnswerCard === 'function');
+        closeAnswerCard();
+      });
+      
+      // Pull down gesture
+      modal.addEventListener('touchstart', (e) => {
+        answerCardTouchStartY = e.touches[0].clientY;
+      }, { passive: true });
+      
+      modal.addEventListener('touchmove', (e) => {
+        const dy = e.touches[0].clientY - answerCardTouchStartY;
+        if (dy > 0) {
+          modal.style.transform = `translateY(${dy}px)`;
+        }
+      }, { passive: true });
+      
+      modal.addEventListener('touchend', (e) => {
+        const deltaY = e.changedTouches[0].clientY - answerCardTouchStartY;
+        if (deltaY > 80) {
+          closeAnswerCard();
+        } else {
+          modal.style.transform = '';
+          modal.style.transition = 'transform 0.2s ease-out';
+          setTimeout(() => { modal.style.transition = ''; }, 200);
+        }
+      }, { passive: true });
+    }, 50);
   };
 
   window.nbNav = function (newPage) { renderPage(newPage); };
   renderPage(currentPage);
+};
+
+// --- Answer Card System (Rewrite) ---
+let answerCardCloseHandler = null;
+let answerCardTouchStartY = 0;
+
+window.closeAnswerCard = function () {
+    console.log('closeAnswerCard initiated (layered approach)');
+    const amc = document.getElementById('answer-modal-container');
+    if (amc) {
+      // Hide or remove to reveal the profile modal underneath
+      amc.style.display = 'none';
+      amc.innerHTML = '';
+      console.log('Answer modal hidden, revealing layer below');
+    }
+};
+
+window.showProfileDetail = function (profileId) {
+    console.log('showProfileDetail called for:', profileId);
+    const mc = getModalContainer();
+    if (mc) {
+      mc.style.display = 'block';
+      mc.style.zIndex = '1000';
+      openProfileModal(profileId);
+    } else {
+      console.error('Modal container not found in showProfileDetail');
+    }
+};
+
+window.updateHeartOnly = function(pageId, liked, chapterNum) {
+  const path = document.getElementById('heart-' + pageId);
+  const chapColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
+  const color = chapColors[chapterNum] || '#9B72CC';
+  
+  if (path) {
+    if (liked) {
+      path.setAttribute('fill', color);
+      path.setAttribute('stroke', 'none');
+    } else {
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', '#ccc');
+    }
+  }
+  
+  // Also update badges if they exist
+  const badges = document.querySelectorAll(`[data-page-id="${pageId}"] .card-liked-badge`);
+  badges.forEach(badge => { badge.style.visibility = liked ? 'visible' : 'hidden'; });
 };
 
 // Double tap anywhere logic
@@ -1524,6 +1749,18 @@ document.addEventListener('touchstart', function (e) {
       padding: 8px;
       z-index: 999;
       transition: transform 0.15s ease-out;
+    }
+    .paged-indicator-centered {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 64px;
+      color: #9B72CC;
+      opacity: 0.85;
+      z-index: 5;
+      pointer-events: none;
+      user-select: none;
     }
   `;
   document.head.appendChild(style);
@@ -1574,13 +1811,29 @@ document.addEventListener('touchstart', function (e) {
   }
 
   window.toggleFilterChip = function (elem, type) {
-    const row = elem.parentElement;
-    row.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('selected'));
-    elem.classList.add('selected');
-
     const textVal = elem.innerText.trim();
-    if (type === 'loc') meetupFilterLocation = textVal;
-    if (type === 'cat') meetupFilterCategory = textVal;
+    
+    if (type === 'loc') {
+      if (meetupFilterLocation === textVal && textVal !== '전체') {
+        meetupFilterLocation = '전체';
+      } else {
+        meetupFilterLocation = textVal;
+      }
+    } else if (type === 'cat') {
+      if (meetupFilterCategory === textVal && textVal !== '전체') {
+        meetupFilterCategory = '전체';
+      } else {
+        meetupFilterCategory = textVal;
+      }
+    }
+
+    // Refresh UI highlighting for the entire row
+    const row = elem.parentElement;
+    row.querySelectorAll('.filter-chip').forEach(c => {
+      const cVal = c.innerText.trim();
+      const currentVal = (type === 'loc' ? meetupFilterLocation : meetupFilterCategory);
+      c.classList.toggle('selected', cVal === currentVal);
+    });
 
     if (currentTab === 'meetups') renderMeetupList();
   }
@@ -1647,7 +1900,6 @@ document.addEventListener('touchstart', function (e) {
   window.skipProfileSetup = function() {
     window.profileIncomplete = true;
     dismissPostOnboardingModal();
-    setTimeout(() => switchTab('discover'), 300);
   };
 
   window.showLockedProfileModal = function() {
@@ -1750,13 +2002,20 @@ document.addEventListener('touchstart', function (e) {
 
     if (tabName === 'discover') {
       window.showLikedCollection = false;
-      discoverFeedList = [];
-      const profileCards = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
-      for (let i = profileCards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [profileCards[i], profileCards[j]] = [profileCards[j], profileCards[i]];
+      
+      // On App Load / First Discover Visit: Fresh Start
+      if (!window.isDiscoverInitialized) {
+        const allProfiles = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
+        // Shuffle
+        const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
+        dailyProfiles = shuffled.slice(0, 6);
+        browseQueue = [...dailyProfiles];
+        pagedSet.clear();
+        passedSet.clear();
+        savedBooks.length = 0;
+        window.isDiscoverInitialized = true;
       }
-      discoverFeedList = profileCards.slice(0, 5);
+      
       renderDiscoverTab();
     } else if (tabName === 'meetups') {
       window.showSavedMeetups = false;
@@ -1778,7 +2037,7 @@ document.addEventListener('touchstart', function (e) {
       ).join('')}
           </div>
           <div class="filter-row">
-            ${['전체', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜'].map(cat =>
+            ${['전체', '✨ 소셜', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브'].map(cat =>
         `<div class="filter-chip ${meetupFilterCategory === cat ? 'selected' : ''}" onclick="toggleFilterChip(this, 'cat')">${cat}</div>`
       ).join('')}
           </div>
@@ -1938,19 +2197,19 @@ document.addEventListener('touchstart', function (e) {
       let gHtml = `<div class="grid-chapter-divider" style="grid-column: 1 / -1; margin-top: ${chapTitle.includes('Chapter 1') ? '0' : '24px'};">${chapTitle}</div>`;
       visibleQuestions.forEach((q) => {
         const ans = answersObj[q.id];
-        const pidStr = (profileId === 'myProfile' || profileId === 1) ? 'myProfile' : profileId;
-        const pageId = `user${pidStr}_Q${q.id}`;
+        const pidStr = (profileId === 'myProfile' || profileId === 1) ? 'myProfile' : `user${profileId}`;
+        const pageId = `${pidStr}_Q${q.id}`;
         if (ans) {
           if (isCurrentUser) {
             const chapBg = chapColors[q.chapter] || '#FAFAF8';
             const isNotebook = !ans.image && !ans.polaroid;
             gHtml += `
-            <div class="grid-square answered-text ${isNotebook ? 'notebook-paper' : ''} interactable" 
+            <div class="grid-square answered-text ${isNotebook ? 'notebook-paper' : ''} answer-card-thumb interactable" 
                  data-page-id="${pageId}"
                  style="border-radius:12px; background: ${chapBg};">
-               <div class="grid-q-badge" style="top:10px; left:10px; font-size:10px; color:#aaa;">Q.${q.id}</div>
+               <div class="q-num" style="position:absolute; top:10px; left:10px; color:#aaa;">Q.${q.id}</div>
                ${ans.polaroid ? `<div class="polaroid-frame" style="width: 80px; transform: scale(0.6) rotate(-2deg); margin: 0; position: absolute; top: 10px; right:-10px;"><img src="${ans.polaroid}" class="polaroid-img" /></div>` : ''}
-               <div class="grid-ans-text" style="font-size:13px; color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(ans.text)}</div>
+               <div class="answer-preview" style="color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(ans.text)}</div>
                ${getLikedBadgeHTML(pageId)}
             </div>
           `;
@@ -1969,9 +2228,9 @@ document.addEventListener('touchstart', function (e) {
           }
         } else if (isCurrentUser) {
           gHtml += `
-            <div class="grid-square unanswered interactable" data-input-qid="${q.id}">
-               <div class="grid-unans-text">${q.text}</div>
-               <i data-lucide="plus" style="width:16px; height:16px; color:#BAB6AD; position:absolute; bottom:12px; left:50%; transform:translateX(-50%);"></i>
+            <div class="grid-square unanswered answer-card-thumb empty interactable" data-input-qid="${q.id}">
+               <span class="q-num">Q.${q.id}</span>
+               <span class="q-text">${q.text}</span>
             </div>
           `;
         }
@@ -2002,10 +2261,47 @@ document.addEventListener('touchstart', function (e) {
   window.openInputModal = function (qId) {
     const q = QUESTIONS.find(x => x.id === qId);
     const mc = getModalContainer();
+    if (typeof myAnswers === 'undefined' || myAnswers === null) {
+      myAnswers = {};
+    }
+    console.log('question type:', q.type, q.id);
     let chapTitle = "";
     if (q.chapter === 1) chapTitle = "Chapter 1. 내가 생각하는 나";
     if (q.chapter === 2) chapTitle = "Chapter 2. 내가 생각하는 사랑";
     if (q.chapter === 3) chapTitle = "Chapter 3. 내가 생각하는 우리의 미래";
+
+    let inputHTML = '';
+    const existingAns = myAnswers[qId] ? myAnswers[qId].text : '';
+
+    if (q.type === 'text') {
+      inputHTML = `<textarea id="ans-${q.id}" class="input-field" style="height: 140px; resize: none; border-radius: 12px; font-size: 16px;" placeholder="편안하게 당신의 이야기를 들려주세요.">${existingAns || ''}</textarea>`;
+    } else if (q.type === 'choice') {
+      inputHTML = `<div class="choice-section" id="ans-${q.id}">
+        ${q.options.map(opt => `<button class="choice-btn ${existingAns === opt ? 'selected' : ''}" onclick="toggleChoice(this)">${opt}</button>`).join('')}
+      </div>`;
+    } else if (q.type === 'multiple-choice') {
+      const selected = Array.isArray(existingAns) ? existingAns : [];
+      inputHTML = `
+        <div style="font-size:13px; color:#999; margin-bottom:12px;">정확히 ${q.limit}개를 선택해주세요.</div>
+        <div class="choice-group" id="ans-${q.id}" data-limit="${q.limit}" style="display:flex; flex-wrap:wrap; gap:8px;">
+          ${q.options.map(opt => `<button class="choice-pill ${selected.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${q.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid #eee; background:#FAFAF8; font-size:14px; color:#666; transition:0.2s;">${opt}</button>`).join('')}
+        </div>`;
+    } else if (q.type === 'compound') {
+      const answers = typeof existingAns === 'object' ? existingAns : {};
+      inputHTML = `<div id="ans-${q.id}">`;
+      q.subQuestions.forEach(sq => {
+        inputHTML += `<div class="choice-section"><p class="choice-label">${sq.text}</p>`;
+        if (sq.type === 'choice') {
+          inputHTML += `<div class="sub-q-group sub-q" data-sqid="${sq.id}">
+            ${sq.options.map(opt => `<button class="choice-btn ${answers[sq.id] === opt ? 'selected' : ''}" onclick="toggleChoice(this)">${opt}</button>`).join('')}
+          </div>`;
+        } else if (sq.type === 'text') {
+          inputHTML += `<textarea class="input-field sub-q" data-sqid="${sq.id}" style="height: 100px; resize: none; border-radius: 10px; font-size: 15px;" placeholder="답변을 입력해주세요.">${answers[sq.id] || ''}</textarea>`;
+        }
+        inputHTML += `</div>`;
+      });
+      inputHTML += `</div>`;
+    }
 
     mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--surface);">
@@ -2016,12 +2312,10 @@ document.addEventListener('touchstart', function (e) {
        </div>
        <div class="content-padding scroll-y">
          <div style="font-size:13px; color:var(--primary); font-weight:600; margin-bottom:12px;">${chapTitle}</div>
-         <h2 style="font-size:20px; margin-bottom:32px;">Q${q.id}. ${q.text}</h2>
-         
-         <textarea id="temp-ans-${q.id}" class="input-field" style="height: 140px; resize: none; border-radius: 12px; font-size: 16px;" placeholder="편안하게 당신의 이야기를 들려주세요."></textarea>
-         
-         <button class="btn-secondary" style="margin-bottom: 24px; display:flex; gap:8px; justify-content:center;"><i data-lucide="image"></i> 사진 추가</button>
-         
+         <h2 style="font-size:20px; margin-bottom:24px; line-height:1.4;">Q${q.id}. ${q.text}</h2>
+         <div id="modal-input-container" style="margin-bottom:32px;">
+           ${inputHTML}
+         </div>
          <button class="btn-primary" onclick="saveAnswer(${q.id})">저장하기</button>
          <div style="text-align:center; margin-top:24px;">
            <span style="color:var(--text-muted); font-size:14px; text-decoration:underline; cursor:pointer;" onclick="closeModal()">건너뛰기</span>
@@ -2032,9 +2326,50 @@ document.addEventListener('touchstart', function (e) {
     if (typeof lucide !== 'undefined') lucide.createIcons();
   }
 
+  window.toggleChoice = function (btn) {
+    const section = btn.closest('.choice-section') || btn.closest('.choice-group');
+    section.querySelectorAll('.choice-btn, .choice-pill').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  window.toggleMultipleChoice = function (btn, val, limit) {
+    const group = btn.closest('.choice-group');
+    const selected = group.querySelectorAll('.choice-pill.selected');
+    if (!btn.classList.contains('selected') && selected.length >= limit) {
+      // already reached limit, ignore or replace first? Let's just ignore for now
+      return;
+    }
+    btn.classList.toggle('selected');
+  }
+
   window.saveAnswer = function (qId) {
-    const val = document.getElementById(`temp-ans-${qId}`).value.trim();
-    if (val) {
+    const q = QUESTIONS.find(x => x.id === qId);
+    let val = null;
+
+    if (q.type === 'text') {
+      val = document.getElementById(`ans-${q.id}`).value.trim();
+    } else if (q.type === 'choice') {
+      const selected = document.querySelector(`#ans-${q.id} .choice-btn.selected, #ans-${q.id} .choice-pill.selected`);
+      val = selected ? selected.innerText : null;
+    } else if (q.type === 'multiple-choice') {
+      const selectedDots = document.querySelectorAll(`#ans-${q.id} .choice-pill.selected`);
+      val = Array.from(selectedDots).map(d => d.innerText);
+    } else if (q.type === 'compound') {
+      val = {};
+      document.querySelectorAll(`#ans-${q.id} .sub-q`).forEach(el => {
+        const sqid = el.dataset.sqid;
+        if (el.tagName === 'TEXTAREA') {
+          val[sqid] = el.value.trim();
+        } else {
+          const sel = el.querySelector('.choice-btn.selected, .choice-pill.selected');
+          val[sqid] = sel ? sel.innerText : null;
+        }
+      });
+      // Check if any sub-answer is filled
+      if (Object.values(val).every(v => !v)) val = null;
+    }
+
+    if (val !== null) {
       myAnswers[qId] = { text: val };
     }
     closeModal();
@@ -2116,10 +2451,13 @@ document.addEventListener('touchstart', function (e) {
     `;
     })();
 
+    const pagedIndicatorDetail = (!isMine && !isPreview && (pagedSet?.has('p' + p.id) ?? false)) ? '<div class="paged-indicator-detail">♥</div>' : '';
+
     // --- Others' profile: full-width swipeable carousel ---
     const photoSectionHTML = (isMine || isPreview) ? myPhotoSectionHTML
       : photos.length > 1 ? `
     <div id="prof-carousel" style="position:relative; width:100%; height:450px; overflow:hidden;">
+      ${pagedIndicatorDetail}
       <div id="prof-carousel-inner" style="display:flex; width:${photos.length * 100}%; height:100%; transition:transform 0.3s ease;">
         ${photos.map(ph => `<div style="flex:0 0 ${100 / photos.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
       </div>
@@ -2127,7 +2465,7 @@ document.addEventListener('touchstart', function (e) {
         ${photos.map((_, pi) => `<div style="width:6px; height:6px; border-radius:50%; background:${pi === 0 ? '#FFF' : 'rgba(255,255,255,0.5)'}; transition:background 0.2s;" data-prof-dot="${pi}"></div>`).join('')}
       </div>
     </div>
-  ` : `<div class="prof-modal-photo" style="background-image:url('${p.image}'); height:450px; background-size:cover; background-position:center;"></div>`;
+  ` : `<div class="prof-modal-photo" style="position:relative; background-image:url('${p.image}'); height:450px; background-size:cover; background-position:center;">${pagedIndicatorDetail}</div>`;
 
     const locationStr = p.location || userLocation;
     const locationSpan = `<span style="font-size:16px; font-weight:400; color:var(--text-muted);"> · ${locationStr}</span>`;
@@ -2200,6 +2538,58 @@ document.addEventListener('touchstart', function (e) {
       
       <div id="my-answers-grid" class="answers-grid" style="column-gap:8px; row-gap:8px;">
       </div>
+
+      ${isMine && !isPreview ? `
+        <div class="profile-section-label">p.Qurated</div>
+        <div class="qurated-card">
+          <div class="qurated-info">
+            <div class="qurated-card-title">p.Qurated</div>
+            <div class="qurated-card-subtitle">Q가 당신에게 딱 맞는 사람을 소개해드려요</div>
+          </div>
+          <button class="qurated-apply-btn">${window.isQurated ? '신청 현황 보기' : '신청하기'}</button>
+        </div>
+
+        <div class="profile-section-label">친구 초대</div>
+        <div class="invite-card">
+           <div class="invite-card-header">
+             <div class="invite-card-title">친구 초대</div>
+             <div class="invite-card-subtitle">나의 초대 링크</div>
+           </div>
+           <div class="invite-grid">
+             ${Array(10).fill(0).map((_, i) => `<div class="invite-dot ${i < 3 ? 'active' : ''}"></div>`).join('')}
+           </div>
+           <button class="invite-share-btn">초대 카드 공유하기</button>
+        </div>
+
+        <div class="profile-section-label">설정</div>
+        <div class="settings-card">
+          <div class="settings-row">
+            <span>알림 설정</span>
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="settings-row">
+            <span>차단 목록</span>
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="settings-row">
+            <span>개인정보 처리방침</span>
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="settings-row">
+            <span>이용약관</span>
+            <i data-lucide="chevron-right"></i>
+          </div>
+          <div class="settings-row no-chevron">
+            <span>버전 정보</span>
+            <span class="version-text">v0.1.0</span>
+          </div>
+        </div>
+
+        <div class="settings-footer-links">
+          <div class="footer-link">로그아웃</div>
+          <div class="footer-link danger">계정 탈퇴</div>
+        </div>
+      ` : ''}
 
       </div>
     </div>
@@ -2343,6 +2733,7 @@ document.addEventListener('touchstart', function (e) {
   };
 
   window.openProfileModal = function (profileId, fromChat = false) {
+    console.log('openProfileModal executing for ID:', profileId);
     const p = MOCK_PROFILES.find(x => x.id === profileId);
     const mc = getModalContainer();
 
@@ -2359,8 +2750,9 @@ document.addEventListener('touchstart', function (e) {
            ${getProfileDetailedHTML(p, false)}
          </div>
        </div>
-       <div class="modal-fixed-bottom">
-          <button class="btn-primary" style="box-shadow: 0 8px 24px rgba(188, 160, 206, 0.4);" onclick="sendLike()">좋아요 보내기 💜</button>
+       <div class="detail-action-bar">
+          <div class="detail-btn-pass" onclick="detailSwipeLeft()">← 넘기기</div>
+          <div class="detail-btn-like" onclick="detailSwipeRight()">Page her ♥</div>
        </div>
     </div>
   `;
@@ -2374,6 +2766,51 @@ document.addEventListener('touchstart', function (e) {
       gridContainer.innerHTML = renderAnswersGrid(profileAnswers, false, p.id);
       bindCardInteractions();
     }
+
+    // Pull-to-close gesture
+    const modalEl = mc.querySelector('.modal');
+    const scrollEl = modalEl.querySelector('.scroll-y');
+    let startY = 0;
+    let currentY = 0;
+    let isDragging = false;
+
+    modalEl.addEventListener('touchstart', (e) => {
+      if (scrollEl.scrollTop <= 0) {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+      }
+    }, { passive: true });
+
+    modalEl.addEventListener('touchmove', (e) => {
+      if (!isDragging) return;
+      currentY = e.touches[0].clientY - startY;
+      if (currentY > 0) {
+        if (e.cancelable) e.preventDefault();
+        const scale = Math.max(0.85, 1 - (currentY / 1500));
+        modalEl.style.transform = `translateY(${currentY}px) scale(${scale})`;
+        modalEl.style.borderRadius = `${Math.min(20, currentY / 10)}px`;
+      } else {
+        isDragging = false;
+        modalEl.style.transform = '';
+      }
+    }, { passive: false });
+
+    modalEl.addEventListener('touchend', (e) => {
+      if (!isDragging) return;
+      isDragging = false;
+      if (currentY > 150) {
+        modalEl.style.transition = 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1), opacity 0.3s';
+        modalEl.style.transform = `translateY(120px) scale(0.6) rotate(-4deg)`;
+        modalEl.style.opacity = '0';
+        setTimeout(closeModal, 400);
+      } else {
+        modalEl.style.transition = 'transform 0.3s ease-out';
+        modalEl.style.transform = '';
+        modalEl.style.borderRadius = '';
+        setTimeout(() => { modalEl.style.transition = ''; }, 300);
+      }
+      currentY = 0;
+    });
   }
 
 
@@ -2726,8 +3163,9 @@ document.addEventListener('touchstart', function (e) {
         <div class="scroll-y" style="flex:1;">
           ${getProfileDetailedHTML(p, false)}
         </div>
-        <div class="modal-fixed-bottom" style="position:sticky; bottom:0;">
-          <button class="btn-primary" style="box-shadow: 0 8px 24px rgba(188,160,206,0.4);" onclick="sendLike()">좋아요 보내기 💜</button>
+        <div class="detail-action-bar">
+          <div class="detail-btn-pass" onclick="closeModal()">닫기</div>
+          <div class="detail-btn-like" onclick="sendLike()">좋아요 보내기 💜</div>
         </div>
       </div>
     `;
@@ -2751,233 +3189,368 @@ document.addEventListener('touchstart', function (e) {
 
     renderMeetupList(); 
   };
-  window.restartDiscover = function () { swipeHistory = []; renderDiscoverTab(); };
+  window.restartDiscover = function () { 
+    // New queue = only unsaved + unpassed cards from today's 6
+    const remaining = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
+    browseQueue = [...remaining];
+    renderDiscoverTab(); 
+  };
+  let currentDragCard = null;
+  let startX = 0;
+  let startY = 0;
+
+  window.initStackGestures = function(cardEl) {
+    if (!cardEl) return;
+    
+    cardEl.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      currentDragCard = cardEl;
+      cardEl.classList.add('dragging');
+    }, { passive: true });
+
+    cardEl.addEventListener('touchmove', e => {
+      if (!currentDragCard) return;
+      const dx = e.touches[0].clientX - startX;
+      const dy = e.touches[0].clientY - startY;
+      const rot = dx / 15;
+      currentDragCard.style.transform = `translate(${dx}px, ${dy}px) rotate(${rot}deg)`;
+    }, { passive: true });
+
+    cardEl.addEventListener('touchend', e => {
+      if (!currentDragCard) return;
+      const dx = e.changedTouches[0].clientX - startX;
+      const dy = e.changedTouches[0].clientY - startY;
+      currentDragCard.classList.remove('dragging');
+
+      if (dx > 100) {
+        swipeRight();
+      } else if (dx < -100) {
+        swipeLeft();
+      } else if (dy < -150) {
+        swipeUp();
+      } else {
+        currentDragCard.style.transform = '';
+      }
+      currentDragCard = null;
+    });
+  };
+
+  window.swipeLeft = function() {
+    const card = document.querySelector('.book-card.level-0');
+    if (!card) return;
+    card.style.transform = 'translateX(-150%) rotate(-30deg)';
+    card.style.opacity = '0';
+    setTimeout(() => {
+      // Swipe (no action): Card goes to back of browseQueue
+      if (browseQueue.length > 0) {
+        const item = browseQueue.shift();
+        browseQueue.push(item);
+      }
+      renderDiscoverTab();
+    }, 300);
+  };
+
+  window.swipeRight = function() {
+    const card = document.querySelector('.book-card.level-0');
+    if (!card) return;
+    card.style.transform = 'translateX(150%) rotate(30deg)';
+    card.style.opacity = '0';
+    setTimeout(() => {
+      // Swipe (no action): Card goes to back of browseQueue
+      if (browseQueue.length > 0) {
+        const item = browseQueue.shift();
+        browseQueue.push(item);
+      }
+      renderDiscoverTab();
+    }, 300);
+  };
+
+  window.detailSwipeLeft = function() {
+    const card = browseQueue[0];
+    if (!card) return;
+    
+    // 넘기기 누른 카드
+    passedSet.add(card.id);
+    browseQueue.shift(); // remove from queue
+    
+    closeModal();
+    renderDiscoverTab();
+  };
+
+  window.detailSwipeRight = function() {
+    const card = browseQueue[0];
+    if (!card || window.__actionLocked) return;
+    
+    // Lock actions briefly to prevent duplicates
+    window.__actionLocked = true;
+    setTimeout(() => { window.__actionLocked = false; }, 1000);
+
+    const overlay = document.getElementById('paged-heart-overlay');
+    if (overlay) overlay.classList.add('active');
+    
+    // Page her 누른 카드
+    pagedSet.add(card.id);
+    
+    const alreadySaved = savedBooks.some(b => b.id === card.id);
+    if (!alreadySaved) {
+      savedBooks.push(card);
+    }
+    
+    browseQueue.shift(); // remove from queue
+    
+    setTimeout(() => {
+      if (overlay) overlay.classList.remove('active');
+      closeModal();
+      renderDiscoverTab();
+    }, 600);
+  };
+
+  window.swipeUp = function() {
+    const card = document.querySelector('.book-card.level-0');
+    if (!card) return;
+    const id = card.dataset.id.replace('p', '');
+    handleCardClick(parseInt(id));
+    card.style.transform = ''; 
+  };
+
+  window.undoSwipe = function() {
+    if (swipeHistory.length === 0) return;
+    swipeHistory.pop();
+    renderDiscoverTab();
+  };
+
+  const SPINE_COLORS = [
+    'rgba(155,35,25)', // red
+    'rgba(25,85,85)',  // teal
+    'rgba(45,45,115)', // indigo
+    'rgba(135,45,75)', // rose
+    'rgba(65,75,25)',  // olive
+    'rgba(160,90,20)'  // amber
+  ];
+
+  function getSpineColor(id) {
+    const idx = (typeof id === 'string' ? parseInt(id.replace('p', '')) : id) % SPINE_COLORS.length;
+    return SPINE_COLORS[idx];
+  }
+
+  function getDistance(id) {
+    const seed = (typeof id === 'string' ? parseInt(id.replace('p', '')) : id);
+    return (0.5 + (seed % 45) / 10).toFixed(1);
+  }
 
   window.renderDiscoverTab = function () {
     const contentArea = document.getElementById('main-content');
     if (!contentArea) return;
 
-    const bgColors = ['#EDE8F5', '#E8E8F5', '#FAF5EB'];
-    let colorIdx = 0;
+    // Current browse queue
+    const remaining = browseQueue;
 
-    let activeFeed = [];
-    
-    if (window.showLikedCollection) {
-      // Find profiles in swipeHistory with 'like' action
-      const likedIds = swipeHistory
-        .filter(s => s.action === 'like' && s.id.startsWith('p'))
-        .map(s => s.id);
+    let headerHTML = `
+      <div class="app-header" style="padding-bottom: 0; background: transparent;">
+        <h2 style="margin:0;">발견</h2>
+        <button class="icon-btn" onclick="renderSavedBox()" style="background:none; border:none; color:#9B72CC;">
+          <i data-lucide="heart" style="width:24px;"></i>
+        </button>
+      </div>
+    `;
+
+    if (remaining.length === 0) {
+      // Check if any undecided cards from original 6 remain
+      const undecidedInPool = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
+      const allDone = undecidedInPool.length === 0;
+
+      contentArea.innerHTML = `
+        ${headerHTML}
+        <div class="discover-tab-container" id="discover-empty-state" style="justify-content: center; align-items: center; text-align: center; height: calc(100vh - 160px);">
+          <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px;"></i>
+          <p style="margin-bottom: 8px; font-size: 20px; font-weight: 700;">오늘의 프로필북을 모두 읽었어요.</p>
+          <p style="color: #8E8E8A; margin-bottom: 32px; font-size: 15px;">내일 새로운 책이 도착해요.</p>
+
+          <div class="p-qurated-promo-card">
+            <div style="font-size: 14px; font-weight: 700; color: #9B72CC; margin-bottom: 6px;">p.Qurated</div>
+            <div style="font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
+            <div style="font-size: 13px; font-weight: 700; color: #9B72CC; cursor: pointer;">자세히 보기</div>
+          </div>
+        </div>
+      `;
       
-      // Get unique IDs in case of duplicates
-      const uniqueLikedIds = [...new Set(likedIds)];
-      
-      activeFeed = uniqueLikedIds.map(id => {
-        const pId = parseInt(id.replace('p', ''));
-        const profile = MOCK_PROFILES.find(p => p.id === pId);
-        return { id, type: 'profile', profile };
-      }).filter(item => item.profile);
-    } else {
-      activeFeed = discoverFeedList.filter(item => !swipeHistory.find(s => s.id === item.id));
+      // FORCE ADD retry button
+      const emptyCont = document.getElementById('discover-empty-state');
+      if (emptyCont) {
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = '다시 읽기';
+        retryBtn.style.cssText = `
+          display: block;
+          margin: 20px auto 32px;
+          border: 1.5px solid #9B72CC;
+          color: #9B72CC;
+          background: transparent;
+          border-radius: 24px;
+          padding: 12px 32px;
+          font-size: 14px;
+          font-family: 'Poppins', sans-serif;
+          cursor: pointer;
+        `;
+        retryBtn.addEventListener('click', () => {
+          console.log('Retry clicked. dailyProfiles count:', dailyProfiles.length);
+          
+          let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
+          console.log('Remaining undecided cards:', rem.length);
+
+          if (rem.length === 0) {
+            console.log('All 6 cards were resolved. Performing full deck reset.');
+            pagedSet.clear();
+            passedSet.clear();
+            rem = [...dailyProfiles];
+          }
+
+          browseQueue = [...rem];
+          console.log('browseQueue reset to:', browseQueue.length);
+
+          // Re-render the whole tab to ensure clean state
+          renderDiscoverTab();
+        });
+        // Insert before the promo card
+        const promo = emptyCont.querySelector('.p-qurated-promo-card');
+        if (promo) {
+          emptyCont.insertBefore(retryBtn, promo);
+        } else {
+          emptyCont.appendChild(retryBtn);
+        }
+      }
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      return;
     }
 
+    let html = `
+      ${headerHTML}
+      <div class="discover-tab-container">
+        <div class="stack-wrapper" id="stack-wrapper">
+    `;
 
+    const displayCount = Math.min(remaining.length, 4);
+    for (let i = displayCount - 1; i >= 0; i--) {
+      const item = remaining[i];
+      const p = item.profile;
+      const levelClass = `level-${i}`;
+      const spineColor = getSpineColor(item.id);
+      const distance = getDistance(item.id);
+      
+      const isPaged = pagedSet?.has(item.id) ?? false;
+      const isPassed = passedSet?.has(item.id) ?? false;
+      
+      const pagedIndicator = isPaged ? '<div class="paged-indicator">♥</div>' : '';
 
-    let feedHTML = '';
-    if (activeFeed.length === 0) {
-      if (window.showLikedCollection) {
-        feedHTML = `
-          <div class="discover-empty show" style="margin-top: 40px; height: 200px; display:flex; flex-direction:column; align-items:center;">
-            <p style="text-align:center; color:var(--text-dark); margin-bottom:24px;">아직 발견을 못하셨군요.<br/>내일 새로운 프로필북이 기다리고 있어요. ☺️</p>
-          </div>
-        `;
-      } else {
-        feedHTML = `
-          <div class="discover-empty show" style="margin-top: 40px; height: 200px; display:flex; flex-direction:column; align-items:center;">
-            <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 16px;"></i>
-            <p style="text-align:center; color:var(--text-dark); margin-bottom:24px;">오늘은 여기까지예요 🌙<br/>내일 새로운 사람들이 기다리고 있어요.</p>
-            <button class="btn-secondary" style="color:var(--primary); border:1px solid var(--primary); background:transparent;" onclick="restartDiscover()">처음부터 다시 보기</button>
-          </div>
-        `;
+      // Defensive Quote Selection: Pick a random answer or fallback to bio
+      let quote = "";
+      const answersDict = p.answers || {};
+      const answerKeys = Object.keys(answersDict);
+      if (answerKeys.length > 0) {
+        const randomKey = answerKeys[Math.floor(Math.random() * answerKeys.length)];
+        const ans = answersDict[randomKey];
+        quote = (typeof ans === 'object' && ans.text) ? (typeof ans.text === 'string' ? ans.text : JSON.stringify(ans.text)) : (typeof ans === 'string' ? ans : "");
       }
-    } else {
-      activeFeed.forEach((item, i) => {
-        if (item.type === 'profile') {
-          const p = item.profile;
-          const photos = p.photos || [p.image];
-          const cardId = `card-${item.id}`;
-          const photoCarouselHTML = photos.length > 1 ? `
-          <div id="carousel-${item.id}" style="position:relative; flex:0 0 273px; height:273px; overflow:hidden;">
-            <div id="carousel-inner-${item.id}" style="display:flex; width:${photos.length * 100}%; height:100%; transition:transform 0.3s ease;">
-              ${photos.map(ph => `<div style="flex:0 0 ${100 / photos.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
+      if (!quote) quote = p.bio || "";
+      
+      html += `
+        <div class="book-card ${levelClass}" data-id="${item.id}" id="card-${item.id}" style="filter: ${isPassed ? 'grayscale(100%)' : 'none'};">
+          ${pagedIndicator}
+          <div class="book-spine" style="background: linear-gradient(to right, ${spineColor}, rgba(0,0,0,0.15))"></div>
+          <div class="book-cover-content">
+            <div class="book-meta-bar">
+              <span class="book-meta-no">No. ${getAge(p.birthYear)}</span>
+              <span class="book-meta-dist">${distance} km</span>
+              <span class="book-meta-role">${p.role === 'visitor' ? 'V' : (p.role === 'booker' ? 'B' : 'F')}</span>
             </div>
-            <div style="position:absolute; bottom:8px; left:0; width:100%; display:flex; justify-content:center; gap:5px; z-index:5;">
-              ${photos.map((_, pi) => `<div class="photo-dot ${pi === 0 ? 'active' : ''}" data-carousel="${item.id}" data-idx="${pi}"></div>`).join('')}
-            </div>
+            <div class="book-spacer-top"></div>
+            <div class="book-title">${p.name}</div>
+            <div class="book-spacer-flex"></div>
+            <div class="book-quote">" ${quote} "</div>
           </div>
-        ` : `<div class="type-a-photo" style="background-image: url('${p.image}')"></div>`;
+          <div class="book-bg-photo" style="background-image: url('${p.image}')"></div>
+          <div class="book-overlay"></div>
+        </div>
+      `;
+    }
 
-          feedHTML += `
-          <div class="swipe-card type-a-card" id="${cardId}" data-id="${item.id}" onclick="handleCardClick(${p.id})">
-             ${photoCarouselHTML}
-              <div class="type-a-content">
-                <div style="position:absolute; top:16px; left:16px; background:rgba(0,0,0,0.4); color:#FFF; font-size:12px; font-weight:700; padding:4px 10px; border-radius:12px;">${p.score}</div>
-                <div class="card-name" style="font-size:22px; display:flex; align-items:center; gap:8px;">
-                  ${formatUserHeader(p, 'list')} 
-                  ${getRoleBadgeHTML(p.role)}
-                </div>
-                <div class="card-tags" style="margin-top:12px;">${p.tags.map(t => `<div class="card-tag">${t}</div>`).join('')}</div>
-                <div class="card-bio" style="font-size:14px; margin-top:10px; line-height:1.4;">${p.bio}</div>
-             </div>
-             <div class="action-overlay overlay-like"><div class="like-stamp"><i data-lucide="heart" fill="#BCA0CE" style="color:#BCA0CE; width:32px;"></i></div></div>
-             <div class="action-overlay overlay-nope"><div class="nope-stamp">X</div></div>
-          </div>
-        `;
-        }
-        else if (item.type === 'answer') {
-          const p = item.profile;
-          const qObj = QUESTIONS.find(q => q.id === item.qId);
-          const ansObj = p.answers[item.qId];
-          if (!qObj || !ansObj) return;
+    html += `
+        </div>
+        
+        <div class="paged-heart-overlay" id="paged-heart-overlay">
+          <i data-lucide="heart" fill="#9B72CC" style="color:#9B72CC; width:48px; height:48px;"></i>
+          <span class="paged-heart-text">Paged ♥</span>
+        </div>
+      </div>
+    `;
 
-          const bgColors = ['#EDE8F5', '#E8E8F5', '#F5F0E8', '#E8F5F0'];
-          const bg = bgColors[i % 4];
-          const chapLabel = qObj.chapter === 1 ? '나' : (qObj.chapter === 2 ? '사랑' : '관계');
-          const isNotebook = !ansObj.image && !ansObj.polaroid;
-          const bgStyle = ansObj.polaroid ? `background-image: url('${ansObj.polaroid}'); background-size: cover; background-position: center; filter: blur(12px) brightness(0.85);` : '';
+    contentArea.innerHTML = html;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 
-          const pidStr = p.id;
-          const pageId = `user${pidStr}_Q${item.qId}`;
-
-          feedHTML += `
-          <div class="swipe-card type-b-card" 
-               data-page-id="${pageId}"
-               data-profile-id="${p.id}"
-               style="background:${ansObj.polaroid ? 'transparent' : (isNotebook ? '#FFF' : bg)}; padding:0; display:flex; flex-direction:column;" 
-               data-id="${item.id}"
-               onclick="handleCardClick(${p.id}, ${item.qId})">
-            ${ansObj.polaroid ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; ${bgStyle} z-index:1;"></div>` : ''}
-            <div class="teaser-frosted-overlay" style="z-index:2;"></div>
-            ${getLikedBadgeHTML(pageId)}
-            
-            <div style="display:flex; justify-content:space-between; padding: 20px; z-index:3;">
-              <div style="font-size:11px; color:${ansObj.polaroid ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)'}; font-weight:600;">Chapter ${qObj.chapter} &middot; ${chapLabel}</div>
-              <div style="font-size:11px; color:${ansObj.polaroid ? 'rgba(255,255,255,0.8)' : 'var(--text-muted)'}; font-weight:600;">Q.${qObj.id}</div>
-            </div>
-            
-            <div class="${isNotebook ? 'notebook-paper' : ''}" style="flex:1; display:flex; flex-direction:column; ${isNotebook ? 'align-items:flex-start; justify-content:flex-start; padding: 16px 24px; text-align:left;' : 'align-items:center; justify-content:center; padding: 0 32px; text-align:center;'} z-index:3;">
-              <div class="ans-card-q-text" style="color:${ansObj.polaroid ? 'rgba(255,255,255,0.75)' : '#777'};">${qObj.text}</div>
-              <div style="font-size:20px; font-weight:500; line-height:28px; color:${ansObj.polaroid ? '#FFF' : 'var(--text-dark)'}; ${ansObj.polaroid ? 'margin-bottom:20px;' : 'margin-top:20px;'}">${applyHighlights(ansObj.text)}</div>
-              ${ansObj.polaroid ? `
-      <div style="background:#FFF; padding:8px 8px 28px 8px; box-shadow:2px 3px 8px rgba(0,0,0,0.12); transform:rotate(-2deg); width:160px; margin:0 auto;">
-                  <img src="${ansObj.polaroid}" style="width:100%; height:144px; object-fit:cover; display:block;" />
-                </div>
-              ` : ''}
-            </div>
-
-            <div style="padding: 24px; border-top: 1px solid ${ansObj.polaroid ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.03)'}; z-index:3;">
-              <div style="display:flex; align-items:center;">
-                <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p.image}'); background-size:cover; margin-right:10px; ${ansObj.polaroid ? 'box-shadow:0 0 0 2px rgba(255,255,255,0.3);' : ''}"></div>
-                <div class="card-name" style="font-size:16px; display:flex; align-items:center; gap:6px; ${ansObj.polaroid ? 'color:#FFF; text-shadow:0 1px 4px rgba(0,0,0,0.7);' : ''}">
-                  ${formatUserHeader(p, 'list')} ${getRoleBadgeHTML(p.role)}
-                </div>
-              </div>
-            </div>
-
-            <div class="action-overlay overlay-like"><div class="like-stamp"><i data-lucide="heart" fill="#BCA0CE" style="color:#BCA0CE; width:32px;"></i></div></div>
-            <div class="action-overlay overlay-nope"><div class="nope-stamp">X</div></div>
-          </div>
-        `;
-        }
+    const frontCard = document.querySelector('.book-card.level-0');
+    if (frontCard) {
+      initStackGestures(frontCard);
+      frontCard.addEventListener('click', (e) => {
+        const id = frontCard.dataset.id.replace('p', '');
+        handleCardClick(parseInt(id));
       });
+    }
+  };
+
+  window.renderSavedBox = function () {
+    const contentArea = document.getElementById('main-content');
+    if (!contentArea) return;
+
+    const savedProfiles = savedBooks.map(item => item.profile);
+
+    let gridHTML = '';
+    if (savedProfiles.length === 0) {
+      gridHTML = `
+        <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 40px; text-align:center; height:60vh;">
+          <i data-lucide="heart" style="width:48px; height:48px; color:#EEE; margin-bottom:16px;"></i>
+          <p style="font-size:15px; color:#2C2C2A; font-weight:600; margin-bottom:8px;">아직 담은 프로필북이 없어요</p>
+          <p style="font-size:13px; color:#8E8E8A;">마음에 드는 분께 Page her를 눌러보세요</p>
+        </div>
+      `;
+    } else {
+      gridHTML = `
+        <div class="saved-grid">
+          ${savedProfiles.map(p => {
+            const spineColor = getSpineColor(p.id);
+            const distance = getDistance(p.id);
+            return `
+              <div class="saved-book-cover" onclick="handleCardClick(${p.id})">
+                <div class="book-spine" style="background: linear-gradient(to right, ${spineColor}, rgba(0,0,0,0.15))"></div>
+                <div class="thumbnail-card-content">
+                  <div class="thumbnail-nickname">${p.name}</div>
+                  <div class="thumbnail-info">${getAge(p.birthYear)} ・ ${distance}km</div>
+                </div>
+                <div class="book-bg-photo" style="background-image: url('${p.image}')"></div>
+                <div class="book-overlay"></div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
 
     contentArea.innerHTML = `
-    <div id="discover-feed-container" class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 110px); background: #FAF9F6; overflow-y: auto; overflow-x: hidden; position: relative;">
-      
-      <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-        <div>
-          <h2 style="margin-bottom:4px;">${window.showLikedCollection ? '좋아요 모음' : '발견'}</h2>
-          <p style="margin-bottom: 24px; font-size:14px; color:var(--text-muted);">
-            ${window.showLikedCollection ? '관심 표현한 프로필 모아보기' : '가치관, 취향이 맞는 사람을 만나보세요.'}
-          </p>
-        </div>
-        <button onclick="toggleLikedCollection()" style="background: none; border: none; cursor: pointer; padding: 8px; color: #9B72CC;">
-          <i data-lucide="heart" style="width: 24px; height: 24px;" ${window.showLikedCollection ? 'fill="#9B72CC"' : ''}></i>
+      <div class="app-header">
+        <button class="icon-btn" onclick="renderDiscoverTab()" style="background:none; border:none; color:#2C2C2A;">
+          <i data-lucide="chevron-left" style="width:28px; height:28px;"></i>
+        </button>
+        <h2 style="margin:0; flex:1; text-align:center; margin-left:8px;">보관함</h2>
+        <button class="icon-btn" style="background:none; border:none; color:#9B72CC;">
+          <i data-lucide="heart" fill="#9B72CC" style="width:24px;"></i>
         </button>
       </div>
-
-      <div class="feed-layout-container" style="overflow: visible; padding-bottom: 80px;">
-         ${feedHTML}
+      <div class="scroll-y" style="height: calc(100vh - 140px); padding-top: 20px;">
+        ${gridHTML}
       </div>
-    </div>
-  `;
+    `;
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
-    initSwipeCards();
-    initPhotoCarousels();
-    bindCardInteractions();
-  };
-
-  window.initSwipeCards = function () {
-    const cards = document.querySelectorAll('.swipe-card:not(.meetup-card)');
-
-    cards.forEach(card => {
-      let startX = 0;
-      let currentX = 0;
-      let isDragging = false;
-
-      card.addEventListener('pointerdown', (e) => {
-        if (window.profileIncomplete && !window.profileComplete) return;
-        isDragging = true;
-        startX = e.clientX;
-        card.classList.add('dragging');
-        card.setPointerCapture(e.pointerId);
-      });
-
-      card.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
-        e.preventDefault();
-        currentX = e.clientX - startX;
-        let rotate = currentX * 0.05;
-        card.style.transform = `translateX(${currentX}px) rotate(${rotate}deg)`;
-
-        const likeOver = card.querySelector('.overlay-like');
-        const nopeOver = card.querySelector('.overlay-nope');
-        if (currentX > 0) {
-          if (likeOver) likeOver.style.opacity = Math.min(currentX / 100, 1);
-          if (nopeOver) nopeOver.style.opacity = 0;
-        } else {
-          if (nopeOver) nopeOver.style.opacity = Math.min(Math.abs(currentX) / 100, 1);
-          if (likeOver) likeOver.style.opacity = 0;
-        }
-      });
-
-      const handlePointerEnd = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        card.classList.remove('dragging');
-
-        if (currentX > 80) {
-          card.classList.add('swiped-right');
-          swipeHistory.push({ id: card.getAttribute('data-id'), action: 'like' });
-          setTimeout(() => renderDiscoverTab(), 250);
-        } else if (currentX < -80) {
-          card.classList.add('swiped-left');
-          swipeHistory.push({ id: card.getAttribute('data-id'), action: 'pass' });
-          setTimeout(() => renderDiscoverTab(), 250);
-        } else {
-          card.style.transform = '';
-          const likeOver = card.querySelector('.overlay-like');
-          const nopeOver = card.querySelector('.overlay-nope');
-          if (likeOver) likeOver.style.opacity = 0;
-          if (nopeOver) nopeOver.style.opacity = 0;
-        }
-        currentX = 0;
-      };
-
-      card.addEventListener('pointerup', handlePointerEnd);
-      card.addEventListener('pointercancel', handlePointerEnd);
-    });
   };
 
 function startApp() {
