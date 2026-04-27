@@ -1,0 +1,161 @@
+window.openAnswerRevealModal = function (profileId, qId) {
+  const isMyProfile = profileId === 'myProfile';
+  const p = isMyProfile ? 
+    { name: userName || '나나', answers: MY_ANSWERS } : 
+    MOCK_PROFILES.find(x => x.id === profileId);
+
+  if (!p) return;
+
+  const mc = getModalContainer();
+  mc.style.display = 'block';
+
+  let pages = [{ type: 'cover', chapter: QUESTIONS.find(q => q.id === qId).chapter }];
+  p.answers && Object.keys(p.answers).forEach(ansId => {
+    pages.push({ type: 'answer', qId: parseInt(ansId) });
+  });
+
+  const startIndex = pages.findIndex(pg => pg.qId === qId);
+  let currentPage = startIndex !== -1 ? startIndex : 0;
+  const totalPages = pages.length;
+
+  const buildCover = (ch, clr) => {
+    let title = ch === 1 ? "Chapter 1. 내가 생각하는 나" : (ch === 2 ? "Chapter 2. 내가 생각하는 사랑" : "Chapter 3. 내가 생각하는 우리의 미래");
+    return `
+      <div class="nb-cover-page">
+        <div class="book-cover-line" style="background:${clr};"></div>
+        <div class="book-cover-title">${title}</div>
+        <div class="book-cover-subtitle">${p.name}'s LOG</div>
+      </div>
+    `;
+  };
+
+  const buildAnswer = (qid, pageIdx) => {
+    const q = QUESTIONS.find(x => x.id === qid);
+    const ans = p.answers[qid];
+    const chapLabel = q.chapter === 1 ? '나' : (q.chapter === 2 ? '사랑' : '관계');
+    return `
+      <div class="nb-answer-page">
+        <div class="book-page-chapter">CHAPTER ${q.chapter} &middot; ${chapLabel}</div>
+        <div class="book-page-question">${q.text}</div>
+        <div class="book-page-answer">${applyHighlights(ans.text)}</div>
+        ${ans.polaroid ? `
+          <div style="display:flex;justify-content:center;margin-top:32px;">
+            <div style="background:#FFF;padding:8px 8px 28px 8px;box-shadow:2px 4px 14px rgba(0,0,0,0.11);transform:rotate(-1.5deg);width:160px;">
+              <img src="${ans.polaroid}" style="width:100%;height:144px;object-fit:cover;display:block;"/>
+            </div>
+          </div>` : ''}
+        ${ans.image && !ans.polaroid ? `
+          <div style="margin:24px 0 0;">
+            <img src="${ans.image}" style="width:100%;border-radius:10px;box-shadow:0 3px 12px rgba(0,0,0,0.07);"/>
+          </div>` : ''}
+      </div>
+    `;
+  };
+
+  const renderPage = (pageIdx) => {
+    currentPage = pageIdx;
+    const pg = pages[pageIdx];
+    const isCover = pg.type === 'cover';
+    const isAnswer = pg.type === 'answer';
+    
+    // Calculate page ID for activation tracking
+    const pidStr = (profileId === 'myProfile' || profileId === 1) ? 'myProfile' : profileId;
+    const pageId = isAnswer ? \`user\${pidStr}_Q\${pg.qId}\` : null;
+    const heartActive = isAnswer ? window.likedState[pageId] : false;
+
+    // Count only answer pages for indicator
+    const answerPages = pages.filter(p => p.type === 'answer');
+    const answerIdx = isAnswer ? answerPages.findIndex(ap => ap.qId === pg.qId) : -1;
+    const indicatorHTML = isAnswer
+      ? \`<div style="position:absolute;bottom:24px;right:24px;font-size:11px;color:#ccc;letter-spacing:0.06em;z-index:10;pointer-events:none;">\${answerIdx + 1} / \${answerPages.length}</div>\`
+      : '';
+
+    // Calculate background gradient and colors
+    const chapterNum = isCover ? pg.chapter : QUESTIONS.find(q => q.id === pg.qId).chapter;
+    const chapColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
+    const gradients = {
+      cover: {
+        1: 'linear-gradient(to right, #E8FF90 0%, #f5ffd6 25%, #ffffff 55%)',
+        2: 'linear-gradient(to right, #FFD5BD 0%, #ffede0 25%, #ffffff 55%)',
+        3: 'linear-gradient(to right, #D3B2E2 0%, #ecdff5 25%, #ffffff 55%)'
+      },
+      answer: {
+        1: 'linear-gradient(to right, #E8FF90 0%, #f8ffe0 8%, #ffffff 25%)',
+        2: 'linear-gradient(to right, #FFD5BD 0%, #fff3ea 8%, #ffffff 25%)',
+        3: 'linear-gradient(to right, #D3B2E2 0%, #f5eefa 8%, #ffffff 25%)'
+      }
+    };
+    const bgGradient = isCover ? gradients.cover[chapterNum] : gradients.answer[chapterNum];
+    const decorColor = chapColors[chapterNum];
+
+    const likeBtn = isAnswer && !isMyProfile ? \`
+      <button id="like-btn" class="\${heartActive ? 'liked' : ''}" onclick="activateLike('\${pageId}', \${chapterNum})">
+        <svg id="like-heart" viewBox="0 0 24 24" width="28" height="28">
+          <path id="heart-path" d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"
+            style="fill: \${heartActive ? decorColor : 'none'}; stroke: \${heartActive ? 'none' : '#ccc'}; stroke-width: 1.5; transition: fill 0.2s ease, stroke 0.2s ease;"/>
+        </svg>
+      </button>
+    \` : '';
+
+    mc.innerHTML = \`
+      <div id="nb-modal" class="book-page-modal" style="background: \${bgGradient};">
+        <!-- Header -->
+        <div class="book-page-header">
+          <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;padding:4px;color:#bbb;display:flex;align-items:center;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+          <div style="flex:1;"></div>
+          <div style="font-size:13px;color:#aaa;font-weight:400;letter-spacing:0.02em;font-family: 'Noto Serif KR', serif;">\${p.name}'s</div>
+        </div>
+
+        <!-- Page content -->
+        <div id="nb-scroll" class="book-page-content">
+          \${isCover ? buildCover(pg.chapter, decorColor) : buildAnswer(pg.qId, pageIdx)}
+          <div style="height:80px;"></div>
+        </div>
+
+        <!-- Tap zones -->
+        \${pageIdx > 0 ? \`<div onclick="nbNav(\${pageIdx - 1})" style="position:absolute;left:0;top:60px;width:32px;height:50%;z-index:10;cursor:pointer;"></div>\` : ''}
+        \${pageIdx < totalPages - 1 ? \`<div onclick="nbNav(\${pageIdx + 1})" style="position:absolute;right:0;top:60px;width:32px;height:50%;z-index:10;cursor:pointer;"></div>\` : ''}
+
+        \${indicatorHTML}
+        \${likeBtn}
+      </div>
+    \`;
+
+    const scroll = document.getElementById('nb-scroll');
+    if (scroll) scroll.scrollTop = 0;
+
+    const modal = document.getElementById('nb-modal');
+    let tsX = 0, tsY = 0;
+    modal.addEventListener('touchstart', e => { tsX = e.touches[0].clientX; tsY = e.touches[0].clientY; }, { passive: true });
+    
+    // Swipe navigation
+    modal.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - tsX;
+      const dy = e.changedTouches[0].clientY - tsY;
+      if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.7) return;
+      if (dx < 0 && currentPage < totalPages - 1) nbNav(currentPage + 1);
+      if (dx > 0 && currentPage > 0) nbNav(currentPage - 1);
+    }, { passive: true });
+
+    // Double tap for like
+    if (isAnswer && !isMyProfile) {
+      let lastTapTime = 0;
+      modal.addEventListener('touchstart', (e) => {
+        const now = Date.now();
+        const timeDiff = now - lastTapTime;
+        if (timeDiff < 300 && timeDiff > 0) {
+          if (e.cancelable) e.preventDefault();
+          activateLike(pageId, chapterNum);
+          lastTapTime = 0;
+        } else {
+          lastTapTime = now;
+        }
+      }, { passive: false });
+    }
+  };
+
+  window.nbNav = function (newPage) { renderPage(newPage); };
+  renderPage(currentPage);
+};

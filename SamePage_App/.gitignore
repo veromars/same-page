@@ -1,0 +1,6 @@
+.DS_Store
+Thumbs.db
+*.log
+scratch/
+full_modal.txt
+SamePage_App/
