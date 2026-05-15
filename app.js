@@ -4028,24 +4028,26 @@ function renderMyMeetingsTab(tabName) {
 }
 window.renderMyMeetingsTab = renderMyMeetingsTab;
 
+function closeMyMeetings() {
+  document.getElementById('my-meetings-overlay')?.remove();
+}
+window.closeMyMeetings = closeMyMeetings;
+
 function openMyMeetings() {
-  let amc = document.getElementById('answer-modal-container');
-  if (!amc) {
-    amc = document.createElement('div');
-    amc.id = 'answer-modal-container';
-    amc.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:3000; pointer-events:auto;';
-    document.body.appendChild(amc);
-  }
-  amc.innerHTML = `
-    <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;">
-      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
-        <button onclick="closeAnswerCard()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
-        <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">내 모임</span>
-        <span style="width:32px;"></span>
-      </div>
-      <div id="my-meetings-content"></div>
+  document.getElementById('my-meetings-overlay')?.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'my-meetings-overlay';
+  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;';
+  overlay.innerHTML = `
+    <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
+      <button onclick="closeMyMeetings()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
+      <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">내 모임</span>
+      <span style="width:32px;"></span>
     </div>
+    <div id="my-meetings-content"></div>
   `;
+  document.body.appendChild(overlay);
   renderMyMeetingsTab('applied');
 }
 window.openMyMeetings = openMyMeetings;
