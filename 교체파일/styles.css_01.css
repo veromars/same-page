@@ -216,7 +216,7 @@ p {
 
 .app-logo {
   font-family: 'Poppins', sans-serif;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 28px;
   color: #9B72CC;
   display: inline-flex;
@@ -339,7 +339,7 @@ p {
 .splash-spine-logo {
   font-family: 'Poppins', 'Futura', sans-serif;
   font-size: 20px;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: normal;
   display: inline-flex;
@@ -350,14 +350,12 @@ p {
   font-size: 11px;
   letter-spacing: 0.08em;
   font-family: 'Poppins', 'Pretendard', sans-serif;
-  font-weight: 700;
 }
 
 .splash-spine-studio {
   font-size: 10px;
   letter-spacing: 0.06em;
   font-family: 'Poppins', 'Pretendard', sans-serif;
-  font-weight: 700;
 }
 
 
@@ -377,7 +375,7 @@ p {
 .splash-tagline-top {
   padding-top: 48px;
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 400;
   color: #E2FF74;
   letter-spacing: 0.05em;
   font-family: 'Poppins', 'Pretendard', sans-serif;
@@ -395,7 +393,7 @@ p {
 
 .cover-logo {
   font-family: 'Poppins', sans-serif;
-  font-weight: 900;
+  font-weight: 700;
   font-size: 60px;
   color: #E2FF74;
   display: flex;
@@ -409,7 +407,7 @@ p {
 .splash-studio {
   padding-bottom: 48px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   color: #B36AE2;
   letter-spacing: 0.08em;
   line-height: 1.6;
@@ -1123,13 +1121,15 @@ p {
 
 .detail-action-bar {
   position: fixed;
-  bottom: 0;
+  bottom: 80px;
+  /* Resting right above bottom tab bar */
   left: 0;
-  width: 100%;
-  padding: 16px 24px;
-  background: white;
+  right: 0;
+  background: transparent;
+  border-top: none;
+  padding: 12px 24px 16px;
   display: flex;
-  gap: 12px;
+  gap: 16px;
   z-index: 120;
 }
 
@@ -1306,24 +1306,6 @@ p {
   overflow: hidden;
 }
 
-.meetup-share-btn {
-  position: absolute;
-  top: 36px;
-  right: 48px;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 9;
-  color: #9B72CC;
-}
-
-.meetup-share-btn:active {
-  transform: scale(0.9);
-}
-
 .meetup-bookmark-btn {
   position: absolute;
   top: 36px;
@@ -1397,11 +1379,6 @@ p {
   font-weight: 600;
   color: var(--text-dark);
   margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .meetup-location-preview {
@@ -3172,8 +3149,6 @@ p {
 .qurated-card-subtitle {
   font-size: 13px;
   color: var(--text-muted);
-  line-height: 1.4;
-  word-break: keep-all;
 }
 
 .qurated-apply-btn {
@@ -3408,17 +3383,15 @@ p {
   display: flex;
   flex-direction: column;
   pointer-events: auto;
-  overflow: hidden;
 }
 
 .match-intro-visual {
-  flex-shrink: 0;
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   gap: 20px;
-  padding: 20px 0;
 }
 
 .match-intro-cover {
@@ -3456,10 +3429,6 @@ p {
   border-top-right-radius: 24px;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
   padding-bottom: env(safe-area-inset-bottom, 24px);
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .pm-message-row {
@@ -3513,17 +3482,15 @@ p {
 }
 
 .match-intro-send {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #9B72CC;
+  background: #C89FDB;
   color: #FFF;
   border: none;
+  border-radius: 24px;
+  padding: 0 20px;
+  font-weight: 600;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  cursor: pointer;
 }
 
 /* =========================================
@@ -3570,200 +3537,4 @@ p {
 
 .match-option-btn:active {
   background: rgba(200, 159, 219, 0.1);
-}
-
-/* Full Screen Invite Page */
-.invite-summary-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-.invite-count-text {
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-}
-.invite-count-text span {
-  color: #9B72CC;
-}
-.invite-progress-bg {
-  width: 100%;
-  height: 4px;
-  background: #EEE;
-  border-radius: 2px;
-  overflow: hidden;
-}
-.invite-progress-fill {
-  height: 100%;
-  background: #9B72CC;
-  border-radius: 2px;
-  transition: width 0.3s ease;
-}
-
-.invite-slots-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.invite-card-slot {
-  aspect-ratio: 3/4;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 12px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-}
-
-/* State 1: Unused */
-.state-unused {
-  background: linear-gradient(135deg, #C89FDB, #9B72CC);
-}
-.envelope-icon-wrap {
-  position: relative;
-  margin-bottom: 12px;
-}
-.envelope-seal {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -10%);
-}
-.invite-number {
-  color: white;
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: auto;
-}
-.use-invite-btn {
-  background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.4);
-  color: white;
-  border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.2s;
-}
-.use-invite-btn:active {
-  background: rgba(255,255,255,0.3);
-}
-
-/* State 2: Active */
-.state-active {
-  background: linear-gradient(135deg, #D4A8E8, #A67BD9);
-  padding: 20px 12px;
-}
-.invite-code {
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-.invite-timer {
-  font-size: 11px;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: auto;
-}
-.invite-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  margin-top: 12px;
-}
-.invite-actions button {
-  background: white;
-  color: #9B72CC;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.invite-actions button.primary {
-  background: #9B72CC;
-  color: white;
-}
-
-/* State 3: Used */
-.state-used {
-  background: #F0F0F0;
-  box-shadow: none;
-  border: 1px solid #E5E5E5;
-}
-.invited-badge {
-  background: #EBDCF5;
-  color: #9B72CC;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
-}
-
-/* Notice */
-.invite-notice-text {
-  font-size: 12px;
-  color: #999;
-  line-height: 1.6;
-}
-
-/* p.Qurated Page */
-.qurated-top-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  margin-bottom: 24px;
-}
-.qurated-feature-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-.qurated-plan-card {
-  background: white;
-  border: 1.5px solid #E0D0F0;
-  border-radius: 16px;
-  padding: 20px;
-  margin-bottom: 16px;
-  position: relative;
-  transition: all 0.2s ease;
-}
-.qurated-plan-card.selected {
-  border-width: 2px;
-  background: #F8F0FC;
-}
-.qurated-plan-card.premium {
-  border-color: #9B72CC;
-  background: white;
-}
-.qurated-plan-card.premium.selected {
-  background: rgba(155, 114, 204, 0.05);
-}
-.qurated-recommend-badge {
-  position: absolute;
-  top: -12px;
-  right: 16px;
-  background: #9B72CC;
-  color: white;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(155, 114, 204, 0.3);
 }
