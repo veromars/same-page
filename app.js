@@ -3977,6 +3977,57 @@ window.openChat = function (chatId) {
 
 window.setDiscoverFilter = function (f) { discoverFilterType = f; renderDiscoverTab(); };
 window.toggleLikedCollection = function () { window.showLikedCollection = !window.showLikedCollection; renderDiscoverTab(); };
+function renderMyMeetingsTab(tabName) {
+  const content = document.getElementById('my-meetings-content');
+  if (!content) return;
+
+  const tabs = ['applied', 'bookmarked', 'created'];
+  const tabLabels = { applied: '신청한 모임', bookmarked: '북마크', created: '만든 모임' };
+
+  const tabBarHtml = tabs.map(t => `
+    <button onclick="renderMyMeetingsTab('${t}')" style="
+      flex:1; background:none; border:none; padding:12px 0; font-size:14px; font-weight:600; cursor:pointer;
+      color:${t === tabName ? '#9B72CC' : 'var(--text-muted)'};
+      border-bottom:${t === tabName ? '2px solid #9B72CC' : '2px solid transparent'};
+    ">${tabLabels[t]}</button>
+  `).join('');
+
+  let bodyHtml = '';
+
+  if (tabName === 'applied') {
+    const samples = MOCK_MEETUPS.filter(m => m.currentCap > 0).slice(0, 2);
+    if (samples.length === 0) {
+      bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">신청한 모임이 없어요</div>`;
+    } else {
+      bodyHtml = samples.map(m => `
+        <div onclick="openMeetupDetail(${m.id})" style="
+          display:flex; justify-content:space-between; align-items:center;
+          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+        ">
+          <div>
+            <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark);">${m.title}</div>
+            <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
+          </div>
+          <span style="
+            background:#E8F5E9; color:#4CAF50; border-radius:999px;
+            padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px;
+          ">확정 ✓</span>
+        </div>
+      `).join('');
+    }
+  } else if (tabName === 'bookmarked') {
+    bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">북마크한 모임이 없어요</div>`;
+  } else if (tabName === 'created') {
+    bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">만든 모임이 없어요</div>`;
+  }
+
+  content.innerHTML = `
+    <div style="display:flex; border-bottom:1px solid var(--border-color);">${tabBarHtml}</div>
+    <div style="padding:0 24px 40px;">${bodyHtml}</div>
+  `;
+}
+window.renderMyMeetingsTab = renderMyMeetingsTab;
+
 function openMyMeetings() {
   let amc = document.getElementById('answer-modal-container');
   if (!amc) {
@@ -3987,16 +4038,15 @@ function openMyMeetings() {
   }
   amc.innerHTML = `
     <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;">
-      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border);">
-        <button onclick="closeAnswerCard()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);">←</button>
+      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
+        <button onclick="closeAnswerCard()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
         <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">내 모임</span>
         <span style="width:32px;"></span>
       </div>
-      <div style="padding:24px;text-align:center;color:var(--text-muted);margin-top:60px;">
-        준비 중이에요 ☺️
-      </div>
+      <div id="my-meetings-content"></div>
     </div>
   `;
+  renderMyMeetingsTab('applied');
 }
 window.openMyMeetings = openMyMeetings;
 
