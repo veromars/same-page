@@ -2070,7 +2070,7 @@ window.switchTab = function (tabName) {
         <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 140px); background: var(--bg-color);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin:0;">모임</h2>
-          <button id="meetup-collection-toggle" onclick="openMyMeetings()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+          <button id="meetup-collection-toggle" class="folder-heart-btn" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="folder-heart" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
           </button>
         </div>
@@ -3993,6 +3993,10 @@ function openMyMeetings() {
   `;
 }
 window.openMyMeetings = openMyMeetings;
+
+document.addEventListener('click', function(e) {
+  if (e.target.closest('.folder-heart-btn')) openMyMeetings();
+});
 
 window.toggleSavedMeetups = function () {
   window.showSavedMeetups = !window.showSavedMeetups;
