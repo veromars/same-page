@@ -3262,7 +3262,7 @@ window.openMeetupDetail = function (id) {
           </div>
           
           <!-- Host Section (Conditional) -->
-          ${!isPrivate && !isEvent ? `
+          ${!isPrivate && (!isEvent || m.host?.isPublic) ? `
           <div style="display:flex; align-items:center; margin-bottom: 32px; padding: 16px; background:#F9F9F9; border-radius:16px;">
              ${isGroup ?
         `<div style="width:48px; height:48px; border-radius:12px; background-image:url('${m.hostLogo}'); background-size:cover; background-position:center;"></div>` :
@@ -3270,10 +3270,10 @@ window.openMeetupDetail = function (id) {
       }
              <div style="margin-left: 12px; flex:1;">
                 <div style="font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px;">
-                  HOST: ${m.hostName} 
+                  HOST: ${m.host?.name || m.hostName}
                   ${!isGroup ? getRoleBadgeHTML(MOCK_PROFILES.find(p => p.name === m.hostName)?.role) : ''}
                 </div>
-                <div style="font-size:13px; color:#777; margin-top:2px;">${m.hostBio}</div>
+                <div style="font-size:13px; color:#777; margin-top:2px;">${m.host?.bio || m.hostBio}</div>
              </div>
           </div>
           ` : ''}
@@ -3293,7 +3293,7 @@ window.openMeetupDetail = function (id) {
                <div class="progress-fill" style="width: ${capPercent}%;"></div>
             </div>
             <div class="attendee-stack" style="flex-wrap: wrap; gap:12px;">
-               ${!isPrivate && !isEvent ? `
+               ${!isPrivate && (!isEvent || m.host?.isPublic) ? `
                  <div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border: none; outline: 2.5px solid #9B72CC; outline-offset: 2px; background-image:url('${isGroup ? m.hostLogo : (MOCK_PROFILES.find(p => p.name === m.hostName)?.image || USER_PHOTOS[0])}'); background-size:cover; background-position:center top;"></div>
                ` : ''}
                ${(m.participants || []).map(url => `
