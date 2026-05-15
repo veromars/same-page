@@ -4346,13 +4346,15 @@ window.renderDiscoverTab = function () {
   const remaining = browseQueue;
 
   let headerHTML = `
-      <div class="app-header" style="padding-bottom: 0; background: transparent; display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0;">발견</h2>
-        <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
-          <i data-lucide="library" style="width: 24px; height: 24px;"></i>
-        </button>
+      <div style="padding: 10px 24px 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <h2 style="margin:0;">발견</h2>
+          <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+            <i data-lucide="library" style="width: 24px; height: 24px;"></i>
+          </button>
+        </div>
+        <p style="margin-bottom: 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
       </div>
-      <p style="margin-bottom: 24px; padding: 0 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
     `;
 
   if (remaining.length === 0) {
