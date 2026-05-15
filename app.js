@@ -3978,7 +3978,13 @@ window.openChat = function (chatId) {
 window.setDiscoverFilter = function (f) { discoverFilterType = f; renderDiscoverTab(); };
 window.toggleLikedCollection = function () { window.showLikedCollection = !window.showLikedCollection; renderDiscoverTab(); };
 function openMyMeetings() {
-  const amc = document.getElementById('answer-modal-container');
+  let amc = document.getElementById('answer-modal-container');
+  if (!amc) {
+    amc = document.createElement('div');
+    amc.id = 'answer-modal-container';
+    amc.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:3000; pointer-events:auto;';
+    document.body.appendChild(amc);
+  }
   amc.innerHTML = `
     <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;">
       <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border);">
