@@ -2225,7 +2225,7 @@ window.renderMeetupList = function () {
     return;
   }
   container.innerHTML = filtered.map(m => {
-    if (m.type.includes('행사')) {
+    if (m.type.includes('행사') && m.isAd === true) {
       const clickAction = m.externalUrl ? `window.open('${m.externalUrl}', '_blank')` : `openMeetupDetail(${m.id})`;
       const posterUrl = m.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800';
       return `
@@ -2264,9 +2264,7 @@ window.renderMeetupList = function () {
                     <div style="color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 2px;">📍 ${m.shortLocation}</div>
                   ` : ''}
                 </div>
-                ${m.externalUrl ? `
-                  <button class="rsvp-btn" onclick="event.stopPropagation(); window.open('${m.externalUrl}', '_blank')" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); flex-shrink: 0; backdrop-filter: blur(4px); margin: 0; font-size: 18px;">→</button>
-                ` : ''}
+                <button class="rsvp-btn" onclick="event.stopPropagation(); ${clickAction}" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.4); flex-shrink: 0; backdrop-filter: blur(4px); margin: 0; font-size: 18px;">→</button>
               </div>
             </div>
       `;
