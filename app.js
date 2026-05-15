@@ -2070,7 +2070,7 @@ window.switchTab = function (tabName) {
         <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 140px); background: var(--bg-color);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin:0;">모임</h2>
-          <button id="meetup-collection-toggle" onclick="toggleSavedMeetups()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+          <button id="meetup-collection-toggle" onclick="openMyMeetings()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="folder-heart" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
           </button>
         </div>
@@ -3977,6 +3977,23 @@ window.openChat = function (chatId) {
 
 window.setDiscoverFilter = function (f) { discoverFilterType = f; renderDiscoverTab(); };
 window.toggleLikedCollection = function () { window.showLikedCollection = !window.showLikedCollection; renderDiscoverTab(); };
+function openMyMeetings() {
+  const amc = document.getElementById('answer-modal-container');
+  amc.innerHTML = `
+    <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;">
+      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border);">
+        <button onclick="closeAnswerCard()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text);">←</button>
+        <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">내 모임</span>
+        <span style="width:32px;"></span>
+      </div>
+      <div style="padding:24px;text-align:center;color:var(--text-muted);margin-top:60px;">
+        준비 중이에요 ☺️
+      </div>
+    </div>
+  `;
+}
+window.openMyMeetings = openMyMeetings;
+
 window.toggleSavedMeetups = function () {
   window.showSavedMeetups = !window.showSavedMeetups;
 
