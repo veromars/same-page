@@ -4346,8 +4346,11 @@ window.renderDiscoverTab = function () {
   const remaining = browseQueue;
 
   let headerHTML = `
-      <div class="app-header" style="padding-bottom: 0; background: transparent;">
+      <div class="app-header" style="padding-bottom: 0; background: transparent; display:flex; justify-content:space-between; align-items:center;">
         <h2 style="margin:0;">발견</h2>
+        <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+          <i data-lucide="library" style="width: 24px; height: 24px;"></i>
+        </button>
       </div>
       <p style="margin-bottom: 24px; padding: 0 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
     `;
@@ -4870,6 +4873,23 @@ window.activateInvite = function (index) {
   window.inviteCardStates[index].state = 1; // Active
   window.inviteCardStates[index].code = code;
   window.renderInvitePage();
+};
+
+window.openLibraryPage = function () {
+  const mc = getModalContainer();
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index: 2000; background: var(--bg-color);">
+      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
+        <button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
+        <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">라이브러리</span>
+        <span style="width:32px;"></span>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: calc(100vh - 100px); color:var(--text-muted);">
+        <div style="font-size:18px; font-weight:600;">준비 중이에요 ☺️</div>
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
 window.openQuratedPage = function () {
