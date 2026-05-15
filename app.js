@@ -700,7 +700,7 @@ const MOCK_MEETUPS = [
   {
     id: 6, title: "퀴어 법률 토크 — 우리가 알아야 할 권리", date: "다음주 토요일 오후 2시", timestamp: "2026-05-02T14:00:00",
     desc: "동성 파트너십, 법적 보호, 의료 결정권 등 실생활에서 꼭 알아야 할 법률 정보를 함께 나눠요. 질문 환영합니다.",
-    type: "🎟️ 행사", maxCap: 20, currentCap: 12,
+    type: "📚 스터디", maxCap: 20, currentCap: 12,
     hostName: "레즈비언인권위원회", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100",
     hostBio: "성소수자 권리 증진을 위해 활동하는 단체입니다",
     styleTrait: "무관", fee: "무료", tags: [],
@@ -2071,7 +2071,7 @@ window.switchTab = function (tabName) {
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin:0;">모임</h2>
           <button id="meetup-collection-toggle" class="folder-heart-btn" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
-            <i data-lucide="folder-heart" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
+            <i data-lucide="archive" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
           </button>
         </div>
         <p style="margin-bottom: 24px;">같은 페이지의 사람들과 함께해요.</p>
@@ -4052,7 +4052,7 @@ function openMyMeetings() {
 }
 window.openMyMeetings = openMyMeetings;
 
-document.addEventListener('click', function(e) {
+document.addEventListener('click', function (e) {
   if (e.target.closest('.folder-heart-btn')) openMyMeetings();
 });
 
