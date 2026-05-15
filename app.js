@@ -673,6 +673,7 @@ const MOCK_MEETUPS = [
     desc: "퀴어 예술과 기술의 교차점을 탐구하는 국제 전시",
     tags: ["#전시", "#퀴어아트", "#공식행사"],
     isAd: true,
+    linkType: "external",
     showTextInfo: true,
     participants: [],
     rules: "매너 있는 관람 부탁드립니다.",
@@ -700,7 +701,7 @@ const MOCK_MEETUPS = [
   {
     id: 6, title: "퀴어 법률 토크 — 우리가 알아야 할 권리", date: "다음주 토요일 오후 2시", timestamp: "2026-05-02T14:00:00",
     desc: "동성 파트너십, 법적 보호, 의료 결정권 등 실생활에서 꼭 알아야 할 법률 정보를 함께 나눠요. 질문 환영합니다.",
-    type: "📚 스터디", maxCap: 20, currentCap: 12,
+    type: "🎟️ 행사", maxCap: 20, currentCap: 12,
     hostName: "레즈비언인권위원회", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100",
     hostBio: "성소수자 권리 증진을 위해 활동하는 단체입니다",
     styleTrait: "무관", fee: "무료", tags: [],
@@ -725,6 +726,8 @@ const MOCK_MEETUPS = [
     maxCap: 1000,
     currentCap: 0,
     isRecommended: false,
+    isAd: true,
+    linkType: "external",
     showTextInfo: false,
     tags: ["#공식행사", "#프라이드", "#전시"],
     participants: [],
@@ -2226,7 +2229,9 @@ window.renderMeetupList = function () {
   }
   container.innerHTML = filtered.map(m => {
     if (m.type.includes('행사') && m.isAd === true) {
-      const clickAction = m.externalUrl ? `window.open('${m.externalUrl}', '_blank')` : `openMeetupDetail(${m.id})`;
+      const clickAction = m.linkType === 'internal'
+        ? `openMeetupDetail(${m.id})`
+        : (m.externalUrl ? `window.open('${m.externalUrl}', '_blank')` : `openMeetupDetail(${m.id})`);
       const posterUrl = m.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800';
       return `
             <div class="meetup-item fade-in" style="overflow: hidden; border: none; position: relative; aspect-ratio: 4/5; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;" onclick="${clickAction}">
