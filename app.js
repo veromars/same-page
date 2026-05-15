@@ -702,6 +702,11 @@ const MOCK_MEETUPS = [
     id: 6, title: "퀴어 법률 토크 — 우리가 알아야 할 권리", date: "다음주 토요일 오후 2시", timestamp: "2026-05-02T14:00:00",
     desc: "동성 파트너십, 법적 보호, 의료 결정권 등 실생활에서 꼭 알아야 할 법률 정보를 함께 나눠요. 질문 환영합니다.",
     type: "🎟️ 행사", maxCap: 20, currentCap: 12,
+    host: {
+      name: "퀴어법률네트워크",
+      bio: "성소수자 법률 지원 및 권리 증진을 위한 단체입니다.",
+      isPublic: true
+    },
     hostName: "레즈비언인권위원회", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100",
     hostBio: "성소수자 권리 증진을 위해 활동하는 단체입니다",
     styleTrait: "무관", fee: "무료", tags: [],
