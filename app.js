@@ -626,6 +626,53 @@ const USER_PHOTOS = [
 
 const MOCK_MEETUPS = [
   {
+    id: 101,
+    type: "🏘️ 커뮤니티",
+    secondaryType: "📚 스터디",
+    title: "레즈비언 독서 모임 \"달빛책방\"",
+    shortLocation: "마포구 (홍대)",
+    fullAddress: "마포구 (홍대)",
+    date: "매달 셋째 주 토요일",
+    timestamp: "2026-05-16T15:00:00",
+    desc: "매달 한 권의 책을 함께 읽어요. 퀴어 문학 중심.",
+    maxCap: 8,
+    currentCap: 7,
+    fee: "없음",
+    tags: ["#정기모임", "#스타일무관", "#일스only"],
+    rules: "신규 멤버 1자리 오픈",
+    isRecommended: false,
+    hostName: "달",
+    hostBio: "책과 사람을 좋아합니다.",
+    hostPublic: true,
+    hostType: "개인",
+    isSaved: false,
+    hasRSVPd: false,
+    participants: []
+  },
+  {
+    id: 102,
+    type: "🏘️ 커뮤니티",
+    secondaryType: "✨ 소셜",
+    title: "[단톡] 우리들이 바라는 세상 \"우바세\"",
+    shortLocation: "온라인",
+    fullAddress: "온라인",
+    date: "상시",
+    timestamp: "2026-05-16T15:00:00",
+    desc: "연령대: 82년생~97년생\n조건: 싱글, 일스\n인증방을 통해 참여해주세요.",
+    maxCap: 50,
+    currentCap: 31,
+    fee: "없음",
+    tags: ["#커뮤니티", "#단톡", "#일스only"],
+    externalUrl: "",
+    isRecommended: false,
+    hostName: "익명",
+    hostPublic: false,
+    hostType: "개인",
+    isSaved: false,
+    hasRSVPd: false,
+    participants: []
+  },
+  {
     id: 1, title: "선데이 필름나이트", date: "일요일 저녁 7시", timestamp: "2026-04-26T19:00:00",
     desc: "'타오르는 여인의 초상' 감상 후 와인 한 잔 🍷", type: "🎬 문화생활", maxCap: 6, currentCap: 6,
     hostName: "bora", hostType: "개인", hostPublic: true, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
@@ -1899,6 +1946,42 @@ window.selectModalCategory = function (elem) {
   grid.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('selected'));
   elem.classList.add('selected');
 }
+
+window.selectModalMeetupCategory = function (elem) {
+  const grid = elem.parentElement;
+  
+  if (elem.classList.contains('selected')) {
+    const selected = grid.querySelectorAll('.filter-chip.selected');
+    if (selected.length > 1) {
+      elem.classList.remove('selected', 'primary-cat', 'secondary-cat');
+      const remaining = grid.querySelector('.filter-chip.selected');
+      if (remaining && !remaining.classList.contains('primary-cat')) {
+         remaining.classList.remove('secondary-cat');
+         remaining.classList.add('primary-cat');
+         const check = remaining.querySelector('.secondary-check');
+         if (check) check.style.display = 'none';
+      }
+      const thisCheck = elem.querySelector('.secondary-check');
+      if (thisCheck) thisCheck.style.display = 'none';
+    }
+    return;
+  }
+  
+  const selected = grid.querySelectorAll('.filter-chip.selected');
+  if (selected.length >= 2) {
+    window.showToast('카테고리는 최대 2개까지 선택할 수 있어요');
+    return;
+  }
+  
+  elem.classList.add('selected');
+  if (selected.length === 0) {
+    elem.classList.add('primary-cat');
+  } else {
+    elem.classList.add('secondary-cat');
+    const check = elem.querySelector('.secondary-check');
+    if (check) check.style.display = 'block';
+  }
+}
 window.selectCalendarDay = function (elem, day) {
   const grid = elem.parentElement;
   grid.querySelectorAll('.calendar-day').forEach(c => c.classList.remove('selected'));
@@ -2090,7 +2173,7 @@ window.switchTab = function (tabName) {
     ).join('')}
           </div>
           <div class="filter-row">
-            ${['전체', '✨ 소셜', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '🎟️ 행사'].map(cat =>
+            ${['전체', '✨ 소셜', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '🎟️ 행사', '🏘️ 커뮤니티'].map(cat =>
       `<div class="filter-chip ${meetupFilterCategory === cat ? 'selected' : ''}" onclick="toggleFilterChip(this, 'cat')">${cat}</div>`
     ).join('')}
           </div>
@@ -2210,7 +2293,7 @@ window.renderMeetupList = function () {
 
   let filtered = MOCK_MEETUPS.filter(m => {
     let locMatch = meetupFilterLocation === '전체' || m.fullAddress.includes(meetupFilterLocation);
-    let catMatch = meetupFilterCategory === '전체' || m.type === meetupFilterCategory;
+    let catMatch = meetupFilterCategory === '전체' || m.type === meetupFilterCategory || m.secondaryType === meetupFilterCategory;
     return locMatch && catMatch;
   });
 
@@ -2260,7 +2343,8 @@ window.renderMeetupList = function () {
               <!-- Top Left Header (Chip & Badge) -->
               <div style="position: relative; z-index: 3;">
                 <div class="meetup-header" style="display: flex; align-items: center; justify-content: flex-start; gap: 8px;">
-                  <div class="meetup-chip" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: white;">🎟️ 행사</div>
+                  <div class="meetup-chip" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: white;">${m.type}</div>
+                  ${m.secondaryType ? `<div class="meetup-chip" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(8px); color: rgba(255,255,255,0.8); padding: 4px 8px;">+</div>` : ''}
                   ${m.isAd ? `<div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.4); color: rgba(255,255,255,0.7); font-size: 9px; border-radius: 999px; padding: 1px 5px;">AD</div>` : ''}
                 </div>
               </div>
@@ -2295,7 +2379,12 @@ window.renderMeetupList = function () {
                   </svg>
                 </div>
               </div>
-              <div class="meetup-header"><div class="meetup-chip">${m.type}</div></div>
+              <div class="meetup-header">
+                <div style="display:flex; gap:8px;">
+                  <div class="meetup-chip">${m.type}</div>
+                  ${m.secondaryType ? `<div class="meetup-chip" style="color:var(--text-muted); background: rgba(0,0,0,0.04);">+</div>` : ''}
+                </div>
+              </div>
               <div>
                 <div class="meetup-date">${m.date}</div>
                 <div class="meetup-title">${m.title}</div>
@@ -2819,8 +2908,11 @@ window.openCreateMeetupModal = function () {
       <div class="scroll-y" style="padding: 24px;">
           <div style="font-size:14px; font-weight:600; margin-bottom:12px;">카테고리 선택</div>
           <div class="modal-category-grid" id="create-meetup-category">
-            ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사'].map((cat, idx) =>
-    `<div class="filter-chip ${idx === 0 ? 'selected' : ''}" onclick="selectModalCategory(this)" style="width:100%; border-radius:12px;">${cat}</div>`
+            ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
+    `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
+       <span class="cat-text">${cat}</span>
+       <span class="secondary-check" style="display:none; position:absolute; right:12px; font-size:12px;">✓</span>
+     </div>`
   ).join('')}
           </div>
 
@@ -2922,8 +3014,17 @@ window.openCreateMeetupModal = function () {
 
 window.submitCreateMeetup = function () {
   // 1. Collect form values
-  const catEl = document.querySelector('#create-meetup-category .selected');
-  const selectedCategory = catEl ? catEl.innerText : '🎬 문화생활';
+  const catEls = document.querySelectorAll('#create-meetup-category .filter-chip.selected');
+  let selectedCategory = '🎬 문화생활';
+  let secondaryCategory = '';
+  if (catEls.length > 0) {
+    const pri = Array.from(catEls).find(e => e.classList.contains('primary-cat')) || catEls[0];
+    selectedCategory = pri.querySelector('.cat-text') ? pri.querySelector('.cat-text').innerText : pri.innerText;
+    if (catEls.length > 1) {
+      const sec = Array.from(catEls).find(e => e.classList.contains('secondary-cat')) || catEls[1];
+      secondaryCategory = sec.querySelector('.cat-text') ? sec.querySelector('.cat-text').innerText : sec.innerText;
+    }
+  }
 
   const titleEl = document.getElementById('create-meetup-title');
   const inputTitle = titleEl ? titleEl.value.trim() : '';
@@ -2989,6 +3090,7 @@ window.submitCreateMeetup = function () {
   const newMeetup = {
     id: Date.now(),
     type: selectedCategory,
+    secondaryType: secondaryCategory,
     title: inputTitle,
     shortLocation: inputLocation,
     fullAddress: inputLocation,
