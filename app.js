@@ -3021,9 +3021,9 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL}">날짜</div>
         <div class="calendar-wrapper" id="create-meetup-calendar" style="margin-bottom:24px;">
           <div class="calendar-header">
-            <i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i>
-            <div id="cal-header-text">2026년 4월 18일 (토)</div>
-            <i data-lucide="chevron-right" style="width:20px; color:var(--text-muted);"></i>
+            <button type="button" onclick="prevMeetupMonth()" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;"><i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i></button>
+            <div id="cal-header-text" style="font-size:15px; font-weight:600;"></div>
+            <button type="button" onclick="nextMeetupMonth()" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;"><i data-lucide="chevron-right" style="width:20px; color:var(--text-muted);"></i></button>
           </div>
           <div class="calendar-grid" id="create-meetup-calendar-grid">
             <div class="calendar-day-header" style="color:#FF6B6B;">일</div>
@@ -3055,10 +3055,17 @@ window.openCreateMeetupModal = function () {
 
         <!-- 참여 연령대 -->
         <div style="${LBL}">참여 연령대 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
-        <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
-          <input type="number" id="create-meetup-age-from" style="${INP}" placeholder="예) 82년생" />
-          <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
-          <input type="number" id="create-meetup-age-to" style="${INP}" placeholder="97년생" />
+        <div id="age-slider-wrapper" style="margin-bottom:24px; padding:0 4px;">
+          <div id="age-slider-label" style="text-align:center; font-size:14px; font-weight:600; color:var(--text-main); margin-bottom:16px;">30대 초반 ~ 40대 초반</div>
+          <div style="position:relative; height:22px; display:flex; align-items:center;">
+            <div style="position:absolute; left:0; right:0; height:4px; background:#E8E4DF; border-radius:2px;"></div>
+            <div id="age-slider-fill" style="position:absolute; height:4px; background:var(--primary); border-radius:2px; left:21.4%; right:57.1%;"></div>
+            <input type="range" id="age-range-from" min="0" max="14" value="3" style="position:absolute; width:100%; height:22px; background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none;">
+            <input type="range" id="age-range-to" min="0" max="14" value="6" style="position:absolute; width:100%; height:22px; background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none;">
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--text-muted);">
+            <span>20대 초반</span><span>60대 후반</span>
+          </div>
         </div>
 
         <!-- 참여비 -->
@@ -3070,13 +3077,16 @@ window.openCreateMeetupModal = function () {
         <!-- 정원 -->
         <div id="create-meetup-capacity-wrapper" style="margin-bottom:24px;">
           <div style="${LBL} margin-top:0;">정원 (명)</div>
-          <div class="picker-wrapper" id="create-meetup-capacity">
-            <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
-              <div class="picker-spacer"></div>
-              ${capOpts.map(c => `<div class="picker-item">${c}</div>`).join('')}
-              <div class="picker-spacer"></div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <div style="position:relative; flex:1;">
+              <input type="number" id="create-meetup-cap-min" min="2" style="${INP} padding-right:28px;" placeholder="최소" />
+              <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:14px; pointer-events:none;">명</span>
             </div>
-            <div class="picker-overlay-bar"></div>
+            <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
+            <div style="position:relative; flex:1;">
+              <input type="number" id="create-meetup-cap-max" min="2" style="${INP} padding-right:28px;" placeholder="최대" />
+              <span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:14px; pointer-events:none;">명</span>
+            </div>
           </div>
         </div>
 
@@ -3108,14 +3118,126 @@ window.openCreateMeetupModal = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   setTimeout(() => {
+    const now = new Date();
+    window._selectedCalDate = null;
+    window.renderMeetupCalendar(now.getFullYear(), now.getMonth() + 1);
+    window.initAgeSlider();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
     const wheels = document.querySelectorAll('.picker-wheel-container');
     if (wheels.length >= 2) {
       wheels[0].scrollTop = 13 * 40;
       wheels[1].scrollTop = 0;
-      if (wheels[2]) wheels[2].scrollTop = 6 * 40;
       wheels.forEach(w => window.handleWheelScroll(w));
     }
   }, 30);
+};
+
+window._calState = { year: null, month: null };
+window._selectedCalDate = null;
+
+window.renderMeetupCalendar = function (year, month) {
+  window._calState = { year, month };
+  const headerEl = document.getElementById('cal-header-text');
+  const gridEl = document.getElementById('create-meetup-calendar-grid');
+  if (!headerEl || !gridEl) return;
+
+  headerEl.textContent = `${year}년 ${month}월`;
+
+  const headers = Array.from(gridEl.querySelectorAll('.calendar-day-header'));
+  gridEl.innerHTML = '';
+  headers.forEach(h => gridEl.appendChild(h));
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+  for (let i = 0; i < firstDay; i++) {
+    gridEl.appendChild(document.createElement('div'));
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month - 1, d);
+    const isPast = date < today;
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day';
+    cell.textContent = d;
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    if (isPast) {
+      cell.style.cssText = 'color:#CCC; cursor:default;';
+    } else if (window._selectedCalDate === dateStr) {
+      cell.style.cssText = 'background:var(--primary); color:#fff; border-radius:50%; cursor:pointer;';
+      cell.onclick = () => window.selectMeetupCalDate(year, month, d);
+    } else {
+      cell.style.cssText = 'cursor:pointer;';
+      cell.onclick = () => window.selectMeetupCalDate(year, month, d);
+    }
+    if (date.getDay() === 0) cell.style.color = isPast ? '#FFBBBB' : '#FF6B6B';
+    if (window._selectedCalDate === dateStr) cell.style.cssText = 'background:var(--primary); color:#fff; border-radius:50%; cursor:pointer;';
+    gridEl.appendChild(cell);
+  }
+};
+
+window.prevMeetupMonth = function () {
+  let { year, month } = window._calState;
+  month--;
+  if (month < 1) { month = 12; year--; }
+  window.renderMeetupCalendar(year, month);
+};
+
+window.nextMeetupMonth = function () {
+  let { year, month } = window._calState;
+  month++;
+  if (month > 12) { month = 1; year++; }
+  window.renderMeetupCalendar(year, month);
+};
+
+window.selectMeetupCalDate = function (year, month, day) {
+  const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  window._selectedCalDate = dateStr;
+  window.renderMeetupCalendar(year, month);
+};
+
+window.initAgeSlider = function () {
+  if (!document.getElementById('age-slider-style')) {
+    const s = document.createElement('style');
+    s.id = 'age-slider-style';
+    s.textContent = `
+      #age-range-from, #age-range-to { pointer-events: none; }
+      #age-range-from::-webkit-slider-thumb, #age-range-to::-webkit-slider-thumb {
+        pointer-events: all; -webkit-appearance: none; appearance: none;
+        width: 22px; height: 22px; border-radius: 50%;
+        background: var(--primary, #E87B4B); border: 2px solid #fff;
+        box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer;
+      }
+    `;
+    document.head.appendChild(s);
+  }
+  const AGE = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 초반','50대 중반','50대 후반','60대 초반','60대 중반','60대 후반'];
+  const fromEl = document.getElementById('age-range-from');
+  const toEl = document.getElementById('age-range-to');
+  const fillEl = document.getElementById('age-slider-fill');
+  const labelEl = document.getElementById('age-slider-label');
+  if (!fromEl || !toEl || !fillEl || !labelEl) return;
+
+  function updateSlider(moved) {
+    let from = parseInt(fromEl.value);
+    let to = parseInt(toEl.value);
+    if (from > to) {
+      if (moved === 'from') { fromEl.value = to; from = to; }
+      else { toEl.value = from; to = from; }
+    }
+    fillEl.style.left = (from / 14 * 100) + '%';
+    fillEl.style.right = ((14 - to) / 14 * 100) + '%';
+    labelEl.textContent = AGE[from] + ' ~ ' + AGE[to];
+    fromEl.style.zIndex = from >= to - 1 ? '3' : '2';
+    toEl.style.zIndex = from >= to - 1 ? '2' : '3';
+  }
+
+  fromEl.addEventListener('input', () => updateSlider('from'));
+  toEl.addEventListener('input', () => updateSlider('to'));
+  updateSlider('from');
 };
 
 window.selectMeetupRegion = function (elem, region) {
@@ -3210,29 +3332,32 @@ window.submitCreateMeetup = function () {
   const locTimingEl = document.querySelector('#create-meetup-location-timing .selected');
   const locationTimingSelected = locTimingEl ? locTimingEl.innerText : '바로 공개';
 
-  const calHeader = document.getElementById('cal-header-text');
-  const selectedDate = calHeader ? calHeader.innerText : '2026년 4월 18일 (토)';
+  let selectedDate = '날짜 미정';
+  if (window._selectedCalDate) {
+    const [cy, cm, cd] = window._selectedCalDate.split('-').map(Number);
+    const dateObj = new Date(cy, cm - 1, cd);
+    const WD = ['일','월','화','수','목','금','토'];
+    selectedDate = `${cy}년 ${cm}월 ${cd}일 (${WD[dateObj.getDay()]})`;
+  }
 
   // Time from pickers
   const pickers = document.querySelectorAll('.picker-wheel-container');
   let selectedTime = "오후 7시 00분";
-  let selectedCapacity = 8;
-  if (pickers.length >= 3) {
+  if (pickers.length >= 2) {
     const hIdx = Math.round(pickers[0].scrollTop / 40);
     const mIdx = Math.round(pickers[1].scrollTop / 40);
-    const cIdx = Math.round(pickers[2].scrollTop / 40);
-
     const hItems = pickers[0].querySelectorAll('.picker-item');
     const mItems = pickers[1].querySelectorAll('.picker-item');
-    const cItems = pickers[2].querySelectorAll('.picker-item');
-
     if (hItems[hIdx] && mItems[mIdx]) {
       selectedTime = hItems[hIdx].innerText + ' ' + mItems[mIdx].innerText;
     }
-    if (cItems[cIdx]) {
-      selectedCapacity = parseInt(cItems[cIdx].innerText.replace('명', ''), 10) || 8;
-    }
   }
+
+  const capMinEl = document.getElementById('create-meetup-cap-min');
+  const capMaxEl = document.getElementById('create-meetup-cap-max');
+  const capMin = capMinEl ? parseInt(capMinEl.value) || 2 : 2;
+  const capMax = capMaxEl ? parseInt(capMaxEl.value) || capMin : capMin;
+  const selectedCapacity = capMax;
 
   const feeInputEl = document.getElementById('create-meetup-fee-input');
   const inputFee = feeInputEl && feeInputEl.value.trim() ? feeInputEl.value.trim() : '무료';
@@ -3250,11 +3375,12 @@ window.submitCreateMeetup = function () {
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
   const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText.trim() === '프로필 공개') : false;
 
-  const ageFromEl = document.getElementById('create-meetup-age-from');
-  const ageToEl = document.getElementById('create-meetup-age-to');
-  const ageFrom = ageFromEl ? ageFromEl.value.trim() : '';
-  const ageTo = ageToEl ? ageToEl.value.trim() : '';
-  const ageRange = (ageFrom && ageTo) ? `${ageFrom} ~ ${ageTo}` : (ageFrom || ageTo || '');
+  const AGE_LABELS = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 초반','50대 중반','50대 후반','60대 초반','60대 중반','60대 후반'];
+  const ageFromEl = document.getElementById('age-range-from');
+  const ageToEl = document.getElementById('age-range-to');
+  const ageFromIdx = ageFromEl ? parseInt(ageFromEl.value) : 0;
+  const ageToIdx = ageToEl ? parseInt(ageToEl.value) : 14;
+  const ageRange = `${AGE_LABELS[ageFromIdx]} ~ ${AGE_LABELS[ageToIdx]}`;
 
   const inputLinks = [];
   document.querySelectorAll('.meetup-link-item').forEach(item => {
