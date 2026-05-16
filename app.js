@@ -2971,8 +2971,7 @@ window.openCreateMeetupModal = function () {
   hourOpts.push('정오 12시');
   for (let i = 1; i <= 11; i++) hourOpts.push(`오후 ${i}시`);
   const minOpts = ['00분', '30분'];
-  const capOpts = [];
-  for (let i = 2; i <= 30; i++) capOpts.push(`${i}명`);
+  const ageOpts = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 이상'];
 
   const LBL = 'font-size:14px; font-weight:600; color:#888; margin-bottom:12px; margin-top:24px; display:block;';
   const INP = 'background:#fff; border:1px solid #E8E4DF; border-radius:12px; padding:12px 16px; width:100%; font-size:15px; box-sizing:border-box; outline:none;';
@@ -2987,7 +2986,7 @@ window.openCreateMeetupModal = function () {
       <div class="scroll-y" style="padding:24px 24px 60px;">
 
         <!-- 카테고리 -->
-        <div style="${LBL} margin-top:0;">카테고리 선택</div>
+        <div style="${LBL} margin-top:0;">카테고리 선택 <span style="color:var(--primary);">*</span></div>
         <div class="modal-category-grid" id="create-meetup-category" style="margin-bottom:24px;">
           ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
             `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
@@ -2998,27 +2997,26 @@ window.openCreateMeetupModal = function () {
         </div>
 
         <!-- 모임 이름 -->
-        <div style="${LBL}">모임 이름</div>
+        <div style="${LBL}">모임 이름 <span style="color:var(--primary);">*</span></div>
         <input type="text" id="create-meetup-title" style="${INP} margin-bottom:24px;" placeholder="모임 이름" />
 
         <!-- 장소 -->
-        <div style="${LBL}">장소</div>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px;">
+        <div style="${LBL}">지역 <span style="color:var(--primary);">*</span></div>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
           ${['서울','경기','부산','대구','인천','광주','대전','제주'].map(r =>
             `<div class="filter-chip" onclick="selectMeetupRegion(this,'${r}')" style="border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">${r}</div>`
           ).join('')}
         </div>
-        <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:8px;" placeholder="예) 홍대입구역 근처, 성수동 카페" />
         <input type="hidden" id="create-meetup-region" value="" />
-        <div id="create-meetup-location-timing" style="display:flex; gap:8px; margin-bottom:4px;">
-          <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">바로 공개</div>
-          <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">참여 확정 후</div>
-          <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">추후 안내</div>
-        </div>
-        <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; margin-top:6px; line-height:1.4;">추후 안내 선택 시 오픈카톡을 통해 장소를 안내할 수 있어요</div>
+        <div style="font-size:13px; font-weight:500; color:#888; margin-bottom:8px;">상세 장소 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
+        <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:10px;" placeholder="예) 홍대입구역 근처, 강남역 카페" />
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:24px; cursor:pointer;">
+          <input type="checkbox" id="create-meetup-location-private" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
+          정확한 주소는 참여 확정 후 공개할게요
+        </label>
 
         <!-- 날짜 -->
-        <div style="${LBL}">날짜</div>
+        <div style="${LBL}">날짜 <span style="color:var(--primary);">*</span></div>
         <div class="calendar-wrapper" id="create-meetup-calendar" style="margin-bottom:24px;">
           <div class="calendar-header">
             <button type="button" onclick="prevMeetupMonth()" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;"><i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i></button>
@@ -3034,7 +3032,7 @@ window.openCreateMeetupModal = function () {
         </div>
 
         <!-- 시간 -->
-        <div style="${LBL}">시간</div>
+        <div style="${LBL}">시간 <span style="color:var(--primary);">*</span></div>
         <div class="picker-wrapper" id="create-meetup-time" style="margin-bottom:24px;">
           <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
             <div class="picker-spacer"></div>
@@ -3055,16 +3053,23 @@ window.openCreateMeetupModal = function () {
 
         <!-- 참여 연령대 -->
         <div style="${LBL}">참여 연령대 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
-        <div id="age-slider-wrapper" style="margin-bottom:24px; padding:0 4px;">
-          <div id="age-slider-label" style="text-align:center; font-size:14px; font-weight:600; color:var(--text-main); margin-bottom:16px;">30대 초반 ~ 40대 초반</div>
-          <div style="position:relative; height:22px; display:flex; align-items:center;">
-            <div style="position:absolute; left:0; right:0; height:4px; background:#E8E4DF; border-radius:2px;"></div>
-            <div id="age-slider-fill" style="position:absolute; height:4px; background:var(--primary); border-radius:2px; left:21.4%; right:57.1%;"></div>
-            <input type="range" id="age-range-from" min="0" max="14" value="3" style="position:absolute; width:100%; height:22px; background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none;">
-            <input type="range" id="age-range-to" min="0" max="14" value="6" style="position:absolute; width:100%; height:22px; background:transparent; cursor:pointer; -webkit-appearance:none; appearance:none;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+          <div class="picker-wrapper" id="create-meetup-age-from-picker" style="flex:1;">
+            <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+              <div class="picker-spacer"></div>
+              ${ageOpts.map(a => `<div class="picker-item" style="font-size:13px;">${a}</div>`).join('')}
+              <div class="picker-spacer"></div>
+            </div>
+            <div class="picker-overlay-bar"></div>
           </div>
-          <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--text-muted);">
-            <span>20대 초반</span><span>60대 후반</span>
+          <span style="flex-shrink:0; font-size:16px; color:var(--text-muted); font-weight:500;">~</span>
+          <div class="picker-wrapper" id="create-meetup-age-to-picker" style="flex:1;">
+            <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+              <div class="picker-spacer"></div>
+              ${ageOpts.map(a => `<div class="picker-item" style="font-size:13px;">${a}</div>`).join('')}
+              <div class="picker-spacer"></div>
+            </div>
+            <div class="picker-overlay-bar"></div>
           </div>
         </div>
 
@@ -3121,14 +3126,16 @@ window.openCreateMeetupModal = function () {
     const now = new Date();
     window._selectedCalDate = null;
     window.renderMeetupCalendar(now.getFullYear(), now.getMonth() + 1);
-    window.initAgeSlider();
     if (typeof lucide !== 'undefined') lucide.createIcons();
-    const wheels = document.querySelectorAll('.picker-wheel-container');
-    if (wheels.length >= 2) {
-      wheels[0].scrollTop = 13 * 40;
-      wheels[1].scrollTop = 0;
-      wheels.forEach(w => window.handleWheelScroll(w));
-    }
+    // 시간 피커: 오후 1시(index 13) / 00분(index 0)
+    const timeWheels = document.querySelectorAll('#create-meetup-time .picker-wheel-container');
+    if (timeWheels[0]) { timeWheels[0].scrollTop = 13 * 40; window.handleWheelScroll(timeWheels[0]); }
+    if (timeWheels[1]) { timeWheels[1].scrollTop = 0; window.handleWheelScroll(timeWheels[1]); }
+    // 연령대 피커: 30대 초반(index 3) ~ 40대 초반(index 6)
+    const ageFromWheel = document.querySelector('#create-meetup-age-from-picker .picker-wheel-container');
+    const ageToWheel = document.querySelector('#create-meetup-age-to-picker .picker-wheel-container');
+    if (ageFromWheel) { ageFromWheel.scrollTop = 3 * 40; window.handleWheelScroll(ageFromWheel); }
+    if (ageToWheel) { ageToWheel.scrollTop = 6 * 40; window.handleWheelScroll(ageToWheel); }
   }, 30);
 };
 
@@ -3268,13 +3275,15 @@ window.addMeetupLink = function () {
       <input type="text" class="input-field" placeholder="https://" style="margin:0;" />
     </div>
     <div class="link-social-input" data-link-idx="${idx}" style="display:none;">
-      <div style="display:flex; gap:6px; margin-bottom:8px;">
-        <div class="filter-chip social-platform-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectSocialPlatform(this,'${idx}')">인스타그램</div>
-        <div class="filter-chip social-platform-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectSocialPlatform(this,'${idx}')">X</div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <span style="font-size:13px; color:var(--text-muted); min-width:64px; flex-shrink:0;">인스타그램</span>
+        <span style="color:var(--text-muted);">@</span>
+        <input type="text" class="input-field social-instagram-input" placeholder="아이디 입력" style="margin:0; flex:1;" />
       </div>
-      <div style="display:flex; align-items:center; gap:4px;">
-        <span style="color:var(--text-muted); font-size:15px;">@</span>
-        <input type="text" class="input-field social-handle-input" placeholder="아이디 입력" style="margin:0; flex:1;" />
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:13px; color:var(--text-muted); min-width:64px; flex-shrink:0;">X</span>
+        <span style="color:var(--text-muted);">@</span>
+        <input type="text" class="input-field social-x-input" placeholder="아이디 입력" style="margin:0; flex:1;" />
       </div>
     </div>
   `;
@@ -3329,8 +3338,8 @@ window.submitCreateMeetup = function () {
   const detail = detailEl ? detailEl.value.trim() : '';
   const inputLocation = region && detail ? `${region} ${detail}` : (region || detail || '');
 
-  const locTimingEl = document.querySelector('#create-meetup-location-timing .selected');
-  const locationTimingSelected = locTimingEl ? locTimingEl.innerText : '바로 공개';
+  const locationPrivateEl = document.getElementById('create-meetup-location-private');
+  const locationTimingSelected = locationPrivateEl && locationPrivateEl.checked ? '참여 확정 후' : '바로 공개';
 
   let selectedDate = '날짜 미정';
   if (window._selectedCalDate) {
@@ -3340,14 +3349,14 @@ window.submitCreateMeetup = function () {
     selectedDate = `${cy}년 ${cm}월 ${cd}일 (${WD[dateObj.getDay()]})`;
   }
 
-  // Time from pickers
-  const pickers = document.querySelectorAll('.picker-wheel-container');
+  // Time from pickers (use scoped selector to avoid picking up age pickers)
+  const timePickers = document.querySelectorAll('#create-meetup-time .picker-wheel-container');
   let selectedTime = "오후 7시 00분";
-  if (pickers.length >= 2) {
-    const hIdx = Math.round(pickers[0].scrollTop / 40);
-    const mIdx = Math.round(pickers[1].scrollTop / 40);
-    const hItems = pickers[0].querySelectorAll('.picker-item');
-    const mItems = pickers[1].querySelectorAll('.picker-item');
+  if (timePickers.length >= 2) {
+    const hIdx = Math.round(timePickers[0].scrollTop / 40);
+    const mIdx = Math.round(timePickers[1].scrollTop / 40);
+    const hItems = timePickers[0].querySelectorAll('.picker-item');
+    const mItems = timePickers[1].querySelectorAll('.picker-item');
     if (hItems[hIdx] && mItems[mIdx]) {
       selectedTime = hItems[hIdx].innerText + ' ' + mItems[mIdx].innerText;
     }
@@ -3375,23 +3384,30 @@ window.submitCreateMeetup = function () {
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
   const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText.trim() === '프로필 공개') : false;
 
-  const AGE_LABELS = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 초반','50대 중반','50대 후반','60대 초반','60대 중반','60대 후반'];
-  const ageFromEl = document.getElementById('age-range-from');
-  const ageToEl = document.getElementById('age-range-to');
-  const ageFromIdx = ageFromEl ? parseInt(ageFromEl.value) : 0;
-  const ageToIdx = ageToEl ? parseInt(ageToEl.value) : 14;
-  const ageRange = `${AGE_LABELS[ageFromIdx]} ~ ${AGE_LABELS[ageToIdx]}`;
+  const ageFromWheel = document.querySelector('#create-meetup-age-from-picker .picker-wheel-container');
+  const ageToWheel = document.querySelector('#create-meetup-age-to-picker .picker-wheel-container');
+  let ageRange = '';
+  if (ageFromWheel && ageToWheel) {
+    const afIdx = Math.round(ageFromWheel.scrollTop / 40);
+    const atIdx = Math.round(ageToWheel.scrollTop / 40);
+    const afItems = ageFromWheel.querySelectorAll('.picker-item');
+    const atItems = ageToWheel.querySelectorAll('.picker-item');
+    if (afItems[afIdx] && atItems[atIdx]) {
+      ageRange = afItems[afIdx].innerText + ' ~ ' + atItems[atIdx].innerText;
+    }
+  }
 
   const inputLinks = [];
   document.querySelectorAll('.meetup-link-item').forEach(item => {
     const typeEl = item.querySelector('.link-type-chip.selected');
     const type = typeEl ? typeEl.textContent.trim() : '기타';
     if (type === '소셜') {
-      const platformEl = item.querySelector('.social-platform-chip.selected');
-      const handleEl = item.querySelector('.social-handle-input');
-      const platform = platformEl ? platformEl.textContent.trim() : '인스타그램';
-      const handle = handleEl ? handleEl.value.trim().replace(/^@/, '') : '';
-      if (handle) inputLinks.push({ type: '소셜', platform, handle });
+      const igEl = item.querySelector('.social-instagram-input');
+      const xEl = item.querySelector('.social-x-input');
+      const igHandle = igEl ? igEl.value.trim().replace(/^@/, '') : '';
+      const xHandle = xEl ? xEl.value.trim().replace(/^@/, '') : '';
+      if (igHandle) inputLinks.push({ type: '소셜', platform: '인스타그램', handle: igHandle });
+      if (xHandle) inputLinks.push({ type: '소셜', platform: 'X', handle: xHandle });
     } else {
       const urlEl = item.querySelector('.link-url-input input');
       const url = urlEl ? urlEl.value.trim() : '';
