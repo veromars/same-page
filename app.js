@@ -2965,136 +2965,164 @@ window.initPhotoCarousels = function () {
 
 window.openCreateMeetupModal = function () {
   const mc = getModalContainer();
+
+  const hourOpts = [];
+  for (let i = 6; i <= 11; i++) hourOpts.push(`오전 ${i}시`);
+  hourOpts.push('정오 12시');
+  for (let i = 1; i <= 11; i++) hourOpts.push(`오후 ${i}시`);
+  const minOpts = ['00분', '30분'];
+  const capOpts = [];
+  for (let i = 2; i <= 30; i++) capOpts.push(`${i}명`);
+
+  const LBL = 'font-size:14px; font-weight:600; color:#888; margin-bottom:12px; margin-top:24px; display:block;';
+  const INP = 'background:#fff; border:1px solid #E8E4DF; border-radius:12px; padding:12px 16px; width:100%; font-size:15px; box-sizing:border-box; outline:none;';
+
   mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 200; background: var(--bg-color);">
+    <div class="modal fade-in active" style="z-index:200; background:var(--bg-color);">
       <div class="app-header">
         <button class="back-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
         <div style="font-size:16px; font-weight:600;">모임 만들기</div>
         <div style="width:32px;"></div>
       </div>
-      <div class="scroll-y" style="padding: 24px;">
+      <div class="scroll-y" style="padding:24px 24px 60px;">
 
-          <!-- 카테고리 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px;">카테고리 선택</div>
-          <div class="modal-category-grid" id="create-meetup-category">
-            ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
-    `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
-       <span class="cat-text">${cat}</span>
-       <span class="secondary-check" style="display:none; position:absolute; right:12px; font-size:12px;">✓</span>
-     </div>`
-  ).join('')}
+        <!-- 카테고리 -->
+        <div style="${LBL} margin-top:0;">카테고리 선택</div>
+        <div class="modal-category-grid" id="create-meetup-category" style="margin-bottom:24px;">
+          ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
+            `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
+              <span class="cat-text">${cat}</span>
+              <span class="secondary-check" style="display:none; position:absolute; right:12px; font-size:12px;">✓</span>
+            </div>`
+          ).join('')}
+        </div>
+
+        <!-- 모임 이름 -->
+        <div style="${LBL}">모임 이름</div>
+        <input type="text" id="create-meetup-title" style="${INP} margin-bottom:24px;" placeholder="모임 이름" />
+
+        <!-- 장소 -->
+        <div style="${LBL}">장소</div>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px;">
+          ${['서울','경기','부산','대구','인천','광주','대전','제주'].map(r =>
+            `<div class="filter-chip" onclick="selectMeetupRegion(this,'${r}')" style="border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">${r}</div>`
+          ).join('')}
+        </div>
+        <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:8px;" placeholder="예) 홍대입구역 근처, 성수동 카페" />
+        <input type="hidden" id="create-meetup-region" value="" />
+        <div id="create-meetup-location-timing" style="display:flex; gap:8px; margin-bottom:4px;">
+          <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">바로 공개</div>
+          <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">참여 확정 후</div>
+          <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">추후 안내</div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; margin-top:6px; line-height:1.4;">추후 안내 선택 시 오픈카톡을 통해 장소를 안내할 수 있어요</div>
+
+        <!-- 날짜 -->
+        <div style="${LBL}">날짜</div>
+        <div class="calendar-wrapper" id="create-meetup-calendar" style="margin-bottom:24px;">
+          <div class="calendar-header">
+            <i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i>
+            <div id="cal-header-text">2026년 4월 18일 (토)</div>
+            <i data-lucide="chevron-right" style="width:20px; color:var(--text-muted);"></i>
           </div>
-
-          <!-- 모임 이름 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:32px;">모임 이름</div>
-          <input type="text" id="create-meetup-title" class="input-field" placeholder="모임 이름" style="margin-bottom:24px;" />
-
-          <!-- 장소 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">장소</div>
-          <input type="text" id="create-meetup-location" class="input-field" placeholder="장소명, 주소를 입력해주세요" style="margin-bottom:12px;" />
-          <div id="create-meetup-location-timing" style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">바로 공개</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">참여 확정 후</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">추후 안내</div>
+          <div class="calendar-grid" id="create-meetup-calendar-grid">
+            <div class="calendar-day-header" style="color:#FF6B6B;">일</div>
+            <div class="calendar-day-header">월</div><div class="calendar-day-header">화</div>
+            <div class="calendar-day-header">수</div><div class="calendar-day-header">목</div>
+            <div class="calendar-day-header">금</div><div class="calendar-day-header">토</div>
           </div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">추후 안내 선택 시 오픈카톡을 통해 장소를 안내할 수 있어요</div>
+        </div>
 
-          <!-- 날짜 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">날짜</div>
-          <div class="calendar-wrapper" id="create-meetup-calendar">
-             <div class="calendar-header">
-                <i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i>
-                <div id="cal-header-text">2026년 4월 18일 (토)</div>
-                <i data-lucide="chevron-right" style="width:20px; color:var(--text-muted);"></i>
-             </div>
-             <div class="calendar-grid" id="create-meetup-calendar-grid">
-                <div class="calendar-day-header" style="color:#FF6B6B;">일</div>
-                <div class="calendar-day-header">월</div><div class="calendar-day-header">화</div>
-                <div class="calendar-day-header">수</div><div class="calendar-day-header">목</div>
-                <div class="calendar-day-header">금</div><div class="calendar-day-header">토</div>
-             </div>
+        <!-- 시간 -->
+        <div style="${LBL}">시간</div>
+        <div class="picker-wrapper" id="create-meetup-time" style="margin-bottom:24px;">
+          <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+            <div class="picker-spacer"></div>
+            ${hourOpts.map(h => `<div class="picker-item">${h}</div>`).join('')}
+            <div class="picker-spacer"></div>
           </div>
-
-          <!-- 시간 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">시간</div>
-          <div class="picker-wrapper" id="create-meetup-time">
-             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
-                <div class="picker-spacer"></div>
-                <div class="picker-spacer"></div>
-             </div>
-             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
-                <div class="picker-spacer"></div>
-                <div class="picker-spacer"></div>
-             </div>
-             <div class="picker-overlay-bar"></div>
+          <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+            <div class="picker-spacer"></div>
+            ${minOpts.map(m => `<div class="picker-item">${m}</div>`).join('')}
+            <div class="picker-spacer"></div>
           </div>
+          <div class="picker-overlay-bar"></div>
+        </div>
 
-          <!-- 설명 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">설명</div>
-          <textarea id="create-meetup-desc" class="input-field" style="height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
+        <!-- 설명 -->
+        <div style="${LBL}">설명</div>
+        <textarea id="create-meetup-desc" style="${INP} height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
 
-          <!-- 참여 연령대 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여 연령대 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
-            <input type="number" id="create-meetup-age-from" class="input-field" placeholder="예) 82년생" maxlength="4" style="flex:1; margin:0;" />
-            <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
-            <input type="number" id="create-meetup-age-to" class="input-field" placeholder="예) 97년생" maxlength="4" style="flex:1; margin:0;" />
-          </div>
+        <!-- 참여 연령대 -->
+        <div style="${LBL}">참여 연령대 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+          <input type="number" id="create-meetup-age-from" style="${INP}" placeholder="예) 82년생" />
+          <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
+          <input type="number" id="create-meetup-age-to" style="${INP}" placeholder="97년생" />
+        </div>
 
-          <!-- 참여비 -->
-          <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
-            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여비 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
-            <input type="text" id="create-meetup-fee-input" class="input-field" placeholder="예) 무료, 1인 2만원" style="margin:0;" />
-          </div>
+        <!-- 참여비 -->
+        <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
+          <div style="${LBL} margin-top:0;">참여비 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
+          <input type="text" id="create-meetup-fee-input" style="${INP}" placeholder="예) 무료, 1인 2만원" />
+        </div>
 
-          <!-- 정원 -->
-          <div id="create-meetup-capacity-wrapper">
-            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">정원 (명)</div>
-            <div class="picker-wrapper" id="create-meetup-capacity" style="margin-bottom:24px;">
-               <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
-                  <div class="picker-spacer"></div>
-                  <div class="picker-spacer"></div>
-               </div>
-               <div class="picker-overlay-bar"></div>
+        <!-- 정원 -->
+        <div id="create-meetup-capacity-wrapper" style="margin-bottom:24px;">
+          <div style="${LBL} margin-top:0;">정원 (명)</div>
+          <div class="picker-wrapper" id="create-meetup-capacity">
+            <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+              <div class="picker-spacer"></div>
+              ${capOpts.map(c => `<div class="picker-item">${c}</div>`).join('')}
+              <div class="picker-spacer"></div>
             </div>
+            <div class="picker-overlay-bar"></div>
           </div>
+        </div>
 
-          <!-- 호스트 공개 여부 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">호스트 공개 여부</div>
-          <div id="create-meetup-host-public" style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명으로 진행</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">프로필 공개</div>
-          </div>
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">익명 선택 시 호스트 정보가 참여자에게 표시되지 않아요</div>
+        <!-- 호스트 공개 여부 -->
+        <div style="${LBL}">호스트 공개 여부</div>
+        <div id="create-meetup-host-public" style="display:flex; gap:8px; margin-bottom:8px;">
+          <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명으로 진행</div>
+          <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">프로필 공개</div>
+        </div>
+        <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">익명 선택 시 호스트 정보가 참여자에게 표시되지 않아요</div>
 
-          <!-- 링크 (커뮤니티/행사만) -->
-          <div id="create-meetup-links-section" style="display:none; margin-bottom:24px;">
-            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">링크 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
-            <div id="create-meetup-links-list"></div>
-            <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed var(--border-color); border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">최대 2개 추가 가능</div>
-          </div>
+        <!-- 링크 (커뮤니티/행사만) -->
+        <div id="create-meetup-links-section" style="display:none; margin-bottom:24px;">
+          <div style="${LBL} margin-top:0;">링크 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
+          <div id="create-meetup-links-list"></div>
+          <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed #E8E4DF; border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
+          <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">최대 2개 추가 가능</div>
+        </div>
 
-          <!-- 주의사항 -->
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">주의사항 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
-          <textarea id="create-meetup-notice" class="input-field" style="height:100px; resize:none; margin-bottom:32px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
+        <!-- 주의사항 -->
+        <div style="${LBL}">주의사항 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
+        <textarea id="create-meetup-notice" style="${INP} height:100px; resize:none; margin-bottom:32px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
 
-          <button class="btn-primary" style="margin-bottom:40px;" onclick="submitCreateMeetup()">모임 만들기</button>
+        <button class="btn-primary" style="margin-bottom:40px;" onclick="submitCreateMeetup()">모임 만들기</button>
       </div>
     </div>
   `;
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
-  // Instant snap initialization to centralize active variables 
   setTimeout(() => {
     const wheels = document.querySelectorAll('.picker-wheel-container');
-    if (wheels.length >= 3) {
+    if (wheels.length >= 2) {
       wheels[0].scrollTop = 13 * 40;
       wheels[1].scrollTop = 0;
-      wheels[2].scrollTop = 6 * 40;
+      if (wheels[2]) wheels[2].scrollTop = 6 * 40;
       wheels.forEach(w => window.handleWheelScroll(w));
     }
   }, 30);
+};
+
+window.selectMeetupRegion = function (elem, region) {
+  elem.parentElement.querySelectorAll('.filter-chip').forEach(el => el.classList.remove('selected'));
+  elem.classList.add('selected');
+  const hidden = document.getElementById('create-meetup-region');
+  if (hidden) hidden.value = region;
 };
 
 window.addMeetupLink = function () {
@@ -3173,8 +3201,11 @@ window.submitCreateMeetup = function () {
   const titleEl = document.getElementById('create-meetup-title');
   const inputTitle = titleEl ? titleEl.value.trim() : '';
 
-  const locEl = document.getElementById('create-meetup-location');
-  const inputLocation = locEl ? locEl.value.trim() : '';
+  const regionEl = document.getElementById('create-meetup-region');
+  const detailEl = document.getElementById('create-meetup-location-detail');
+  const region = regionEl ? regionEl.value.trim() : '';
+  const detail = detailEl ? detailEl.value.trim() : '';
+  const inputLocation = region && detail ? `${region} ${detail}` : (region || detail || '');
 
   const locTimingEl = document.querySelector('#create-meetup-location-timing .selected');
   const locationTimingSelected = locTimingEl ? locTimingEl.innerText : '바로 공개';
