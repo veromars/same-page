@@ -1981,6 +1981,35 @@ window.selectModalMeetupCategory = function (elem) {
     const check = elem.querySelector('.secondary-check');
     if (check) check.style.display = 'block';
   }
+  updateCreateMeetupFormByCategory();
+}
+
+function updateCreateMeetupFormByCategory() {
+  const sel = Array.from(document.querySelectorAll('#create-meetup-category .filter-chip.selected')).map(e => e.textContent.trim());
+  const isCommunity = sel.some(s => s.includes('커뮤니티'));
+  const isEvent = sel.some(s => s.includes('행사'));
+  const showLinks = isCommunity || isEvent;
+
+  const capWrapper = document.getElementById('create-meetup-capacity-wrapper');
+  const feeWrapper = document.getElementById('create-meetup-fee-wrapper');
+  const linksSection = document.getElementById('create-meetup-links-section');
+  const addBtn = document.getElementById('create-meetup-links-add-btn');
+
+  if (capWrapper) {
+    capWrapper.style.opacity = isCommunity ? '0.4' : '1';
+    capWrapper.style.pointerEvents = isCommunity ? 'none' : 'auto';
+  }
+  if (feeWrapper) {
+    feeWrapper.style.opacity = isCommunity ? '0.4' : '1';
+    feeWrapper.style.pointerEvents = isCommunity ? 'none' : 'auto';
+  }
+  if (linksSection) linksSection.style.display = showLinks ? 'block' : 'none';
+
+  if (addBtn) {
+    const list = document.getElementById('create-meetup-links-list');
+    const count = list ? list.querySelectorAll('.meetup-link-item').length : 0;
+    addBtn.style.display = count >= 2 ? 'none' : 'block';
+  }
 }
 window.selectCalendarDay = function (elem, day) {
   const grid = elem.parentElement;
@@ -2996,16 +3025,18 @@ window.openCreateMeetupModal = function () {
              <div class="picker-overlay-bar"></div>
           </div>
           
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">정원 (명)</div>
-          <div class="picker-wrapper" id="create-meetup-capacity" style="margin-bottom: 24px;">
-             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
-                <div class="picker-spacer"></div>
-                <div class="picker-spacer"></div>
-             </div>
-             <div class="picker-overlay-bar"></div>
+          <div id="create-meetup-capacity-wrapper">
+            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">정원 (명)</div>
+            <div class="picker-wrapper" id="create-meetup-capacity" style="margin-bottom: 24px;">
+               <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
+                  <div class="picker-spacer"></div>
+                  <div class="picker-spacer"></div>
+               </div>
+               <div class="picker-overlay-bar"></div>
+            </div>
           </div>
 
-          <div style="margin-bottom: 24px;">
+          <div id="create-meetup-fee-wrapper" style="margin-bottom: 24px;">
             <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여비</div>
             <div id="create-meetup-fee" style="display:flex; gap:8px;">
               <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this); document.getElementById('create-meetup-fee-custom').style.display='none';">없음</div>
@@ -3015,23 +3046,37 @@ window.openCreateMeetupModal = function () {
             <input type="text" id="create-meetup-fee-custom" class="input-field" placeholder="예) 1만 5천원 (와인/간식)" style="display:none; margin-top: 12px;" />
           </div>
 
+          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여 연령대 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+            <input type="text" id="create-meetup-age-from" class="input-field" placeholder="예) 82년생" style="flex:1; margin:0;" />
+            <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
+            <input type="text" id="create-meetup-age-to" class="input-field" placeholder="예) 97년생" style="flex:1; margin:0;" />
+          </div>
+
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">태그</div>
           <input type="text" id="create-meetup-tags" class="input-field" placeholder="#스타일무관 #일스only #티부환영 #스없" style="margin-bottom: 8px;" />
           <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">모임의 스타일/타입/분위기를 태그로 표현해보세요</div>
 
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">설명</div>
           <textarea id="create-meetup-desc" class="input-field" style="height: 120px; resize: none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
-          
+
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">주의사항</div>
           <textarea id="create-meetup-notice" class="input-field" style="height: 100px; resize: none; margin-bottom:24px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
 
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">호스트 공개 여부</div>
           <div id="create-meetup-host-public" style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">공개</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명</div>
+            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">공개</div>
+            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명</div>
           </div>
           <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">익명 선택 시 호스트 정보가 참여자에게 표시되지 않아요</div>
-          
+
+          <div id="create-meetup-links-section" style="display:none; margin-bottom:24px;">
+            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">링크</div>
+            <div id="create-meetup-links-list"></div>
+            <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed var(--border-color); border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">최대 2개 추가 가능</div>
+          </div>
+
           <button class="btn-primary" style="margin-top:24px;" onclick="submitCreateMeetup()">모임 만들기</button>
       </div>
     </div>
@@ -3048,6 +3093,65 @@ window.openCreateMeetupModal = function () {
       wheels.forEach(w => window.handleWheelScroll(w));
     }
   }, 30);
+};
+
+window.addMeetupLink = function () {
+  const list = document.getElementById('create-meetup-links-list');
+  const addBtn = document.getElementById('create-meetup-links-add-btn');
+  if (!list) return;
+  const count = list.querySelectorAll('.meetup-link-item').length;
+  if (count >= 2) return;
+
+  const idx = Date.now();
+  const item = document.createElement('div');
+  item.className = 'meetup-link-item';
+  item.dataset.idx = idx;
+  item.style.cssText = 'background:#F9F9F9; border-radius:12px; padding:14px; margin-bottom:10px;';
+  item.innerHTML = `
+    <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+      ${['메인','인증','소셜','기타'].map(t => `<div class="filter-chip link-type-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectLinkType(this,'${idx}')">${t}</div>`).join('')}
+      <button type="button" onclick="removeMeetupLink('${idx}')" style="margin-left:auto; background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; line-height:1;">×</button>
+    </div>
+    <div class="link-url-input" data-link-idx="${idx}">
+      <input type="text" class="input-field" placeholder="https://" style="margin:0;" />
+    </div>
+    <div class="link-social-input" data-link-idx="${idx}" style="display:none;">
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
+        <div class="filter-chip social-platform-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectSocialPlatform(this,'${idx}')">인스타그램</div>
+        <div class="filter-chip social-platform-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectSocialPlatform(this,'${idx}')">X</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span style="color:var(--text-muted); font-size:15px;">@</span>
+        <input type="text" class="input-field social-handle-input" placeholder="아이디 입력" style="margin:0; flex:1;" />
+      </div>
+    </div>
+  `;
+  list.appendChild(item);
+  if (addBtn) addBtn.style.display = list.querySelectorAll('.meetup-link-item').length >= 2 ? 'none' : 'block';
+};
+
+window.removeMeetupLink = function (idx) {
+  const item = document.querySelector(`.meetup-link-item[data-idx="${idx}"]`);
+  if (item) item.remove();
+  const addBtn = document.getElementById('create-meetup-links-add-btn');
+  if (addBtn) addBtn.style.display = 'block';
+};
+
+window.selectLinkType = function (elem, idx) {
+  const item = document.querySelector(`.meetup-link-item[data-idx="${idx}"]`);
+  if (!item) return;
+  item.querySelectorAll('.link-type-chip').forEach(c => c.classList.remove('selected'));
+  elem.classList.add('selected');
+  const isSocial = elem.textContent.trim() === '소셜';
+  item.querySelector(`.link-url-input`).style.display = isSocial ? 'none' : 'block';
+  item.querySelector(`.link-social-input`).style.display = isSocial ? 'block' : 'none';
+};
+
+window.selectSocialPlatform = function (elem, idx) {
+  const item = document.querySelector(`.meetup-link-item[data-idx="${idx}"]`);
+  if (!item) return;
+  item.querySelectorAll('.social-platform-chip').forEach(c => c.classList.remove('selected'));
+  elem.classList.add('selected');
 };
 
 window.submitCreateMeetup = function () {
@@ -3117,7 +3221,30 @@ window.submitCreateMeetup = function () {
   const inputNotice = noticeEl ? noticeEl.value.trim() : '';
 
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
-  const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText === '공개') : true;
+  const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText === '공개') : false;
+
+  const ageFromEl = document.getElementById('create-meetup-age-from');
+  const ageToEl = document.getElementById('create-meetup-age-to');
+  const ageFrom = ageFromEl ? ageFromEl.value.trim() : '';
+  const ageTo = ageToEl ? ageToEl.value.trim() : '';
+  const ageRange = (ageFrom && ageTo) ? `${ageFrom} ~ ${ageTo}` : (ageFrom || ageTo || '');
+
+  const inputLinks = [];
+  document.querySelectorAll('.meetup-link-item').forEach(item => {
+    const typeEl = item.querySelector('.link-type-chip.selected');
+    const type = typeEl ? typeEl.textContent.trim() : '기타';
+    if (type === '소셜') {
+      const platformEl = item.querySelector('.social-platform-chip.selected');
+      const handleEl = item.querySelector('.social-handle-input');
+      const platform = platformEl ? platformEl.textContent.trim() : '인스타그램';
+      const handle = handleEl ? handleEl.value.trim().replace(/^@/, '') : '';
+      if (handle) inputLinks.push({ type: '소셜', platform, handle });
+    } else {
+      const urlEl = item.querySelector('.link-url-input input');
+      const url = urlEl ? urlEl.value.trim() : '';
+      if (url) inputLinks.push({ type, url });
+    }
+  });
 
   if (!inputTitle || !inputLocation) {
     window.showToast('모임 이름과 장소를 입력해주세요');
@@ -3142,6 +3269,8 @@ window.submitCreateMeetup = function () {
     rules: inputNotice,
     hostPublic: hostPublicSelected,
     locationTiming: locationTimingSelected,
+    ageRange: ageRange || null,
+    links: inputLinks.length > 0 ? inputLinks : null,
     isRecommended: false,
     isSaved: false,
     hasRSVPd: true,
@@ -3149,7 +3278,7 @@ window.submitCreateMeetup = function () {
     hostType: selectedCategory.includes('행사') ? "단체" : "개인",
     hostBio: "",
     styleTrait: "무관",
-    participants: [] // host is counted in currentCap but not in participants array
+    participants: []
   };
 
   MOCK_MEETUPS.unshift(newMeetup);
@@ -3421,6 +3550,29 @@ window.openMeetupDetail = function (id) {
           <div style="font-size:16px; line-height:1.6; color:var(--text-dark); margin-bottom: 12px;">
             ${m.desc}
           </div>
+
+          <!-- Age Range -->
+          ${m.ageRange ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">👥 ${m.ageRange}</div>` : ''}
+
+          <!-- Links -->
+          ${m.links && m.links.length > 0 ? `
+          <div style="margin-bottom:20px;">
+            ${m.links.map(link => {
+              if (link.type === '소셜') {
+                const url = link.platform === 'X' ? `https://x.com/${link.handle}` : `https://instagram.com/${link.handle}`;
+                return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer;">
+                  <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
+                  <span style="font-size:14px; color:var(--text-dark);">@${link.handle}</span>
+                  <span style="font-size:12px; color:var(--text-muted);">${link.platform}</span>
+                </div>`;
+              }
+              return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer; overflow:hidden;">
+                <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
+                <span style="font-size:14px; color:var(--text-dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</span>
+              </div>`;
+            }).join('')}
+          </div>
+          ` : ''}
 
           <!-- Hashtags -->
           <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:40px;">
