@@ -4610,20 +4610,20 @@ function startApp() {
   <!-- Book spine: text reads top→bottom (writing-mode: vertical-lr) -->
   <div class="splash-spine">
     <span class="splash-spine-logo">p<svg viewBox="0 0 24 24" width="8" height="8" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:-1px;left:-4px;transform:rotate(135deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#C89FDB"/></svg>2</span>
-    <span class="splash-spine-tagline" style="font-weight:700;">On the same page</span>
-    <span class="splash-spine-studio" style="font-weight:700;">Versatile Studio</span>
+    <span class="splash-spine-tagline" style="font-weight:600;">On the same page</span>
+    <span class="splash-spine-studio" style="font-weight:600;">Versatile Studio</span>
   </div>
 
   <!-- Book cover: 3-zone flex column -->
   <div class="splash-cover">
     <!-- TOP: tagline -->
-    <div class="splash-tagline-top" style="font-weight:700;">On the same page</div>
+    <div class="splash-tagline-top" style="font-weight:600;">On the same page</div>
     <!-- CENTER: logo, fills remaining height -->
     <div class="splash-logo-wrap">
       <div class="cover-logo">p<svg class="logo-heart" viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:4px;left:-3px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#E2FF74"/></svg>2</div>
     </div>
     <!-- BOTTOM: studio -->
-    <div class="splash-studio" style="font-weight:700;">Versatile<br>Studio</div>
+    <div class="splash-studio" style="font-weight:600;">Versatile<br>Studio</div>
   </div>
 `);
   splash.classList.add('active');
