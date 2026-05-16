@@ -643,7 +643,7 @@ const MOCK_MEETUPS = [
     isRecommended: false,
     hostName: "달",
     hostBio: "책과 사람을 좋아합니다.",
-    hostPublic: true,
+    hostPublic: false,
     hostType: "개인",
     isSaved: false,
     hasRSVPd: false,
@@ -675,7 +675,7 @@ const MOCK_MEETUPS = [
   {
     id: 1, title: "선데이 필름나이트", date: "일요일 저녁 7시", timestamp: "2026-04-26T19:00:00",
     desc: "'타오르는 여인의 초상' 감상 후 와인 한 잔 🍷", type: "🎬 문화생활", maxCap: 6, currentCap: 6,
-    hostName: "bora", hostType: "개인", hostPublic: true, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
+    hostName: "bora", hostType: "개인", hostPublic: false, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
     styleTrait: "무관", fee: "1만 5천원 (와인/간식)", tags: ["#스타일무관"],
     rules: "주류가 포함된 모임으로 과도한 음주는 자제해주세요.",
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "마포구 (홍대)", fullAddress: "서울 마포구 와우산로 29길 26, 2층 씨네라운지",
@@ -730,7 +730,7 @@ const MOCK_MEETUPS = [
   {
     id: 4, title: "성수동 카페 브런치", date: "일요일 오전 11시", timestamp: "2026-04-26T11:00:00",
     desc: "새로 생긴 카페 같이 가요 ☕", type: "🍽️ 식도락", maxCap: 6, currentCap: 4,
-    hostName: "밍", hostType: "개인", hostPublic: true, hostBio: "카페 투어가 취미인 밍입니다. 맛있는 브런치 먹어요!",
+    hostName: "밍", hostType: "개인", hostPublic: false, hostBio: "카페 투어가 취미인 밍입니다. 맛있는 브런치 먹어요!",
     styleTrait: "무관", fee: "개인 부담", tags: ["#스없"],
     rules: "예약 없이 방문하므로 노쇼는 절대 금지입니다.",
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 연무장길 11, 카페 모노",
@@ -2364,6 +2364,44 @@ window.renderMeetupList = function () {
       `;
     }
 
+    if (m.type.includes('커뮤니티')) {
+      const logoHtml = m.hostLogo
+        ? `<div style="width:48px; height:48px; border-radius:50%; background-image:url('${m.hostLogo}'); background-size:cover; background-position:center; flex-shrink:0;"></div>`
+        : `<div style="width:48px; height:48px; border-radius:50%; background:#F0E8FA; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">🏘️</div>`;
+      const ageMatch = (m.desc || '').match(/(\d{2}년생[^~\n]*~[^\n]*\d{2}년생)/);
+      const ageRange = ageMatch ? ageMatch[0] : null;
+      return `
+            <div class="meetup-item fade-in" onclick="openMeetupDetail(${m.id})">
+              <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
+                <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: #9B72CC; background: none;">
+                  <i data-lucide="share" style="width: 24px; height: 24px;"></i>
+                </div>
+                <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: #9B72CC; background: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="#9B72CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? '#9B72CC' : 'none'}"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                </div>
+              </div>
+              <div class="meetup-header">
+                <div style="display:flex; gap:8px;">
+                  <div class="meetup-chip">${m.type}</div>
+                  ${m.secondaryType ? `<div class="meetup-chip" style="color:var(--text-muted); background:rgba(0,0,0,0.04);">${m.secondaryType}</div>` : ''}
+                </div>
+              </div>
+              <div class="meetup-title" style="margin-bottom:12px;">${m.title}</div>
+              <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:8px;">
+                ${logoHtml}
+                <div style="flex:1; min-width:0;">
+                  ${ageRange ? `<div style="font-size:12px; color:var(--text-muted); font-weight:600; margin-bottom:4px;">👥 ${ageRange}</div>` : ''}
+                  <div class="meetup-desc">${m.desc}</div>
+                </div>
+              </div>
+              <div class="meetup-footer" style="margin-top:8px;">
+                <div></div>
+                <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">더 보기 →</button>
+              </div>
+            </div>
+      `;
+    }
+
     const capPercent = (m.currentCap / m.maxCap) * 100;
     const isEndingSoon = (m.currentCap / m.maxCap) >= 0.8 && m.currentCap < m.maxCap;
     const isFull = m.currentCap >= m.maxCap;
@@ -2405,7 +2443,7 @@ window.renderMeetupList = function () {
                    ${(m.participants || []).slice(0, 5).map(url => `<div class="attendee-avatar" style="background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')}
                    ${m.currentCap > 5 ? `<div style="font-size: 12px; color: var(--text-muted); margin-left: 8px; line-height: 28px;">+${m.currentCap - 5}</div>` : ''}
                 </div>
-                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">${m.hasRSVPd ? '신청 완료 ✓' : 'RSVP'}</button>`}
+                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">${m.hasRSVPd ? '신청 완료 ✓' : '더 보기 →'}</button>`}
               </div>
             </div>
           `;
