@@ -2973,6 +2973,8 @@ window.openCreateMeetupModal = function () {
         <div style="width:32px;"></div>
       </div>
       <div class="scroll-y" style="padding: 24px;">
+
+          <!-- 카테고리 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px;">카테고리 선택</div>
           <div class="modal-category-grid" id="create-meetup-category">
             ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
@@ -2983,20 +2985,21 @@ window.openCreateMeetupModal = function () {
   ).join('')}
           </div>
 
+          <!-- 모임 이름 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:32px;">모임 이름</div>
-          <input type="text" id="create-meetup-title" class="input-field" placeholder="모임 이름" style="margin-bottom: 24px;" />
-          
+          <input type="text" id="create-meetup-title" class="input-field" placeholder="모임 이름" style="margin-bottom:24px;" />
+
+          <!-- 장소 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">장소</div>
-          <input type="text" id="create-meetup-location" class="input-field" placeholder="장소명, 주소를 입력해주세요" style="margin-bottom: 24px;" />
-          
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">장소 공개 시점</div>
+          <input type="text" id="create-meetup-location" class="input-field" placeholder="장소명, 주소를 입력해주세요" style="margin-bottom:12px;" />
           <div id="create-meetup-location-timing" style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">바로 공개</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">참여 확정 후 공개</div>
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">추후 안내</div>
+            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">바로 공개</div>
+            <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">참여 확정 후</div>
+            <div class="filter-chip" style="flex:1; border-radius:12px; padding:8px 0; text-align:center; font-size:13px;" onclick="selectModalCategory(this)">추후 안내</div>
           </div>
           <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">추후 안내 선택 시 오픈카톡을 통해 장소를 안내할 수 있어요</div>
 
+          <!-- 날짜 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">날짜</div>
           <div class="calendar-wrapper" id="create-meetup-calendar">
              <div class="calendar-header">
@@ -3012,6 +3015,7 @@ window.openCreateMeetupModal = function () {
              </div>
           </div>
 
+          <!-- 시간 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">시간</div>
           <div class="picker-wrapper" id="create-meetup-time">
              <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
@@ -3024,10 +3028,29 @@ window.openCreateMeetupModal = function () {
              </div>
              <div class="picker-overlay-bar"></div>
           </div>
-          
+
+          <!-- 설명 -->
+          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">설명</div>
+          <textarea id="create-meetup-desc" class="input-field" style="height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
+
+          <!-- 참여 연령대 -->
+          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여 연령대 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
+            <input type="number" id="create-meetup-age-from" class="input-field" placeholder="예) 82년생" maxlength="4" style="flex:1; margin:0;" />
+            <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
+            <input type="number" id="create-meetup-age-to" class="input-field" placeholder="예) 97년생" maxlength="4" style="flex:1; margin:0;" />
+          </div>
+
+          <!-- 참여비 -->
+          <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
+            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여비 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
+            <input type="text" id="create-meetup-fee-input" class="input-field" placeholder="예) 무료, 1인 2만원" style="margin:0;" />
+          </div>
+
+          <!-- 정원 -->
           <div id="create-meetup-capacity-wrapper">
             <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">정원 (명)</div>
-            <div class="picker-wrapper" id="create-meetup-capacity" style="margin-bottom: 24px;">
+            <div class="picker-wrapper" id="create-meetup-capacity" style="margin-bottom:24px;">
                <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
                   <div class="picker-spacer"></div>
                   <div class="picker-spacer"></div>
@@ -3036,48 +3059,27 @@ window.openCreateMeetupModal = function () {
             </div>
           </div>
 
-          <div id="create-meetup-fee-wrapper" style="margin-bottom: 24px;">
-            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여비</div>
-            <div id="create-meetup-fee" style="display:flex; gap:8px;">
-              <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this); document.getElementById('create-meetup-fee-custom').style.display='none';">없음</div>
-              <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this); document.getElementById('create-meetup-fee-custom').style.display='none';">1/N</div>
-              <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this); document.getElementById('create-meetup-fee-custom').style.display='block';">직접 입력</div>
-            </div>
-            <input type="text" id="create-meetup-fee-custom" class="input-field" placeholder="예) 1만 5천원 (와인/간식)" style="display:none; margin-top: 12px;" />
-          </div>
-
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">참여 연령대 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
-          <div style="display:flex; align-items:center; gap:8px; margin-bottom:24px;">
-            <input type="text" id="create-meetup-age-from" class="input-field" placeholder="예) 82년생" style="flex:1; margin:0;" />
-            <span style="color:var(--text-muted); font-size:14px; flex-shrink:0;">~</span>
-            <input type="text" id="create-meetup-age-to" class="input-field" placeholder="예) 97년생" style="flex:1; margin:0;" />
-          </div>
-
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">태그</div>
-          <input type="text" id="create-meetup-tags" class="input-field" placeholder="#스타일무관 #일스only #티부환영 #스없" style="margin-bottom: 8px;" />
-          <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">모임의 스타일/타입/분위기를 태그로 표현해보세요</div>
-
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">설명</div>
-          <textarea id="create-meetup-desc" class="input-field" style="height: 120px; resize: none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
-
-          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">주의사항</div>
-          <textarea id="create-meetup-notice" class="input-field" style="height: 100px; resize: none; margin-bottom:24px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
-
+          <!-- 호스트 공개 여부 -->
           <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">호스트 공개 여부</div>
           <div id="create-meetup-host-public" style="display:flex; gap:8px; margin-bottom:8px;">
-            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">공개</div>
-            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명</div>
+            <div class="filter-chip selected" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">익명으로 진행</div>
+            <div class="filter-chip" style="flex:1; border-radius:12px; padding:10px 0; text-align:center;" onclick="selectModalCategory(this)">프로필 공개</div>
           </div>
           <div style="font-size:12px; color:var(--text-muted); margin-bottom:24px; line-height:1.4;">익명 선택 시 호스트 정보가 참여자에게 표시되지 않아요</div>
 
+          <!-- 링크 (커뮤니티/행사만) -->
           <div id="create-meetup-links-section" style="display:none; margin-bottom:24px;">
-            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">링크</div>
+            <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">링크 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
             <div id="create-meetup-links-list"></div>
             <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed var(--border-color); border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
             <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">최대 2개 추가 가능</div>
           </div>
 
-          <button class="btn-primary" style="margin-top:24px;" onclick="submitCreateMeetup()">모임 만들기</button>
+          <!-- 주의사항 -->
+          <div style="font-size:14px; font-weight:600; margin-bottom:12px; margin-top:8px;">주의사항 <span style="font-weight:400; color:var(--text-muted); font-size:13px;">(선택사항)</span></div>
+          <textarea id="create-meetup-notice" class="input-field" style="height:100px; resize:none; margin-bottom:32px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
+
+          <button class="btn-primary" style="margin-bottom:40px;" onclick="submitCreateMeetup()">모임 만들기</button>
       </div>
     </div>
   `;
@@ -3201,14 +3203,8 @@ window.submitCreateMeetup = function () {
     }
   }
 
-  const feeEl = document.querySelector('#create-meetup-fee .selected');
-  let inputFee = feeEl ? feeEl.innerText : '없음';
-  if (inputFee === '직접 입력') {
-    const customFeeEl = document.getElementById('create-meetup-fee-custom');
-    inputFee = customFeeEl && customFeeEl.value.trim() ? customFeeEl.value.trim() : '직접 입력';
-  } else if (inputFee === '없음') {
-    inputFee = '무료';
-  }
+  const feeInputEl = document.getElementById('create-meetup-fee-input');
+  const inputFee = feeInputEl && feeInputEl.value.trim() ? feeInputEl.value.trim() : '무료';
 
   const tagsEl = document.getElementById('create-meetup-tags');
   const tagsText = tagsEl ? tagsEl.value.trim() : '';
@@ -3221,7 +3217,7 @@ window.submitCreateMeetup = function () {
   const inputNotice = noticeEl ? noticeEl.value.trim() : '';
 
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
-  const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText === '공개') : false;
+  const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText.trim() === '프로필 공개') : false;
 
   const ageFromEl = document.getElementById('create-meetup-age-from');
   const ageToEl = document.getElementById('create-meetup-age-to');
