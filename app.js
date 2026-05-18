@@ -638,6 +638,7 @@ const MOCK_MEETUPS = [
     maxCap: 8,
     currentCap: 7,
     fee: "없음",
+    ageRange: "30대 초반 ~ 40대 초반",
     tags: ["#정기모임", "#스타일무관", "#일스only"],
     rules: "신규 멤버 1자리 오픈",
     isRecommended: false,
@@ -662,6 +663,7 @@ const MOCK_MEETUPS = [
     maxCap: 50,
     currentCap: 31,
     fee: "없음",
+    ageRange: "20대 후반 ~ 30대 후반",
     tags: ["#커뮤니티", "#단톡", "#일스only"],
     externalUrl: "",
     isRecommended: false,
@@ -2416,11 +2418,14 @@ window.renderMeetupList = function () {
     }
 
     if (m.type.includes('커뮤니티')) {
-      const hostAvatar = m.hostLogo
-        ? `<div class="attendee-avatar" style="background-image:url('${m.hostLogo}'); background-size:cover; background-position:center;"></div>`
+      const organizers = m.organizers && m.organizers.length > 0 ? m.organizers : (m.hostLogo ? [m.hostLogo] : []);
+      const hostAvatarHtml = organizers.length > 0
+        ? organizers.slice(0, 3).map(url => `<div class="attendee-avatar" style="background-image:url('${url}'); background-size:cover; background-position:center top;"></div>`).join('')
         : `<div class="attendee-avatar" style="background:#F0E8FA; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#9B72CC;">${(m.hostName || '?')[0]}</div>`;
       const communityTags = (m.tags || []).map(t => t.startsWith('#') ? t : '#' + t).join('  ');
-      const ageDisplay = m.ageRange ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">👥 ${m.ageRange}</div>` : '';
+      const ageDisplay = m.ageRange
+        ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>${m.ageRange}</div>`
+        : `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>연령 무관</div>`;
       return `
             <div class="meetup-item fade-in" onclick="openMeetupDetail(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
@@ -2443,9 +2448,9 @@ window.renderMeetupList = function () {
                 ${communityTags ? `<div style="font-size:12px; color:#9B7FD4; margin-top:4px; line-height:1.8;">${communityTags}</div>` : ''}
               </div>
               <div class="meetup-footer" style="margin-top:16px;">
-                <div style="display:flex; align-items:center; gap:6px;">
+                <div style="display:flex; align-items:center; gap:8px;">
                   <span style="font-size:12px; color:var(--text-muted); font-weight:500;">운영진</span>
-                  ${hostAvatar}
+                  <div class="attendee-stack">${hostAvatarHtml}</div>
                 </div>
                 <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">더 보기 →</button>
               </div>
@@ -2477,7 +2482,7 @@ window.renderMeetupList = function () {
               <div>
                 <div class="meetup-date">${formatCardDate(m.date)}</div>
                 <div class="meetup-title">${m.title}</div>
-                <div class="meetup-location-preview">📍 ${m.shortLocation}</div>
+                <div class="meetup-location-preview" style="display:flex; align-items:center;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;flex-shrink:0;margin-right:4px;"></i>${m.shortLocation}</div>
                 <div class="meetup-desc">${m.desc}</div>
               </div>
               <div style="margin-top: 16px;">
