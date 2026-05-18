@@ -639,7 +639,7 @@ const MOCK_MEETUPS = [
     currentCap: 7,
     fee: "없음",
     ageRange: "30대 초반 ~ 40대 초반",
-    tags: ["#정기모임", "#스타일무관", "#일스only"],
+    tags: ["#정기모임", "#스타일무관"],
     rules: "신규 멤버 1자리 오픈",
     isRecommended: false,
     hostName: "달",
@@ -664,7 +664,7 @@ const MOCK_MEETUPS = [
     currentCap: 31,
     fee: "없음",
     ageRange: "20대 후반 ~ 30대 후반",
-    tags: ["#커뮤니티", "#단톡", "#일스only"],
+    tags: ["#단톡", "#친목&솔탈", "#일스only"],
     externalUrl: "",
     isRecommended: false,
     hostName: "익명",
@@ -3082,7 +3082,7 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL}">참여 조건</div>
 
         <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:10px;">연령대 <span style="color:var(--primary);">*</span></div>
-        <div id="age-pickers-wrapper" style="display:flex; align-items:center; gap:10px; margin-bottom:0;">
+        <div id="age-pickers-wrapper" style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
           <div class="picker-wrapper" id="create-meetup-age-from-picker" style="flex:1;">
             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
               <div class="picker-spacer"></div>
@@ -3101,7 +3101,7 @@ window.openCreateMeetupModal = function () {
             <div class="picker-overlay-bar"></div>
           </div>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:8px; margin-bottom:16px; cursor:pointer;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:4px; margin-bottom:16px; cursor:pointer;">
           <input type="checkbox" id="create-meetup-age-any" onchange="toggleAgeAny()" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
           연령 무관
         </label>
