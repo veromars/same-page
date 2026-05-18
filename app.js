@@ -654,7 +654,7 @@ const MOCK_MEETUPS = [
     id: 102,
     type: "🏘️ 커뮤니티",
     secondaryType: "✨ 소셜",
-    title: "[단톡] 우리들이 바라는 세상 \"우바세\"",
+    title: "우리들이 바라는 세상 \"우바세\"",
     shortLocation: "온라인",
     fullAddress: "온라인",
     date: "상시",
@@ -1951,30 +1951,30 @@ window.selectModalCategory = function (elem) {
 
 window.selectModalMeetupCategory = function (elem) {
   const grid = elem.parentElement;
-  
+
   if (elem.classList.contains('selected')) {
     const selected = grid.querySelectorAll('.filter-chip.selected');
     if (selected.length > 1) {
       elem.classList.remove('selected', 'primary-cat', 'secondary-cat');
       const remaining = grid.querySelector('.filter-chip.selected');
       if (remaining && !remaining.classList.contains('primary-cat')) {
-         remaining.classList.remove('secondary-cat');
-         remaining.classList.add('primary-cat');
-         const check = remaining.querySelector('.secondary-check');
-         if (check) check.style.display = 'none';
+        remaining.classList.remove('secondary-cat');
+        remaining.classList.add('primary-cat');
+        const check = remaining.querySelector('.secondary-check');
+        if (check) check.style.display = 'none';
       }
       const thisCheck = elem.querySelector('.secondary-check');
       if (thisCheck) thisCheck.style.display = 'none';
     }
     return;
   }
-  
+
   const selected = grid.querySelectorAll('.filter-chip.selected');
   if (selected.length >= 2) {
     window.showToast('카테고리는 최대 2개까지 선택할 수 있어요');
     return;
   }
-  
+
   elem.classList.add('selected');
   if (selected.length === 0) {
     elem.classList.add('primary-cat');
@@ -2331,7 +2331,7 @@ function formatCardDate(dateStr) {
     return `${month}/${day} (${wd}) ${tod} ${hour}시${min === 30 ? ' 반' : ''}`;
   }
   // Free-form strings: convert 오전/오후 → time-of-day label, 요일 short form
-  const WD = { '월요일':'(월)', '화요일':'(화)', '수요일':'(수)', '목요일':'(목)', '금요일':'(금)', '토요일':'(토)', '일요일':'(일)' };
+  const WD = { '월요일': '(월)', '화요일': '(화)', '수요일': '(수)', '목요일': '(목)', '금요일': '(금)', '토요일': '(토)', '일요일': '(일)' };
   return dateStr
     .replace(/오전\s*(\d+)시/g, (_, h) => { const hr = parseInt(h); return `${hr <= 8 ? '아침' : '오전'} ${hr}시`; })
     .replace(/오후\s*(\d+)시/g, (_, h) => { const hr = parseInt(h); return `${hr <= 1 ? '낮' : hr <= 5 ? '오후' : hr <= 8 ? '저녁' : '밤'} ${hr}시`; })
@@ -2998,7 +2998,7 @@ window.openCreateMeetupModal = function () {
   hourOpts.push('정오 12시');
   for (let i = 1; i <= 11; i++) hourOpts.push(`오후 ${i}시`);
   const minOpts = ['00분', '30분'];
-  const ageOpts = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 이상'];
+  const ageOpts = ['20대 초반', '20대 중반', '20대 후반', '30대 초반', '30대 중반', '30대 후반', '40대 초반', '40대 중반', '40대 후반', '50대 이상'];
 
   const LBL = 'font-size:14px; font-weight:600; color:#888; margin-bottom:12px; margin-top:24px; display:block;';
   const INP = 'background:#fff; border:1px solid #E8E4DF; border-radius:12px; padding:12px 16px; width:100%; font-size:15px; box-sizing:border-box; outline:none;';
@@ -3016,11 +3016,11 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL} margin-top:0;">카테고리 선택 <span style="color:var(--primary);">*</span></div>
         <div class="modal-category-grid" id="create-meetup-category" style="margin-bottom:24px;">
           ${['✨ 소셜', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
-            `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
+    `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
               <span class="cat-text">${cat}</span>
               <span class="secondary-check" style="display:none; position:absolute; right:12px; font-size:12px;">✓</span>
             </div>`
-          ).join('')}
+  ).join('')}
         </div>
 
         <!-- 모임 이름 -->
@@ -3030,9 +3030,9 @@ window.openCreateMeetupModal = function () {
         <!-- 장소 -->
         <div style="${LBL}">지역 <span style="color:var(--primary);">*</span></div>
         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
-          ${['서울','경기','부산','대구','인천','광주','대전','제주'].map(r =>
-            `<div class="filter-chip" onclick="selectMeetupRegion(this,'${r}')" style="border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">${r}</div>`
-          ).join('')}
+          ${['서울', '경기', '부산', '대구', '인천', '광주', '대전', '제주'].map(r =>
+    `<div class="filter-chip" onclick="selectMeetupRegion(this,'${r}')" style="border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">${r}</div>`
+  ).join('')}
         </div>
         <input type="hidden" id="create-meetup-region" value="" />
         <div style="font-size:13px; font-weight:500; color:#888; margin-bottom:8px;">상세 장소 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
@@ -3263,7 +3263,7 @@ window.initAgeSlider = function () {
     `;
     document.head.appendChild(s);
   }
-  const AGE = ['20대 초반','20대 중반','20대 후반','30대 초반','30대 중반','30대 후반','40대 초반','40대 중반','40대 후반','50대 초반','50대 중반','50대 후반','60대 초반','60대 중반','60대 후반'];
+  const AGE = ['20대 초반', '20대 중반', '20대 후반', '30대 초반', '30대 중반', '30대 후반', '40대 초반', '40대 중반', '40대 후반', '50대 초반', '50대 중반', '50대 후반', '60대 초반', '60대 중반', '60대 후반'];
   const fromEl = document.getElementById('age-range-from');
   const toEl = document.getElementById('age-range-to');
   const fillEl = document.getElementById('age-slider-fill');
@@ -3338,7 +3338,7 @@ window.addMeetupLink = function () {
   item.style.cssText = 'background:#F9F9F9; border-radius:12px; padding:14px; margin-bottom:10px;';
   item.innerHTML = `
     <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
-      ${['메인','인증','소셜','기타'].map(t => `<div class="filter-chip link-type-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectLinkType(this,'${idx}')">${t}</div>`).join('')}
+      ${['메인', '인증', '소셜', '기타'].map(t => `<div class="filter-chip link-type-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectLinkType(this,'${idx}')">${t}</div>`).join('')}
       <button type="button" onclick="removeMeetupLink('${idx}')" style="margin-left:auto; background:none; border:none; color:var(--text-muted); font-size:18px; cursor:pointer; line-height:1;">×</button>
     </div>
     <div class="link-url-input" data-link-idx="${idx}">
@@ -3415,7 +3415,7 @@ window.submitCreateMeetup = function () {
   if (window._selectedCalDate) {
     const [cy, cm, cd] = window._selectedCalDate.split('-').map(Number);
     const dateObj = new Date(cy, cm - 1, cd);
-    const WD = ['일','월','화','수','목','금','토'];
+    const WD = ['일', '월', '화', '수', '목', '금', '토'];
     selectedDate = `${cy}년 ${cm}월 ${cd}일 (${WD[dateObj.getDay()]})`;
   }
 
@@ -3810,19 +3810,19 @@ window.openMeetupDetail = function (id) {
           ${m.links && m.links.length > 0 ? `
           <div style="margin-bottom:20px;">
             ${m.links.map(link => {
-              if (link.type === '소셜') {
-                const url = link.platform === 'X' ? `https://x.com/${link.handle}` : `https://instagram.com/${link.handle}`;
-                return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer;">
+        if (link.type === '소셜') {
+          const url = link.platform === 'X' ? `https://x.com/${link.handle}` : `https://instagram.com/${link.handle}`;
+          return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer;">
                   <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
                   <span style="font-size:14px; color:var(--text-dark);">@${link.handle}</span>
                   <span style="font-size:12px; color:var(--text-muted);">${link.platform}</span>
                 </div>`;
-              }
-              return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer; overflow:hidden;">
+        }
+        return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer; overflow:hidden;">
                 <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
                 <span style="font-size:14px; color:var(--text-dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</span>
               </div>`;
-            }).join('')}
+      }).join('')}
           </div>
           ` : ''}
 
