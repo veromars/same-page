@@ -2988,7 +2988,7 @@ window.openCreateMeetupModal = function () {
         <!-- 카테고리 -->
         <div style="${LBL} margin-top:0;">카테고리 선택 <span style="color:var(--primary);">*</span></div>
         <div class="modal-category-grid" id="create-meetup-category" style="margin-bottom:24px;">
-          ${['🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '✨ 소셜', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
+          ${['✨ 소셜', '🎬 문화생활', '🏃 액티비티', '🍽️ 식도락', '📚 스터디', '🎨 크리에이티브', '🎟️ 행사', '🏘️ 커뮤니티'].map((cat, idx) =>
             `<div class="filter-chip ${idx === 0 ? 'selected primary-cat' : ''}" onclick="selectModalMeetupCategory(this)" style="width:100%; border-radius:12px; position:relative;">
               <span class="cat-text">${cat}</span>
               <span class="secondary-check" style="display:none; position:absolute; right:12px; font-size:12px;">✓</span>
@@ -3051,9 +3051,11 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL}">설명</div>
         <textarea id="create-meetup-desc" style="${INP} height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
 
-        <!-- 참여 연령대 -->
-        <div style="${LBL}">참여 연령대 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+        <!-- 참여 조건 -->
+        <div style="${LBL}">참여 조건 <span style="color:var(--primary);">*</span></div>
+
+        <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:10px;">연령대</div>
+        <div id="age-pickers-wrapper" style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
           <div class="picker-wrapper" id="create-meetup-age-from-picker" style="flex:1;">
             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
               <div class="picker-spacer"></div>
@@ -3072,6 +3074,14 @@ window.openCreateMeetupModal = function () {
             <div class="picker-overlay-bar"></div>
           </div>
         </div>
+        <div style="margin-bottom:20px;">
+          <button type="button" id="create-meetup-age-any" onclick="toggleAgeAny()"
+            style="background:#F5F0FF; border:1.5px solid #E0D4F7; border-radius:999px; padding:6px 18px; font-size:13px; font-weight:600; color:#9B72CC; cursor:pointer;">무관</button>
+        </div>
+
+        <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">태그 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
+        <input type="text" id="create-meetup-tags" style="${INP} margin-bottom:8px;" placeholder="예) 스없, 일스, 반려동물" oninput="updateTagPreview()" />
+        <div id="tag-preview" style="min-height:20px; font-size:13px; color:#9B7FD4; margin-bottom:24px; word-break:break-all; line-height:1.6;"></div>
 
         <!-- 참여비 -->
         <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
@@ -3245,6 +3255,26 @@ window.initAgeSlider = function () {
   fromEl.addEventListener('input', () => updateSlider('from'));
   toEl.addEventListener('input', () => updateSlider('to'));
   updateSlider('from');
+};
+
+window.toggleAgeAny = function () {
+  const btn = document.getElementById('create-meetup-age-any');
+  const wrapper = document.getElementById('age-pickers-wrapper');
+  if (!btn || !wrapper) return;
+  const isAny = btn.classList.toggle('selected');
+  wrapper.style.opacity = isAny ? '0.35' : '1';
+  wrapper.style.pointerEvents = isAny ? 'none' : '';
+  btn.style.background = isAny ? '#9B72CC' : '#F5F0FF';
+  btn.style.color = isAny ? '#fff' : '#9B72CC';
+  btn.style.borderColor = isAny ? '#9B72CC' : '#E0D4F7';
+};
+
+window.updateTagPreview = function () {
+  const input = document.getElementById('create-meetup-tags');
+  const preview = document.getElementById('tag-preview');
+  if (!input || !preview) return;
+  const tags = input.value.split(',').map(t => t.trim()).filter(t => t);
+  preview.textContent = tags.map(t => '#' + t).join('  ');
 };
 
 window.selectMeetupRegion = function (elem, region) {
