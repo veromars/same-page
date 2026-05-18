@@ -3074,19 +3074,24 @@ window.openCreateMeetupModal = function () {
             <div class="picker-overlay-bar"></div>
           </div>
         </div>
-        <div style="margin-bottom:20px;">
-          <button type="button" id="create-meetup-age-any" onclick="toggleAgeAny()"
-            style="background:#F5F0FF; border:1.5px solid #E0D4F7; border-radius:999px; padding:6px 18px; font-size:13px; font-weight:600; color:#9B72CC; cursor:pointer;">무관</button>
-        </div>
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:20px; cursor:pointer;">
+          <input type="checkbox" id="create-meetup-age-any" onchange="toggleAgeAny()" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
+          연령 무관
+        </label>
 
         <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">태그 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
-        <input type="text" id="create-meetup-tags" style="${INP} margin-bottom:8px;" placeholder="예) 스없, 일스, 반려동물" oninput="updateTagPreview()" />
+        <input type="text" id="create-meetup-tags" style="${INP} margin-bottom:8px;" placeholder="예) 스없, 일스, 반려동물 환영 — 콤마(,)로 구분" oninput="updateTagPreview()" />
         <div id="tag-preview" style="min-height:20px; font-size:13px; color:#9B7FD4; margin-bottom:24px; word-break:break-all; line-height:1.6;"></div>
 
         <!-- 참여비 -->
         <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
           <div style="${LBL} margin-top:0;">참여비 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
-          <input type="text" id="create-meetup-fee-input" style="${INP}" placeholder="예) 무료, 1인 2만원" />
+          <div style="display:flex; gap:8px; margin-bottom:10px;">
+            <div class="filter-chip" id="fee-btn-each" onclick="selectFeeType('각자')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">각자</div>
+            <div class="filter-chip" id="fee-btn-split" onclick="selectFeeType('1/N')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">1/N</div>
+            <div class="filter-chip" id="fee-btn-other" onclick="selectFeeType('기타')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">기타</div>
+          </div>
+          <input type="text" id="create-meetup-fee-input" style="${INP} display:none;" placeholder="예) 2만원, 재료비 실비" />
         </div>
 
         <!-- 정원 -->
@@ -3258,15 +3263,23 @@ window.initAgeSlider = function () {
 };
 
 window.toggleAgeAny = function () {
-  const btn = document.getElementById('create-meetup-age-any');
+  const cb = document.getElementById('create-meetup-age-any');
   const wrapper = document.getElementById('age-pickers-wrapper');
-  if (!btn || !wrapper) return;
-  const isAny = btn.classList.toggle('selected');
-  wrapper.style.opacity = isAny ? '0.35' : '1';
-  wrapper.style.pointerEvents = isAny ? 'none' : '';
-  btn.style.background = isAny ? '#9B72CC' : '#F5F0FF';
-  btn.style.color = isAny ? '#fff' : '#9B72CC';
-  btn.style.borderColor = isAny ? '#9B72CC' : '#E0D4F7';
+  if (!cb || !wrapper) return;
+  wrapper.style.opacity = cb.checked ? '0.35' : '1';
+  wrapper.style.pointerEvents = cb.checked ? 'none' : '';
+};
+
+window.selectFeeType = function (type) {
+  ['each', 'split', 'other'].forEach(id => {
+    const btn = document.getElementById(`fee-btn-${id}`);
+    if (btn) btn.classList.remove('selected');
+  });
+  const idMap = { '각자': 'each', '1/N': 'split', '기타': 'other' };
+  const btn = document.getElementById(`fee-btn-${idMap[type]}`);
+  if (btn) btn.classList.add('selected');
+  const inp = document.getElementById('create-meetup-fee-input');
+  if (inp) inp.style.display = type === '기타' ? 'block' : 'none';
 };
 
 window.updateTagPreview = function () {
@@ -3398,8 +3411,13 @@ window.submitCreateMeetup = function () {
   const capMax = capMaxEl ? parseInt(capMaxEl.value) || capMin : capMin;
   const selectedCapacity = capMax;
 
+  const selectedFeeBtn = document.querySelector('#create-meetup-fee-wrapper .filter-chip.selected');
+  const feeType = selectedFeeBtn ? selectedFeeBtn.innerText.trim() : '';
   const feeInputEl = document.getElementById('create-meetup-fee-input');
-  const inputFee = feeInputEl && feeInputEl.value.trim() ? feeInputEl.value.trim() : '무료';
+  let inputFee = '무료';
+  if (feeType === '각자') inputFee = '각자';
+  else if (feeType === '1/N') inputFee = '1/N';
+  else if (feeType === '기타') inputFee = feeInputEl && feeInputEl.value.trim() ? feeInputEl.value.trim() : '기타';
 
   const tagsEl = document.getElementById('create-meetup-tags');
   const tagsText = tagsEl ? tagsEl.value.trim() : '';
@@ -3416,8 +3434,8 @@ window.submitCreateMeetup = function () {
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
   const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText.trim() === '프로필 공개') : false;
 
-  const ageAnyBtn = document.getElementById('create-meetup-age-any');
-  const isAgeAny = ageAnyBtn && ageAnyBtn.classList.contains('selected');
+  const ageAnyCb = document.getElementById('create-meetup-age-any');
+  const isAgeAny = ageAnyCb && ageAnyCb.checked;
   const ageFromWheel = document.querySelector('#create-meetup-age-from-picker .picker-wheel-container');
   const ageToWheel = document.querySelector('#create-meetup-age-to-picker .picker-wheel-container');
   let ageRange = '';
