@@ -3052,10 +3052,10 @@ window.openCreateMeetupModal = function () {
         <textarea id="create-meetup-desc" style="${INP} height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
 
         <!-- 참여 조건 -->
-        <div style="${LBL}">참여 조건 <span style="color:var(--primary);">*</span></div>
+        <div style="${LBL}">참여 조건</div>
 
-        <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:10px;">연령대</div>
-        <div id="age-pickers-wrapper" style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:10px;">연령대 <span style="color:var(--primary);">*</span></div>
+        <div id="age-pickers-wrapper" style="display:flex; align-items:center; gap:10px; margin-bottom:0;">
           <div class="picker-wrapper" id="create-meetup-age-from-picker" style="flex:1;">
             <div class="picker-wheel-container" onscroll="handleWheelScroll(this)">
               <div class="picker-spacer"></div>
@@ -3074,7 +3074,7 @@ window.openCreateMeetupModal = function () {
             <div class="picker-overlay-bar"></div>
           </div>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:8px; margin-bottom:20px; cursor:pointer;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:8px; margin-bottom:16px; cursor:pointer;">
           <input type="checkbox" id="create-meetup-age-any" onchange="toggleAgeAny()" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
           연령 무관
         </label>
