@@ -3443,6 +3443,7 @@ window.submitCreateMeetup = function () {
     isRecommended: false,
     isSaved: false,
     hasRSVPd: true,
+    createdByMe: true,
     hostName: "나",
     hostType: selectedCategory.includes('행사') ? "단체" : "개인",
     hostBio: "",
@@ -4375,9 +4376,47 @@ function renderMyMeetingsTab(tabName) {
       `).join('');
     }
   } else if (tabName === 'bookmarked') {
-    bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">북마크한 모임이 없어요</div>`;
+    const saved = MOCK_MEETUPS.filter(m => window.bookmarkedMoims && window.bookmarkedMoims[m.id]);
+    if (saved.length === 0) {
+      bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">북마크한 모임이 없어요</div>`;
+    } else {
+      bodyHtml = saved.map(m => `
+        <div onclick="openMeetupDetail(${m.id})" style="
+          display:flex; justify-content:space-between; align-items:center;
+          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+        ">
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.title}</div>
+            <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
+          </div>
+          <span style="
+            background:#F3EEFF; color:#9B72CC; border-radius:999px;
+            padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px; flex-shrink:0;
+          ">북마크 ♥</span>
+        </div>
+      `).join('');
+    }
   } else if (tabName === 'created') {
-    bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">만든 모임이 없어요</div>`;
+    const mine = MOCK_MEETUPS.filter(m => m.createdByMe);
+    if (mine.length === 0) {
+      bodyHtml = `<div style="text-align:center;color:var(--text-muted);margin-top:60px;">만든 모임이 없어요</div>`;
+    } else {
+      bodyHtml = mine.map(m => `
+        <div onclick="openMeetupDetail(${m.id})" style="
+          display:flex; justify-content:space-between; align-items:center;
+          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+        ">
+          <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.title}</div>
+            <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
+          </div>
+          <span style="
+            background:#E8F5E9; color:#4CAF50; border-radius:999px;
+            padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px; flex-shrink:0;
+          ">주최 ✓</span>
+        </div>
+      `).join('');
+    }
   }
 
   content.innerHTML = `
@@ -4388,25 +4427,25 @@ function renderMyMeetingsTab(tabName) {
 window.renderMyMeetingsTab = renderMyMeetingsTab;
 
 function closeMyMeetings() {
-  document.getElementById('my-meetings-overlay')?.remove();
+  window.closeModal();
 }
 window.closeMyMeetings = closeMyMeetings;
 
 function openMyMeetings() {
-  document.getElementById('my-meetings-overlay')?.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'my-meetings-overlay';
-  overlay.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:var(--bg-color); z-index:2000; overflow-y:auto;';
-  overlay.innerHTML = `
-    <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
-      <button onclick="closeMyMeetings()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
-      <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">내 모임</span>
-      <span style="width:32px;"></span>
+  const mc = getModalContainer();
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index:200; background:var(--bg-color);">
+      <div class="app-header">
+        <button class="back-btn" onclick="closeModal()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:16px; font-weight:600;">내 모임</div>
+        <div style="width:32px;"></div>
+      </div>
+      <div class="scroll-y" style="padding-top:0;">
+        <div id="my-meetings-content"></div>
+      </div>
     </div>
-    <div id="my-meetings-content"></div>
   `;
-  document.body.appendChild(overlay);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
   renderMyMeetingsTab('applied');
 }
 window.openMyMeetings = openMyMeetings;
