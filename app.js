@@ -596,34 +596,6 @@ const MOCK_AVATARS = [
   "https://images.unsplash.com/photo-1719306625386-3e610c3dd5ae?w=200"
 ];
 
-// 24 user photos pool (consistent assignment across app)
-const USER_PHOTOS = [
-  "https://images.unsplash.com/photo-1704731267944-c93c8d059cdc?w=400", // 1 Heej
-  "https://images.unsplash.com/photo-1566139884643-d6c62cc13b49?w=400", // 2 s
-  "https://images.unsplash.com/photo-1708533296070-b3e49fbdb08e?w=400", // 3 달
-  "https://images.unsplash.com/photo-1602421110952-01a3057d8987?w=400", // 4 bora
-  "https://images.unsplash.com/photo-1719306625386-3e610c3dd5ae?w=400", // 5 밍
-  "https://images.unsplash.com/photo-1713751429134-3d049a83b694?w=400", // 6
-  "https://images.unsplash.com/photo-1653196709875-427673568d12?w=400", // 7
-  "https://images.unsplash.com/photo-1632242219460-938944e38947?w=400", // 8
-  "https://images.unsplash.com/photo-1599314785151-49a35a619b1b?w=400", // 9
-  "https://images.unsplash.com/photo-1570441102939-ca93df98ffdb?w=400", // 10
-  "https://images.unsplash.com/photo-1679628751127-7706cced9819?w=400", // 11
-  "https://images.unsplash.com/photo-1737041315827-5d9ceda7f27e?w=400", // 12
-  "https://images.unsplash.com/photo-1704731268191-e744c6d96b26?w=400", // 13
-  "https://images.unsplash.com/photo-1691068013523-0f653e498f10?w=400", // 14
-  "https://images.unsplash.com/photo-1669026481679-268f2fd919bf?w=400", // 15
-  "https://images.unsplash.com/photo-1565150860083-2257da1fbf23?w=400", // 16 zoe
-  "https://images.unsplash.com/photo-1572288236082-e363d5121568?w=400", // 17 하람
-  "https://images.unsplash.com/photo-1698252980771-4bbf18c4439a?w=400", // 18 kira
-  "https://images.unsplash.com/photo-1762954419103-43708f0cf893?w=400", // 19 🌿
-  "https://images.unsplash.com/photo-1620216977705-df5ba73ca1a1?w=400", // 20 luna
-  "https://images.unsplash.com/photo-1523177311887-ad300abe97cc?w=400", // 21 은유
-  "https://images.unsplash.com/photo-1739010577139-6f904e57fe41?w=400", // 22 tori
-  "https://images.unsplash.com/photo-1565050831300-833bcdc08d3b?w=400", // 23 솔아
-  "https://images.unsplash.com/photo-1543204607-75cad6df85c3?w=400", // 24 nara
-];
-
 const MOCK_MEETUPS = [
   {
     id: 101,
@@ -639,13 +611,15 @@ const MOCK_MEETUPS = [
     currentCap: 7,
     fee: "없음",
     ageRange: "30대 초반 ~ 40대 초반",
-    tags: ["#정기모임", "#스타일무관"],
+    tags: ["#정기모임"],
     rules: "신규 멤버 1자리 오픈",
     isRecommended: false,
     hostName: "달",
     hostBio: "책과 사람을 좋아합니다.",
     hostPublic: false,
     hostType: "개인",
+    hostImage: MOCK_PROFILES[16].image,
+    organizers: [MOCK_PROFILES[16].image],
     isSaved: false,
     hasRSVPd: false,
     participants: []
@@ -653,21 +627,41 @@ const MOCK_MEETUPS = [
   {
     id: 102,
     type: "🏘️ 커뮤니티",
-    secondaryType: "✨ 소셜",
+    secondaryType: false,
     title: "우리들이 바라는 세상 \"우바세\"",
-    shortLocation: "온라인",
-    fullAddress: "온라인",
+    shortLocation: "수도권",
+    fullAddress: "수도권",
+    location: "수도권",
     date: "상시",
     timestamp: "2026-05-16T15:00:00",
-    desc: "연령대: 82년생~97년생\n조건: 싱글, 일스\n인증방을 통해 참여해주세요.",
+    desc: `🌈우바세🌈
+
+우리가 바라는 세상 . 우바세에 오신것을 환영합니다.
+
+우바세는 솔탈이 근본 목적이지만 친목활동으로 엘 타운 같은 방이 되고자 하는게 목표입니다
+
+취미/여가/관심사 활동을 함께하기도 하고, 서로 가지고 있는 다양한 지식/인맥을 통해 정보교류나 도움도 줄 수 있고, 나아가서 메타 마을이긴 하나 우리만의 쉼터가 생겼으면 해서 만들었습니다.
+
+평생 함께하고 싶은 지인과 만들었으니 그만큼 좋은 분들만 들어왔으면 좋겠습니다.
+
+기본적인 조건은 수도권에 사는 / 97년생~82년생 / 단발이상 / 솔로입니다.
+
+내향적인 분들도 용기내셔서 많은 관심 부탁드립니다
+
+요건에 충족 되시는 분들은 두 팔 벌려 환영합니다🤗`,
     maxCap: 50,
     currentCap: 31,
     fee: "없음",
-    ageRange: "20대 후반 ~ 30대 후반",
-    tags: ["#단톡", "#친목&솔탈", "#일스only"],
+    ageRange: "30대 초반 ~ 40대 중반",
+    tags: ["#단톡", "#친목&솔탈", "#솔로", "#일스only", "#82-97"],
+    links: [
+      { type: "메인", url: "https://open.kakao.com/o/gA9SXDVh" },
+      { type: "인증", url: "https://open.kakao.com/o/gj4d0JIh" }
+    ],
     externalUrl: "",
     isRecommended: false,
     hostName: "익명",
+    hostImage: MOCK_PROFILES[3].image,
     hostPublic: false,
     hostType: "개인",
     isSaved: false,
@@ -677,34 +671,37 @@ const MOCK_MEETUPS = [
   {
     id: 1, title: "선데이 필름나이트", date: "일요일 저녁 7시", timestamp: "2026-04-26T19:00:00",
     desc: "'타오르는 여인의 초상' 감상 후 와인 한 잔 🍷", type: "🎬 문화생활", maxCap: 6, currentCap: 6,
-    hostName: "bora", hostType: "개인", hostPublic: false, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
-    styleTrait: "무관", fee: "1만 5천원 (와인/간식)", tags: ["#스타일무관"],
+    hostName: "bora", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
+    styleTrait: "무관", fee: "1만 5천원 (와인/간식)", tags: [],
+    ageRange: "20대 후반 ~ 30대 후반",
     rules: "주류가 포함된 모임으로 과도한 음주는 자제해주세요.",
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "마포구 (홍대)", fullAddress: "서울 마포구 와우산로 29길 26, 2층 씨네라운지",
-    participants: [USER_PHOTOS[0], USER_PHOTOS[1], USER_PHOTOS[2], USER_PHOTOS[3], USER_PHOTOS[4]]
+    participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[1].image, MOCK_PROFILES[2].image, MOCK_PROFILES[3].image, MOCK_PROFILES[4].image]
   },
   {
     id: 2, title: "남산 나이트 하이크", date: "금요일 저녁 8시", timestamp: "2026-04-24T20:00:00",
     desc: "초보 환영, 강아지 환영 🐾", type: "🏃 액티비티", maxCap: 10, currentCap: 7,
-    hostName: "s", hostType: "개인", hostPublic: false, hostBio: "",
-    styleTrait: "무관", fee: "무료", tags: ["#스타일무관", "#스없"],
+    hostName: "s", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
+    styleTrait: "무관", fee: "무료", tags: [],
+    ageRange: "30대 초반 ~ 40대 초반",
     rules: "편한 운동화 and 개인 생수를 지참해주세요.",
     isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "용산구 (남산)", fullAddress: "서울 용산구 남산공원길 105, 북측 주차장 앞",
-    participants: [USER_PHOTOS[6], USER_PHOTOS[7], USER_PHOTOS[8], USER_PHOTOS[9], USER_PHOTOS[10], USER_PHOTOS[11]]
+    participants: [MOCK_PROFILES[6].image, MOCK_PROFILES[7].image, MOCK_PROFILES[8].image, MOCK_PROFILES[9].image, MOCK_PROFILES[10].image, MOCK_PROFILES[11].image]
   },
   {
     id: 3, title: "퀴어 문학 읽기 모임", date: "4/20 월요일 오후 3시", timestamp: "2026-04-20T15:00:00",
     desc: "이번 달 책: 버지니아 울프 '올랜도' 📖", type: "📚 스터디", maxCap: 8, currentCap: 5,
-    hostName: "무지개 북스", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100",
+    hostName: "무지개 북스", hostType: "단체", hostIsPublic: false, hostLogo: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100",
     hostBio: "다양한 목소리를 담는 독립 서점, 무지개 북스입니다.",
-    styleTrait: "무관", fee: "5천원 (공간 대여료)", tags: ["#스타일무관"],
+    styleTrait: "무관", fee: "5천원 (공간 대여료)", tags: ["정기모임"],
+    ageRange: "20대 중반 ~ 30대 후반",
     rules: "읽어올 분량을 꼭 읽어와주세요. 서로의 의견을 존중합니다.",
     reviews: [
       { nickname: "민트", date: "2026.03.15", text: "정말 깊이 있는 대화를 나눌 수 있었어요. 다음에도 꼭 참여하고 싶습니다." },
       { nickname: "바다", date: "2026.03.01", text: "공간도 예쁘고 호스트분들도 친절하셔서 편하게 이야기했습니다." }
     ],
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 서울숲2길 32-14, 북라운지",
-    participants: [USER_PHOTOS[12], USER_PHOTOS[13], USER_PHOTOS[14], USER_PHOTOS[15], USER_PHOTOS[16]]
+    participants: [MOCK_PROFILES[12].image, MOCK_PROFILES[13].image, MOCK_PROFILES[14].image, MOCK_PROFILES[15].image, MOCK_PROFILES[16].image]
   },
   {
     id: 8,
@@ -714,16 +711,31 @@ const MOCK_MEETUPS = [
     fullAddress: "서울 종로구 율곡로3길 144 아트선재센터",
     date: "03/27 (금) ~ 06/22 (월)",
     image: "images/art-exhibition-spectro.jpg",
-    externalUrl: "https://artsonje.org/exhibition/%EC%8A%A4%ED%8E%99%ED%8A%B8%EB%A1%9C%EC%8B%A0%ED%85%8C%EC%8B%9C%EC%8A%A4-%EC%84%9C%EC%9A%B8/",
     fee: "무료",
     maxCap: 500,
     currentCap: 0,
     isRecommended: false,
-    desc: "퀴어 예술과 기술의 교차점을 탐구하는 국제 전시",
+    desc: `스펙트로신테시스(Spectrosynthesis)는 아시아 최대 규모의 LGBTQ+ 미술 전시로, 퀴어 예술과 기술의 교차점을 탐구합니다. 서울 아트선재센터에서 열리는 이번 전시는 아시아 전역의 퀴어 아티스트들의 작품을 한자리에서 만날 수 있는 특별한 기회입니다.
+
+전시는 회화, 설치, 영상, 퍼포먼스 등 다양한 매체를 통해 정체성, 몸, 욕망, 커뮤니티에 대한 이야기를 담아냅니다.`,
     tags: ["#전시", "#퀴어아트", "#공식행사"],
+    ageRange: "연령 무관",
+    links: [
+      { type: "메인", url: "https://artsonje.org/exhibition/spectrosynthesis" },
+      { type: "소셜", platform: "인스타그램", handle: "artsonje_center", url: "https://www.instagram.com/artsonje_center/" }
+    ],
     isAd: true,
-    linkType: "external",
+    linkType: "internal",
     showTextInfo: true,
+    showParticipants: false,
+    disableRSVP: true,
+    images: [
+      "images/art-exhibition-spectro-di/art-exhibition-spectro-di-01.jpg",
+      "images/art-exhibition-spectro-di/art-exhibition-spectro-di-02.jpg",
+      "images/art-exhibition-spectro-di/art-exhibition-spectro-di-03.jpg",
+      "images/art-exhibition-spectro-di/art-exhibition-spectro-di-04.jpg",
+      "images/art-exhibition-spectro-di/art-exhibition-spectro-di-05.jpg"
+    ],
     participants: [],
     rules: "매너 있는 관람 부탁드립니다.",
     isSaved: false,
@@ -732,20 +744,22 @@ const MOCK_MEETUPS = [
   {
     id: 4, title: "성수동 카페 브런치", date: "일요일 오전 11시", timestamp: "2026-04-26T11:00:00",
     desc: "새로 생긴 카페 같이 가요 ☕", type: "🍽️ 식도락", maxCap: 6, currentCap: 4,
-    hostName: "밍", hostType: "개인", hostPublic: false, hostBio: "카페 투어가 취미인 밍입니다. 맛있는 브런치 먹어요!",
-    styleTrait: "무관", fee: "개인 부담", tags: ["#스없"],
-    rules: "예약 없이 방문하므로 노쇼는 절대 금지입니다.",
+    hostName: "밍", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "카페 투어가 취미인 밍입니다. 맛있는 브런치 먹어요!",
+    styleTrait: "무관", fee: "1/N", tags: ["#일스"],
+    ageRange: "20대 후반 ~ 30대 초반",
+    rules: "예약 후 방문하므로 노쇼는 절대 금지입니다.",
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 연무장길 11, 카페 모노",
-    participants: [USER_PHOTOS[18], USER_PHOTOS[19], USER_PHOTOS[20]]
+    participants: [MOCK_PROFILES[18].image, MOCK_PROFILES[19].image, MOCK_PROFILES[20].image]
   },
   {
     id: 5, title: "이쪽 바에서 칵테일 한 잔 🍸", date: "5/2 토요일 저녁 9시", timestamp: "2026-05-02T21:00:00",
     desc: "프라이빗한 공간에서 편하게 한 잔 해요", type: "✨ 소셜", maxCap: 8, currentCap: 5,
-    hostName: "mina", hostType: "개인", hostPublic: false, hostBio: "",
-    styleTrait: '<span style="background: linear-gradient(transparent 60%, rgba(200,159,219,0.6) 60%); padding: 0 3px;">일스</span>', fee: "개인 부담", tags: ["#티부환영"],
+    hostName: "mina", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
+    styleTrait: '<span style="background: linear-gradient(transparent 60%, rgba(200,159,219,0.6) 60%); padding: 0 3px;">일스</span>', fee: "1/N", tags: ["#티부환영"],
+    ageRange: "30대 초반 ~ 40대 초반",
     rules: "과도한 음주는 자제해주세요.",
     isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "중구 (대구)", fullAddress: "대구광역시 중구 국채보상로 643, B1\n그레이 (GREY)",
-    participants: [USER_PHOTOS[0], USER_PHOTOS[4], USER_PHOTOS[8], USER_PHOTOS[12]]
+    participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[4].image, MOCK_PROFILES[8].image, MOCK_PROFILES[12].image]
   },
   {
     id: 6, title: "퀴어 법률 토크 — 우리가 알아야 할 권리", date: "다음주 토요일 오후 2시", timestamp: "2026-05-02T14:00:00",
@@ -756,16 +770,17 @@ const MOCK_MEETUPS = [
       bio: "성소수자 법률 지원 및 권리 증진을 위한 단체입니다.",
       isPublic: true
     },
-    hostName: "레즈비언인권위원회", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100",
+    hostName: "레즈비언인권위원회", hostType: "단체", hostIsPublic: false, hostLogo: "https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=100",
     hostBio: "성소수자 권리 증진을 위해 활동하는 단체입니다",
     styleTrait: "무관", fee: "무료", tags: [],
+    ageRange: "연령 무관",
     rules: "녹화 및 촬영은 금지입니다.",
     reviews: [
       { nickname: "", date: "2주 전", text: "몰랐던 내용을 많이 알게 됐어요. 다음에도 꼭 참석할게요." },
       { nickname: "", date: "1달 전", text: "실용적인 정보가 많았어요. 강추합니다!" }
     ],
     isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "종로구 (혜화)", fullAddress: "서울 종로구 대학로 116, 혜화 세미나실",
-    participants: [USER_PHOTOS[4], USER_PHOTOS[6], USER_PHOTOS[8], USER_PHOTOS[10], USER_PHOTOS[12], USER_PHOTOS[14], USER_PHOTOS[0], USER_PHOTOS[2], USER_PHOTOS[5], USER_PHOTOS[7], USER_PHOTOS[9], USER_PHOTOS[11]]
+    participants: [MOCK_PROFILES[4].image, MOCK_PROFILES[6].image, MOCK_PROFILES[8].image, MOCK_PROFILES[10].image, MOCK_PROFILES[12].image, MOCK_PROFILES[14].image, MOCK_PROFILES[0].image, MOCK_PROFILES[2].image, MOCK_PROFILES[5].image, MOCK_PROFILES[7].image, MOCK_PROFILES[9].image, MOCK_PROFILES[11].image]
   },
   {
     id: 999,
@@ -775,15 +790,19 @@ const MOCK_MEETUPS = [
     fullAddress: "서울 중구 을지로 281 동대문디자인플라자 디자인랩 2-3층",
     date: "5월 30일 토 — 5월 31일 일",
     image: "images/pride-expo-2026.jpg",
-    externalUrl: "https://seoulpride.kr/",
+    externalUrl: "",
     fee: "무료",
     maxCap: 1000,
     currentCap: 0,
     isRecommended: false,
     isAd: true,
-    linkType: "external",
+    linkType: "internal",
+    links: [{ type: "공식 사이트", url: "https://seoulpride.kr/" }],
     showTextInfo: false,
+    showParticipants: false,
+    disableRSVP: true,
     tags: ["#공식행사", "#프라이드", "#전시"],
+    ageRange: "연령 무관",
     participants: [],
     rules: "매너 있는 참여 부탁드립니다.",
     desc: "제12회 서울프라이드엑스포"
@@ -792,12 +811,13 @@ const MOCK_MEETUPS = [
     id: 7, title: "FC빠세 🌈 주말 풋살", date: "이번주 토요일 오전 10시", timestamp: "2026-04-25T10:00:00",
     desc: "실력 무관, 처음이어도 환영해요! 함께 뛰고 땀 흘리고 밥 먹어요 ⚽ 운동화와 긍정 에너지만 챙겨오세요.",
     type: "🏃 액티비티", maxCap: 12, currentCap: 8,
-    hostName: "FC빠세", hostType: "단체", hostLogo: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=100",
+    hostName: "FC빠세", hostType: "단체", hostIsPublic: false, hostLogo: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=100",
     hostBio: "레즈비언 & 퀴어 여성 풋살 클럽",
-    styleTrait: "무관", fee: "5,000원 (구장 대여비)", tags: ["#스타일무관"],
+    styleTrait: "무관", fee: "1/N (구장 대관료)", tags: ["#스타일무관"],
+    ageRange: "20대 후반 ~ 30대 중반",
     rules: "운동화 필참. cleats(축구화)는 착용 불가합니다.",
     isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "마포구 (상암)", fullAddress: "서울 마포구 성산동 상암월드컵경기장 풋살구장",
-    participants: [USER_PHOTOS[1], USER_PHOTOS[3], USER_PHOTOS[5], USER_PHOTOS[7], USER_PHOTOS[9], USER_PHOTOS[11], USER_PHOTOS[13], USER_PHOTOS[2]]
+    participants: [MOCK_PROFILES[1].image, MOCK_PROFILES[3].image, MOCK_PROFILES[5].image, MOCK_PROFILES[7].image, MOCK_PROFILES[9].image, MOCK_PROFILES[11].image, MOCK_PROFILES[13].image, MOCK_PROFILES[2].image]
   }
 ];
 
@@ -2256,6 +2276,28 @@ window.switchTab = function (tabName) {
         <div class="matches-section-title" style="margin-top: 0;">대화 중</div>
         <div style="flex: 1; overflow-y: auto; padding-bottom: 40px;">
           ${MOCK_CHATS.map(chat => {
+      if (chat.type === 'group') {
+        const partCount = (chat.participants || []).length + 1;
+        const _mi = MOCK_MEETUPS.find(x => x.id === chat.meetupId);
+        const _em = { '소셜':'✨','문화생활':'🎬','액티비티':'🏃‍♀️','식도락':'🍽️','스터디':'📚','크리에이티브':'🎨','행사':'🎟️','커뮤니티':'🏘️' };
+        let _icon = '👥';
+        if (_mi && _mi.type) { for (const [k,v] of Object.entries(_em)) { if (_mi.type.includes(k)) { _icon=v; break; } } }
+        return `
+              <div class="message-item" onclick="openChat('${chat.id}')">
+                <div class="msg-avatar" style="background:#EDE0FF; display:flex; align-items:center; justify-content:center; font-size:22px; background-image:none;">${_icon}</div>
+                <div class="msg-info">
+                  <div class="msg-header-row">
+                    <span class="msg-name" style="display:flex; align-items:center; gap:6px;">
+                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${chat.title}</span>
+                      <span class="card-age" style="font-size:13px; font-weight:400; color:var(--text-muted);flex-shrink:0;">${partCount}명</span>
+                    </span>
+                    <span class="msg-time">${chat.time}</span>
+                  </div>
+                  <div class="msg-preview" style="${chat.unread ? 'font-weight:700; color:#333;' : ''}">${chat.preview}</div>
+                </div>
+              </div>
+            `;
+      }
       const p = MOCK_PROFILES.find(pr => pr.name === chat.name);
       return `
               <div class="message-item" onclick="openChat(${chat.id})">
@@ -2263,10 +2305,10 @@ window.switchTab = function (tabName) {
                 <div class="msg-info">
                   <div class="msg-header-row">
                     <span class="msg-name" style="display:flex; align-items:center; gap:6px;">
-                      ${chat.name} 
-                      <span class="card-age" style="font-size:14px; font-weight:400; color:var(--text-muted);">${getAge(p ? p.birthYear : 2001)}</span>
-                      ${chat.isNew ? '<span class="msg-badge msg-badge-new">NEW</span>' : ''}
-                      ${chat.isUnread ? '<span class="msg-badge msg-badge-unread">UNREAD</span>' : ''}
+                      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;">${chat.name}</span>
+                      <span class="card-age" style="font-size:14px; font-weight:400; color:var(--text-muted);flex-shrink:0;">${getAge(p ? p.birthYear : 2001)}</span>
+                      ${chat.isNew ? '<span class="msg-badge msg-badge-new" style="flex-shrink:0;">NEW</span>' : ''}
+                      ${chat.isUnread ? '<span class="msg-badge msg-badge-unread" style="flex-shrink:0;">UNREAD</span>' : ''}
                     </span>
                     <span class="msg-time">${chat.time}</span>
                   </div>
@@ -2418,10 +2460,8 @@ window.renderMeetupList = function () {
     }
 
     if (m.type.includes('커뮤니티')) {
-      const organizers = m.organizers && m.organizers.length > 0 ? m.organizers : (m.hostLogo ? [m.hostLogo] : []);
-      const hostAvatarHtml = organizers.length > 0
-        ? organizers.slice(0, 3).map(url => `<div class="attendee-avatar" style="background-image:url('${url}'); background-size:cover; background-position:center top;"></div>`).join('')
-        : `<div class="attendee-avatar" style="background:#F0E8FA; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#9B72CC;">${(m.hostName || '?')[0]}</div>`;
+      const organizers = m.organizers && m.organizers.length > 0 ? m.organizers : (m.hostImage ? [m.hostImage] : ["https://i.pravatar.cc/150?img=1"]);
+      const hostAvatarHtml = organizers.slice(0, 3).map(url => `<div class="attendee-avatar" style="background-image:url('${url}'); background-size:cover; background-position:center top;"></div>`).join('');
       const communityTags = (m.tags || []).map(t => t.startsWith('#') ? t : '#' + t).join('  ');
       const ageDisplay = m.ageRange
         ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>${m.ageRange}</div>`
@@ -2448,10 +2488,7 @@ window.renderMeetupList = function () {
                 ${communityTags ? `<div style="font-size:12px; color:#9B7FD4; margin-top:4px; line-height:1.8;">${communityTags}</div>` : ''}
               </div>
               <div class="meetup-footer" style="margin-top:16px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:12px; color:var(--text-muted); font-weight:500;">운영진</span>
-                  <div class="attendee-stack">${hostAvatarHtml}</div>
-                </div>
+                <div class="attendee-stack">${hostAvatarHtml}</div>
                 <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">더 보기 →</button>
               </div>
             </div>
@@ -2818,7 +2855,7 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
           ${p.intent || '연애를 기대해요 ❤️'}
         </div>
 
-        <div style="font-size:15px; margin-top:20px; line-height:1.5; color:var(--text-dark);">
+        <div style="font-size:15px; margin-top:20px; line-height:1.5; color:var(--text-dark); white-space: pre-line;">
           ${p.bio || '새로운 시작을 기대하며!'}
         </div>
 
@@ -2992,6 +3029,7 @@ window.initPhotoCarousels = function () {
 
 window.openCreateMeetupModal = function () {
   const mc = getModalContainer();
+  window._meetupImages = [];
 
   const hourOpts = [];
   for (let i = 6; i <= 11; i++) hourOpts.push(`오전 ${i}시`);
@@ -3029,22 +3067,22 @@ window.openCreateMeetupModal = function () {
 
         <!-- 장소 -->
         <div style="${LBL}">지역 <span style="color:var(--primary);">*</span></div>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:16px;">
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:32px;">
           ${['서울', '경기', '부산', '대구', '인천', '광주', '대전', '제주'].map(r =>
     `<div class="filter-chip" onclick="selectMeetupRegion(this,'${r}')" style="border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">${r}</div>`
   ).join('')}
         </div>
         <input type="hidden" id="create-meetup-region" value="" />
         <div style="font-size:13px; font-weight:500; color:#888; margin-bottom:8px;">상세 장소 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
-        <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:10px;" placeholder="예) 홍대입구역 근처, 강남역 카페" />
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:24px; cursor:pointer;">
+        <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:8px;" placeholder="예) 홍대입구역 근처, 강남역 카페" />
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:32px; cursor:pointer;">
           <input type="checkbox" id="create-meetup-location-private" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
           정확한 주소는 참여 확정 후 공개할게요
         </label>
 
         <!-- 날짜 -->
         <div style="${LBL}">날짜 <span style="color:var(--primary);">*</span></div>
-        <div class="calendar-wrapper" id="create-meetup-calendar" style="margin-bottom:24px;">
+        <div class="calendar-wrapper" id="create-meetup-calendar" style="margin-bottom:32px;">
           <div class="calendar-header">
             <button type="button" onclick="prevMeetupMonth()" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;"><i data-lucide="chevron-left" style="width:20px; color:var(--text-muted);"></i></button>
             <div id="cal-header-text" style="font-size:15px; font-weight:600;"></div>
@@ -3078,6 +3116,14 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL}">설명</div>
         <textarea id="create-meetup-desc" style="${INP} height:120px; resize:none; margin-bottom:24px;" placeholder="예) 초보 환영, 강아지 환영 🐾"></textarea>
 
+        <!-- 사진 -->
+        <div style="${LBL}">사진 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
+        <div id="meetup-image-preview" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <input type="file" id="meetup-image-input" accept="image/*" multiple style="display:none;" onchange="handleMeetupImageSelect(this)" />
+        <button type="button" id="meetup-image-add-btn" onclick="document.getElementById('meetup-image-input').click()" style="display:flex; align-items:center; gap:6px; padding:10px 16px; border:1.5px dashed #C89FDB; border-radius:12px; background:none; color:#9B72CC; font-size:14px; cursor:pointer; margin-bottom:24px;">
+          <i data-lucide="plus" style="width:16px;height:16px;stroke:#9B72CC;"></i> 사진 추가
+        </button>
+
         <!-- 참여 조건 -->
         <div style="${LBL}">참여 조건</div>
 
@@ -3101,7 +3147,7 @@ window.openCreateMeetupModal = function () {
             <div class="picker-overlay-bar"></div>
           </div>
         </div>
-        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:4px; margin-bottom:16px; cursor:pointer;">
+        <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-top:-20px; margin-bottom:16px; cursor:pointer;">
           <input type="checkbox" id="create-meetup-age-any" onchange="toggleAgeAny()" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
           연령 무관
         </label>
@@ -3114,8 +3160,9 @@ window.openCreateMeetupModal = function () {
         <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
           <div style="${LBL} margin-top:0;">참여비 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
           <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <div class="filter-chip" id="fee-btn-each" onclick="selectFeeType('각자')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">각자</div>
             <div class="filter-chip" id="fee-btn-split" onclick="selectFeeType('1/N')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">1/N</div>
+            <div class="filter-chip" id="fee-btn-each" onclick="selectFeeType('각자')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">각자</div>
+            <div class="filter-chip" id="fee-btn-free" onclick="selectFeeType('없음')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">없음</div>
             <div class="filter-chip" id="fee-btn-other" onclick="selectFeeType('기타')" style="flex:1; border-radius:12px; padding:10px 0; text-align:center; font-size:14px;">기타</div>
           </div>
           <input type="text" id="create-meetup-fee-input" style="${INP} display:none;" placeholder="예) 2만원, 재료비 실비" />
@@ -3298,15 +3345,84 @@ window.toggleAgeAny = function () {
 };
 
 window.selectFeeType = function (type) {
-  ['each', 'split', 'other'].forEach(id => {
+  ['each', 'split', 'free', 'other'].forEach(id => {
     const btn = document.getElementById(`fee-btn-${id}`);
     if (btn) btn.classList.remove('selected');
   });
-  const idMap = { '각자': 'each', '1/N': 'split', '기타': 'other' };
+  const idMap = { '각자': 'each', '1/N': 'split', '없음': 'free', '기타': 'other' };
   const btn = document.getElementById(`fee-btn-${idMap[type]}`);
   if (btn) btn.classList.add('selected');
   const inp = document.getElementById('create-meetup-fee-input');
   if (inp) inp.style.display = type === '기타' ? 'block' : 'none';
+};
+
+window._meetupImages = [];
+
+window.handleMeetupImageSelect = function (input) {
+  const files = Array.from(input.files);
+  const remaining = 5 - window._meetupImages.length;
+  files.slice(0, remaining).forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      window._meetupImages.push(e.target.result);
+      renderMeetupImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+  input.value = '';
+};
+
+window.removeMeetupImage = function (idx) {
+  window._meetupImages.splice(idx, 1);
+  renderMeetupImagePreviews();
+};
+
+function renderMeetupImagePreviews() {
+  const container = document.getElementById('meetup-image-preview');
+  const addBtn = document.getElementById('meetup-image-add-btn');
+  if (!container) return;
+  container.innerHTML = window._meetupImages.map((src, i) => `
+    <div style="position:relative; width:80px; height:80px; border-radius:10px; overflow:hidden; flex-shrink:0;">
+      <img src="${src}" style="width:100%; height:100%; object-fit:cover;" />
+      <button onclick="removeMeetupImage(${i})" style="position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; background:rgba(0,0,0,0.6); border:none; color:white; font-size:14px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center;">×</button>
+    </div>
+  `).join('');
+  if (addBtn) addBtn.style.display = window._meetupImages.length >= 5 ? 'none' : 'flex';
+}
+
+window.openImageViewer = function (meetupId, startIdx) {
+  const m = MOCK_MEETUPS.find(x => x.id === meetupId);
+  if (!m || !m.images || m.images.length === 0) return;
+  const images = m.images;
+  let idx = startIdx || 0;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'image-viewer-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.93);z-index:9999;display:flex;align-items:center;justify-content:center;touch-action:none;';
+
+  function render() {
+    overlay.innerHTML = `
+      <button onclick="document.getElementById('image-viewer-overlay').remove()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:white;font-size:28px;cursor:pointer;z-index:1;line-height:1;">×</button>
+      <button id="iv-prev" onclick="window._ivPrev()" style="position:absolute;left:12px;background:none;border:none;color:white;font-size:40px;cursor:pointer;padding:12px;opacity:${idx === 0 ? '0.25' : '1'};${idx === 0 ? 'pointer-events:none;' : ''}">‹</button>
+      <img src="${images[idx]}" style="max-width:92vw;max-height:86vh;object-fit:contain;border-radius:8px;display:block;" />
+      <button id="iv-next" onclick="window._ivNext()" style="position:absolute;right:12px;background:none;border:none;color:white;font-size:40px;cursor:pointer;padding:12px;opacity:${idx === images.length - 1 ? '0.25' : '1'};${idx === images.length - 1 ? 'pointer-events:none;' : ''}">›</button>
+      ${images.length > 1 ? `<div style="position:absolute;bottom:16px;color:rgba(255,255,255,0.6);font-size:13px;">${idx + 1} / ${images.length}</div>` : ''}
+    `;
+  }
+
+  window._ivPrev = () => { if (idx > 0) { idx--; render(); } };
+  window._ivNext = () => { if (idx < images.length - 1) { idx++; render(); } };
+
+  let touchStartX = 0;
+  overlay.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  overlay.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (dx < -50) window._ivNext();
+    else if (dx > 50) window._ivPrev();
+  });
+
+  render();
+  document.body.appendChild(overlay);
 };
 
 window.updateTagPreview = function () {
@@ -3522,6 +3638,7 @@ window.submitCreateMeetup = function () {
     locationTiming: locationTimingSelected,
     ageRange: ageRange || null,
     links: inputLinks.length > 0 ? inputLinks : null,
+    images: (window._meetupImages || []).length > 0 ? [...window._meetupImages] : null,
     isRecommended: false,
     isSaved: false,
     hasRSVPd: true,
@@ -3745,6 +3862,16 @@ window.openMeetupDetail = function (id) {
   const isGroup = m.hostType === '단체';
   const isEvent = m.type.includes('행사');
   const isPrivate = m.hostType === '개인' && !m.hostPublic;
+  const isCommunity = m.type.includes('커뮤니티');
+  const showHostThumb = !isCommunity && !!m.hostIsPublic && m.hostType !== '단체';
+  const displayedCap = (showHostThumb ? 1 : 0) + (m.participants || []).length;
+  const displayCapPercent = m.maxCap > 0 ? Math.round((displayedCap / m.maxCap) * 100) : 0;
+  const showAgeRange = !!(m.ageRange && m.ageRange !== '연령 무관');
+  const showFee = !!(m.fee && !['없음', '무료'].includes(m.fee));
+  const cleanDesc = isCommunity
+    ? m.desc.split('\n').filter(l => !/^(연령대|조건)\s*:/.test(l.trim())).join('\n').trim()
+    : m.desc;
+  const organizerImgs = isCommunity ? (m.organizers || (m.hostImage ? [m.hostImage] : [])) : [];
 
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
@@ -3762,32 +3889,36 @@ window.openMeetupDetail = function (id) {
          </div>
        </div>
        <div class="scroll-y" style="padding: 10px 24px 140px;">
-          <div style="color:var(--primary); font-size:14px; font-weight:700; margin-bottom:8px;">${m.type} · ${getDetailDateString(m.timestamp)}</div>
+          <div style="color:var(--primary); font-size:14px; font-weight:700; margin-bottom:8px;">${isCommunity ? m.type : `${m.type} · ${getDetailDateString(m.timestamp)}`}</div>
           <h2 style="font-size: 26px; line-height: 1.3; margin-bottom: 8px; font-weight:800;">${m.title}</h2>
           
           ${!m.hasRSVPd ?
-      `<div class="meetup-location-preview" style="margin-bottom: 24px; font-size:15px; color:#666;">📍 ${m.shortLocation}</div>` :
-      `<div class="address-reveal-card" style="margin-bottom:24px;">
+      `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}</div>` :
+      `<div class="address-reveal-card" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
                 <div class="address-reveal-card-sub">참여 확정 후 공개되는 장소입니다</div>
               </div>`
     }
 
+          ${showAgeRange ? `<div style="font-size:14px; color:#888; margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
+
           <!-- New Info Fields -->
+          ${!isCommunity && showFee ? `
           <div style="margin-bottom: 32px; border-top: 1px solid #EEE; padding-top: 20px;">
             <div style="display:flex;">
               <div style="width:80px; font-size:14px; color:#888;">참여비</div>
-              <div style="font-size:14px; color:var(--text-dark); font-weight:500;">${m.fee || '무료'}</div>
+              <div style="font-size:14px; color:var(--text-dark); font-weight:500;">${m.fee}</div>
             </div>
           </div>
+          ` : ''}
           
           <!-- Host Section (Conditional) -->
           ${!isPrivate && (!isEvent || m.host?.isPublic) ? `
           <div style="display:flex; align-items:center; margin-bottom: 32px; padding: 16px; background:#F9F9F9; border-radius:16px;">
              ${isGroup ?
         `<div style="width:48px; height:48px; border-radius:12px; background-image:url('${m.hostLogo}'); background-size:cover; background-position:center;"></div>` :
-        `<div class="attendee-avatar" style="width:48px; height:48px; background-image:url('${MOCK_PROFILES.find(p => p.name === m.hostName)?.image || USER_PHOTOS[0]}'); background-size:cover; background-position:center top;"></div>`
+        `<div class="attendee-avatar" style="width:48px; height:48px; background-image:url('${MOCK_PROFILES.find(p => p.name === m.hostName)?.image || MOCK_PROFILES[0].image}'); background-size:cover; background-position:center top;"></div>`
       }
              <div style="margin-left: 12px; flex:1;">
                 <div style="font-size:15px; font-weight:700; display:flex; align-items:center; gap:6px;">
@@ -3799,28 +3930,38 @@ window.openMeetupDetail = function (id) {
           </div>
           ` : ''}
           
-          <div style="font-size:16px; line-height:1.6; color:var(--text-dark); margin-bottom: 12px;">
-            ${m.desc}
+          <div style="font-size:16px; line-height:1.6; color:var(--text-dark); margin-bottom: 12px; white-space: pre-line;">
+            ${cleanDesc}
           </div>
 
-          <!-- Age Range -->
-          ${m.ageRange ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:12px;">👥 ${m.ageRange}</div>` : ''}
+          <!-- Images -->
+          ${m.images && m.images.length > 0 ? `
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;">
+            ${m.images.map((src, i) => `
+              <div onclick="openImageViewer(${m.id}, ${i})" style="width:80px; height:80px; border-radius:10px; overflow:hidden; cursor:pointer; flex-shrink:0;">
+                <img src="${src}" style="width:100%; height:100%; object-fit:cover;" />
+              </div>
+            `).join('')}
+          </div>
+          ` : ''}
 
           <!-- Links -->
           ${m.links && m.links.length > 0 ? `
           <div style="margin-bottom:20px;">
             ${m.links.map(link => {
         if (link.type === '소셜') {
-          const url = link.platform === 'X' ? `https://x.com/${link.handle}` : `https://instagram.com/${link.handle}`;
+          const url = link.url || (link.platform === 'X' ? `https://x.com/${link.handle}` : `https://instagram.com/${link.handle}`);
+          const iconImg = link.platform === 'X'
+            ? `<img src="https://cdn.simpleicons.org/x/000000" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">`
+            : `<img src="https://cdn.simpleicons.org/instagram/E1306C" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">`;
           return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer;">
-                  <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
-                  <span style="font-size:14px; color:var(--text-dark);">@${link.handle}</span>
-                  <span style="font-size:12px; color:var(--text-muted);">${link.platform}</span>
+                  <span style="font-size:12px; font-weight:600; color:#888; flex-shrink:0; min-width:36px;">${link.type}</span>
+                  <span style="font-size:14px; color:var(--primary); text-decoration:underline; display:flex; align-items:center;">${iconImg}@${link.handle}</span>
                 </div>`;
         }
         return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer; overflow:hidden;">
-                <span style="font-size:12px; font-weight:600; color:#9B72CC; background:#F0E8FA; border-radius:999px; padding:2px 8px; flex-shrink:0;">${link.type}</span>
-                <span style="font-size:14px; color:var(--text-dark); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</span>
+                <span style="font-size:12px; font-weight:600; color:#888; flex-shrink:0; min-width:36px;">${link.type}</span>
+                <span style="font-size:14px; color:var(--primary); text-decoration:underline; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</span>
               </div>`;
       }).join('')}
           </div>
@@ -3831,26 +3972,39 @@ window.openMeetupDetail = function (id) {
             ${(m.tags || []).map(tag => `<div style="padding:4px 10px; border:1px solid #C89FDB; color:#9B72CC; border-radius:100px; font-size:12px; font-weight:500;">${tag}</div>`).join('')}
           </div>
           
+          ${isCommunity ? `
           <div style="background:var(--surface); padding:20px; border-radius:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
-            <div style="font-size:15px; font-weight:600; margin-bottom:12px;">참여자 (${m.currentCap}/${m.maxCap}명)</div>
+            <div style="font-size:15px; font-weight:600; margin-bottom:12px;">호스트</div>
+            <div class="attendee-stack" style="flex-wrap: wrap; gap:12px;">
+               ${organizerImgs.length > 0
+        ? organizerImgs.map(url => `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid #9B72CC; outline-offset:2px; background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')
+        : `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid #9B72CC; outline-offset:2px; background-image:url('${isGroup ? m.hostLogo : (MOCK_PROFILES.find(p => p.name === m.hostName)?.image || m.hostImage || MOCK_PROFILES[0].image)}');background-size:cover;background-position:center top;"></div>`}
+            </div>
+          </div>
+          ` : (isEvent && m.showParticipants === false) ? `` : `
+          <div style="background:var(--surface); padding:20px; border-radius:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.02);">
+            <div style="font-size:15px; font-weight:600; margin-bottom:12px;">참여자 (${displayedCap}/${m.maxCap}명)</div>
             <div class="progress-track" style="margin-bottom: 24px;">
-               <div class="progress-fill" style="width: ${capPercent}%;"></div>
+               <div class="progress-fill" style="width: ${displayCapPercent}%;"></div>
             </div>
             <div class="attendee-stack" style="flex-wrap: wrap; gap:12px;">
-               ${!isPrivate && (!isEvent || m.host?.isPublic) ? `
-                 <div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border: none; outline: 2.5px solid #9B72CC; outline-offset: 2px; background-image:url('${isGroup ? m.hostLogo : (MOCK_PROFILES.find(p => p.name === m.hostName)?.image || USER_PHOTOS[0])}'); background-size:cover; background-position:center top;"></div>
+               ${showHostThumb ? `
+                 <div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border: none; outline: 2.5px solid #9B72CC; outline-offset: 2px; background-image:url('${MOCK_PROFILES.find(p => p.name === m.hostName)?.image || m.hostImage || MOCK_PROFILES[0].image}'); background-size:cover; background-position:center top;"></div>
                ` : ''}
                ${(m.participants || []).map(url => `
                  <div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border: none; background-image:url('${url}');background-size:cover;background-position:center top;"></div>
                `).join('')}
             </div>
           </div>
+          `}
 
           <!-- Rules Section -->
+          ${!isCommunity ? `
           <div style="margin-top:24px; padding:20px; background:#F0F0F0; border-radius:16px;">
             <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:#555;">주의사항</div>
             <div style="font-size:14px; color:#666; line-height:1.5;">${m.rules || '매너 있는 참여 부탁드립니다.'}</div>
           </div>
+          ` : ''}
 
           <!-- Reviews Section (Only if Group) -->
           ${isGroup && m.reviews ? `
@@ -3869,16 +4023,8 @@ window.openMeetupDetail = function (id) {
 
        </div>
        <div class="modal-fixed-bottom" style="display:block; z-index: 110; padding: 16px 24px; background: white; border-top: 1px solid #EEE;">
-          <button id="detail-rsvp-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: ${m.hasRSVPd ? '#CCC' : '#9B72CC'}; color: white; font-size: 16px; font-weight: 600; border: none; cursor: ${m.hasRSVPd ? 'default' : 'pointer'}; pointer-events: ${m.hasRSVPd ? 'none' : 'auto'};" onclick="
-            const btn = this;
-            btn.style.background = '#CCC';
-            btn.style.pointerEvents = 'none';
-            btn.innerText = '신청 완료 ✓';
-            const m = MOCK_MEETUPS.find(x => x.id === ${m.id});
-            if (m) m.hasRSVPd = true;
-            window.showToast('모임 참석 신청이 완료됐어요 ☺️');
-          ">
-             ${m.hasRSVPd ? '신청 완료 ✓' : '참석하기'}
+          <button id="detail-rsvp-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: ${m.hasRSVPd || m.disableRSVP ? '#CCC' : '#9B72CC'}; color: white; font-size: 16px; font-weight: 600; border: none; cursor: ${m.hasRSVPd || m.disableRSVP ? 'default' : 'pointer'}; pointer-events: ${m.hasRSVPd || m.disableRSVP ? 'none' : 'auto'};" onclick="joinMeetupChat(${m.id})">
+             ${m.hasRSVPd ? '신청 완료 ✓' : m.disableRSVP ? '외부 사이트에서 신청' : '참여하기'}
           </button>
        </div>
     </div>
@@ -3891,6 +4037,54 @@ window.closeModal = function () {
   const mc = document.getElementById('modal-container');
   if (mc) mc.innerHTML = '';
 }
+
+window.joinMeetupChat = function (meetupId) {
+  const m = MOCK_MEETUPS.find(x => x.id === meetupId);
+  if (!m) return;
+  const chatId = 'group_' + m.id;
+  if (!MOCK_CHATS.find(c => c.id === chatId)) {
+    const participantProfiles = (m.participants || [])
+      .map(imgUrl => MOCK_PROFILES.find(p => p.image === imgUrl))
+      .filter(Boolean);
+    const _hostImg = m.hostImage || (MOCK_PROFILES.find(p => p.name === m.hostName) || {}).image || '';
+    const _cm = {
+      '소셜':      { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 편하게 즐기는 자리 만들게요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 기대돼요 🥂', p2:'처음인데 잘 부탁드려요! ✨' },
+      '문화생활':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 좋은 작품 함께 감상해요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 너무 설레요 🎬', p2:'저도 영화 너무 좋아해요, 잘 부탁드려요!' },
+      '액티비티':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 같이 신나게 달려봐요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 열심히 할게요 🏃‍♀️', p2:'저도 처음이에요, 잘 부탁드려요!' },
+      '식도락':    { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 맛있는 시간 함께 해요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 맛집 기대됩니다 🍴', p2:'저도 처음이에요, 잘 부탁드려요!' },
+      '스터디':    { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 함께 배우고 나눠요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 열심히 할게요 📖', p2:'저도 처음인데 잘 부탁드려요!' },
+      '크리에이티브': { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 창작의 즐거움 함께 나눠요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 기대돼요 🎨', p2:'초보지만 열심히 할게요!' },
+      '행사':      { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 함께 특별한 시간 만들어요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 정말 기대돼요 🎉', p2:'저도 처음이에요, 잘 부탁드려요!' },
+      '커뮤니티':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 좋은 인연 함께 만들어가요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 반갑습니다 🌈', p2:'저도 처음이에요, 잘 부탁드려요!' },
+    };
+    const _ck = Object.keys(_cm).find(k => m.type && m.type.includes(k)) || '소셜';
+    const _t = _cm[_ck];
+    const _p1 = participantProfiles[0];
+    const _p2 = participantProfiles[1];
+    const _msgs = [
+      { type:'system', text: m.title + ' 모임방에 오신 것을 환영해요! 🎉' },
+      { type:'host', name: m.hostName, image: _hostImg, text: _t.host, time:'오전 10:23' },
+      ...(_p1 ? [{ type:'participant', name:_p1.name, image:_p1.image, text:_t.p1, time:'오전 10:31' }] : []),
+      ...(_p2 ? [{ type:'participant', name:_p2.name, image:_p2.image, text:_t.p2, time:'오전 11:05' }] : []),
+    ];
+    MOCK_CHATS.unshift({
+      id: chatId,
+      type: 'group',
+      meetupId: m.id,
+      title: m.title,
+      preview: _t.p2,
+      time: '오전 11:05',
+      unread: 2,
+      messages: _msgs,
+      participants: participantProfiles
+    });
+  }
+  if (m) m.hasRSVPd = true;
+  closeModal();
+  window.showToast('모임 참여 신청이 완료됐어요 ☺️');
+  switchTab('messages');
+  setTimeout(() => openChat(chatId), 100);
+};
 
 window.submitRSVP = function (id) {
   const m = MOCK_MEETUPS.find(x => x.id === id);
@@ -4334,12 +4528,216 @@ window.triggerPostMeetingCheckin = function () {
 };
 
 
+function openGroupChat(chatId) {
+  const chat = MOCK_CHATS.find(c => c.id === chatId);
+  if (!chat) return;
+  const contentArea = document.getElementById('main-content');
+  if (!contentArea) return;
+
+  const m = MOCK_MEETUPS.find(x => x.id === chat.meetupId);
+  const hostProfile = m ? MOCK_PROFILES.find(p => p.name === m.hostName) : null;
+  const participants = chat.participants || [];
+  const totalCount = participants.length + (hostProfile ? 1 : 0);
+
+  const renderGroupChatView = () => {
+    contentArea.innerHTML = `
+      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
+        <div class="chat-header" style="position: relative; justify-content: center; padding: 12px 20px; min-height: 60px;">
+          <button class="back-btn" onclick="switchTab('messages')" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 0;">
+            <i data-lucide="chevron-left" style="width:28px;"></i>
+          </button>
+          <div style="display:flex; flex-direction:column; align-items:center;">
+            <div style="font-size:16px; font-weight:700; color:#333;">${chat.title}</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${totalCount}명 참여 중</div>
+          </div>
+          <button onclick="openGroupParticipants('${chatId}')" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border:none; background:none; cursor:pointer; padding:0; color:#555;">
+            <i data-lucide="users" style="width:22px; height:22px;"></i>
+          </button>
+        </div>
+        <div class="chat-scroller" id="group-chat-scroller">
+          ${chat.messages.map(msg => {
+            if (msg.type === 'system') {
+              return `<div style="text-align:center; font-size:12px; color:#AAA; padding:8px 16px;">${msg.text}</div>`;
+            }
+            if (msg.type === 'host' || msg.type === 'participant') {
+              return `
+                <div style="display:flex; align-items:flex-start; gap:8px;">
+                  <div style="width:34px;height:34px;border-radius:50%;background-image:url('${msg.image}');background-size:cover;background-position:center;flex-shrink:0;background-color:#EDE0FF;"></div>
+                  <div>
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;">${msg.name}${msg.type === 'host' ? ' · 호스트' : ''}</div>
+                    <div style="display:flex;align-items:flex-end;gap:6px;">
+                      <div class="chat-bubble received" style="margin:0;">${msg.text}</div>
+                      ${msg.time ? `<div style="font-size:10px;color:#BBB;white-space:nowrap;">${msg.time}</div>` : ''}
+                    </div>
+                  </div>
+                </div>`;
+            }
+            return `<div class="chat-bubble ${msg.type}">${msg.text}</div>`;
+          }).join('')}
+        </div>
+        <div class="chat-input-bar">
+          <button style="border:none; background:none; cursor:pointer; color: var(--text-muted);">
+            <i data-lucide="plus" style="width: 24px;"></i>
+          </button>
+          <input type="text" id="group-chat-input" class="chat-input" placeholder="메시지 보내기..." />
+          <button id="group-chat-send" class="match-intro-send">
+            <i data-lucide="send" style="width: 20px;"></i>
+          </button>
+        </div>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const input = contentArea.querySelector('#group-chat-input');
+    const scroller = contentArea.querySelector('#group-chat-scroller');
+    const sendBtn = contentArea.querySelector('#group-chat-send');
+
+    function sendGroupMsg() {
+      const text = input.value.trim();
+      if (!text) return;
+      chat.messages.push({ type: 'sent', text });
+      input.value = '';
+      const bubble = document.createElement('div');
+      bubble.className = 'chat-bubble sent';
+      bubble.textContent = text;
+      scroller.appendChild(bubble);
+      scroller.scrollTop = scroller.scrollHeight;
+    }
+
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') sendGroupMsg(); });
+    sendBtn.addEventListener('click', sendGroupMsg);
+  };
+
+  window.openGroupParticipants = function (cId) {
+    const c = MOCK_CHATS.find(x => x.id === cId);
+    if (!c) return;
+    const meetup = MOCK_MEETUPS.find(x => x.id === c.meetupId);
+    const host = meetup ? MOCK_PROFILES.find(p => p.name === meetup.hostName) : null;
+    const parts = c.participants || [];
+
+    contentArea.innerHTML = `
+      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
+        <div class="app-header" style="background:var(--bg-color);">
+          <button class="back-btn" onclick="openChat('${cId}')">
+            <i data-lucide="chevron-left" style="width:28px;"></i>
+          </button>
+          <div style="font-size:15px; font-weight:600;">참여자 목록</div>
+          <div style="width:32px;"></div>
+        </div>
+        <div class="scroll-y" style="flex:1; padding:0 24px;">
+          ${host ? `
+          <div style="padding:16px 0; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${host.id}, '${cId}')">
+            <div style="width:48px;height:48px;border-radius:50%;background-image:url('${host.image}');background-size:cover;background-position:center;flex-shrink:0;"></div>
+            <div style="flex:1;">
+              <div style="font-size:15px;font-weight:600;color:#333;">${host.name}</div>
+              <div style="font-size:12px;color:var(--text-muted);">${getAge(host.birthYear)}세</div>
+            </div>
+            <span style="font-size:12px;font-weight:600;color:#9B72CC;background:#F0E6FF;padding:3px 8px;border-radius:20px;">호스트</span>
+          </div>
+          ` : ''}
+          ${parts.map(pp => `
+          <div style="padding:16px 0; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${pp.id}, '${cId}')">
+            <div style="width:48px;height:48px;border-radius:50%;background-image:url('${pp.image}');background-size:cover;background-position:center;flex-shrink:0;"></div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:#333;">${pp.name}</div>
+              <div style="font-size:12px;color:var(--text-muted);">${getAge(pp.birthYear)}세</div>
+            </div>
+          </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+
+  renderGroupChatView();
+}
+
+window.openLimitedProfile = function (profileId, chatId) {
+  const p = MOCK_PROFILES.find(pr => pr.id === profileId);
+  if (!p) return;
+  const contentArea = document.getElementById('main-content');
+  if (!contentArea) return;
+
+  const age = 2026 - (p.birthYear || 1995) + 1;
+  const yearSuffix = ((p.birthYear || 1995) % 100).toString().padStart(2, '0');
+  const blurStyle = p.photoPrivate ? 'filter:blur(8px);' : '';
+
+  const limitedFields = [
+    { label: '내 스타일', value: p.aboutMe?.style },
+    { label: '이상형', value: p.aboutMe?.ideal },
+    { label: '주량', value: p.aboutMe?.drink },
+    { label: '흡연 여부', value: p.aboutMe?.smoke }
+  ].filter(f => f.value && f.value.trim() !== '');
+
+  const infoRowsHTML = limitedFields.map((f, idx) => `
+    <div class="info-row" style="${idx === limitedFields.length - 1 ? 'border-bottom:none;' : ''}">
+      <div class="info-label">${f.label}</div>
+      <div class="info-val" style="color:#2C2C2A;">${f.value}</div>
+    </div>
+  `).join('');
+
+  contentArea.innerHTML = `
+    <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color);">
+        <button class="back-btn" onclick="openGroupParticipants('${chatId}')">
+          <i data-lucide="chevron-left" style="width:28px;"></i>
+        </button>
+        <div style="font-size:15px; font-weight:600;">${p.name}</div>
+        <div style="width:32px;"></div>
+      </div>
+      <div class="scroll-y" style="flex:1;">
+        <div style="padding-bottom:120px;">
+          <div class="prof-modal-photo" style="position:relative; height:450px; overflow:hidden; background:#EEE;">
+            <div style="position:absolute;inset:0;background-image:url('${p.image}');background-size:cover;background-position:center;${blurStyle}"></div>
+            ${p.photoPrivate ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,0.5);padding:12px 24px;border-radius:14px;color:white;font-size:14px;font-weight:600;">🔒 매칭 후 공개</div></div>` : ''}
+          </div>
+
+          <div style="padding:24px;">
+            <div class="card-name" style="font-size:22px; display:flex; align-items:center; gap:8px; font-weight:600; color:var(--text-dark); flex-wrap:wrap;">
+              ${p.name} <span style="font-size:16px; font-weight:400; color:var(--text-muted);">${age}세 (${yearSuffix}년생)</span> ${getRoleBadgeHTML(p.role)}
+            </div>
+
+            <div class="card-tags" style="margin-top:16px;">
+              ${(p.tags || []).map(t => `<div class="card-tag">${t}</div>`).join('')}
+            </div>
+
+            <div class="profile-badge" style="margin-top:24px; display:inline-block;">
+              ${p.intent || '연애를 기대해요 ❤️'}
+            </div>
+
+            <div style="font-size:15px; margin-top:20px; line-height:1.5; color:var(--text-dark); white-space:pre-line;">
+              ${p.bio || ''}
+            </div>
+
+            ${infoRowsHTML ? `
+            <div class="profile-section-title" style="margin-top:40px;">나에 대해</div>
+            <div class="info-card">${infoRowsHTML}</div>
+            ` : ''}
+
+            <div style="margin-top:32px; background:#F8F4FF; border-radius:16px; padding:20px; text-align:center;">
+              <div style="font-size:15px; font-weight:600; color:#9B72CC;">💜 더 알아보려면 매칭이 필요해요</div>
+              <div style="font-size:13px; color:#AAA; margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
 window.openChat = function (chatId) {
   const chat = MOCK_CHATS.find(c => c.id === chatId);
   if (!chat) return;
 
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
+
+  if (chat.type === 'group') {
+    openGroupChat(chatId);
+    return;
+  }
 
   const p = MOCK_PROFILES.find(pr => pr.name === chat.name);
   const ageDistText = p ? `${getAge(p.birthYear)} ・ ${getDistance(p.id)}km` : chat.score;
