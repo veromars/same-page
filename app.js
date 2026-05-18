@@ -3403,7 +3403,9 @@ window.submitCreateMeetup = function () {
 
   const tagsEl = document.getElementById('create-meetup-tags');
   const tagsText = tagsEl ? tagsEl.value.trim() : '';
-  const inputTags = tagsText ? tagsText.split(' ').map(t => t.startsWith('#') ? t : '#' + t) : ['#스타일무관'];
+  const inputTags = tagsText
+    ? tagsText.split(',').map(t => t.trim()).filter(t => t).map(t => t.startsWith('#') ? t : '#' + t)
+    : ['#스타일무관'];
 
   const descEl = document.getElementById('create-meetup-desc');
   const inputDescription = descEl ? descEl.value.trim() : '';
@@ -3414,10 +3416,14 @@ window.submitCreateMeetup = function () {
   const hostPublicEl = document.querySelector('#create-meetup-host-public .selected');
   const hostPublicSelected = hostPublicEl ? (hostPublicEl.innerText.trim() === '프로필 공개') : false;
 
+  const ageAnyBtn = document.getElementById('create-meetup-age-any');
+  const isAgeAny = ageAnyBtn && ageAnyBtn.classList.contains('selected');
   const ageFromWheel = document.querySelector('#create-meetup-age-from-picker .picker-wheel-container');
   const ageToWheel = document.querySelector('#create-meetup-age-to-picker .picker-wheel-container');
   let ageRange = '';
-  if (ageFromWheel && ageToWheel) {
+  if (isAgeAny) {
+    ageRange = '무관';
+  } else if (ageFromWheel && ageToWheel) {
     const afIdx = Math.round(ageFromWheel.scrollTop / 40);
     const atIdx = Math.round(ageToWheel.scrollTop / 40);
     const afItems = ageFromWheel.querySelectorAll('.picker-item');
@@ -3426,6 +3432,7 @@ window.submitCreateMeetup = function () {
       ageRange = afItems[afIdx].innerText + ' ~ ' + atItems[atIdx].innerText;
     }
   }
+  if (!ageRange) { window.showToast('참여 연령대를 선택해주세요'); return; }
 
   const inputLinks = [];
   document.querySelectorAll('.meetup-link-item').forEach(item => {
