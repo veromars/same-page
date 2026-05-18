@@ -2316,6 +2316,28 @@ window.switchTab = function (tabName) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+function formatCardDate(dateStr) {
+  if (!dateStr) return dateStr;
+  // Structured format from submitCreateMeetup: "2026년 5월 25일 (월) 오후 7시 00분"
+  const full = dateStr.match(/\d+년\s*(\d+)월\s*(\d+)일\s*\(([^)]+)\)\s*(오전|오후|정오)\s*(\d+)시(?:\s*(\d+)분)?/);
+  if (full) {
+    const [, month, day, wd, ampm, h, m] = full;
+    const hour = parseInt(h);
+    const min = parseInt(m || '0');
+    const h24 = ampm === '오전' ? hour : ampm === '정오' ? 12 : hour + 12;
+    const tod = h24 <= 8 ? '아침' : h24 <= 11 ? '오전' : h24 <= 13 ? '낮' : h24 <= 17 ? '오후' : h24 <= 20 ? '저녁' : '밤';
+    return `${month}/${day} (${wd}) ${tod} ${hour}시${min === 30 ? ' 반' : ''}`;
+  }
+  // Free-form strings: convert 오전/오후 → time-of-day label, 요일 short form
+  const WD = { '월요일':'(월)', '화요일':'(화)', '수요일':'(수)', '목요일':'(목)', '금요일':'(금)', '토요일':'(토)', '일요일':'(일)' };
+  return dateStr
+    .replace(/오전\s*(\d+)시/g, (_, h) => { const hr = parseInt(h); return `${hr <= 8 ? '아침' : '오전'} ${hr}시`; })
+    .replace(/오후\s*(\d+)시/g, (_, h) => { const hr = parseInt(h); return `${hr <= 1 ? '낮' : hr <= 5 ? '오후' : hr <= 8 ? '저녁' : '밤'} ${hr}시`; })
+    .replace(/정오\s*12시/g, '낮 12시')
+    .replace(/월요일|화요일|수요일|목요일|금요일|토요일|일요일/g, d => WD[d] || d);
+}
+window.formatCardDate = formatCardDate;
+
 window.renderMeetupList = function () {
   const container = document.getElementById('meetups-list-container');
   if (!container) return;
@@ -2382,7 +2404,7 @@ window.renderMeetupList = function () {
               <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 20px 24px 24px; z-index: 3; display: flex; align-items: flex-end; justify-content: space-between;">
                 <div style="flex: 1; padding-right: 12px;">
                   ${m.showTextInfo ? `
-                    <div style="color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; margin-bottom: 6px;">${m.date}</div>
+                    <div style="color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; margin-bottom: 6px;">${formatCardDate(m.date)}</div>
                     <div style="color: white; font-size: 20px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 2px;">📍 ${m.shortLocation}</div>
                   ` : ''}
@@ -2394,11 +2416,11 @@ window.renderMeetupList = function () {
     }
 
     if (m.type.includes('커뮤니티')) {
-      const logoHtml = m.hostLogo
-        ? `<div style="width:48px; height:48px; border-radius:50%; background-image:url('${m.hostLogo}'); background-size:cover; background-position:center; flex-shrink:0;"></div>`
-        : `<div style="width:48px; height:48px; border-radius:50%; background:#F0E8FA; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:20px;">🏘️</div>`;
-      const ageMatch = (m.desc || '').match(/(\d{2}년생[^~\n]*~[^\n]*\d{2}년생)/);
-      const ageRange = ageMatch ? ageMatch[0] : null;
+      const hostAvatar = m.hostLogo
+        ? `<div class="attendee-avatar" style="background-image:url('${m.hostLogo}'); background-size:cover; background-position:center;"></div>`
+        : `<div class="attendee-avatar" style="background:#F0E8FA; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#9B72CC;">${(m.hostName || '?')[0]}</div>`;
+      const communityTags = (m.tags || []).map(t => t.startsWith('#') ? t : '#' + t).join('  ');
+      const ageDisplay = m.ageRange ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px;">👥 ${m.ageRange}</div>` : '';
       return `
             <div class="meetup-item fade-in" onclick="openMeetupDetail(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
@@ -2415,16 +2437,16 @@ window.renderMeetupList = function () {
                   ${m.secondaryType ? `<div class="meetup-chip" style="color:var(--text-muted); background:rgba(0,0,0,0.04);">${m.secondaryType}</div>` : ''}
                 </div>
               </div>
-              <div class="meetup-title" style="margin-bottom:12px;">${m.title}</div>
-              <div style="display:flex; align-items:flex-start; gap:12px; margin-bottom:8px;">
-                ${logoHtml}
-                <div style="flex:1; min-width:0;">
-                  ${ageRange ? `<div style="font-size:12px; color:var(--text-muted); font-weight:600; margin-bottom:4px;">👥 ${ageRange}</div>` : ''}
-                  <div class="meetup-desc">${m.desc}</div>
-                </div>
+              <div>
+                <div class="meetup-title">${m.title}</div>
+                ${ageDisplay}
+                ${communityTags ? `<div style="font-size:12px; color:#9B7FD4; margin-top:4px; line-height:1.8;">${communityTags}</div>` : ''}
               </div>
-              <div class="meetup-footer" style="margin-top:8px;">
-                <div></div>
+              <div class="meetup-footer" style="margin-top:16px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <span style="font-size:12px; color:var(--text-muted); font-weight:500;">운영진</span>
+                  ${hostAvatar}
+                </div>
                 <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">더 보기 →</button>
               </div>
             </div>
@@ -2453,7 +2475,7 @@ window.renderMeetupList = function () {
                 </div>
               </div>
               <div>
-                <div class="meetup-date">${m.date}</div>
+                <div class="meetup-date">${formatCardDate(m.date)}</div>
                 <div class="meetup-title">${m.title}</div>
                 <div class="meetup-location-preview">📍 ${m.shortLocation}</div>
                 <div class="meetup-desc">${m.desc}</div>
