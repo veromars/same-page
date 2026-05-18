@@ -3334,9 +3334,9 @@ window.submitCreateMeetup = function () {
 
   const regionEl = document.getElementById('create-meetup-region');
   const detailEl = document.getElementById('create-meetup-location-detail');
-  const region = regionEl ? regionEl.value.trim() : '';
+  const inputRegion = regionEl ? regionEl.value.trim() : '';
   const detail = detailEl ? detailEl.value.trim() : '';
-  const inputLocation = region && detail ? `${region} ${detail}` : (region || detail || '');
+  const inputLocation = inputRegion && detail ? `${inputRegion} ${detail}` : (inputRegion || detail || '');
 
   const locationPrivateEl = document.getElementById('create-meetup-location-private');
   const locationTimingSelected = locationPrivateEl && locationPrivateEl.checked ? '참여 확정 후' : '바로 공개';
@@ -3415,10 +3415,10 @@ window.submitCreateMeetup = function () {
     }
   });
 
-  if (!inputTitle || !inputLocation) {
-    window.showToast('모임 이름과 장소를 입력해주세요');
-    return;
-  }
+  if (!selectedCategory) { window.showToast('카테고리를 선택해주세요'); return; }
+  if (!inputTitle) { window.showToast('모임 이름을 입력해주세요'); return; }
+  if (!inputRegion) { window.showToast('지역을 선택해주세요'); return; }
+  if (!window._selectedCalDate) { window.showToast('날짜를 선택해주세요'); return; }
 
   // 2. Create meetup object
   const newMeetup = {
