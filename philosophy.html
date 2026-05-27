@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>p.2 · Design Philosophy & Product Definition v6</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #1A1A1A; --bg: #F7F4F0; --muted: #999590;
+    --border: rgba(0,0,0,0.08); --purple: #9B72CC;
+    --purple-light: #EDE4F7; --warm: #C9A8E0;
+    --lime: #E2FF74; --peach: #FFD5BD;
+  }
+  body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--ink); padding: 60px 24px 100px; line-height: 1.7; }
+  .doc { max-width: 760px; margin: 0 auto; }
+
+  .header { padding-bottom: 40px; margin-bottom: 56px; border-bottom: 1.5px solid var(--ink); }
+  .logo { font-weight: 200; font-size: 52px; color: var(--ink); line-height: 1; margin-bottom: 12px; letter-spacing: -2px; }
+  .doc-meta { display: flex; gap: 24px; font-size: 11px; font-family: 'Jost', sans-serif; font-weight: 300; color: var(--muted); letter-spacing: 0.08em; flex-wrap: wrap; }
+  .version-badge { background: var(--purple); color: white; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-family: 'Jost', sans-serif; letter-spacing: 0.1em; }
+  .new-badge { background: var(--lime); color: var(--ink); font-size: 10px; padding: 2px 8px; border-radius: 4px; font-family: 'Jost', sans-serif; letter-spacing: 0.1em; font-weight: 500; }
+
+  .chapter { margin-bottom: 64px; }
+  .chapter-label { font-size: 10px; font-family: 'Jost', sans-serif; font-weight: 300; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+  .chapter-title { font-size: 22px; font-weight: 300; margin-bottom: 24px; letter-spacing: -0.5px; }
+
+  .card { background: white; border-radius: 14px; padding: 22px 24px; margin-bottom: 12px; border: 1px solid var(--border); }
+  .card.dark { background: var(--ink); color: white; }
+  .card.dark .card-title { color: rgba(255,255,255,0.5); }
+  .card.dark .card-body { color: rgba(255,255,255,0.9); }
+  .card.purple { background: var(--purple-light); border-color: transparent; }
+  .card.peach { background: #FFF3EC; border-color: transparent; }
+  .card.lime { background: #F5FFD6; border-color: transparent; }
+  .card-title { font-size: 10px; font-family: 'Jost', sans-serif; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+  .card-body { font-size: 13.5px; font-weight: 300; color: var(--ink); line-height: 1.8; }
+  .card.dark .card-body { color: rgba(255,255,255,0.9); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; font-weight: 300; }
+  th { font-weight: 400; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .card.dark th { color: rgba(255,255,255,0.4); border-color: rgba(255,255,255,0.1); }
+  .card.dark td { border-color: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); }
+
+  .tag { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--purple-light); color: var(--purple); margin: 3px 3px 3px 0; font-family: 'Jost', sans-serif; }
+  .tag.dark { background: #1A1A1A; color: white; }
+  .tag.peach { background: #FFE8D8; color: #B05A30; }
+  .tag.lime { background: #EEFFB0; color: #4A6A00; }
+
+  .highlight { background: var(--ink); color: var(--lime); border-radius: 14px; padding: 24px 28px; margin-bottom: 12px; }
+  .highlight-text { font-size: 15px; font-weight: 300; line-height: 1.8; }
+
+  .flow { display: flex; flex-direction: column; gap: 0; margin-bottom: 12px; }
+  .flow-step { background: white; border: 1px solid var(--border); padding: 16px 20px; display: flex; gap: 16px; align-items: flex-start; }
+  .flow-step:first-child { border-radius: 14px 14px 0 0; }
+  .flow-step:last-child { border-radius: 0 0 14px 14px; }
+  .flow-step:not(:first-child) { border-top: none; }
+  .flow-label { font-size: 10px; font-family: 'Jost', sans-serif; color: var(--purple); letter-spacing: 0.1em; text-transform: uppercase; min-width: 48px; padding-top: 2px; }
+
+  .pricing-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .pricing-card { background: white; border-radius: 14px; padding: 22px; border: 1px solid var(--border); }
+  .pricing-card.featured { background: var(--ink); color: white; border-color: transparent; }
+  .pricing-card.qurated-e { background: var(--purple-light); border-color: transparent; }
+  .pricing-card.qurated-l { background: var(--ink); color: white; border-color: transparent; }
+  .pricing-tier { font-size: 10px; font-family: 'Jost', sans-serif; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 10px; opacity: 0.6; }
+  .pricing-name { font-size: 16px; font-weight: 300; margin-bottom: 16px; }
+  .pricing-price { font-size: 24px; font-weight: 200; margin-bottom: 4px; letter-spacing: -1px; }
+  .pricing-sub { font-size: 11px; opacity: 0.5; margin-bottom: 16px; font-family: 'Jost', sans-serif; }
+  .pricing-features { font-size: 12px; font-weight: 300; line-height: 2; opacity: 0.8; }
+  .pricing-features li { list-style: none; padding-left: 0; }
+  .pricing-features li::before { content: "— "; opacity: 0.4; }
+
+  .roadmap-item { display: grid; grid-template-columns: 120px 1fr 100px; gap: 0; border-bottom: 1px solid var(--border); background: white; padding: 16px 20px; align-items: center; }
+  .roadmap-item:first-child { border-radius: 14px 14px 0 0; }
+  .roadmap-item:last-child { border-radius: 0 0 14px 14px; border-bottom: none; }
+  .roadmap-phase { font-size: 11px; font-weight: 400; color: var(--purple); font-family: 'Jost', sans-serif; letter-spacing: 0.1em; }
+  .roadmap-desc { font-size: 13px; font-weight: 300; }
+  .roadmap-rev { font-size: 13px; font-weight: 400; text-align: right; font-family: 'Jost', sans-serif; }
+
+  .divider { height: 1px; background: var(--border); margin: 48px 0; }
+  .updated { font-size: 11px; font-family: 'Jost', sans-serif; font-weight: 300; color: var(--muted); text-align: right; margin-top: 48px; letter-spacing: 0.08em; }
+
+  .check { color: var(--purple); }
+  .x { color: #ccc; }
+
+  .changelog { background: #F5FFD6; border-radius: 14px; padding: 22px 24px; margin-bottom: 48px; border: 1px solid rgba(0,0,0,0.06); }
+  .changelog-title { font-size: 10px; font-family: 'Jost', sans-serif; letter-spacing: 0.15em; text-transform: uppercase; color: #4A6A00; margin-bottom: 12px; }
+  .changelog-body { font-size: 12.5px; font-weight: 300; line-height: 2; color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="doc">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">p.2</div>
+    <div class="doc-meta">
+      <span>Design Philosophy & Product Definition</span>
+      <span class="version-badge">v6</span>
+      <span>2026.05</span>
+      <span>by Dawn Works</span>
+    </div>
+  </div>
+
+  <!-- Changelog -->
+  <div class="changelog">
+    <div class="changelog-title">v6 업데이트 — 2026.05.27</div>
+    <div class="changelog-body">
+      + p.2+ 혜택 수정 (여행 모드 제거 → 패스한 사람 되살리기 추가)<br>
+      + 라이브러리 구조 확정 (나를 Page한 사람 탭 / 내가 패스한 사람 탭)<br>
+      + 프로필북 책등 효과 확정 (유저 ID 해시 기반 컬러 고정, 발견 탭 10px 그라데이션)<br>
+      + 모임 참여 완료 화면 추가 (참여하기 → 완료 화면 → 단체방 입장)<br>
+      + 1:1 메시지창 상대방 프로필 사진 표시<br>
+      + 메시지창 헤더 탭 → 프로필북 이동<br>
+      + 타깃 설명 업데이트<br>
+      + 참고 서비스: HER — Match Group 인수 (2025.05), Grindr 재무 현황 추가<br>
+      + 온보딩 플로우 수정 (프로필북 작성 → 온보딩 후 선택 작성으로 변경)
+    </div>
+  </div>
+
+  <!-- CH 01 서비스 정의 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 01</div>
+    <div class="chapter-title">서비스 정의</div>
+    <div class="highlight">
+      <div class="highlight-text">가치관이 맞는 레즈비언 여성들의 깊은 연결.<br>빠른 매칭이 아니라, 천천히 읽고 연결되는 경험.</div>
+    </div>
+    <div class="two-col">
+      <div class="card dark">
+        <div class="card-title">앱 이름</div>
+        <div class="card-body"><strong>p.2</strong> — Same Page<br><br>같은 페이지에 있다는 것.<br>가치관이 맞는 사람을 만난다는 것.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">타깃</div>
+        <div class="card-body">한국 레즈비언 여성<br>20~50대<br>진지한 연결을 원하는 싱글</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">경쟁 서비스 포지셔닝</div>
+      <div class="card-body">
+        <table>
+          <tr><th>서비스</th><th>특징</th><th>p.2와 차이</th></tr>
+          <tr><td>시스(Sis)</td><td>번개·커뮤니티 위주, 즉흥 만남</td><td>p.2는 느리고 깊은 연결</td></tr>
+          <tr><td>Zoe</td><td>체코 기반, 한국 1위 레즈비언 앱, 1,000만 유저</td><td>p.2는 가치관 기반 + 큐레이티드</td></tr>
+          <tr><td>HER</td><td>SF 기반, 커뮤니티+이벤트 구조</td><td>p.2는 큐레이티드 레이어 추가</td></tr>
+          <tr><td>Hinge</td><td>"designed to be deleted", 프롬프트 기반</td><td>p.2는 레즈비언 전용 + 큐레이티드</td></tr>
+          <tr><td>블루벨벳</td><td>결정사+앱 혼합 시도, 정체성 분산으로 실패</td><td>p.2는 레이어 명확히 분리</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 02 앱 구조 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 02</div>
+    <div class="chapter-title">앱 구조</div>
+    <div class="card">
+      <div class="card-title">탭 구성</div>
+      <div class="card-body">
+        <table>
+          <tr><th>탭</th><th>역할</th></tr>
+          <tr><td>발견</td><td>하루 최대 6명 추천 프로필북 — 북 스택 UI</td></tr>
+          <tr><td>모임</td><td>소모임 탐색 및 참여 — 소셜·문화생활·액티비티·식도락·스터디·크리에이티브·행사·커뮤니티</td></tr>
+          <tr><td>메시지</td><td>1:1 매칭 채팅 + 모임 단체 메시지방</td></tr>
+          <tr><td>나</td><td>프로필북, 설정, p.Qurated 신청, 친구 초대</td></tr>
+        </table>
+        <br>
+        온보딩: 스플래시 → 회원가입/로그인 → 프로필 설정 → 발견 탭 진입<br>
+        프로필북 작성 (Ch.1~3 · 특별부록)은 온보딩 이후 선택적으로 작성
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">프로필북 구조</div>
+      <div class="card-body">
+        <table>
+          <tr><th>구성</th><th>내용</th></tr>
+          <tr><td>북커버</td><td>대표 사진 + 닉네임 + 나이·지역·성향(F/B/V)</td></tr>
+          <tr><td>대표 한 줄</td><td>27개 답변 중 유저가 직접 선택한 1개</td></tr>
+          <tr><td>지금 이 순간</td><td>자주 바뀌는 무드 한 마디</td></tr>
+          <tr><td>Ch.1 나</td><td>Q1~Q9 — 매력, 하루, 소울푸드, 힐링스팟, 초능력, 영화/드라마, 플레이리스트, 어린시절, 5년 뒤</td></tr>
+          <tr><td>Ch.2 사랑</td><td>Q10~Q18 — 상대매력, 플러팅, 연락빈도, 연애가치관, 사랑순간, 필수요소, 다툼해결, 이별순간, 미래순간</td></tr>
+          <tr><td>Ch.3 관계</td><td>Q19~Q27 — 파트너매력, 원하는것3가지, 확인할것3가지, 함께하는삶, 동네, 최대금액, 집안일, 파트너일상, 함께하는삶이란</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 03 디자인 철학 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 03</div>
+    <div class="chapter-title">디자인 철학</div>
+    <div class="highlight">
+      <div class="highlight-text">"p.2는 앱이 아니라 책이다.<br>사용자는 독자이자 저자이고,<br>만남은 같은 책을 읽는 것에서 시작된다."</div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">컬러 팔레트</div>
+        <div class="card-body">
+          라일락 · 라벤더 중심<br>
+          <span style="display:inline-block;width:14px;height:14px;background:#C89FDB;border-radius:50%;vertical-align:middle;margin-right:4px"></span>Lavender #C89FDB<br>
+          <span style="display:inline-block;width:14px;height:14px;background:#E2FF74;border-radius:50%;vertical-align:middle;margin-right:4px"></span>Lime #E2FF74<br>
+          <span style="display:inline-block;width:14px;height:14px;background:#FFD5BD;border-radius:50%;vertical-align:middle;margin-right:4px"></span>Peach #FFD5BD<br>
+          <span style="display:inline-block;width:14px;height:14px;background:#2C2C2A;border-radius:50%;vertical-align:middle;margin-right:4px"></span>Ink #2C2C2A
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">타이포그래피</div>
+        <div class="card-body">
+          Pretendard — 본문, UI 전반<br>
+          Noto Serif KR — 강조, 감성 텍스트<br><br>
+          하이라이트 텍스트 UI<br>책의 한 페이지처럼 — 밑줄, 형광펜
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">핵심 UX 원칙</div>
+      <div class="card-body">
+        <table>
+          <tr><th>원칙</th><th>구현</th></tr>
+          <tr><td>소비적이지 않은 앱</td><td>하루 6명 제한, 스와이프 없음, 알림 최소화</td></tr>
+          <tr><td>깔끔함</td><td>기능 제한이 아닌 경험의 질로 유료 유도</td></tr>
+          <tr><td>책의 세계관 일관성</td><td>프로필북, 챕터, Page her, 보관함 — 모두 책 은유</td></tr>
+          <tr><td>느슨한 연대감</td><td>단순 데이팅앱이 아닌 커뮤니티 공간</td></tr>
+          <tr><td>조용한 개입</td><td>p.M은 강요 없이 자연스럽게 연결을 돕는 역할</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 04 커뮤니티 & 모임 구조 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 04</div>
+    <div class="chapter-title">커뮤니티 & 모임 구조</div>
+    <div class="card dark">
+      <div class="card-title">모임 레이어 3단계</div>
+      <div class="card-body">
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">레이어</th><th style="color:rgba(255,255,255,0.4)">주체</th><th style="color:rgba(255,255,255,0.4)">예시</th></tr>
+          <tr><td>1차</td><td>유저 자발적 소모임</td><td>"같이 영화봐요", "풋살 같이 해요"</td></tr>
+          <tr><td>2차</td><td>기관·단체 공식 행사</td><td>퀴어연대 '퀴어법률알기', 클럽 ACE '솔로파티'</td></tr>
+          <tr><td>3차</td><td>p.2 자체 이벤트 (미래)</td><td>p.Qurated 유저 한정 또는 유료 큐레이티드 이벤트</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">모임 카테고리 (v5 확정)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>카테고리</th><th>이모지</th><th>설명</th></tr>
+          <tr><td>소셜</td><td>✨</td><td>번개·소규모 만남 위주</td></tr>
+          <tr><td>문화생활</td><td>🎬</td><td>영화·전시·공연</td></tr>
+          <tr><td>액티비티</td><td>🏃‍♀️</td><td>운동·야외활동</td></tr>
+          <tr><td>식도락</td><td>🍽️</td><td>맛집·와인·브런치</td></tr>
+          <tr><td>스터디</td><td>📚</td><td>독서·학습·토론</td></tr>
+          <tr><td>크리에이티브</td><td>🎨</td><td>예술·창작</td></tr>
+          <tr><td>행사 <span class="new-badge">new</span></td><td>🎟️</td><td>외부 기관/단체 공식 행사, 외부 링크 연결</td></tr>
+          <tr><td>커뮤니티 <span class="new-badge">new</span></td><td>🏘️</td><td>지속 운영 그룹, 정기 모임 커뮤니티</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">모임 카드 타입별 표시 원칙</div>
+      <div class="card-body">
+        <table>
+          <tr><th>항목</th><th>일반 모임</th><th>커뮤니티</th><th>행사</th></tr>
+          <tr><td>날짜/시간</td><td>✓ 간략 표시</td><td>—</td><td>✓</td></tr>
+          <tr><td>장소</td><td>✓ map-pin 아이콘</td><td>✓ (지역 단위)</td><td>✓</td></tr>
+          <tr><td>연령대</td><td>✓ users 아이콘</td><td>✓</td><td>✓</td></tr>
+          <tr><td>설명 한 줄</td><td>✓</td><td>— (태그로 대체)</td><td>✓</td></tr>
+          <tr><td>참여비</td><td>✓</td><td>—</td><td>✓</td></tr>
+          <tr><td>인원 progress 바</td><td>✓</td><td>—</td><td>조건부</td></tr>
+          <tr><td>참여자 썸네일</td><td>✓ (호스트 포함)</td><td>— (호스트만)</td><td>조건부</td></tr>
+          <tr><td>링크</td><td>—</td><td>✓ (메인/인증/소셜)</td><td>✓ (메인/소셜)</td></tr>
+          <tr><td>주의사항</td><td>✓</td><td>—</td><td>조건부</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">모임 만들기 폼 필드 구조 (v5 확정)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>필드</th><th>필수</th><th>비고</th></tr>
+          <tr><td>카테고리</td><td>✓</td><td>소셜 → 문화생활 → 액티비티 → 식도락 → 스터디 → 크리에이티브 → 행사 → 커뮤니티</td></tr>
+          <tr><td>모임 이름</td><td>✓</td><td></td></tr>
+          <tr><td>지역</td><td>✓</td><td>서울/경기/부산/대구/인천/광주/대전/제주 버튼 선택</td></tr>
+          <tr><td>상세 장소</td><td>—</td><td>자유 입력, "정확한 주소는 참여 확정 후 공개" 체크박스</td></tr>
+          <tr><td>날짜</td><td>✓</td><td>캘린더 picker</td></tr>
+          <tr><td>시간</td><td>✓</td><td>드럼롤 picker (기본값 오후 7시)</td></tr>
+          <tr><td>설명</td><td>—</td><td>white-space: pre-line 적용</td></tr>
+          <tr><td>사진</td><td>—</td><td>최대 5장, 1:1 썸네일</td></tr>
+          <tr><td>참여 조건 — 연령대</td><td>✓</td><td>드럼롤 피커 (20대 초반~50대 이상) 또는 "연령 무관" 체크박스</td></tr>
+          <tr><td>참여 조건 — 태그</td><td>—</td><td>콤마 구분 입력, #미리보기 제공</td></tr>
+          <tr><td>참여비</td><td>—</td><td>[1/N][각자][없음][기타] 선택, 기타 시 직접 입력</td></tr>
+          <tr><td>정원</td><td>—</td><td>최소/최대 명 직접 입력, 커뮤니티 시 비활성화</td></tr>
+          <tr><td>호스트 공개 여부</td><td>—</td><td>기본값: 익명으로 진행</td></tr>
+          <tr><td>링크</td><td>—</td><td>행사/커뮤니티 카테고리에만 표시, 최대 2개, 메인/인증/소셜/기타</td></tr>
+          <tr><td>주의사항</td><td>—</td><td>자유 입력</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">카카오톡 커뮤니티 연결 전략</div>
+      <div class="card-body">
+        모임 탭 내 '커뮤니티' 카테고리에서 외부 카카오톡 단톡 링크 연결 지원.<br>
+        기존 카카오톡 그룹채팅 커뮤니티는 흡수하지 않음.<br>
+        채팅방은 그대로 유지하되,<br>
+        앱의 소모임·이벤트 정보를 안팎으로 연결·공유.<br><br>
+        역할 분리:<br>
+        이벤트 RSVP → p.2 안에서<br>
+        실시간 대화 → 카카오톡에서
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 05 매칭 흐름 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 05</div>
+    <div class="chapter-title">매칭 흐름</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-label">Step 1</div><div>내가 Page her → 상대도 Page her</div></div>
+      <div class="flow-step"><div class="flow-label">Step 2</div><div>매칭 성사 — "on the same page ♥" 오버레이<br><span style="font-size:12px;opacity:0.6">"어떤 인연이 될지는 두 분이 써내려가요"</span></div></div>
+      <div class="flow-step"><div class="flow-label">Step 3</div><div>메시지창 열림 + 상단에 "함께 갈 수 있는 모임" 배너</div></div>
+      <div class="flow-step"><div class="flow-label">Step 4</div><div>모임 탭 소셜 카테고리로 연결 → 1:1 or 소규모 팟 참여</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">발견 탭 UX</div>
+      <div class="card-body">
+        북 스택 UI (카드 겹침 구조) — 하루 최대 6명, 추천 기반<br>
+        Page her → 라이브러리 담기 / 넘기기 → 패스<br>
+        당일 되돌리기 가능<br>
+        6명 소진 후 → p.Qurated 안내 화면 노출<br><br>
+        <strong>라이브러리 구조 (v6 확정)</strong><br>
+        탭 1: 나를 Page한 사람 — 블러 처리, p.2+ 구독 시 해제<br>
+        탭 2: 내가 패스한 사람 — 히스토리 및 되살리기 (p.2+)
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">프로필북 책등 효과 (v6 확정)</div>
+      <div class="card-body">
+        유저 ID/닉네임 해시 기반으로 책등 컬러 고정<br>
+        — 어느 화면에서나 동일 유저는 동일 색상<br>
+        색상 배열: #C89FDB · #A8C5A0 · #E8B4A0 · #9FB8D8 · #D4B896 · #B8A0C8<br><br>
+        발견 탭: 너비 10px, 좌→우 그라데이션 (spineColor → transparent)<br>
+        메시지 탭 썸네일: 너비 3px, solid
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 05-B 단체 메시지방 & p.M 팔로업 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 05-B <span class="new-badge">new</span></div>
+    <div class="chapter-title">단체 메시지방 & p.M 팔로업</div>
+
+    <div class="card dark">
+      <div class="card-title">단체 메시지방 구조</div>
+      <div class="card-body">
+        모임 상세 페이지에서 "참여하기" → 단체 채팅방 자동 생성<br>
+        (현재: 바로 참여 / 추후: 호스트 승인 옵션 추가 예정)<br><br>
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">항목</th><th style="color:rgba(255,255,255,0.4)">내용</th></tr>
+          <tr><td>방 아이콘</td><td>모임 카테고리 이모지</td></tr>
+          <tr><td>참여자 목록</td><td>호스트 배지 표시, 탭 시 제한된 프로필 보기</td></tr>
+          <tr><td>대상 모임 정원</td><td>최대 12명 (초과 시 팔로업 없음)</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">단체방에서 제한된 프로필 공개 범위</div>
+      <div class="card-body">
+        매칭된 상대가 아닌 모임 참여자에게는 아래만 공개:<br><br>
+        <table>
+          <tr><th>항목</th><th>공개 여부</th></tr>
+          <tr><td>프로필 이미지</td><td>✓ (photoPrivate 이미지는 블러)</td></tr>
+          <tr><td>이름/닉네임, 나이</td><td>✓</td></tr>
+          <tr><td>bio</td><td>✓ 첫 줄만</td></tr>
+          <tr><td>나에 대해 — 내 스타일, 이상형, 주량, 흡연 여부</td><td>✓</td></tr>
+          <tr><td>태그</td><td>✓</td></tr>
+          <tr><td>챕터 답변 (Ch.1~3)</td><td>✗ 매칭 후 공개</td></tr>
+        </table>
+        <br>
+        하단 안내: "💜 더 알아보려면 매칭이 필요해요"
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-title">p.M 팔로업 플로우 — 모임 후 체크인</div>
+      <div class="card-body">
+        모임 다음날 p.M이 메시지 발송:<br>
+        "어제 모임은 어떠셨나요? 호스트에게 전하고 싶은 말이 있으면 남겨주세요."<br><br>
+        이후 각 참여자에 대해 순차적으로 선택지 제시:
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">팔로업 선택지</div>
+      <div class="card-body">
+        <table>
+          <tr><th>선택</th><th>의미</th><th>이후 흐름</th></tr>
+          <tr><td>💜 더 알아가고 싶어요</td><td>연애 기반 관심</td><td>상대 선택에 따라 매칭 또는 전달</td></tr>
+          <tr><td>🤝 우리 친해져요</td><td>우정 기반 관심</td><td>상대 선택에 따라 매칭 또는 전달</td></tr>
+          <tr><td>👋 이미 아는 사이예요</td><td>기존 지인</td><td>팔로업 생략, 조용히 종료</td></tr>
+          <tr><td>✨ 좋은 만남이었습니다</td><td>추가 연결 의사 없음</td><td>조용히 종료</td></tr>
+          <tr><td>🚫 다시 보고싶지 않아요</td><td>불편함 표시</td><td>p.M 피드백 설문 진행</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">매칭 조합별 흐름</div>
+      <div class="card-body">
+        <table>
+          <tr><th>조합</th><th>결과</th></tr>
+          <tr><td>💜 + 💜</td><td>바로 1:1 메시지창 열림</td></tr>
+          <tr><td>🤝 + 🤝</td><td>바로 1:1 메시지창 열림</td></tr>
+          <tr><td>💜 + 🤝</td><td>p.M: "OO님이 더 알아가고 싶다고 했어요. 대화해보시겠어요?" → 수락 시 메시지창</td></tr>
+          <tr><td>🤝 + 💜</td><td>p.M: "OO님이 친해지고 싶다고 했어요. 대화해보시겠어요?" → 수락 시 메시지창</td></tr>
+          <tr><td>👋 or ✨ (어느 한쪽)</td><td>조용히 종료, 상대에게 알림 없음</td></tr>
+          <tr><td>🚫 (어느 한쪽)</td><td>p.M 피드백 설문 진행</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 06 과금 구조 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 06</div>
+    <div class="chapter-title">과금 구조</div>
+    <div class="card">
+      <div class="card-title">기본 철학</div>
+      <div class="card-body">
+        기능 제한으로 결제를 강요하지 않는다.<br>
+        무료로도 핵심 경험(소모임, 매칭, 채팅)은 온전히 제공.<br>
+        유료는 편의·프라이버시·정보의 질을 판다.<br>
+        소비적이지 않고 깔끔한 앱.
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">무료</div>
+        <div class="card-body">
+          소모임 / 이벤트 ✓<br>
+          매칭 / 채팅 ✓<br>
+          프로필북 열람 ✓<br>
+          광고 있음
+        </div>
+      </div>
+      <div class="card purple">
+        <div class="card-title">p.2+ 유료</div>
+        <div class="card-body">
+          광고 제거 ✓<br>
+          나를 좋아요 한 사람 보기 ✓<br>
+          패스한 사람 되살리기 ✓<br>
+          <br>
+          <strong>월 7,900원</strong><br>
+          3개월 19,900원<br>
+          무료 체험 없음
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">p.2+ 혜택 상세</div>
+      <div class="card-body">
+        <strong>나를 좋아요 한 사람 보기</strong><br>
+        라이브러리 탭에서 블러 해제 — 누가 나를 Page했는지 확인 가능<br><br>
+        <strong>패스한 사람 되살리기</strong><br>
+        라이브러리 "내가 패스한 사람" 탭에서 되살리기 가능<br>
+        당일 무료 되돌리기와 별개 — 기간 제한 없이 히스토리에서 복구<br><br>
+        <strong>광고 제거</strong><br>
+        앱 내 외부 광고 배너 미노출
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 07 p.Qurated -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 07</div>
+    <div class="chapter-title">p.Qurated</div>
+    <div class="card dark">
+      <div class="card-title">서비스 정의</div>
+      <div class="card-body">
+        <strong>p.Qurated</strong> — Queer + Curated<br>
+        매니저 캐릭터: <strong>Q (큐)</strong><br><br>
+        "Q가 당신에게 딱 맞는 사람을 소개해드려요."<br><br>
+        결정사형 프리미엄 매칭 서비스.<br>
+        일반 앱 레이어와 명확히 분리된 별도 구조.
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="card purple">
+        <div class="card-title">p.Qurated Edition</div>
+        <div class="card-body">
+          <strong style="font-size:20px">월 10만원</strong><br><br>
+          주 1권 큐레이티드 프로필북<br>
+          월 1회 오프라인 만남 주선<br>
+          추가 프로필 열람 ✓<br>
+          &nbsp;&nbsp;<small style="color:#666">직업·학력·연봉대·거주형태</small><br>
+          매칭 후 피드백 채팅 ✓
+        </div>
+      </div>
+      <div class="card dark">
+        <div class="card-title">p.Qurated Edition+</div>
+        <div class="card-body">
+          <strong style="font-size:20px">월 30만원</strong><br><br>
+          주 3권 큐레이티드 프로필북<br>
+          주 1회 오프라인 주선 (Q 직접 큐레이션)<br>
+          추가 프로필 열람 ✓<br>
+          매칭 후 피드백 채팅 ✓<br>
+          Q 소개 이유 작성 ✓
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">티어 네이밍 의도</div>
+      <div class="card-body">
+        Edition = 일반판 — 큐레이티드 경험의 시작<br>
+        Edition+ = 심화판 — Q의 개입 깊이가 다른, 에디터 레터가 붙은 버전<br><br>
+        차이는 단순 횟수가 아니라 정보의 깊이와 Q의 관계 수준.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">매칭 방식</div>
+      <div class="card-body">
+        AI 1차 필터링 후 운영자(Q)가 최종 판단<br>
+        활용 데이터: MBTI · 사랑의 언어 · 사주 일주 · 성향<br>
+        추가 프로필: 직업군 · 학력 · 연봉대 · 거주형태<br>
+        (일반 발견 탭에 절대 노출 안 됨 — 큐레이티드 레이어 전용)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">커플 성사 시</div>
+      <div class="card-body">
+        기부 유도 (2만원 × 2명)<br>
+        페이지북 책자 제공 (두 사람의 프로필북을 실제 책으로)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">진입 경로</div>
+      <div class="card-body">
+        발견 탭 6명 소진 후 빈 화면 안내<br>
+        프로필 탭 하단 조용한 신청 버튼<br><br>
+        신청 전 → "신청하기" / 신청 후 → "신청 현황 보기"
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">베타 전략</div>
+      <div class="card-body">
+        Phase 1: 기존 커뮤니티(우바세·엘밴드 등)에서 50~100명 모집<br>
+        베타 기간 무료 체험 → 첫 성공 케이스 만들기<br>
+        성공 케이스 익명 공유 → 유료 전환 유도<br><br>
+        모집 문구:<br>
+        <em>"p.Qurated 베타 멤버를 조용히 모집해요.<br>
+        Q와 인터뷰하고, 직접 한 분을 소개받아보는 경험.<br>
+        진지한 만남을 원하는 분만 신청해주세요."</em>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 08 수익 추산 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 08</div>
+    <div class="chapter-title">수익 추산 & 로드맵</div>
+
+    <div class="card">
+      <div class="card-title">모수 설계</div>
+      <div class="card-body">
+        한국 성소수자 추정 인구: 약 150~350만명 (Ipsos 2023, 성인 인구 7%)<br>
+        커밍아웃·자기인식 비율: 약 30~40%<br>
+        데이팅앱 사용 의향: 약 10~15%<br>
+        잠재 타깃 유저: 약 4.5만~21만명<br>
+        p.2 초기 점유 목표: <strong>MAU 10,000명</strong>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">단계별 수익 로드맵</div>
+      <div class="card-body">
+        <table>
+          <tr><th>구간</th><th>단계</th><th>MAU</th><th>월 수익</th><th>연 환산</th></tr>
+          <tr><td>0~6개월</td><td>베타 검증</td><td>3,000</td><td>~200만원</td><td>~2,400만원</td></tr>
+          <tr><td>7~12개월</td><td>본격 과금</td><td>6,000</td><td>~2,369만원</td><td>~2.8억원</td></tr>
+          <tr><td>13~24개월</td><td>스케일업</td><td>10,000</td><td>~4,422만원</td><td>~5.3억원</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Phase 3 수익 구성 (MAU 10,000 기준)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>항목</th><th>유저</th><th>단가</th><th>월 수익</th></tr>
+          <tr><td>p.2+ (전환율 18%)</td><td>1,800명</td><td>7,900원</td><td>1,422만원</td></tr>
+          <tr><td>p.Qurated Edition</td><td>150명</td><td>10만원</td><td>1,500만원</td></tr>
+          <tr><td>p.Qurated Edition+</td><td>50명</td><td>30만원</td><td>1,500만원</td></tr>
+          <tr><td><strong>합계</strong></td><td></td><td></td><td><strong>4,422만원</strong></td></tr>
+        </table>
+        <br>
+        수익 구성: p.Qurated 68% / p.2+ 32%<br>
+        p.Qurated가 수익의 핵심 — p.2는 유저 풀을 쌓는 역할
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 09 참고 서비스 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 09</div>
+    <div class="chapter-title">참고 서비스 분석</div>
+    <div class="card dark">
+      <div class="card-title">LGBTQ+ 앱 투자 트렌드 (v6 추가)</div>
+      <div class="card-body">
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">서비스</th><th style="color:rgba(255,255,255,0.4)">현황</th><th style="color:rgba(255,255,255,0.4)">의미</th></tr>
+          <tr><td>Grindr</td><td>2022 SPAC IPO $2.1B 상장<br>2024 매출 $300M+, EBITDA 마진 40%<br>MAU 1,420만명 (2024 Q4)<br>2025 매출 성장 26%+ 전망</td><td>LGBTQ+ 앱 수익화 가능성 입증<br>구독 전환율 약 8% (유료 유저 110만명)</td></tr>
+          <tr><td>HER</td><td>2015 시드 $1M (Reddit 창업자 등 투자)<br>2025년 5월 Match Group에 인수</td><td>퀴어 여성 특화 앱의 전략적 가치 인정<br>대형 플랫폼이 니치 플레이어 흡수 시작</td></tr>
+        </table>
+        <br>
+        → HER의 Match Group 인수는 퀴어 여성 시장이 주류 플랫폼의 레이더에 들어왔다는 신호.<br>
+        → p.2는 한국 시장 특화 + p.Qurated 큐레이티드 레이어로 차별화된 포지션 유지 필요.
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">과금 모델 비교</div>
+      <div class="card-body">
+        <table>
+          <tr><th>서비스</th><th>모델</th><th>주요 가격</th><th>p.2 참고점</th></tr>
+          <tr><td>Hinge</td><td>Hinge+ / HingeX</td><td>$32.99~$49.99/월</td><td>"삭제되도록 설계" 철학, 정보 비대칭으로 유료 유도</td></tr>
+          <tr><td>Bumble</td><td>3단계 구독</td><td>$40~$80/월</td><td>여성 우선, Beeline(나를 좋아요 한 사람) 잠금</td></tr>
+          <tr><td>HER</td><td>구독 + 커뮤니티</td><td>$8.99~$14.99/월</td><td>이벤트=리텐션 도구 → 2025.05 Match Group 인수</td></tr>
+          <tr><td>Grindr</td><td>구독 + 광고</td><td>$22.99~$44.99/월</td><td>MAU 대비 유료 전환율 ~8%, EBITDA 40%</td></tr>
+          <tr><td>시스</td><td>시스 플러스</td><td>₩12,900/월</td><td>더 많은 프로필 보기 중심, 커뮤니티 강점</td></tr>
+          <tr><td><strong>p.2</strong></td><td>구독 + 큐레이티드</td><td>₩7,900/월 + ₩10~30만원</td><td>기능 제한 아닌 경험의 질과 편의를 판다</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">글로벌 트렌드 인사이트</div>
+      <div class="card-body">
+        영국 2023~2024년 데이팅 앱 유저 140만명 이탈 (-16%).<br>
+        Tinder 60만 유저 손실. 그 자리를 여성 주도 퍼스널 매칭 에이전시가 채움.<br>
+        영국 퍼스널 매칭 에이전시 90%가 여성 소유·운영.<br>
+        Dating Options: 2025년 £200만 매출, 2,222쌍 커플 성사.<br><br>
+        니치 플랫폼에서 의미있는 연결 가능성이 일반 앱 대비 42% 높음.<br><br>
+        <strong>→ p.2 + p.Qurated 구조가 이 트렌드와 정확히 맞아떨어짐.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 10 시장 데이터 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 10</div>
+    <div class="chapter-title">시장 데이터</div>
+    <div class="card">
+      <div class="card-title">글로벌 LGBTQ+ 데이팅 앱 시장</div>
+      <div class="card-body">
+        <table>
+          <tr><th>항목</th><th>수치</th></tr>
+          <tr><td>2025년 시장 규모</td><td>약 10~20억 달러</td></tr>
+          <tr><td>2033년 전망</td><td>약 32~60억 달러</td></tr>
+          <tr><td>CAGR</td><td>9.3~15%</td></tr>
+          <tr><td>퀴어 여성 세그먼트</td><td>전체의 약 40%</td></tr>
+          <tr><td>아시아 성장률</td><td>연 18% (가장 빠른 지역)</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">시스(Sis) 앱 데이터 — 2025.10 기준</div>
+      <div class="card-body">
+        <table>
+          <tr><th>항목</th><th>수치</th></tr>
+          <tr><td>총 유저</td><td>69,000명+</td></tr>
+          <tr><td>월간 새 글</td><td>112,000건</td></tr>
+          <tr><td>19~26세</td><td>52% (핵심층)</td></tr>
+          <tr><td>V 성향</td><td>56.7%</td></tr>
+          <tr><td>싱글</td><td>66.2%</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="updated">Last updated: 2026.05.27 · v6 · p.2 by Dawn Works</div>
+
+</div>
+</body>
+</html>
