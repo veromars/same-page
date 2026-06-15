@@ -109,18 +109,20 @@
 
   <!-- Changelog -->
   <div class="changelog">
-    <div class="changelog-title">v6 업데이트 — 2026.05.27</div>
+    <div class="changelog-title">v6.2 업데이트 — 2026.06.15</div>
     <div class="changelog-body">
-      + p.2+ 혜택 수정 (여행 모드 제거 → 패스한 사람 되살리기 추가)<br>
-      + 라이브러리 구조 확정 (나를 Page한 사람 탭 / 내가 패스한 사람 탭)<br>
-      + 프로필북 책등 효과 확정 (유저 ID 해시 기반 컬러 고정, 발견 탭 10px 그라데이션)<br>
-      + 모임 참여 완료 화면 추가 (참여하기 → 완료 화면 → 단체방 입장)<br>
-      + 1:1 메시지창 상대방 프로필 사진 표시<br>
-      + 메시지창 헤더 탭 → 프로필북 이동<br>
-      + 타깃 설명 업데이트<br>
-      + 참고 서비스: HER — Match Group 인수 (2025.05), Grindr 재무 현황 추가<br>
-      + 온보딩 플로우 수정 (프로필북 작성 → 온보딩 후 선택 작성으로 변경)<br>
-      + 초기 유저 확보 전략 추가 (Ch.07-B) — 추천코드·SNS·실물 초대장
+      + p.2+ 가격 구조 확정 (₩5,900 / ₩17,900 / ₩39,900)<br>
+      + 단체 메시지방 삭제 → 모임 게시판 구조로 대체<br>
+      + 1:1 메시지방 유지 근거 명시 (p.M 공간)<br>
+      + p.Qurated 매칭 방식 수정 (Q AI 인터뷰 → 운영자 최종 결정)<br>
+      + p.Qurated 베타 — 숫자 제거, 자격 요건 프레이밍<br>
+      + 초기 유저 확보 커뮤니티 규모 수정 (우바세 ~100명, 엘밴드 ~80명)<br>
+      + Date Drop 분석 심화 — 4단계 프로필, 고갈 곡선, 대응 자산 매핑, 2세대 경쟁군<br>
+      + 이혼 패턴 역공학 인사이트 추가 (Gottman 연구 기반)<br>
+      + 수익 추산 p.2+ 가격 반영<br>
+      <br>
+      v6.1 — 2026.06.15: 블러 정책·1.5단계 매칭·발견 탭 철학·엘팅·Date Drop 알고리즘<br>
+      v6 — 2026.05.27: p.2+ 혜택·라이브러리·책등·모임 완료 화면·HER 인수·Grindr
     </div>
   </div>
 
@@ -129,7 +131,7 @@
     <div class="chapter-label">Chapter 01</div>
     <div class="chapter-title">서비스 정의</div>
     <div class="highlight">
-      <div class="highlight-text">가치관이 맞는 레즈비언 여성들의 깊은 연결.<br>빠른 매칭이 아니라, 천천히 읽고 연결되는 경험.</div>
+      <div class="highlight-text">가치관이 맞는 레즈비언 여성들의 깊은 연결.<br>누구나 가볍게 시작할 수 있되, 원하는 사람은 얼마든 깊이 들어갈 수 있는 공간.</div>
     </div>
     <div class="two-col">
       <div class="card dark">
@@ -311,13 +313,12 @@
     <div class="card">
       <div class="card-title">카카오톡 커뮤니티 연결 전략</div>
       <div class="card-body">
-        모임 탭 내 '커뮤니티' 카테고리에서 외부 카카오톡 단톡 링크 연결 지원.<br>
-        기존 카카오톡 그룹채팅 커뮤니티는 흡수하지 않음.<br>
-        채팅방은 그대로 유지하되,<br>
-        앱의 소모임·이벤트 정보를 안팎으로 연결·공유.<br><br>
+        모임 탭 내 '커뮤니티' 카테고리에서 기존 카카오톡 단톡방을 앱 안으로 흡수.<br>
+        카카오톡 그룹채팅 커뮤니티에 p.2 연동 링크 제공 → 앱 내 커뮤니티 페이지로 연결.<br>
+        소모임·이벤트 정보를 앱 안팎으로 연결·공유.<br><br>
         역할 분리:<br>
-        이벤트 RSVP → p.2 안에서<br>
-        실시간 대화 → 카카오톡에서
+        이벤트 RSVP · 모임 정보 → p.2 안에서<br>
+        실시간 대화 · 기존 채팅 → 카카오톡에서 병행
       </div>
     </div>
   </div>
@@ -326,12 +327,43 @@
   <div class="chapter">
     <div class="chapter-label">Chapter 05</div>
     <div class="chapter-title">매칭 흐름</div>
-    <div class="flow">
-      <div class="flow-step"><div class="flow-label">Step 1</div><div>내가 Page her → 상대도 Page her</div></div>
-      <div class="flow-step"><div class="flow-label">Step 2</div><div>매칭 성사 — "on the same page ♥" 오버레이<br><span style="font-size:12px;opacity:0.6">"어떤 인연이 될지는 두 분이 써내려가요"</span></div></div>
-      <div class="flow-step"><div class="flow-label">Step 3</div><div>메시지창 열림 + 상단에 "함께 갈 수 있는 모임" 배너</div></div>
-      <div class="flow-step"><div class="flow-label">Step 4</div><div>모임 탭 소셜 카테고리로 연결 → 1:1 or 소규모 팟 참여</div></div>
+
+    <div class="card dark">
+      <div class="card-title">1.5단계 매칭 구조 (v6.1 확정)</div>
+      <div class="card-body">
+        복잡한 다단계 없이 단순하게 — 얇은 풀에서 마찰 최소화.<br><br>
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">단계</th><th style="color:rgba(255,255,255,0.4)">액션</th><th style="color:rgba(255,255,255,0.4)">감정</th></tr>
+          <tr><td>발견</td><td>블러 커버 → 탭 → 세부 프로필 읽기</td><td>"한번 더 들여다볼까"</td></tr>
+          <tr><td>Page her</td><td>글/키워드/답변 읽고 가볍게 담기</td><td>"괜찮은데, 더 알고 싶어"</td></tr>
+          <tr><td>매칭 성사</td><td>상대도 Page her → 블러 해제</td><td>"어, 이런 사람이었구나" — 첫 설렘</td></tr>
+          <tr><td>연결</td><td>메시지창 열림 → 대화/모임 자유 선택</td><td>강요 없이 자율적으로</td></tr>
+        </table>
+      </div>
     </div>
+
+    <div class="flow">
+      <div class="flow-step"><div class="flow-label">Step 1</div><div>발견 탭 북 스택 — 블러 커버 탭 → 세부 프로필 진입 (사진 선명, 답변 공개)</div></div>
+      <div class="flow-step"><div class="flow-label">Step 2</div><div>Page her → 라이브러리 담김 (상대 알림 없음)</div></div>
+      <div class="flow-step"><div class="flow-label">Step 3</div><div>상대도 Page her → 매칭 성사<br>"on the same page ♥" + "어떤 인연이 될지는 두 분이 써내려가요"<br>이 순간 블러 해제 애니메이션 (blur 20px → 0, 0.8s)</div></div>
+      <div class="flow-step"><div class="flow-label">Step 4</div><div>메시지창 열림 — p.M 선택지: 모임 함께 · 만남 제안 · 직접 대화</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">사진 블러 정책 (v6.1 확정)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>화면</th><th>블러</th><th>이유</th></tr>
+          <tr><td>발견 탭 북 스택 커버</td><td>✓ 실루엣 수준</td><td>표지만 보고 pass/좋아요 막기 → 한 번 더 탭하게 유도</td></tr>
+          <tr><td>세부 프로필 페이지 (매칭 전/후 동일)</td><td>✗ 선명하게</td><td>사진·글 자유롭게 — 강조하고 싶은 걸 강조하는 구조</td></tr>
+          <tr><td>매칭 성사 순간</td><td>커버 블러 해제 이펙트</td><td>발견 탭 커버의 블러가 걷히는 애니메이션 — 이미 내부에서 볼 수 있던 사진, 커버에서 처음 선명하게 보이는 순간</td></tr>
+        </table>
+        <br>
+        사진을 강조하고 싶은 사람은 사진으로, 글로 자신을 표현하고 싶은 사람은 텍스트가 강점이 되는 구조.<br>
+        p.2의 차별점은 사진 너머의 것들 — UX가 이를 자연스럽게 보여줌.
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">발견 탭 UX</div>
       <div class="card-body">
@@ -356,49 +388,102 @@
     </div>
   </div>
 
-  <!-- CH 05-B 단체 메시지방 & p.M 팔로업 -->
+  <!-- CH 05-C 발견 탭 철학 & 모임의 역할 -->
   <div class="chapter">
-    <div class="chapter-label">Chapter 05-B <span class="new-badge">new</span></div>
-    <div class="chapter-title">단체 메시지방 & p.M 팔로업</div>
+    <div class="chapter-label">Chapter 05-C <span class="new-badge">new</span></div>
+    <div class="chapter-title">발견 탭 철학 & 모임의 역할</div>
+
+    <div class="highlight">
+      <div class="highlight-text">발견 탭은 입구다.<br>모임이 앱을 살아있게 만드는 엔진이다.</div>
+    </div>
 
     <div class="card dark">
-      <div class="card-title">단체 메시지방 구조</div>
+      <div class="card-title">Zoe 껍데기 문제</div>
       <div class="card-body">
-        모임 상세 페이지에서 "참여하기" → 단체 채팅방 자동 생성<br>
-        (현재: 바로 참여 / 추후: 호스트 승인 옵션 추가 예정)<br><br>
+        Zoe를 비롯한 기존 앱의 현실:<br>
+        젊은 유저들 → 사진 몇 장 + 인스타그램 링크<br>
+        앱 내 소통 없이, 관심 있으면 인스타 DM으로 연결<br>
+        → 앱이 인스타 유입 채널로 전락<br><br>
+        p.2가 껍데기가 되지 않으려면 — 앱 안에서 실제 연결이 일어나야 함.<br>
+        그 장치가 <strong>모임(소모임)</strong>이다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">앱 활성화 루프</div>
+      <div class="card-body">
         <table>
-          <tr><th style="color:rgba(255,255,255,0.4)">항목</th><th style="color:rgba(255,255,255,0.4)">내용</th></tr>
-          <tr><td>방 아이콘</td><td>모임 카테고리 이모지</td></tr>
-          <tr><td>참여자 목록</td><td>호스트 배지 표시, 탭 시 제한된 프로필 보기</td></tr>
-          <tr><td>대상 모임 정원</td><td>최대 12명 (초과 시 팔로업 없음)</td></tr>
+          <tr><th>단계</th><th>역할</th></tr>
+          <tr><td>발견 탭</td><td>입구 — 나를 발견해줘, 글/사진으로 자신 표현</td></tr>
+          <tr><td>모임 탭</td><td>엔진 — 같은 공간에서 자연스럽게 오프라인 만남</td></tr>
+          <tr><td>p.M 팔로업</td><td>연결고리 — 오프라인 경험을 온라인으로 이어줌</td></tr>
+          <tr><td>메시지 / 매칭</td><td>결과 — 앱 안에서 지속되는 관계</td></tr>
+        </table>
+        <br>
+        인스타에서 서로 피드 보고 DM하는 흐름을 p.2 안에서 대체:<br>
+        모임 참여 → 오프라인 만남 → p.M 팔로업 → 매칭 & 대화
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-title">타깃 전략 — 라이트 유저 포용 (v6.1)</div>
+      <div class="card-body">
+        <strong>모두가 이용 가능하되, 깊이는 선택지로.</strong><br><br>
+        라이트 유저: 사진 위주, 간단한 소개 → 발견 탭 & 모임에서 자연스럽게 활동<br>
+        딥 유저: Ch.1~3 풍부한 답변 → 더 정확한 매칭, p.Qurated로 연결<br><br>
+        프로필 완성도가 높을수록 매칭 품질이 높아지는 구조 — 강요 없이 동기 부여.<br>
+        (Hinge가 완성도 높은 프로필을 우선 노출하는 방식과 동일한 원리)
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">프로필 3단계 구조</div>
+      <div class="card-body">
+        <table>
+          <tr><th>단계</th><th>내용</th><th>발견 탭 노출</th></tr>
+          <tr><td>기본 (필수)</td><td>사진, 닉네임, 나이, 지역, 성향</td><td>✓ 즉시 노출</td></tr>
+          <tr><td>소개 (선택)</td><td>대표 한 줄, 지금 이 순간, Ch.1 일부</td><td>✓ 노출 + 매칭 품질 상승</td></tr>
+          <tr><td>깊이 (선택)</td><td>Ch.1~3 전체, 특별부록 (가치관)</td><td>✓ p.Qurated 우선 대상</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- CH 05-B 모임 커뮤니케이션 구조 & p.M 팔로업 -->
+  <div class="chapter">
+    <div class="chapter-label">Chapter 05-B</div>
+    <div class="chapter-title">모임 커뮤니케이션 & p.M 팔로업</div>
+
+    <div class="card dark">
+      <div class="card-title">메시지 구조 확정 (v6.2)</div>
+      <div class="card-body">
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">채널</th><th style="color:rgba(255,255,255,0.4)">결정</th><th style="color:rgba(255,255,255,0.4)">이유</th></tr>
+          <tr><td>단체 메시지방</td><td>삭제</td><td>카카오톡이 더 잘 함. 채팅 인프라 부담 대비 필요도 낮음</td></tr>
+          <tr><td>1:1 메시지방</td><td>유지</td><td>p.M이 살아있는 공간. 매칭 순간·팔로업 루프의 핵심</td></tr>
+          <tr><td>모임 실시간 대화</td><td>오픈카톡 연동</td><td>호스트가 오픈카톡 링크 등록 → 앱에서 연결</td></tr>
         </table>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">단체방에서 제한된 프로필 공개 범위</div>
+      <div class="card-title">모임 상세 페이지 구조 (단체방 대체)</div>
       <div class="card-body">
-        매칭된 상대가 아닌 모임 참여자에게는 아래만 공개:<br><br>
         <table>
-          <tr><th>항목</th><th>공개 여부</th></tr>
-          <tr><td>프로필 이미지</td><td>✓ (photoPrivate 이미지는 블러)</td></tr>
-          <tr><td>이름/닉네임, 나이</td><td>✓</td></tr>
-          <tr><td>bio</td><td>✓ 첫 줄만</td></tr>
-          <tr><td>나에 대해 — 내 스타일, 이상형, 주량, 흡연 여부</td><td>✓</td></tr>
-          <tr><td>태그</td><td>✓</td></tr>
-          <tr><td>챕터 답변 (Ch.1~3)</td><td>✗ 매칭 후 공개</td></tr>
+          <tr><th>탭</th><th>내용</th></tr>
+          <tr><td>정보</td><td>모임 설명 · 호스트 소개 · 주의사항 · 오픈카톡 링크</td></tr>
+          <tr><td>게시판</td><td>공지 (호스트만 작성) · 자유 댓글 (참여자 전체) · 모임 후기</td></tr>
+          <tr><td>참여자</td><td>닉네임·나이·태그만 공개 → 탭하면 제한 프로필 팝업</td></tr>
         </table>
-        <br>
-        하단 안내: "💜 더 알아보려면 매칭이 필요해요"
       </div>
     </div>
 
     <div class="card purple">
       <div class="card-title">p.M 팔로업 플로우 — 모임 후 체크인</div>
       <div class="card-body">
-        모임 다음날 p.M이 메시지 발송:<br>
-        "어제 모임은 어떠셨나요? 호스트에게 전하고 싶은 말이 있으면 남겨주세요."<br><br>
-        이후 각 참여자에 대해 순차적으로 선택지 제시:
+        모임 다음날 p.M이 각 참여자에게 <strong>1:1 개별 메시지</strong> 발송:<br>
+        "어제 [모임명]에서 만난 분들 어떠셨나요?"<br><br>
+        참여자 목록 순서대로 선택지 제시:
       </div>
     </div>
 
@@ -463,23 +548,32 @@
           나를 좋아요 한 사람 보기 ✓<br>
           패스한 사람 되살리기 ✓<br>
           <br>
-          <strong>월 7,900원</strong><br>
-          3개월 19,900원<br>
-          무료 체험 없음
+          <strong>1주 ₩5,900</strong><br>
+          1개월 ₩17,900 (24% 할인)<br>
+          3개월 ₩39,900 (48% 할인)<br>
+          무료 체험 없음 · 해지 예약 즉시 노출
         </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-title">p.2+ 혜택 상세</div>
+      <div class="card-title">p.2+ 가격 철학</div>
       <div class="card-body">
-        <strong>나를 좋아요 한 사람 보기</strong><br>
-        라이브러리 탭에서 블러 해제 — 누가 나를 Page했는지 확인 가능<br><br>
-        <strong>패스한 사람 되살리기</strong><br>
-        라이브러리 "내가 패스한 사람" 탭에서 되살리기 가능<br>
-        당일 무료 되돌리기와 별개 — 기간 제한 없이 히스토리에서 복구<br><br>
-        <strong>광고 제거</strong><br>
-        앱 내 외부 광고 배너 미노출
+        p.2+는 네트워킹이 아닌 <strong>데이팅 집중 진입 도구</strong>.<br>
+        필요할 때 잠깐 쓰고, 매칭 성공하면 더 이상 필요 없어야 하는 서비스.<br><br>
+        <table>
+          <tr><th>플랜</th><th>가격</th><th>주 환산</th><th>할인</th><th>포지셔닝</th></tr>
+          <tr><td>1주</td><td>₩5,900</td><td>₩5,900</td><td>—</td><td>"일단 해볼게"</td></tr>
+          <tr><td>1개월</td><td>₩17,900</td><td>₩4,475</td><td>24%</td><td>"이번 달 집중적으로"</td></tr>
+          <tr><td>3개월</td><td>₩39,900</td><td>₩3,069</td><td>48%</td><td>"진지하게 3개월"</td></tr>
+        </table>
+        <br>
+        6개월·연간 플랜 없음 — 데이팅앱 평균 이용 기간 3~6개월, 상한이 3개월.<br>
+        해지 예약 버튼 결제 직후 즉시 노출. 갱신 3일 전 알림.<br><br>
+        <strong>혜택 상세</strong><br>
+        나를 좋아요 한 사람 보기 — 라이브러리에서 블러 해제<br>
+        패스한 사람 되살리기 — 기간 제한 없이 히스토리에서 복구<br>
+        광고 제거 — 앱 내 외부 광고 배너 미노출
       </div>
     </div>
   </div>
@@ -536,10 +630,11 @@
     <div class="card">
       <div class="card-title">매칭 방식</div>
       <div class="card-body">
-        AI 1차 필터링 후 운영자(Q)가 최종 판단<br>
+        Q(AI)가 인터뷰 및 1차 큐레이션 진행 → 운영자가 최종 매칭 결정<br>
         활용 데이터: MBTI · 사랑의 언어 · 사주 일주 · 성향<br>
         추가 프로필: 직업군 · 학력 · 연봉대 · 거주형태<br>
-        (일반 발견 탭에 절대 노출 안 됨 — 큐레이티드 레이어 전용)
+        (일반 발견 탭에 절대 노출 안 됨 — 큐레이티드 레이어 전용)<br><br>
+        베타 → 장기: Q의 인터뷰 품질 검증 후 점진적으로 자동화 확대
       </div>
     </div>
 
@@ -563,13 +658,11 @@
     <div class="card">
       <div class="card-title">베타 전략</div>
       <div class="card-body">
-        Phase 1: 기존 커뮤니티(우바세·엘밴드 등)에서 50~100명 모집<br>
-        베타 기간 무료 체험 → 첫 성공 케이스 만들기<br>
-        성공 케이스 익명 공유 → 유료 전환 유도<br><br>
-        모집 문구:<br>
-        <em>"p.Qurated 베타 멤버를 조용히 모집해요.<br>
+        p.Qurated 베타 멤버를 조용히 모집.<br>
         Q와 인터뷰하고, 직접 한 분을 소개받아보는 경험.<br>
-        진지한 만남을 원하는 분만 신청해주세요."</em>
+        진지한 만남을 원하는 분만 신청.<br><br>
+        숫자 공개 없음 — 자격 요건으로 희소성 연출.<br>
+        베타 기간 무료 체험 → 첫 성공 케이스 만들기 → 익명 공유 → 유료 전환 유도
       </div>
     </div>
   </div>
@@ -584,7 +677,7 @@
       <div class="card-body">
         <table>
           <tr><th style="color:rgba(255,255,255,0.4)">단계</th><th style="color:rgba(255,255,255,0.4)">방법</th><th style="color:rgba(255,255,255,0.4)">목표</th></tr>
-          <tr><td>1단계</td><td>기존 커뮤니티 직접 모집<br>(우바세 ~80명, 엘밴드 ~70명)</td><td>시드 유저 50~100명</td></tr>
+          <tr><td>1단계</td><td>기존 커뮤니티 직접 모집<br>(우바세 ~100명, 엘밴드 ~80명)</td><td>시드 유저 50~100명</td></tr>
           <tr><td>2단계</td><td>추천코드 지인 확산<br>시드 유저 1인당 코드 10개 보유</td><td>500~1,000명</td></tr>
           <tr><td>3단계</td><td>SNS 지속 포스팅 + DM 초대링크</td><td>지속 유입</td></tr>
           <tr><td>4단계</td><td>바·클럽 초대장 랜덤 배포<br>실물 트럼프 카드형 초대장</td><td>오프라인 확산</td></tr>
@@ -714,6 +807,106 @@
         <strong>→ p.2 + p.Qurated 구조가 이 트렌드와 정확히 맞아떨어짐.</strong>
       </div>
     </div>
+
+    <div class="card purple">
+      <div class="card-title">엘팅 (v6.1 추가) — 매칭 후 사진 공개 방식</div>
+      <div class="card-body">
+        2016년부터 운영된 국내 레즈비언 소개팅 앱.<br>
+        하루 3명 추천 ("오늘의 팅") — 프로필 작성 후 승인 심사 통과 필요.<br><br>
+        <strong>핵심 차별점: 매칭 후 사진 공개</strong><br>
+        매칭 전 → 텍스트/키워드 기반 판단<br>
+        매칭 성사 → 그 순간 사진 공개<br><br>
+        → 소개 내용에 더 신경 쓰게 되는 구조<br>
+        → 사진보다 글로 먼저 호감을 쌓는 흐름<br>
+        → 매칭 순간 자체가 감정적 이벤트가 됨<br><br>
+        p.2 적용: 발견 탭 커버 블러 유지 + 매칭 성사 시 블러 해제 애니메이션이 이 구조와 동일한 원리.
+      </div>
+    </div>
+
+    <div class="card dark">
+      <div class="card-title">매칭 알고리즘 비교 분석 (v6.1 추가)</div>
+      <div class="card-body">
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">서비스</th><th style="color:rgba(255,255,255,0.4)">방식</th><th style="color:rgba(255,255,255,0.4)">p.2 참고점</th></tr>
+          <tr><td>Hinge</td><td>Gale-Shapley 안정 매칭 + 내부 Elo 티어<br>프로필 완성도 높을수록 우선 노출<br>프롬프트 답변 = 알고리즘 입력값</td><td>완성도 높은 프로필 → 매칭 품질 상승<br>강요 없이 깊이 쓸 동기 부여</td></tr>
+          <tr><td>Date Drop</td><td>가치관 50문항 + 음성 대화 + 주관식<br>실제 데이트 성사 데이터로 모델 훈련<br>주 1회 매칭, Tinder 대비 전환율 10배</td><td>모임 후 p.M 팔로업 = 실제 만남 결과 데이터<br>초기엔 운영자 판단 → 데이터 쌓이면 학습</td></tr>
+          <tr><td>엘팅</td><td>하루 3명 큐레이션<br>매칭 후 사진 공개</td><td>발견 탭 커버 블러 + 매칭 시 해제 구조로 적용</td></tr>
+        </table>
+        <br>
+        <strong>p.2 매칭 알고리즘 방향:</strong><br>
+        초기 → 거리·성향·활동 기반 기본 필터링<br>
+        중기 → 프로필 완성도 가중치 + p.M 팔로업 반응 데이터 수집<br>
+        장기 → 실제 만남 결과로 모델 학습 (Date Drop 방식)
+      </div>
+    </div>
+
+    <div class="card peach">
+      <div class="card-title">Date Drop 심화 분석 — 얇은 시장 교훈 (v6.2 추가)</div>
+      <div class="card-body">
+        <strong>프로필 구축 4단계:</strong><br>
+        ① 리커트 50문항 ② 가치관 다중선택 ③ 주관식 ④ 음성 대화<br><br>
+        <strong>고갈 곡선 데이터:</strong><br>
+        스탠포드 침투율 70%, 4주 리텐션 58% — 그러나 11주차에 이탈 발생.<br>
+        "남은 건 괴짜뿐" 체감 → 닫힌 풀의 한계.<br><br>
+        <strong>p.2 대응 자산 매핑:</strong>
+        <table>
+          <tr><th>Date Drop 요소</th><th>p.2 대응 자산</th></tr>
+          <tr><td>결과 피드백 루프</td><td>모임 후 p.M 팔로업 5선택지 = 대면 결과 신호</td></tr>
+          <tr><td>음성 대화 입력</td><td>Q 인터뷰 = 자기보고 너머를 듣는 구조</td></tr>
+          <tr><td>예측모델 콜드스타트</td><td>초기 운영자 판단 → 데이터 축적 후 학습</td></tr>
+          <tr><td>가치관 정량 문항</td><td>27문항 서사형 — 텍스트로 차별화</td></tr>
+        </table>
+        <br>
+        <strong>얇은 시장 함정/방어:</strong>
+        <table>
+          <tr><th>함정</th><th>p.2 방어</th></tr>
+          <tr><td>고갈 곡선 — 닫힌 풀 소진 후 이탈</td><td>모임(오프라인)이 신선한 후보를 계속 주입하는 펌프</td></tr>
+          <tr><td>주기적 매칭의 압박 — 의무감 발생</td><td>강요 아닌 초대 톤 (p.M "조용한 개입")</td></tr>
+          <tr><td>자기보고의 한계 — 페르소나만 포착</td><td>모임 행동 + Q 인터뷰로 보강</td></tr>
+          <tr><td>표면 모방 가능</td><td>해자를 커뮤니티 신뢰·정체성에 둠</td></tr>
+        </table>
+        <br>
+        <strong>핵심 통찰:</strong> 얇은 시장에서 병목은 배정 최적화가 아니라 liquidity.<br>
+        모임이 풀을 살아있게 만드는 엔진이어야 한다.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2세대 데이팅 경쟁군 (v6.2 추가)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>서비스</th><th>특징</th></tr>
+          <tr><td>Known</td><td>음성 AI 온보딩으로 텍스트 프로필 폼 대체. SF 베타 소개의 80%가 실제 만남</td></tr>
+          <tr><td>Sitch</td><td>인간 전문성 + AI 매치메이킹 결합</td></tr>
+          <tr><td>Les Amís</td><td>AI 매칭 + 활동(도자기·와인 클래스) 결합</td></tr>
+          <tr><td>Clyx</td><td>지역 이벤트 발견 중심</td></tr>
+        </table>
+        <br>
+        <strong>2세대 공통 문법: 음성 입력 · 사람+AI 큐레이션 · 활동/이벤트 결합</strong><br>
+        p.2는 이미 셋 다 보유 (Q 인터뷰 / Q 큐레이션 / 모임).<br>
+        차별점은 퀴어 여성 니치에서 한다는 것.
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-title">이혼 패턴 역공학 — 매칭 품질 향상 (v6.2 추가)</div>
+      <div class="card-body">
+        <strong>핵심 인사이트 (Gottman 연구 기반):</strong><br>
+        기존 데이팅앱은 초기 호감을 최적화. p.2는 장기 관계 실패 패턴을 역공학해서 매칭.<br><br>
+        <strong>관계 실패의 주요 예측 변수:</strong>
+        <table>
+          <tr><th>변수</th><th>자기보고 가능?</th><th>p.2 포착 방법</th></tr>
+          <tr><td>갈등 방식 불일치</td><td>✗ (행동으로만 드러남)</td><td>모임 행동 데이터 + p.M 팔로업</td></tr>
+          <tr><td>경제관 불일치</td><td>△ (설문 가능하나 왜곡 있음)</td><td>Q 인터뷰 심층 질문</td></tr>
+          <tr><td>경멸(contempt) 패턴</td><td>✗</td><td>모임 후 🚫 신호로 간접 포착</td></tr>
+          <tr><td>관계 구조·미래 계획</td><td>✓</td><td>Ch.3 질문 + 특별부록 가치관</td></tr>
+        </table>
+        <br>
+        핵심: 차이 자체보다 <strong>갈등·회복 방식의 호환성</strong>이 장기 관계 예측력이 높음.<br>
+        → 매칭 알고리즘의 가중치를 초기 호감이 아닌 갈등 스타일 호환성에 더 둬야 함.<br>
+        → 모임 + p.M 팔로업이 이 행동 데이터를 포착하는 구조적 우위.
+      </div>
+    </div>
   </div>
 
   <!-- CH 10 시장 데이터 -->
@@ -748,7 +941,7 @@
     </div>
   </div>
 
-  <div class="updated">Last updated: 2026.05.27 · v6 · p.2 by Dawn Works</div>
+  <div class="updated">Last updated: 2026.06.15 · v6.2 · p.2 by Dawn Works</div>
 
 </div>
 </body>
