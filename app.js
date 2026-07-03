@@ -1,4 +1,7 @@
 console.log('app loaded');
+
+// Dev flag: set true to skip onboarding and jump straight to the app
+const SKIP_ONBOARDING = true;
 let myAnswers = window.myAnswers || window.currentUser?.answers || {};
 let dailyProfiles = [];
 let browseQueue = [];
@@ -821,12 +824,19 @@ const MOCK_MEETUPS = [
   }
 ];
 
-const MATCHED_PROFILES = [
-  { id: 4, name: "여름", image: MOCK_PROFILES[4].image, isNew: true },
-  { id: 5, name: "수아", image: MOCK_PROFILES[5].image, isNew: false },
-  { id: 6, name: "지안", image: MOCK_PROFILES[6].image, isNew: false },
-  { id: 7, name: "하늘", image: MOCK_PROFILES[7].image, isNew: false }
-];
+// Single source of truth for matched users — both messages tab and grid page reference this
+const MATCHED_USER_ANSWERS = {
+  4: ["같이 있어도 조용할 수 있는 것", "재즈바에서 혼자 술 한 잔", "느린 아침을 좋아해요"],
+  5: ["바람 부는 날 드라이브", "책 한 권과 카페 구석 자리", "말보다 눈빛으로 통하는 것"],
+  6: ["일몰 직전의 하늘색", "함께여도 각자의 시간", "좋아하는 음악 공유하기"],
+  7: ["오래된 필름 사진 같은 하루", "조용한 골목 산책", "취향이 맞는 사람"],
+};
+const MATCHED_USERS = [4, 5, 6, 7].map((id, i) => {
+  const p = MOCK_PROFILES.find(pr => pr.id === id);
+  const answers = MATCHED_USER_ANSWERS[id] || [];
+  return { id, name: p.name, birthYear: p.birthYear, image: p.image, isNew: i === 0, answers };
+});
+const MATCHED_PROFILES = MATCHED_USERS.map(({ id, name, image, isNew, answers }) => ({ id, name, image, isNew, answers }));
 
 const MOCK_CHATS = [
   {
@@ -2250,18 +2260,18 @@ window.switchTab = function (tabName) {
         <div class="matches-scroll-container" style="margin-top: 12px;">
           ${MATCHED_PROFILES.map(match => {
       const p = MOCK_PROFILES.find(pr => pr.id === match.id) || MOCK_PROFILES[0];
-      const spineColor = getSpineColor(p.id);
+      const spineColor = getMatchSpineColor(p.id);
       const distance = getDistance(p.id);
       return `
             <div class="match-thumbnail-wrap" onclick="openMatchIntroModal(${match.id})">
-              <div class="match-thumbnail saved-book-cover" style="box-shadow: 0 4px 10px rgba(0,0,0,0.15); border-radius: 6px;">
-                <div class="book-spine" style="background: linear-gradient(to right, ${spineColor}, rgba(0,0,0,0.15)); width: 5px;"></div>
-                <div class="thumbnail-card-content">
-                  <div class="thumbnail-nickname" style="font-family: 'Pretendard', sans-serif; font-size: 13px; font-weight: 600; top: 10px; padding: 0 4px 0 10px; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">${p.name}</div>
-                  <div class="thumbnail-info" style="font-size: 9px; bottom: 8px;">${getAge(p.birthYear)} ・ ${distance}km</div>
-                </div>
-                <div class="book-bg-photo" style="background-image: url('${p.image}'); filter: none; transform: scale(1.1);"></div>
+              <div class="match-thumbnail saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.18); border-radius:4px; border-left:3px solid ${spineColor};">
+                <div class="book-bg-photo" style="background-image: url('${p.image}'); filter: blur(1.5px); transform: scale(1.08);"></div>
                 <div class="book-overlay"></div>
+                <div style="position:absolute; top:0; left:0; width:100%; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
+                <div style="position:absolute; bottom:0; left:0; width:100%; height:35%; background:linear-gradient(to top, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
+                <div class="thumbnail-card-content">
+                  <div class="thumbnail-nickname" style="font-family:'Noto Serif KR',serif; font-size:13px; font-weight:400; top:40%; transform:translateY(-50%); padding:0 4px 0 10px; text-shadow:0 1px 4px rgba(0,0,0,0.5);">${p.name}</div>
+                </div>
               </div>
               <div class="match-thumbnail-heart">
                 <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -4079,11 +4089,29 @@ window.joinMeetupChat = function (meetupId) {
       participants: participantProfiles
     });
   }
-  if (m) m.hasRSVPd = true;
+  if (m) { m.hasRSVPd = true; m.currentCap = (m.currentCap || 0) + 1; }
   closeModal();
-  window.showToast('모임 참여 신청이 완료됐어요 ☺️');
   switchTab('messages');
-  setTimeout(() => openChat(chatId), 100);
+  const _joinContentArea = document.getElementById('main-content');
+  if (_joinContentArea) {
+    _joinContentArea.innerHTML = `
+      <div style="position:absolute;top:-60px;left:0;width:100%;height:calc(100vh - 84px);background:#F7F4F0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:0 24px;box-sizing:border-box;">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:10px;">
+          <div style="font-size:36px;text-align:center;">🎉</div>
+          <div style="font-size:16px;font-weight:300;color:var(--text-dark);text-align:center;">참여 완료!</div>
+          <div style="font-size:12px;color:#999;text-align:center;margin-bottom:22px;">${m.title}에 참여했어요</div>
+          <div style="width:100%;background:#EDE4F7;border-radius:14px;padding:16px 20px;box-sizing:border-box;text-align:center;">
+            <div style="font-size:10px;color:#9B72CC;margin-bottom:8px;">단체 메시지방 생성됨</div>
+            <div style="font-size:13px;font-weight:400;color:var(--text-dark);margin-bottom:6px;">${m.title}</div>
+            <div style="font-size:9px;color:#999;">${m.currentCap}명 참여 중</div>
+          </div>
+        </div>
+        <div style="width:100%;padding-bottom:20px;">
+          <button onclick="openChat('${chatId}')" style="width:100%;padding:14px;border-radius:24px;background:#9B72CC;color:white;font-size:15px;font-weight:600;border:none;cursor:pointer;">단체방 입장하기</button>
+        </div>
+      </div>
+    `;
+  }
 };
 
 window.submitRSVP = function (id) {
@@ -4136,7 +4164,46 @@ window.toggleBookmark = function (id) {
     renderMeetupList();
   }
 }
-window.openMatchIntroModal = function (profileId, isQurated = false) {
+window.openProfileFromModal = function (profileId, backTarget) {
+  const p = MOCK_PROFILES.find(pr => pr.id === profileId);
+  if (!p) return;
+  const amc = document.getElementById('answer-modal-container');
+  if (amc) amc.style.display = 'none';
+  const contentArea = document.getElementById('main-content');
+  if (!contentArea) return;
+  const backAction = backTarget === 'grid' ? `openAllMatchesGrid()` : `closeAnswerCard(); switchTab('messages')`;
+  contentArea.innerHTML = `
+    <div style="position:absolute; top:-60px; left:0; width:100%; height:calc(100vh - 84px); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color);">
+        <button class="back-btn" onclick="${backAction}"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:15px; font-weight:600;">${p.name}</div>
+        <div style="width:32px;"></div>
+      </div>
+      <div class="scroll-y" style="flex:1;">${getProfileDetailedHTML(p, false)}</div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.openProfileForChat = function (profileId, chatId) {
+  const p = MOCK_PROFILES.find(pr => pr.id === profileId);
+  if (!p) return;
+  const contentArea = document.getElementById('main-content');
+  if (!contentArea) return;
+  contentArea.innerHTML = `
+    <div style="position:absolute; top:-60px; left:0; width:100%; height:calc(100vh - 84px); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color);">
+        <button class="back-btn" onclick="openChat(${chatId})"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:15px; font-weight:600;">${p.name}</div>
+        <div style="width:32px;"></div>
+      </div>
+      <div class="scroll-y" style="flex:1;">${getProfileDetailedHTML(p, false)}</div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.openMatchIntroModal = function (profileId, isQurated = false, from = 'messages') {
   const match = MATCHED_PROFILES.find(m => m.id === profileId);
   if (!match) return;
 
@@ -4157,16 +4224,19 @@ window.openMatchIntroModal = function (profileId, isQurated = false) {
   amc.innerHTML = `
       <div class="match-intro-modal fade-in" style="overflow: hidden; display: flex; flex-direction: column;">
         <div class="chat-header" style="position: relative; width: 100%; z-index: 3001; background: transparent; justify-content: center; padding: 12px 20px; border-bottom: none; min-height: 60px;">
-          <button class="modal-fixed-close" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0;" onclick="closeAnswerCard()">
+          <button class="modal-fixed-close" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0;" onclick="closeAnswerCard(); switchTab('messages')">
             <i data-lucide="x" style="color:#333; width:28px;"></i>
           </button>
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <div style="font-size:16px; font-weight:700; color:#333;">${otherProfile.name}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${otherAge} ・ ${otherDist}km</div>
           </div>
+          <button onclick="openProfileFromModal(${otherProfile.id}, '${from}')" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;">
+            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${otherProfile.image}'); background-size:cover; background-position:center; background-color:#EDE0FF; border:1px solid rgba(0,0,0,0.08);"></div>
+          </button>
         </div>
 
-        <div class="match-intro-pm" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+        <div class="match-intro-pm" style="flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; display:flex; flex-direction:column;">
           <div style="text-align: center; font-size: 13px; color: var(--text-muted); margin-bottom: 20px;" class="fade-in">
             어떤 인연이 될지는 두 분이 써내려가요
           </div>
@@ -4176,9 +4246,9 @@ window.openMatchIntroModal = function (profileId, isQurated = false) {
               함께 읽고 싶은 이야기가 많을 것 같아요 ☺️
             </div>
           </div>
-          
+
           ${!isQurated ? `
-          <div class="match-options fade-in" id="regular-match-options-${match.id}" style="animation-delay: 1s; display:flex; flex-direction:column; margin-bottom:12px; margin-top:16px; gap:8px; padding:0 4px; position:relative; z-index:10; overflow:visible;">
+          <div class="match-options fade-in" id="regular-match-options-${match.id}" style="animation-delay: 1s; display:flex; flex-direction:column; margin-top:auto; margin-bottom:0; padding:0 4px 24px; gap:10px; position:relative; z-index:10; overflow:visible;">
             <button id="btn-step1-meetup-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
               📅 함께 참여할 수 있는 모임이 있어요
             </button>
@@ -4528,6 +4598,67 @@ window.triggerPostMeetingCheckin = function () {
 };
 
 
+window.closeGroupSidePanel = function () {
+  const el = document.getElementById('group-side-panel-overlay');
+  if (el) el.remove();
+};
+
+window.openGroupSidePanel = function (chatId) {
+  closeGroupSidePanel();
+  const c = MOCK_CHATS.find(x => x.id === chatId);
+  if (!c) return;
+  const meetup = MOCK_MEETUPS.find(x => x.id === c.meetupId);
+  const host = meetup ? MOCK_PROFILES.find(p => p.name === meetup.hostName) : null;
+  const parts = (c.participants || []);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'group-side-panel-overlay';
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;justify-content:flex-end;';
+
+  const hostHTML = host ? `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0EDE8;">
+      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${host.image}');background-size:cover;background-color:#EDE0FF;flex-shrink:0;"></div>
+      <div style="flex:1;">
+        <span style="font-size:13px;font-weight:600;color:#333;">${host.name}</span>
+        <span style="font-size:11px;color:#999;margin-left:4px;">${getAge(host.birthYear)}세</span>
+      </div>
+      <span style="font-size:10px;color:#9B72CC;background:#EDE4F7;padding:2px 8px;border-radius:20px;font-weight:600;">호스트</span>
+    </div>` : '';
+
+  const partsHTML = parts.map(pp => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0EDE8;">
+      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${pp.image}');background-size:cover;background-color:#EDE0FF;flex-shrink:0;"></div>
+      <div>
+        <span style="font-size:13px;font-weight:600;color:#333;">${pp.name}</span>
+        <span style="font-size:11px;color:#999;margin-left:4px;">${getAge(pp.birthYear)}세</span>
+      </div>
+    </div>`).join('');
+
+  overlay.innerHTML = `
+    <div onclick="closeGroupSidePanel()" style="position:absolute;inset:0;background:rgba(0,0,0,0.3);"></div>
+    <div style="position:relative;width:80%;max-width:300px;height:100%;background:var(--bg-color);overflow-y:auto;z-index:1;animation:slideInRight 0.25s ease-out;display:flex;flex-direction:column;">
+      <div style="padding:20px 16px 12px;border-bottom:1px solid #F0EDE8;">
+        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">${c.title}</div>
+        ${meetup ? `
+          <div style="font-size:12px;color:#666;margin-bottom:2px;">📍 ${meetup.shortLocation || ''}</div>
+          <div style="font-size:12px;color:#666;margin-bottom:2px;">📅 ${meetup.date || ''}</div>
+          <div style="font-size:12px;color:#666;">${(parts.length + (host ? 1 : 0))}명 참여 중</div>
+        ` : ''}
+      </div>
+      <div style="padding:12px 16px;border-bottom:1px solid #F0EDE8;">
+        <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:8px;">공지사항</div>
+        <div style="font-size:13px;color:${meetup?.notice ? '#333' : '#BBB'};">${meetup?.notice || '공지사항이 없어요'}</div>
+      </div>
+      <div style="padding:12px 16px;flex:1;">
+        <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:4px;">참여자</div>
+        ${hostHTML}${partsHTML}
+      </div>
+    </div>
+  `;
+  const container = document.getElementById('app-container') || document.body;
+  container.appendChild(overlay);
+};
+
 function openGroupChat(chatId) {
   const chat = MOCK_CHATS.find(c => c.id === chatId);
   if (!chat) return;
@@ -4550,8 +4681,8 @@ function openGroupChat(chatId) {
             <div style="font-size:16px; font-weight:700; color:#333;">${chat.title}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${totalCount}명 참여 중</div>
           </div>
-          <button onclick="openGroupParticipants('${chatId}')" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border:none; background:none; cursor:pointer; padding:0; color:#555;">
-            <i data-lucide="users" style="width:22px; height:22px;"></i>
+          <button onclick="openGroupSidePanel('${chatId}')" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border:none; background:none; cursor:pointer; padding:0; color:#555;">
+            <i data-lucide="more-horizontal" style="width:22px; height:22px;"></i>
           </button>
         </div>
         <div class="chat-scroller" id="group-chat-scroller">
@@ -4741,20 +4872,32 @@ window.openChat = function (chatId) {
 
   const p = MOCK_PROFILES.find(pr => pr.name === chat.name);
   const ageDistText = p ? `${getAge(p.birthYear)} ・ ${getDistance(p.id)}km` : chat.score;
+  const sharedMeetup = MOCK_MEETUPS.find(m =>
+    m.hasRSVPd && (m.hostName === chat.name || (m.participants || []).some(img => img === p?.image))
+  );
 
   const renderChatView = () => {
     contentArea.innerHTML = `
       <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
         <div class="chat-header" style="position: relative; justify-content: center; padding: 12px 20px; min-height: 60px;">
           <button class="back-btn" onclick="switchTab('messages')" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 0;"><i data-lucide="chevron-left" style="width:28px;"></i></button>
-          <div class="chat-header-user-info" style="display:flex; flex-direction:column; align-items:center; cursor:pointer;" onclick="openChatProfile(${chatId})">
+          <div class="chat-header-user-info" style="display:flex; flex-direction:column; align-items:center;">
             <div style="font-size:16px; font-weight:700; color:#333;">${chat.name}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${ageDistText}</div>
           </div>
+          <button onclick="openProfileForChat(${p?.id || 0}, ${chatId})" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;">
+            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; background-color:#EDE0FF; border:1px solid rgba(0,0,0,0.08);"></div>
+          </button>
         </div>
+        ${sharedMeetup ? `
+        <div id="shared-meetup-banner" style="background:#EDE4F7; padding:10px 16px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span style="font-size:13px; color:#333; flex:1; cursor:pointer; line-height:1.3;" onclick="openMeetupDetail(${sharedMeetup.id})">📅 ${sharedMeetup.title} · ${sharedMeetup.date || ''}</span>
+          <button onclick="document.getElementById('shared-meetup-banner').remove()" style="background:none; border:none; cursor:pointer; color:#999; padding:0; font-size:18px; flex-shrink:0; line-height:1;">×</button>
+        </div>
+        ` : ''}
 
         <div class="chat-scroller">
-          ${chat.messages.map(m => {
+          ${chat.messages.map((m, idx) => {
       let meetupHTML = '';
       if (m.meetupId) {
         const meetup = MOCK_MEETUPS.find(x => x.id === m.meetupId);
@@ -4769,6 +4912,18 @@ window.openChat = function (chatId) {
                   </div>
                 `;
         }
+      }
+      if (m.type === 'received') {
+        const isConsecutive = idx > 0 && chat.messages[idx - 1].type === 'received';
+        const avatarHTML = isConsecutive
+          ? `<div style="width:32px; flex-shrink:0;"></div>`
+          : `<div onclick="openProfileForChat(${p?.id || 0}, ${chatId})" style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; flex-shrink:0; background-color:#EDE0FF; cursor:pointer;"></div>`;
+        return `
+              ${meetupHTML}
+              <div style="display:flex; align-items:flex-start; gap:8px;">
+                ${avatarHTML}
+                <div class="chat-bubble received">${m.text}</div>
+              </div>`;
       }
       return `
               ${meetupHTML}
@@ -5189,19 +5344,12 @@ window.undoSwipe = function () {
   renderDiscoverTab();
 };
 
-const SPINE_COLORS = [
-  'rgba(155,35,25)', // red
-  'rgba(25,85,85)',  // teal
-  'rgba(45,45,115)', // indigo
-  'rgba(135,45,75)', // rose
-  'rgba(65,75,25)',  // olive
-  'rgba(160,90,20)'  // amber
-];
-
+const SPINE_COLORS = ['#C89FDB', '#A8C5A0', '#E8B4A0', '#9FB8D8', '#D4B896', '#B8A0C8'];
 function getSpineColor(id) {
-  const idx = (typeof id === 'string' ? parseInt(id.replace('p', '')) : id) % SPINE_COLORS.length;
-  return SPINE_COLORS[idx];
+  const s = String(id).replace('p', '');
+  return SPINE_COLORS[[...s].reduce((acc, c) => acc + c.charCodeAt(0), 0) % SPINE_COLORS.length];
 }
+const getMatchSpineColor = getSpineColor;
 
 function getDistance(id) {
   const seed = (typeof id === 'string' ? parseInt(id.replace('p', '')) : id);
@@ -5307,7 +5455,6 @@ window.renderDiscoverTab = function () {
     const item = remaining[i];
     const p = item.profile;
     const levelClass = `level-${i}`;
-    const spineColor = getSpineColor(item.id);
     const distance = getDistance(item.id);
 
     const isPaged = pagedSet?.has(item.id) ?? false;
@@ -5326,10 +5473,13 @@ window.renderDiscoverTab = function () {
     }
     if (!quote) quote = p.bio || "";
 
+    
     html += `
         <div class="book-card ${levelClass}" data-id="${item.id}" id="card-${item.id}" style="filter: ${isPassed ? 'grayscale(100%)' : 'none'};">
           ${pagedIndicator}
-          <div class="book-spine" style="background: linear-gradient(to right, ${spineColor}, rgba(0,0,0,0.15))"></div>
+          <div style="position:absolute; left:0; top:0; bottom:0; width:10px; z-index:5; border-radius:6px 0 0 6px; background:linear-gradient(to right, ${getSpineColor(item.id)}CC, ${getSpineColor(item.id)}FF, ${getSpineColor(item.id)}88);">
+            <div style="position:absolute; left:3px; top:0; bottom:0; width:1px; background:rgba(255,255,255,0.3);"></div>
+          </div>
           <div class="book-cover-content">
             <div class="book-meta-bar">
               <span class="book-meta-no">No. ${getAge(p.birthYear)}</span>
@@ -5383,22 +5533,28 @@ window.openAllMatchesGrid = function () {
     `;
   } else {
     gridHTML = `
-      <div style="display:grid; grid-template-columns:repeat(3,1fr); column-gap:8px; row-gap:20px; padding:0 20px 40px;">
-        ${MATCHED_PROFILES.map(match => {
+      <div style="display:grid; grid-template-columns:repeat(2,1fr); column-gap:12px; row-gap:16px; padding:0 20px 40px;">
+        ${MATCHED_PROFILES.map((match, idx) => {
       const p = MOCK_PROFILES.find(pr => pr.id === match.id);
-      const spineColor = getSpineColor(match.id);
+      const _spineColor = getMatchSpineColor(match.id);
       const distance = getDistance(match.id);
       const age = p ? getAge(p.birthYear) : '';
+      const _answers = match.answers || [];
+      const _randomAnswer = _answers.length ? _answers[Math.floor(Math.random() * _answers.length)] : '';
       return `
-            <div onclick="openMatchIntroModal(${match.id})" style="position:relative; aspect-ratio:2/3; border-radius:12px; overflow:hidden; box-shadow:0 6px 16px rgba(0,0,0,0.2); cursor:pointer;">
-              <div style="position:absolute; top:0; left:0; width:8px; height:100%; background:linear-gradient(to right,${spineColor},rgba(0,0,0,0.15)); z-index:2;"></div>
-              <div style="position:absolute; inset:0; background-image:url('${match.image}'); background-size:cover; background-position:center; filter:none; transform:scale(1.08);"></div>
-              <div style="position:absolute; inset:0; background:rgba(0,0,0,0.35);"></div>
-              <div style="position:absolute; top:0; left:0; width:100%; text-align:center; font-size:14px; font-weight:600; color:#FFF; z-index:3; padding-top:12px; text-shadow: 0 1px 4px rgba(0,0,0,0.5);">${match.name}</div>
-              ${age ? `<div style="position:absolute; bottom:8px; left:10px; font-size:9px; font-weight:300; color:rgba(255,255,255,0.8); z-index:3; font-family:'Jost',sans-serif;">${age} · ${distance}km</div>` : ''}
-              <div style="position:absolute; bottom:6px; right:6px; z-index:3; width:20px; height:20px; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.3); border-radius:50%;">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="#E2FF74"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <div onclick="openMatchIntroModal(${match.id}, false, 'grid')" class="saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.2); border-left:3px solid ${_spineColor};">
+              <div class="book-bg-photo" style="background-image:url('${p ? p.image : match.image}'); filter:blur(1.5px); transform:scale(1.08);"></div>
+              <div class="book-overlay"></div>
+              <div style="position:absolute; top:0; left:0; width:100%; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
+              <div style="position:absolute; bottom:0; left:0; width:100%; height:35%; background:linear-gradient(to top, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
+              <div style="position:absolute; top:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 8px; box-sizing:border-box; z-index:4;">
+                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">No.${age}</span>
+                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">${distance}km</span>
               </div>
+              <div class="thumbnail-card-content">
+                <div class="thumbnail-nickname" style="top:30%; transform:translateY(-50%);">${p ? p.name : match.name}</div>
+              </div>
+              ${_randomAnswer ? `<div style="position:absolute; bottom:14px; left:0; width:100%; padding:0 8px; box-sizing:border-box; z-index:4; text-align:center;"><div style="font-size:10px; color:rgba(255,255,255,0.75); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">"${_randomAnswer}"</div></div>` : ''}
             </div>
           `;
     }).join('')}
@@ -5504,7 +5660,12 @@ function startApp() {
   const doTransition = () => {
     if (transitioned) return;
     transitioned = true;
-    navigateTo('onboarding-0');
+    if (SKIP_ONBOARDING) {
+      navigateTo('main');
+      setTimeout(() => switchTab('messages'), 300);
+    } else {
+      navigateTo('onboarding-0');
+    }
   };
 
   setTimeout(doTransition, 2200);
