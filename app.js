@@ -40,14 +40,36 @@ window.getYearLabel = function (year) {
 const QUESTIONS = [
   // Chapter 1 · 나
   { id: 1, chapter: 1, text: "상대를 설레게 하는 나의 매력", type: "text" },
-  { id: 2, chapter: 1, text: "나의 하루 그리고 나의 휴일", type: "text" },
+  {
+    id: 2, chapter: 1, text: "나의 하루 그리고 나의 휴일", type: "compound",
+    axis: "에너지 회복", isCoreAxis: true,
+    subQuestions: [
+      { id: "2-1", text: "에너지", type: "ab-choice", options: ["혼자 충전이 필요한 편", "사람들 속에서 힘을 얻는 편"], required: true },
+      { id: "2-2", text: "내가 하루 또는 주말에 꼭 지키는 루틴은?", type: "text", required: false, placeholder: "편안하게 당신의 이야기를 들려주세요" }
+    ]
+  },
   { id: 3, chapter: 1, text: "나의 소울 푸드", type: "text" },
   { id: 4, chapter: 1, text: "나의 힐링 스팟", type: "text" },
-  { id: 5, chapter: 1, text: "나만의 초능력", type: "text" },
+  {
+    id: 5, chapter: 1, text: "내가 세상을 대하는 관점", type: "compound",
+    axis: "세계관", isCoreAxis: true,
+    subQuestions: [
+      { id: "5-1", text: "나는…", type: "ab-choice", options: ["목소리를 내는 사람", "개인 영역에 집중하는 사람"], required: true },
+      { id: "5-2", text: "나는…", type: "ab-choice", options: ["옳고 그름이 명확한 사람", "맥락에 따라 다른 사람"], required: true }
+    ]
+  },
   { id: 6, chapter: 1, text: "내가 사랑하는 영화/드라마와 그 속의 한 장면", type: "text" },
   { id: 7, chapter: 1, text: "연인에게 들려주고 싶은 나의 플레이리스트", type: "text" },
   { id: 8, chapter: 1, text: "어린시절, 가장 행복했던 기억의 한 장면", type: "text" },
-  { id: 9, chapter: 1, text: "5년 뒤, 내가 그리는 나의 모습", type: "text" },
+  {
+    id: 9, chapter: 1, text: "내가 미래를 대하는 태도", type: "compound",
+    axis: "목표 및 성취", isCoreAxis: true,
+    subQuestions: [
+      { id: "9-1", text: "나는…", type: "ab-choice", options: ["성장 지향적인 사람", "안정 지향적인 사람"], required: true },
+      { id: "9-2", text: "나는…", type: "ab-choice", options: ["목표가 이끄는 사람", "흐름을 따르는 사람"], required: true },
+      { id: "9-3", text: "5년 뒤, 내가 그리는 나의 모습", type: "text", required: false }
+    ]
+  },
 
   // Chapter 2 · 사랑
   { id: 10, chapter: 2, text: "나를 설레게 하는 상대의 매력", type: "text" },
@@ -62,8 +84,7 @@ const QUESTIONS = [
   {
     id: 13, chapter: 2, text: "연애 가치관 체크", type: "compound",
     subQuestions: [
-      { id: "13-1", text: "내가 원하는 애정 표현 방식은?", type: "choice", options: ["스킨십", "인정하는 말", "함께하는 시간", "선물", "봉사"] },
-      { id: "13-2", text: "파트너의 친구들과의 단둘 만남, 어디까지 괜찮아?", type: "choice", options: ["단둘 만남 자체 불가", "단체 모임은 가능", "카페/식사는 가능", "영화/노래방도 가능", "술자리도 가능"] }
+      { id: "13-1", text: "내가 원하는 애정 표현 방식은?", type: "multiple-choice", options: ["스킨십", "인정하는 말", "함께하는 시간", "선물", "봉사"], limit: 2, required: true }
     ]
   },
   { id: 14, chapter: 2, text: "내가 사랑하고 있다고 느끼는 순간 & 사랑받고 있다고 느끼는 순간", type: "text" },
@@ -72,26 +93,48 @@ const QUESTIONS = [
     options: ["설렘", "스킨십", "성의 있는 데이트", "편안함", "신뢰감", "속 깊은 대화", "미래에 대한 약속", "서로를 위한 배려"],
     limit: 3
   },
-  { id: 16, chapter: 2, text: "다투었을 때 내가 원하는 해결 방법", type: "choice", options: ["서로 마음이 풀릴 때까지 이야기한다", "화가 가라앉을 때까지 잠시 시간을 갖는다"] },
+  {
+    id: 16, chapter: 2, text: "다투었을 때 나의 해결 방식", type: "compound",
+    axis: "갈등 해결", isCoreAxis: true,
+    subQuestions: [
+      { id: "16-1", text: "", type: "ab-choice", options: ["바로 풀어야 해", "시간이 필요해"], required: true },
+      { id: "16-2", text: "", type: "ab-choice", options: ["말로 푸는 편", "행동으로 푸는 편"], required: true },
+      { id: "16-3", text: "", type: "text", required: false, placeholder: "편안하게 당신의 이야기를 더 들려주세요" }
+    ]
+  },
   { id: 17, chapter: 2, text: "이 사람과 헤어질 수도 있겠다고 느끼는 순간", type: "text" },
   { id: 18, chapter: 2, text: "이 사람과 함께하는 미래를 떠올리게 되는 순간", type: "text" },
 
   // Chapter 3 · 관계
   { id: 19, chapter: 3, text: "파트너로서 나의 매력", type: "text" },
   { id: 20, chapter: 3, text: "내가 파트너에게 원하는 3가지", type: "text" },
-  { id: 21, chapter: 3, text: "함께하기 전 꼭 확인하고 싶은 3가지", type: "text" },
   {
-    id: 22, chapter: 3, text: "함께하는 삶 — 스피드 Q&A", type: "compound",
+    id: 21, chapter: 3, text: "내가 추구하는 인간관계", type: "compound",
+    axis: "세계관", isCoreAxis: true,
+    subQuestions: [
+      { id: "21-1", text: "", type: "ab-choice", options: ["깊게 소수의 사람과", "넓게 다양한 사람과"], required: true },
+      { id: "21-2", text: "", type: "text", required: false, placeholder: "편안하게 당신의 이야기를 더 들려주세요" }
+    ]
+  },
+  {
+    id: 22, chapter: 3, text: "함께하는 삶", type: "compound",
     subQuestions: [
       { id: "22-1", text: "같이 살 집은?", type: "choice", options: ["빚 안고 자가", "빚 없이 전세"] },
       { id: "22-2", text: "경제 관리는?", type: "choice", options: ["각자 벌어서 각자 관리", "생활비만 각출", "모든 수입 공개, 함께 관리"] },
       { id: "22-3", text: "수면 형태는?", type: "choice", options: ["같은 방 한 침대", "같은 방 침대 따로", "각자 방에서 숙면"] },
       { id: "22-4", text: "반려동물은?", type: "choice", options: ["없다", "반려견", "반려묘", "둘 다", "기타"] },
-      { id: "22-5", text: "아이를 원하나요? 원한다면 계획은? 어떤 부모가 되고 싶어요?", type: "text" }
+      { id: "22-5", text: "아이를 원하나요? 원한다면 계획은? 어떤 부모가 되고 싶어요?", type: "text", placeholder: "편안하게 당신의 이야기를 들려주세요" }
     ]
   },
   { id: 23, chapter: 3, text: "살고 싶은 동네는?", type: "text" },
-  { id: 24, chapter: 3, text: "차 한 대, 소파 하나, 신발 한 켤레에 쓸 수 있는 최대 금액", type: "text" },
+  {
+    id: 24, chapter: 3, text: "파트너를 위해 소비하는 방식", type: "compound",
+    axis: "경제관", isCoreAxis: true,
+    subQuestions: [
+      { id: "24-1", text: "선물", type: "ab-choice", options: ["의미있는 선물", "실속있는 선물"], required: true },
+      { id: "24-2", text: "이벤트", type: "ab-choice", options: ["평소에 소소하게 챙기기", "기념일에 특별하게 챙기기"], required: true }
+    ]
+  },
   { id: 25, chapter: 3, text: "내가 원하는 집안일 분담", type: "text" },
   { id: 26, chapter: 3, text: "파트너와 꼭 함께하고 싶은 일상의 한 장면", type: "text" },
   { id: 27, chapter: 3, text: "내가 생각하는 함께하는 삶이란", type: "text" }
@@ -625,6 +668,7 @@ const MOCK_MEETUPS = [
     organizers: [MOCK_PROFILES[16].image],
     isSaved: false,
     hasRSVPd: false,
+    kakaoLink: 'https://open.kakao.com/o/test',
     participants: []
   },
   {
@@ -669,6 +713,7 @@ const MOCK_MEETUPS = [
     hostType: "개인",
     isSaved: false,
     hasRSVPd: false,
+    kakaoLink: 'https://open.kakao.com/o/test',
     participants: []
   },
   {
@@ -678,7 +723,7 @@ const MOCK_MEETUPS = [
     styleTrait: "무관", fee: "1만 5천원 (와인/간식)", tags: [],
     ageRange: "20대 후반 ~ 30대 후반",
     rules: "주류가 포함된 모임으로 과도한 음주는 자제해주세요.",
-    isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "마포구 (홍대)", fullAddress: "서울 마포구 와우산로 29길 26, 2층 씨네라운지",
+    isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "마포구 (홍대)", fullAddress: "서울 마포구 와우산로 29길 26, 2층 씨네라운지",
     participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[1].image, MOCK_PROFILES[2].image, MOCK_PROFILES[3].image, MOCK_PROFILES[4].image]
   },
   {
@@ -688,7 +733,7 @@ const MOCK_MEETUPS = [
     styleTrait: "무관", fee: "무료", tags: [],
     ageRange: "30대 초반 ~ 40대 초반",
     rules: "편한 운동화 and 개인 생수를 지참해주세요.",
-    isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "용산구 (남산)", fullAddress: "서울 용산구 남산공원길 105, 북측 주차장 앞",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "용산구 (남산)", fullAddress: "서울 용산구 남산공원길 105, 북측 주차장 앞",
     participants: [MOCK_PROFILES[6].image, MOCK_PROFILES[7].image, MOCK_PROFILES[8].image, MOCK_PROFILES[9].image, MOCK_PROFILES[10].image, MOCK_PROFILES[11].image]
   },
   {
@@ -703,7 +748,7 @@ const MOCK_MEETUPS = [
       { nickname: "민트", date: "2026.03.15", text: "정말 깊이 있는 대화를 나눌 수 있었어요. 다음에도 꼭 참여하고 싶습니다." },
       { nickname: "바다", date: "2026.03.01", text: "공간도 예쁘고 호스트분들도 친절하셔서 편하게 이야기했습니다." }
     ],
-    isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 서울숲2길 32-14, 북라운지",
+    isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 서울숲2길 32-14, 북라운지",
     participants: [MOCK_PROFILES[12].image, MOCK_PROFILES[13].image, MOCK_PROFILES[14].image, MOCK_PROFILES[15].image, MOCK_PROFILES[16].image]
   },
   {
@@ -712,7 +757,7 @@ const MOCK_MEETUPS = [
     title: "스펙트로신테시스 서울",
     shortLocation: "아트선재센터",
     fullAddress: "서울 종로구 율곡로3길 144 아트선재센터",
-    date: "03/27 (금) ~ 06/22 (월)",
+    date: "03/27 (금) ~ 06/22 (월)", startDate: '2026-03-27', endDate: '2026-06-22',
     image: "images/art-exhibition-spectro.jpg",
     fee: "무료",
     maxCap: 500,
@@ -751,7 +796,7 @@ const MOCK_MEETUPS = [
     styleTrait: "무관", fee: "1/N", tags: ["#일스"],
     ageRange: "20대 후반 ~ 30대 초반",
     rules: "예약 후 방문하므로 노쇼는 절대 금지입니다.",
-    isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 연무장길 11, 카페 모노",
+    isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 연무장길 11, 카페 모노",
     participants: [MOCK_PROFILES[18].image, MOCK_PROFILES[19].image, MOCK_PROFILES[20].image]
   },
   {
@@ -761,7 +806,7 @@ const MOCK_MEETUPS = [
     styleTrait: '<span style="background: linear-gradient(transparent 60%, rgba(200,159,219,0.6) 60%); padding: 0 3px;">일스</span>', fee: "1/N", tags: ["#티부환영"],
     ageRange: "30대 초반 ~ 40대 초반",
     rules: "과도한 음주는 자제해주세요.",
-    isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "중구 (대구)", fullAddress: "대구광역시 중구 국채보상로 643, B1\n그레이 (GREY)",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "중구 (대구)", fullAddress: "대구광역시 중구 국채보상로 643, B1\n그레이 (GREY)",
     participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[4].image, MOCK_PROFILES[8].image, MOCK_PROFILES[12].image]
   },
   {
@@ -782,7 +827,7 @@ const MOCK_MEETUPS = [
       { nickname: "", date: "2주 전", text: "몰랐던 내용을 많이 알게 됐어요. 다음에도 꼭 참석할게요." },
       { nickname: "", date: "1달 전", text: "실용적인 정보가 많았어요. 강추합니다!" }
     ],
-    isRecommended: true, isSaved: false, hasRSVPd: false, shortLocation: "종로구 (혜화)", fullAddress: "서울 종로구 대학로 116, 혜화 세미나실",
+    isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "종로구 (혜화)", fullAddress: "서울 종로구 대학로 116, 혜화 세미나실",
     participants: [MOCK_PROFILES[4].image, MOCK_PROFILES[6].image, MOCK_PROFILES[8].image, MOCK_PROFILES[10].image, MOCK_PROFILES[12].image, MOCK_PROFILES[14].image, MOCK_PROFILES[0].image, MOCK_PROFILES[2].image, MOCK_PROFILES[5].image, MOCK_PROFILES[7].image, MOCK_PROFILES[9].image, MOCK_PROFILES[11].image]
   },
   {
@@ -791,7 +836,7 @@ const MOCK_MEETUPS = [
     title: "2026 서울 프라이드 엑스포",
     shortLocation: "동대문 DDP 디자인랩 2-3층",
     fullAddress: "서울 중구 을지로 281 동대문디자인플라자 디자인랩 2-3층",
-    date: "5월 30일 토 — 5월 31일 일",
+    date: "5월 30일 토 — 5월 31일 일", startDate: '2026-05-30', endDate: '2026-05-31',
     image: "images/pride-expo-2026.jpg",
     externalUrl: "",
     fee: "무료",
@@ -819,7 +864,7 @@ const MOCK_MEETUPS = [
     styleTrait: "무관", fee: "1/N (구장 대관료)", tags: ["#스타일무관"],
     ageRange: "20대 후반 ~ 30대 중반",
     rules: "운동화 필참. cleats(축구화)는 착용 불가합니다.",
-    isRecommended: false, isSaved: false, hasRSVPd: false, shortLocation: "마포구 (상암)", fullAddress: "서울 마포구 성산동 상암월드컵경기장 풋살구장",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "마포구 (상암)", fullAddress: "서울 마포구 성산동 상암월드컵경기장 풋살구장",
     participants: [MOCK_PROFILES[1].image, MOCK_PROFILES[3].image, MOCK_PROFILES[5].image, MOCK_PROFILES[7].image, MOCK_PROFILES[9].image, MOCK_PROFILES[11].image, MOCK_PROFILES[13].image, MOCK_PROFILES[2].image]
   }
 ];
@@ -1500,7 +1545,34 @@ window.toggleTargetRole = function (el, role) {
 // ── Highlight helper ────────────────────────────────────────────
 // Wraps 1-3 key words per answer in highlight spans.
 // Cycles: yellow → sage → lavender
+function formatAnswerText(ansText, q) {
+  if (typeof ansText === 'string') return ansText;
+  if (Array.isArray(ansText)) return ansText.join(', ');
+  if (ansText && typeof ansText === 'object') {
+    if (q && q.subQuestions) {
+      const choiceVals = [];
+      let textVal = '';
+      q.subQuestions.forEach(sq => {
+        const v = ansText[sq.id];
+        if (!v || typeof v !== 'string') return;
+        if (sq.type === 'ab-choice' || sq.type === 'choice') {
+          choiceVals.push(v);
+        } else if (sq.type === 'text') {
+          textVal = v;
+        }
+      });
+      const choicePart = choiceVals.length ? choiceVals.join(', ') : '';
+      if (choicePart && textVal) return `${choicePart}.\n${textVal}`;
+      if (choicePart) return `${choicePart}.`;
+      return textVal;
+    }
+    return Object.values(ansText).filter(v => v && typeof v === 'string').join(', ');
+  }
+  return '';
+}
+
 function applyHighlights(text) {
+  if (text && typeof text === 'object') text = formatAnswerText(text);
   if (!text) return text;
   const colors = ['highlight-yellow', 'highlight-sage', 'highlight-lavender'];
   // Keyword patterns to highlight (emotionally meaningful words/phrases)
@@ -1645,7 +1717,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
       <div class="nb-answer-page">
         <div class="book-page-chapter">CHAPTER ${q.chapter} &middot; ${chapLabel}</div>
         <div class="book-page-question">${q.text}</div>
-        <div class="book-page-answer">${applyHighlights(ans.text)}</div>
+        <div class="book-page-answer">${applyHighlights(formatAnswerText(ans.text, q))}</div>
         ${ans.polaroid ? `
           <div style="display:flex;justify-content:center;margin-top:32px;">
             <div style="background:#FFF;padding:8px 8px 28px 8px;box-shadow:2px 4px 14px rgba(0,0,0,0.11);transform:rotate(-1.5deg);width:160px;">
@@ -2436,10 +2508,10 @@ window.renderMeetupList = function () {
               <!-- Top Right Icons -->
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
                 <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: white; background: rgba(0,0,0,0.2); backdrop-filter: blur(8px); border-radius: 50%; padding: 6px; display: flex; align-items: center; justify-content: center;">
-                  <i data-lucide="share" style="width: 20px; height: 20px;"></i>
+                  <i data-lucide="share" style="width: 24px; height: 24px;"></i>
                 </div>
                 <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: white; background: rgba(0,0,0,0.2); backdrop-filter: blur(8px); border-radius: 50%; padding: 6px; display: flex; align-items: center; justify-content: center;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims && window.bookmarkedMoims[m.id] ? 'white' : 'none'}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims && window.bookmarkedMoims[m.id] ? 'white' : 'none'}">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                   </svg>
                 </div>
@@ -2458,7 +2530,7 @@ window.renderMeetupList = function () {
               <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 20px 20px 24px 24px; z-index: 3; display: flex; align-items: flex-end; justify-content: space-between;">
                 <div style="flex: 1; padding-right: 12px;">
                   ${m.showTextInfo ? `
-                    <div style="color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; margin-bottom: 6px;">${formatCardDate(m.date)}</div>
+                    <div style="color: rgba(255,255,255,0.9); font-size: 13px; font-weight: 600; margin-bottom: 6px;">${getFeedDateString(m)}</div>
                     <div style="color: white; font-size: 20px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">${m.title}</div>
                     <div style="color: rgba(255,255,255,0.8); font-size: 13px; margin-bottom: 2px;">📍 ${m.shortLocation}</div>
                   ` : ''}
@@ -2527,7 +2599,7 @@ window.renderMeetupList = function () {
                 </div>
               </div>
               <div>
-                <div class="meetup-date">${formatCardDate(m.date)}</div>
+                <div class="meetup-date">${getFeedDateString(m)}</div>
                 <div class="meetup-title">${m.title}</div>
                 <div class="meetup-location-preview" style="display:flex; align-items:center;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;flex-shrink:0;margin-right:4px;"></i>${m.shortLocation}</div>
                 <div class="meetup-desc">${m.desc}</div>
@@ -2585,7 +2657,7 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId) {
                  style="border-radius:12px; background: ${chapBg};">
                <div class="q-num" style="position:absolute; top:10px; left:10px; color:#aaa;">Q.${q.id}</div>
                ${ans.polaroid ? `<div class="polaroid-frame" style="width: 80px; transform: scale(0.6) rotate(-2deg); margin: 0; position: absolute; top: 10px; right:-10px;"><img src="${ans.polaroid}" class="polaroid-img" /></div>` : ''}
-               <div class="answer-preview" style="color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(ans.text)}</div>
+               <div class="answer-preview" style="color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(formatAnswerText(ans.text, q))}</div>
                ${getLikedBadgeHTML(pageId)}
             </div>
           `;
@@ -2666,13 +2738,25 @@ window.openInputModal = function (qId) {
     const answers = typeof existingAns === 'object' ? existingAns : {};
     inputHTML = `<div id="ans-${q.id}">`;
     q.subQuestions.forEach(sq => {
-      inputHTML += `<div class="choice-section"><p class="choice-label">${sq.text}</p>`;
-      if (sq.type === 'choice') {
+      const labelHTML = sq.text ? `<p class="choice-label">${sq.text}</p>` : '';
+      inputHTML += `<div class="choice-section">${labelHTML}`;
+      if (sq.type === 'ab-choice') {
+        inputHTML += `<div class="sub-q-group sub-q" data-sqid="${sq.id}">
+            ${sq.options.map(opt => `<button class="choice-btn ${answers[sq.id] === opt ? 'selected' : ''}" onclick="toggleChoice(this)">${opt}</button>`).join('')}
+          </div>`;
+      } else if (sq.type === 'multiple-choice') {
+        const selArr = Array.isArray(answers[sq.id]) ? answers[sq.id] : [];
+        inputHTML += `<div style="font-size:13px; color:#999; margin-bottom:12px;">정확히 ${sq.limit}개를 선택해주세요.</div>
+          <div class="choice-group sub-q" data-sqid="${sq.id}" data-limit="${sq.limit}" style="display:flex; flex-wrap:wrap; gap:8px;">
+            ${sq.options.map(opt => `<button class="choice-pill ${selArr.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${sq.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid #eee; background:#FAFAF8; font-size:14px; color:#666; transition:0.2s;">${opt}</button>`).join('')}
+          </div>`;
+      } else if (sq.type === 'choice') {
         inputHTML += `<div class="sub-q-group sub-q" data-sqid="${sq.id}">
             ${sq.options.map(opt => `<button class="choice-btn ${answers[sq.id] === opt ? 'selected' : ''}" onclick="toggleChoice(this)">${opt}</button>`).join('')}
           </div>`;
       } else if (sq.type === 'text') {
-        inputHTML += `<textarea class="input-field sub-q" data-sqid="${sq.id}" style="height: 100px; resize: none; border-radius: 10px; font-size: 15px;" placeholder="답변을 입력해주세요.">${answers[sq.id] || ''}</textarea>`;
+        const ph = sq.placeholder || '답변을 입력해주세요.';
+        inputHTML += `<textarea class="input-field sub-q" data-sqid="${sq.id}" style="height: 100px; resize: none; border-radius: 10px; font-size: 15px;" placeholder="${ph}">${answers[sq.id] || ''}</textarea>`;
       }
       inputHTML += `</div>`;
     });
@@ -2680,24 +2764,24 @@ window.openInputModal = function (qId) {
   }
 
   mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 100; background: var(--surface);">
-       <div class="app-header" style="background:var(--surface);">
-         <button class="back-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
-         <div style="font-weight:600; font-size:16px;">답변 작성</div>
-         <div style="width:32px;"></div>
-       </div>
-       <div class="content-padding scroll-y">
-         <div style="font-size:13px; color:var(--primary); font-weight:600; margin-bottom:12px;">${chapTitle}</div>
-         <h2 style="font-size:20px; margin-bottom:24px; line-height:1.4;">Q${q.id}. ${q.text}</h2>
-         <div id="modal-input-container" style="margin-bottom:32px;">
-           ${inputHTML}
-         </div>
-         <button class="btn-primary" onclick="saveAnswer(${q.id})">저장하기</button>
-         <div style="text-align:center; margin-top:24px;">
-           <span style="color:var(--text-muted); font-size:14px; text-decoration:underline; cursor:pointer;" onclick="closeModal()">건너뛰기</span>
-         </div>
-       </div>
+  <div class="modal fade-in active" style="z-index: 100; background: var(--surface);">
+    <div class="app-header" style="background:var(--surface);">
+      <button class="back-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
+      <div style="font-weight:600; font-size:16px;">답변 작성</div>
+      <div style="width:32px;"></div>
     </div>
+    <div class="content-padding scroll-y">
+      <div style="font-size:13px; color:var(--primary); font-weight:600; margin-bottom:12px;">${chapTitle}</div>
+      <h2 style="font-size:20px; margin-bottom:24px; line-height:1.4;">Q${q.id}. ${q.text}</h2>
+      <div id="modal-input-container" style="margin-bottom:32px;">
+        ${inputHTML}
+      </div>
+      <button class="btn-primary" onclick="saveAnswer(${q.id})">저장하기</button>
+      <div style="text-align:center; margin-top:24px;">
+        <span style="color:var(--text-muted); font-size:14px; text-decoration:underline; cursor:pointer;" onclick="closeModal()">건너뛰기</span>
+      </div>
+    </div>
+  </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
 }
@@ -2736,20 +2820,32 @@ window.saveAnswer = function (qId) {
       const sqid = el.dataset.sqid;
       if (el.tagName === 'TEXTAREA') {
         val[sqid] = el.value.trim();
+      } else if (el.dataset.limit) {
+        const pills = el.querySelectorAll('.choice-pill.selected');
+        val[sqid] = Array.from(pills).map(p => p.innerText);
       } else {
         const sel = el.querySelector('.choice-btn.selected, .choice-pill.selected');
         val[sqid] = sel ? sel.innerText : null;
       }
     });
-    // Check if any sub-answer is filled
-    if (Object.values(val).every(v => !v)) val = null;
+    if (Object.values(val).every(v => !v || (Array.isArray(v) && v.length === 0))) val = null;
   }
 
   if (val !== null) {
     myAnswers[qId] = { text: val };
   }
   closeModal();
-  switchTab('profile');
+  const _grid = document.getElementById('my-answers-grid');
+  if (_grid) {
+    renderMyProfile();
+  }
+}
+
+window.renderMyProfile = function () {
+  const _grid = document.getElementById('my-answers-grid');
+  if (!_grid) return;
+  _grid.innerHTML = renderAnswersGrid(MY_ANSWERS, true, 'myProfile');
+  bindCardInteractions();
 }
 
 window.renderBasicInfoRows = function (p, isMine, isPreview = false) {
@@ -3847,22 +3943,44 @@ document.addEventListener('scroll', function (e) {
   }
 }, true);
 
-function getDetailDateString(timestamp) {
-  if (!timestamp) return "";
-  const dt = new Date(timestamp);
-  const nextMonday = new Date("2026-04-27T00:00:00");
-  const days = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-  const dayName = days[dt.getDay()];
-  const hours = dt.getHours();
-  const period = hours >= 12 ? '저녁' : '오전';
-  const displayHour = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
-  const timeStr = `${period} ${displayHour}시`;
+const _DAYS_SHORT = ['일','월','화','수','목','금','토'];
 
-  if (dt < nextMonday) {
-    return `${dayName} ${timeStr}`;
-  } else {
-    return `${dt.getMonth() + 1}/${dt.getDate()} ${dayName} ${timeStr}`;
-  }
+function _dateRangeStr(startDate, endDate) {
+  const s = new Date(startDate + 'T00:00:00');
+  const e = new Date(endDate + 'T00:00:00');
+  return `${s.getMonth()+1}/${s.getDate()} (${_DAYS_SHORT[s.getDay()]}) — ${e.getMonth()+1}/${e.getDate()} (${_DAYS_SHORT[e.getDay()]})`;
+}
+
+function getFeedDateString(m) {
+  if (m.startDate && m.endDate) return _dateRangeStr(m.startDate, m.endDate);
+  if (!m.timestamp) return m.date || '';
+  const dt = new Date(m.timestamp);
+  const now = new Date();
+  const dow = _DAYS_SHORT[dt.getDay()];
+  const h = dt.getHours();
+  const period = h >= 12 ? '오후' : '오전';
+  const dh = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  const timeStr = `${period} ${dh}시`;
+  // Monday-based week boundaries
+  const mon = new Date(now); mon.setHours(0,0,0,0);
+  mon.setDate(mon.getDate() - (mon.getDay() === 0 ? 6 : mon.getDay() - 1));
+  const nextMon = new Date(mon); nextMon.setDate(mon.getDate() + 7);
+  const afterMon = new Date(mon); afterMon.setDate(mon.getDate() + 14);
+  const dtD = new Date(dt); dtD.setHours(0,0,0,0);
+  if (dtD >= mon && dtD < nextMon) return `이번주 (${dow}) ${timeStr}`;
+  if (dtD >= nextMon && dtD < afterMon) return `다음주 (${dow}) ${timeStr}`;
+  return `${dt.getMonth()+1}/${dt.getDate()} (${dow}) ${timeStr}`;
+}
+
+function getDetailDateString(m) {
+  if (m.startDate && m.endDate) return _dateRangeStr(m.startDate, m.endDate);
+  if (!m.timestamp) return m.date || '';
+  const dt = new Date(m.timestamp);
+  const dow = _DAYS_SHORT[dt.getDay()];
+  const h = dt.getHours();
+  const period = h >= 12 ? '오후' : '오전';
+  const dh = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+  return `${dt.getMonth()+1}/${dt.getDate()} (${dow}) ${period} ${dh}시`;
 }
 
 window.openMeetupDetail = function (id) {
@@ -3899,16 +4017,23 @@ window.openMeetupDetail = function (id) {
          </div>
        </div>
        <div class="scroll-y" style="padding: 10px 24px 140px;">
-          <div style="color:var(--primary); font-size:14px; font-weight:700; margin-bottom:8px;">${isCommunity ? m.type : `${m.type} · ${getDetailDateString(m.timestamp)}`}</div>
+          <div style="color:var(--primary); font-size:14px; font-weight:700; margin-bottom:8px;">${(() => { const ds = getDetailDateString(m); return isCommunity ? m.type : (ds ? `${m.type} · ${ds}` : m.type); })()}</div>
           <h2 style="font-size: 26px; line-height: 1.3; margin-bottom: 8px; font-weight:800;">${m.title}</h2>
           
           ${!m.hasRSVPd ?
       `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}</div>` :
-      `<div class="address-reveal-card" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
+      `<div class="address-reveal-card" style="margin-bottom:${m.kakaoLink ? '12px' : (showAgeRange ? '8px' : '24px')};">
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
                 <div class="address-reveal-card-sub">참여 확정 후 공개되는 장소입니다</div>
-              </div>`
+              </div>
+              ${m.kakaoLink ? `<div onclick="window.open('${m.kakaoLink}', '_blank')" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; background:#FEE500; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <span style="font-size:18px;">💬</span>
+                <div style="flex:1;">
+                  <div style="font-size:13px; font-weight:700; color:#3A1D1D;">오픈채팅방 입장하기</div>
+                  <div style="font-size:11px; color:#7A5C00; margin-top:2px;">카카오 오픈채팅</div>
+                </div>
+              </div>` : ''}`
     }
 
           ${showAgeRange ? `<div style="font-size:14px; color:#888; margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
@@ -4051,67 +4176,24 @@ window.closeModal = function () {
 window.joinMeetupChat = function (meetupId) {
   const m = MOCK_MEETUPS.find(x => x.id === meetupId);
   if (!m) return;
-  const chatId = 'group_' + m.id;
-  if (!MOCK_CHATS.find(c => c.id === chatId)) {
-    const participantProfiles = (m.participants || [])
-      .map(imgUrl => MOCK_PROFILES.find(p => p.image === imgUrl))
-      .filter(Boolean);
-    const _hostImg = m.hostImage || (MOCK_PROFILES.find(p => p.name === m.hostName) || {}).image || '';
-    const _cm = {
-      '소셜':      { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 편하게 즐기는 자리 만들게요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 기대돼요 🥂', p2:'처음인데 잘 부탁드려요! ✨' },
-      '문화생활':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 좋은 작품 함께 감상해요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 너무 설레요 🎬', p2:'저도 영화 너무 좋아해요, 잘 부탁드려요!' },
-      '액티비티':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 같이 신나게 달려봐요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 열심히 할게요 🏃‍♀️', p2:'저도 처음이에요, 잘 부탁드려요!' },
-      '식도락':    { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 맛있는 시간 함께 해요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 맛집 기대됩니다 🍴', p2:'저도 처음이에요, 잘 부탁드려요!' },
-      '스터디':    { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 함께 배우고 나눠요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 열심히 할게요 📖', p2:'저도 처음인데 잘 부탁드려요!' },
-      '크리에이티브': { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 창작의 즐거움 함께 나눠요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 기대돼요 🎨', p2:'초보지만 열심히 할게요!' },
-      '행사':      { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 함께 특별한 시간 만들어요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 정말 기대돼요 🎉', p2:'저도 처음이에요, 잘 부탁드려요!' },
-      '커뮤니티':   { host:`안녕하세요! 호스트 ${m.hostName}입니다 😊 좋은 인연 함께 만들어가요, 모임 날 뵙겠습니다!`, p1:'안녕하세요~ 반갑습니다 🌈', p2:'저도 처음이에요, 잘 부탁드려요!' },
-    };
-    const _ck = Object.keys(_cm).find(k => m.type && m.type.includes(k)) || '소셜';
-    const _t = _cm[_ck];
-    const _p1 = participantProfiles[0];
-    const _p2 = participantProfiles[1];
-    const _msgs = [
-      { type:'system', text: m.title + ' 모임방에 오신 것을 환영해요! 🎉' },
-      { type:'host', name: m.hostName, image: _hostImg, text: _t.host, time:'오전 10:23' },
-      ...(_p1 ? [{ type:'participant', name:_p1.name, image:_p1.image, text:_t.p1, time:'오전 10:31' }] : []),
-      ...(_p2 ? [{ type:'participant', name:_p2.name, image:_p2.image, text:_t.p2, time:'오전 11:05' }] : []),
-    ];
-    MOCK_CHATS.unshift({
-      id: chatId,
-      type: 'group',
-      meetupId: m.id,
-      title: m.title,
-      preview: _t.p2,
-      time: '오전 11:05',
-      unread: 2,
-      messages: _msgs,
-      participants: participantProfiles
-    });
-  }
-  if (m) { m.hasRSVPd = true; m.currentCap = (m.currentCap || 0) + 1; }
-  closeModal();
-  switchTab('messages');
-  const _joinContentArea = document.getElementById('main-content');
-  if (_joinContentArea) {
-    _joinContentArea.innerHTML = `
-      <div style="position:absolute;top:-60px;left:0;width:100%;height:calc(100vh - 84px);background:#F7F4F0;z-index:50;display:flex;flex-direction:column;align-items:center;padding:0 24px;box-sizing:border-box;">
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:10px;">
-          <div style="font-size:36px;text-align:center;">🎉</div>
-          <div style="font-size:16px;font-weight:300;color:var(--text-dark);text-align:center;">참여 완료!</div>
-          <div style="font-size:12px;color:#999;text-align:center;margin-bottom:22px;">${m.title}에 참여했어요</div>
-          <div style="width:100%;background:#EDE4F7;border-radius:14px;padding:16px 20px;box-sizing:border-box;text-align:center;">
-            <div style="font-size:10px;color:#9B72CC;margin-bottom:8px;">단체 메시지방 생성됨</div>
-            <div style="font-size:13px;font-weight:400;color:var(--text-dark);margin-bottom:6px;">${m.title}</div>
-            <div style="font-size:9px;color:#999;">${m.currentCap}명 참여 중</div>
-          </div>
+  m.hasRSVPd = true;
+  m.currentCap = (m.currentCap || 0) + 1;
+  const mc = getModalContainer();
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
+      <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 24px; box-sizing: border-box;">
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 12px;">
+          <div style="font-size: 48px; text-align: center;">🎉</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;">참여 완료</div>
+          <div style="font-size: 14px; color: #999; text-align: center; margin-bottom: 24px;">${m.title}</div>
+          ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: #3A1D1D; font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
         </div>
-        <div style="width:100%;padding-bottom:20px;">
-          <button onclick="openChat('${chatId}')" style="width:100%;padding:14px;border-radius:24px;background:#9B72CC;color:white;font-size:15px;font-weight:600;border:none;cursor:pointer;">단체방 입장하기</button>
+        <div style="width: 100%; padding-bottom: 40px;">
+          <button onclick="openMeetupDetail(${m.id})" style="width: 100%; padding: 14px; border-radius: 24px; background: #F0F0F0; color: #555; font-size: 15px; font-weight: 600; border: none; cursor: pointer;">돌아가기</button>
         </div>
       </div>
-    `;
-  }
+    </div>
+  `;
 };
 
 window.submitRSVP = function (id) {
@@ -5469,7 +5551,7 @@ window.renderDiscoverTab = function () {
     if (answerKeys.length > 0) {
       const randomKey = answerKeys[Math.floor(Math.random() * answerKeys.length)];
       const ans = answersDict[randomKey];
-      quote = (typeof ans === 'object' && ans.text) ? (typeof ans.text === 'string' ? ans.text : JSON.stringify(ans.text)) : (typeof ans === 'string' ? ans : "");
+      quote = (typeof ans === 'object' && ans.text) ? formatAnswerText(ans.text) : (typeof ans === 'string' ? ans : "");
     }
     if (!quote) quote = p.bio || "";
 
@@ -5662,7 +5744,7 @@ function startApp() {
     transitioned = true;
     if (SKIP_ONBOARDING) {
       navigateTo('main');
-      setTimeout(() => switchTab('messages'), 300);
+      setTimeout(() => switchTab('discover'), 300);
     } else {
       navigateTo('onboarding-0');
     }
@@ -5819,38 +5901,51 @@ window.openInvitePage = function () {
     const usedCount = window.inviteCardStates.filter(c => c.state === 2).length;
     const progressPercent = (usedCount / 10) * 100;
 
+    const _ordSuffix = n => { const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); };
     const cardsHTML = window.inviteCardStates.map(card => {
       if (card.state === 2) {
-        // STATE 3 - Used
+        // Used
         return `
-          <div class="invite-card-slot state-used" style="position:relative; background:#F0F0F0; border:1px solid #E5E5E5; box-shadow:none;">
-            <i data-lucide="mail-open" style="width: 32px; height: 32px; color: #CCC; margin-bottom: 12px; opacity: 0.5;"></i>
-            <div class="invite-code" style="color: #BBB;">${card.code}</div>
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%) rotate(-20deg); color:white; opacity:0.6; font-size:28px; font-weight:900; pointer-events:none; white-space:nowrap; text-shadow: 0 0 10px rgba(0,0,0,0.1);">INVITED</div>
+          <div class="invite-card-slot state-used">
+            <div class="envelope-flap envelope-flap-top"></div>
+            <div class="envelope-flap envelope-flap-bottom"></div>
+            <div class="envelope-content">
+              <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">INVITED</div>
+              <div class="invite-circle">
+                <i data-lucide="heart" style="width:20px; height:20px; color:#999;"></i>
+              </div>
+              <div style="color:#888; font-size:13px; font-family:monospace;">${card.code}</div>
+            </div>
           </div>
         `;
       } else if (card.state === 1) {
-        // STATE 2 - Active
+        // Active
         return `
-          <div class="invite-card-slot state-active" style="border-radius:16px; overflow:hidden; aspect-ratio:3/4; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; background:linear-gradient(135deg, #B8A0E8, #7B5EA8);">
-            <i data-lucide="mail-open" style="width: 32px; height: 32px; color: white; margin-bottom: 16px;"></i>
-            <div class="invite-code">${card.code}</div>
-            <div class="invite-timer">23시간 59분 남음</div>
+          <div class="invite-card-slot state-active">
+            <div class="invite-inner-card">
+              <div class="invite-inner-label">INVITATION</div>
+              <div class="invite-code">${card.code}</div>
+              <div class="invite-timer">23시간 59분 남음</div>
+            </div>
             <div class="invite-actions">
-              <button onclick="event.stopPropagation(); alert('링크가 복사되었습니다.')">링크 복사</button>
-              <button class="primary" onclick="event.stopPropagation(); if(navigator.share) { navigator.share({title: 'p.2 초대', text: 'p.2에 초대합니다 🩷 코드: ${card.code}'}); } else { alert('p.2에 초대합니다 🩷 코드: ${card.code}'); }">공유하기</button>
+              <button class="invite-btn-copy" onclick="event.stopPropagation(); alert('링크가 복사되었습니다.')">링크 복사</button>
+              <button class="invite-btn-share" onclick="event.stopPropagation(); if(navigator.share){navigator.share({title:'p.2 초대',text:'p.2에 초대합니다 🩷 코드: ${card.code}'});}else{alert('p.2에 초대합니다 🩷 코드: ${card.code}');}">공유하기</button>
             </div>
           </div>
         `;
       } else {
-        // STATE 1 - Unused
+        // Unused
         return `
-          <div class="invite-card-slot state-unused" style="border-radius:16px; overflow:hidden; aspect-ratio:3/4; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; background:linear-gradient(135deg, #C89FDB, #9B72CC);">
-            <div class="envelope-icon-wrap" style="margin-bottom: 16px;">
-              <i data-lucide="mail" style="width: 48px; height: 48px; color: white;"></i>
+          <div class="invite-card-slot state-unused">
+            <div class="envelope-flap envelope-flap-top"></div>
+            <div class="envelope-flap envelope-flap-bottom"></div>
+            <div class="envelope-content">
+              <div class="invite-number">${_ordSuffix(card.num)} Invitation</div>
+              <div class="invite-circle">
+                <i data-lucide="heart" style="width:20px; height:20px; color:#9B7FD4;"></i>
+              </div>
+              <button class="use-invite-btn" onclick="window.activateInvite(${card.num - 1})">사용하기</button>
             </div>
-            <div class="invite-number">${card.num}번 초대장</div>
-            <button class="use-invite-btn" onclick="window.activateInvite(${card.num - 1})">사용하기</button>
           </div>
         `;
       }

@@ -3632,34 +3632,137 @@ p {
   padding: 16px 12px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-/* State 1: Unused */
-.state-unused {
-  background: linear-gradient(135deg, #C89FDB, #9B72CC);
-}
-.envelope-icon-wrap {
-  position: relative;
-  margin-bottom: 12px;
-}
-.envelope-seal {
+/* Envelope flap shared */
+.envelope-flap {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -10%);
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  z-index: 0;
 }
-.invite-number {
-  color: white;
-  font-size: 14px;
+.envelope-flap-top {
+  top: 0;
+  height: 44%;
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+}
+.envelope-flap-bottom {
+  bottom: 0;
+  height: 44%;
+  clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
+}
+.envelope-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  width: 100%;
+  padding: 12px;
+}
+.invite-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* State: Used */
+.state-used {
+  background: #D8D0E8;
+  border: none;
+  box-shadow: none;
+}
+.state-used .envelope-flap { background: #C8BFD8; }
+.state-used .invite-circle { background: rgba(0,0,0,0.1); }
+
+/* State: Active */
+.state-active {
+  background: #9B7FD4;
+  padding: 12px;
+  justify-content: space-between;
+}
+.invite-inner-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 12px 12px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.invite-inner-label {
+  color: #9B7FD4;
+  font-size: 10px;
+  letter-spacing: 0.2em;
   font-weight: 600;
-  margin-bottom: auto;
+}
+.invite-code {
+  font-family: monospace;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 6px 0;
+  letter-spacing: 1px;
+}
+.invite-timer {
+  font-size: 12px;
+  color: #999;
+}
+.invite-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+}
+.invite-btn-copy {
+  border: 1.5px solid rgba(255,255,255,0.6);
+  background: transparent;
+  color: white;
+  border-radius: 100px;
+  font-size: 13px;
+  padding: 8px;
+  cursor: pointer;
+  width: 100%;
+}
+.invite-btn-share {
+  background: #4A3060;
+  color: white;
+  border-radius: 100px;
+  font-size: 13px;
+  padding: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* State: Unused */
+.state-unused {
+  background: #9B7FD4;
+}
+.state-unused .envelope-flap { background: #8A6FC4; }
+.state-unused .invite-circle { background: white; }
+.invite-number {
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 600;
 }
 .use-invite-btn {
   background: rgba(255,255,255,0.2);
-  border: 1px solid rgba(255,255,255,0.4);
+  border: none;
   color: white;
-  border-radius: 999px;
+  border-radius: 100px;
   padding: 8px 16px;
   font-size: 13px;
   font-weight: 600;
@@ -3669,61 +3772,6 @@ p {
 }
 .use-invite-btn:active {
   background: rgba(255,255,255,0.3);
-}
-
-/* State 2: Active */
-.state-active {
-  background: linear-gradient(135deg, #D4A8E8, #A67BD9);
-  padding: 20px 12px;
-}
-.invite-code {
-  font-family: monospace;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
-  letter-spacing: 1px;
-  margin-bottom: 4px;
-}
-.invite-timer {
-  font-size: 11px;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: auto;
-}
-.invite-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  width: 100%;
-  margin-top: 12px;
-}
-.invite-actions button {
-  background: white;
-  color: #9B72CC;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.invite-actions button.primary {
-  background: #9B72CC;
-  color: white;
-}
-
-/* State 3: Used */
-.state-used {
-  background: #F0F0F0;
-  box-shadow: none;
-  border: 1px solid #E5E5E5;
-}
-.invited-badge {
-  background: #EBDCF5;
-  color: #9B72CC;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 700;
 }
 
 /* Notice */
