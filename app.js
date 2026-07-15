@@ -2941,26 +2941,25 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
 
   // --- Photo section ---
   const carouselPhotos = isPreview ? (window.myPhotos || []).filter(Boolean) : photos;
-  const buildCarousel = (phs, indicator, applyBlur = false) => {
-    const blurFilter = applyBlur ? 'filter:blur(0.75px);' : '';
+  const buildCarousel = (phs, indicator) => {
     if (phs.length > 1) return `
     <div id="prof-carousel" style="position:relative; width:100%; height:360px; overflow:hidden;">
       ${indicator}
       <div id="prof-carousel-inner" style="display:flex; width:${phs.length * 100}%; height:100%; transition:transform 0.3s ease;">
-        ${phs.map(ph => `<div style="flex:0 0 ${100 / phs.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center; ${blurFilter}"></div>`).join('')}
+        ${phs.map(ph => `<div style="flex:0 0 ${100 / phs.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
       </div>
       <div style="position:absolute; bottom:12px; left:0; width:100%; display:flex; justify-content:center; gap:6px; z-index:5;">
         ${phs.map((_, pi) => `<div style="width:6px; height:6px; border-radius:50%; background:${pi === 0 ? '#FFF' : 'rgba(255,255,255,0.5)'}; transition:background 0.2s;" data-prof-dot="${pi}"></div>`).join('')}
       </div>
     </div>
   `;
-    if (phs.length === 1) return `<div class="prof-modal-photo" style="position:relative; background-image:url('${phs[0]}'); height:360px; background-size:cover; background-position:center; ${blurFilter}">${indicator}</div>`;
+    if (phs.length === 1) return `<div class="prof-modal-photo" style="position:relative; background-image:url('${phs[0]}'); height:360px; background-size:cover; background-position:center;">${indicator}</div>`;
     return `<div style="width:100%; height:260px; background:#F0F0EE; display:flex; align-items:center; justify-content:center;"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>`;
   };
 
   const photoSectionHTML = isMine
     ? myPhotoSectionHTML
-    : buildCarousel(carouselPhotos, pagedIndicatorDetail, !isPreview);
+    : buildCarousel(carouselPhotos, pagedIndicatorDetail);
 
   const locationStr = p.location || userLocation;
   const locationSpan = `<span style="font-size:16px; font-weight:400; color:var(--text-muted);"> · ${locationStr}</span>`;
