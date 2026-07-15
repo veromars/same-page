@@ -3586,6 +3586,85 @@ p {
   background: rgba(200, 159, 219, 0.1);
 }
 
+/* ── Photo Grid (내 프로필 edit view) ── */
+.my-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 16px 16px 8px;
+}
+
+.photo-slot {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-slot.filled {
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+  cursor: pointer;
+}
+
+.photo-slot.filled.editing {
+  outline: 2px solid #9B7FD4;
+  outline-offset: -2px;
+}
+
+.photo-slot.filled.dragging {
+  opacity: 0.55;
+}
+
+.photo-slot.empty {
+  background: #F4F3F0;
+  border: 1.5px dashed #D0CEC8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.photo-slot.empty:active {
+  background: #EEEDE9;
+}
+
+.photo-delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(0,0,0,0.62);
+  color: white;
+  border: none;
+  font-size: 13px;
+  font-weight: 700;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: all;
+  line-height: 1;
+}
+
+.photo-main-badge {
+  position: absolute;
+  bottom: 5px;
+  left: 5px;
+  background: rgba(0,0,0,0.48);
+  color: white;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
+
 /* Full Screen Invite Page */
 .invite-summary-bar {
   display: flex;
@@ -3686,54 +3765,59 @@ p {
 /* State: Active */
 .state-active {
   background: #9B7FD4;
-  padding: 12px;
+  padding: 14px;
   justify-content: space-between;
 }
 .invite-inner-card {
   background: white;
   border-radius: 12px;
-  padding: 16px 12px 12px;
+  padding: 20px 20px 16px;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  flex: 1;
+  gap: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
 }
 .invite-inner-label {
   color: #9B7FD4;
   font-size: 10px;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
   font-weight: 600;
+  text-align: center;
+  width: 100%;
 }
 .invite-code {
   font-family: monospace;
   font-size: 20px;
   font-weight: 700;
   color: #1a1a1a;
-  margin: 6px 0;
+  margin: 4px 0 2px;
   letter-spacing: 1px;
 }
 .invite-timer {
   font-size: 12px;
   color: #999;
+  margin-top: 4px;
 }
 .invite-actions {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   width: 100%;
-  margin-top: 8px;
+  margin-top: 10px;
+  flex-shrink: 0;
 }
 .invite-btn-copy {
-  border: 1.5px solid rgba(255,255,255,0.6);
-  background: transparent;
-  color: white;
+  border: 1.5px solid rgba(155,127,212,0.45);
+  background: rgba(155,127,212,0.08);
+  color: #4A3060;
   border-radius: 100px;
   font-size: 13px;
-  padding: 8px;
+  padding: 9px;
   cursor: pointer;
   width: 100%;
+  font-weight: 500;
 }
 .invite-btn-share {
   background: #4A3060;
