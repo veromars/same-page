@@ -930,6 +930,13 @@ let selectedQuizOpt = null;
 window.profileComplete = false;
 window.profileIncomplete = false;
 let userProfilePhoto = null;
+window.myPhotos = [
+  'https://images.unsplash.com/photo-1704731267944-c93c8d059cdc?w=400',
+  'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600',
+  'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600',
+];
+window._photoGridEditMode = false;
+window._photoGridDragSrc = null;
 let userStyle = '';
 let userIdeal = '';
 let userDrink = '';
@@ -1554,11 +1561,13 @@ function formatAnswerText(ansText, q) {
       let textVal = '';
       q.subQuestions.forEach(sq => {
         const v = ansText[sq.id];
-        if (!v || typeof v !== 'string') return;
-        if (sq.type === 'ab-choice' || sq.type === 'choice') {
-          choiceVals.push(v);
+        if (v === null || v === undefined) return;
+        if (sq.type === 'multiple-choice') {
+          if (Array.isArray(v) && v.length > 0) choiceVals.push(v.join(', '));
+        } else if (sq.type === 'ab-choice' || sq.type === 'choice') {
+          if (typeof v === 'string' && v) choiceVals.push(v);
         } else if (sq.type === 'text') {
-          textVal = v;
+          if (typeof v === 'string' && v) textVal = v;
         }
       });
       const choicePart = choiceVals.length ? choiceVals.join(', ') : '';
@@ -2274,16 +2283,25 @@ window.switchTab = function (tabName) {
   if (tabName === 'discover') {
     window.showLikedCollection = false;
 
-    // On App Load / First Discover Visit: Fresh Start
+    // On App Load / First Discover Visit: check weekly cadence
     if (!window.isDiscoverInitialized) {
+      const weekTs = getWeeklyResetTimestamp();
+      const storedTs = parseInt(localStorage.getItem('sp_week_start') || '0');
+      const isNewWeek = storedTs !== weekTs;
+
+      if (isNewWeek) {
+        localStorage.setItem('sp_week_start', String(weekTs));
+        localStorage.removeItem('sp_viewed_this_week');
+        pagedSet.clear();
+        passedSet.clear();
+        savedBooks.length = 0;
+      }
+
       const allProfiles = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
-      // Shuffle
       const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
       dailyProfiles = shuffled.slice(0, 6);
       browseQueue = [...dailyProfiles];
-      pagedSet.clear();
-      passedSet.clear();
-      savedBooks.length = 0;
+      window.weeklyViewedProfiles = JSON.parse(localStorage.getItem('sp_viewed_this_week') || '[]');
       window.isDiscoverInitialized = true;
     }
 
@@ -2435,6 +2453,7 @@ window.switchTab = function (tabName) {
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
     initPhotoCarousels();
+    initPhotoGrid();
     const gridHtml = renderAnswersGrid(MY_ANSWERS, true, 'myProfile');
     document.getElementById('my-answers-grid').innerHTML = gridHtml;
     bindCardInteractions();
@@ -2650,13 +2669,11 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId) {
       if (ans) {
         if (isCurrentUser) {
           const chapBg = chapColors[q.chapter] || '#FAFAF8';
-          const isNotebook = !ans.image && !ans.polaroid;
           gHtml += `
-            <div class="grid-square answered-text ${isNotebook ? 'notebook-paper' : ''} answer-card-thumb interactable" 
+            <div class="grid-square answered-text answer-card-thumb interactable"
                  data-page-id="${pageId}"
                  style="border-radius:12px; background: ${chapBg};">
                <div class="q-num" style="position:absolute; top:10px; left:10px; color:#aaa;">Q.${q.id}</div>
-               ${ans.polaroid ? `<div class="polaroid-frame" style="width: 80px; transform: scale(0.6) rotate(-2deg); margin: 0; position: absolute; top: 10px; right:-10px;"><img src="${ans.polaroid}" class="polaroid-img" /></div>` : ''}
                <div class="answer-preview" style="color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(formatAnswerText(ans.text, q))}</div>
                ${getLikedBadgeHTML(pageId)}
             </div>
@@ -2912,32 +2929,46 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
 
   const photos = p.photos || (p.image ? [p.image] : []);
 
-  // --- My Profile: rectangular placeholder ---
+  // --- My Profile: 3×2 photo grid ---
   const myPhotoSectionHTML = (() => {
-    return `
-      <div style="width:100%; height:220px; background:#F0F0EE; display:flex; align-items:center; justify-content:center; position:relative;">
-        <i data-lucide="camera" style="width:40px; height:40px; color:#C2C2C0;"></i>
-        <!-- Optional: photo overlay if we had userProfilePhoto -->
-        ${userProfilePhoto ? `<div style="position:absolute; inset:0; background-image:url('${userProfilePhoto}'); background-size:cover; background-position:center;"></div>` : ''}
-      </div>
-    `;
+    const photos = window.myPhotos || [];
+    const slots = Array.from({length: 6}, (_, i) => {
+      const ph = photos[i];
+      return ph
+        ? `<div class="photo-slot filled" data-idx="${i}" style="background-image:url('${ph}');">
+             <div class="photo-delete-btn" onclick="event.stopPropagation();window.deleteMyPhoto(${i})">×</div>
+             ${i === 0 ? '<div class="photo-main-badge">대표</div>' : ''}
+           </div>`
+        : `<div class="photo-slot empty" onclick="window.addMyPhoto()">
+             <i data-lucide="plus" style="width:22px;height:22px;color:#C2C2C0;"></i>
+           </div>`;
+    }).join('');
+    return `<div class="my-photo-grid" id="my-photo-grid">${slots}</div>`;
   })();
 
   const pagedIndicatorDetail = (!isMine && !isPreview && (pagedSet?.has('p' + p.id) ?? false)) ? '<div class="paged-indicator-detail">♥</div>' : '';
 
-  // --- Others' profile: full-width swipeable carousel ---
-  const photoSectionHTML = (isMine || isPreview) ? myPhotoSectionHTML
-    : photos.length > 1 ? `
-    <div id="prof-carousel" style="position:relative; width:100%; height:450px; overflow:hidden;">
-      ${pagedIndicatorDetail}
-      <div id="prof-carousel-inner" style="display:flex; width:${photos.length * 100}%; height:100%; transition:transform 0.3s ease;">
-        ${photos.map(ph => `<div style="flex:0 0 ${100 / photos.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
+  // --- Photo section ---
+  const carouselPhotos = isPreview ? (window.myPhotos || []).filter(Boolean) : photos;
+  const buildCarousel = (phs, indicator) => {
+    if (phs.length > 1) return `
+    <div id="prof-carousel" style="position:relative; width:100%; height:360px; overflow:hidden;">
+      ${indicator}
+      <div id="prof-carousel-inner" style="display:flex; width:${phs.length * 100}%; height:100%; transition:transform 0.3s ease;">
+        ${phs.map(ph => `<div style="flex:0 0 ${100 / phs.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
       </div>
       <div style="position:absolute; bottom:12px; left:0; width:100%; display:flex; justify-content:center; gap:6px; z-index:5;">
-        ${photos.map((_, pi) => `<div style="width:6px; height:6px; border-radius:50%; background:${pi === 0 ? '#FFF' : 'rgba(255,255,255,0.5)'}; transition:background 0.2s;" data-prof-dot="${pi}"></div>`).join('')}
+        ${phs.map((_, pi) => `<div style="width:6px; height:6px; border-radius:50%; background:${pi === 0 ? '#FFF' : 'rgba(255,255,255,0.5)'}; transition:background 0.2s;" data-prof-dot="${pi}"></div>`).join('')}
       </div>
     </div>
-  ` : `<div class="prof-modal-photo" style="position:relative; background-image:url('${p.image}'); height:450px; background-size:cover; background-position:center;">${pagedIndicatorDetail}</div>`;
+  `;
+    if (phs.length === 1) return `<div class="prof-modal-photo" style="position:relative; background-image:url('${phs[0]}'); height:360px; background-size:cover; background-position:center;">${indicator}</div>`;
+    return `<div style="width:100%; height:260px; background:#F0F0EE; display:flex; align-items:center; justify-content:center;"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>`;
+  };
+
+  const photoSectionHTML = isMine
+    ? myPhotoSectionHTML
+    : buildCarousel(carouselPhotos, pagedIndicatorDetail);
 
   const locationStr = p.location || userLocation;
   const locationSpan = `<span style="font-size:16px; font-weight:400; color:var(--text-muted);"> · ${locationStr}</span>`;
@@ -2976,19 +3007,19 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
           <!-- Benefit Dashboard -->
           <div style="margin-bottom:24px; padding:16px; background:#F8FAFE; border-radius:12px; border:1px solid #E8EEFB;">
             <div style="font-size:13px; color:#666; margin-bottom:4px;">
-              📖 오늘 열람 가능한 프로필북 
+              📖 이번 주 열람 가능한 프로필북
               <span style="font-size:13px; font-weight:700; color:var(--text-dark); background: linear-gradient(transparent 60%, rgba(226,255,116,0.7) 60%); padding: 0 3px;">
                 ${benefitCount}권
               </span>
             </div>
-            
+
             <div style="font-size:12px; color:#9B72CC; margin-top:8px; font-weight:500;">
               ${answersToday < 3 ? `답변 ${3 - answersToday}개 더 작성하면 +1권` :
-        (answersToday < 6 ? `답변 ${6 - answersToday}개 더 작성하면 +1권` : '오늘의 답변 보너스 완료! ✨')}
+        (answersToday < 6 ? `답변 ${6 - answersToday}개 더 작성하면 +1권` : '이번 주 답변 보너스 완료! ✨')}
             </div>
             ${chapters.some(cl => cl.count < 9) ? `
               <div style="font-size:11px; color:#999; margin-top:4px;">
-                한 Chapter를 완성하면 매일 +1권 열람 가능!
+                한 Chapter를 완성하면 +1권 열람 가능!
               </div>
             ` : ''}
           </div>
@@ -3131,6 +3162,111 @@ window.initPhotoCarousels = function () {
       inner.style.transform = `translateX(-${cur * (100 / total)}%)`;
     }, { passive: true });
   }
+};
+
+window.refreshPhotoGrid = function () {
+  const grid = document.getElementById('my-photo-grid');
+  if (!grid) return;
+  const photos = window.myPhotos;
+  grid.innerHTML = Array.from({length: 6}, (_, i) => {
+    const ph = photos[i];
+    return ph
+      ? `<div class="photo-slot filled" data-idx="${i}" style="background-image:url('${ph}');">
+           <div class="photo-delete-btn" onclick="event.stopPropagation();window.deleteMyPhoto(${i})">×</div>
+           ${i === 0 ? '<div class="photo-main-badge">대표</div>' : ''}
+         </div>`
+      : `<div class="photo-slot empty" onclick="window.addMyPhoto()">
+           <i data-lucide="plus" style="width:22px;height:22px;color:#C2C2C0;"></i>
+         </div>`;
+  }).join('');
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.deleteMyPhoto = function (idx) {
+  window.myPhotos.splice(idx, 1);
+  const wasEdit = window._photoGridEditMode;
+  window.refreshPhotoGrid();
+  window.initPhotoGrid();
+  if (wasEdit) {
+    const g = document.getElementById('my-photo-grid');
+    if (g) {
+      g.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = 'flex');
+      g.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.add('editing'));
+      window._photoGridEditMode = true;
+    }
+  }
+};
+
+window.addMyPhoto = function () {
+  if ((window.myPhotos || []).length >= 6) return;
+  // Placeholder — real impl would open <input type="file">
+};
+
+window.initPhotoGrid = function () {
+  const grid = document.getElementById('my-photo-grid');
+  if (!grid) return;
+
+  let lpTimer = null;
+
+  const setEdit = (on) => {
+    window._photoGridEditMode = on;
+    grid.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = on ? 'flex' : 'none');
+    grid.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.toggle('editing', on));
+    if (!on) {
+      window._photoGridDragSrc = null;
+      grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging'));
+    }
+  };
+
+  grid.addEventListener('touchstart', e => {
+    if (e.target.closest('.photo-delete-btn')) return;
+    const slot = e.target.closest('.photo-slot.filled');
+    if (!slot) { if (window._photoGridEditMode) setEdit(false); return; }
+    if (window._photoGridEditMode) {
+      window._photoGridDragSrc = parseInt(slot.dataset.idx);
+      slot.classList.add('dragging');
+      return;
+    }
+    const idx = parseInt(slot.dataset.idx);
+    lpTimer = setTimeout(() => {
+      lpTimer = null;
+      setEdit(true);
+      window._photoGridDragSrc = idx;
+      slot.classList.add('dragging');
+    }, 500);
+  }, { passive: true });
+
+  grid.addEventListener('touchmove', e => {
+    if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+  }, { passive: true });
+
+  grid.addEventListener('touchend', e => {
+    if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+    const src = window._photoGridDragSrc;
+    if (src === null) return;
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const tgt = el && el.closest('.photo-slot[data-idx]');
+    if (tgt) {
+      const ti = parseInt(tgt.dataset.idx);
+      if (ti !== src) {
+        const tmp = window.myPhotos[src];
+        window.myPhotos.splice(src, 1);
+        window.myPhotos.splice(ti, 0, tmp);
+        window._photoGridDragSrc = null;
+        window.refreshPhotoGrid();
+        window.initPhotoGrid();
+        const newGrid = document.getElementById('my-photo-grid');
+        if (newGrid && window._photoGridEditMode) {
+          newGrid.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = 'flex');
+          newGrid.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.add('editing'));
+        }
+        return;
+      }
+    }
+    grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging'));
+    window._photoGridDragSrc = null;
+  }, { passive: true });
 };
 
 window.openCreateMeetupModal = function () {
@@ -3802,7 +3938,9 @@ window.openMyProfilePreview = function () {
       religion: userReligion,
       job: userJob
     },
-    chapterProgress: { c1: 0, c2: 0, c3: 0 }
+    chapterProgress: { c1: 0, c2: 0, c3: 0 },
+    photos: (window.myPhotos || []).filter(Boolean),
+    image: (window.myPhotos || []).find(Boolean) || null,
   };
 
   mc.innerHTML = `
@@ -3981,6 +4119,26 @@ function getDetailDateString(m) {
   const period = h >= 12 ? '오후' : '오전';
   const dh = h > 12 ? h - 12 : (h === 0 ? 12 : h);
   return `${dt.getMonth()+1}/${dt.getDate()} (${dow}) ${period} ${dh}시`;
+}
+
+// Returns UTC timestamp of the most recent Monday 7:00 AM KST (UTC+9)
+function getWeeklyResetTimestamp() {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 3600 * 1000);
+  const dow = kst.getUTCDay(); // 0=Sun, 1=Mon … in KST
+  const hour = kst.getUTCHours();
+  let daysSince = dow === 0 ? 6 : dow - 1;
+  if (dow === 1 && hour < 7) daysSince = 7; // Monday before 7AM → previous cycle
+  const resetKST = new Date(kst);
+  resetKST.setUTCDate(kst.getUTCDate() - daysSince);
+  resetKST.setUTCHours(7, 0, 0, 0);
+  return resetKST.getTime() - 9 * 3600 * 1000;
+}
+
+function getNextMondayKSTStr() {
+  const nextTs = getWeeklyResetTimestamp() + 7 * 24 * 3600 * 1000;
+  const nextKST = new Date(nextTs + 9 * 3600 * 1000);
+  return `${nextKST.getUTCMonth() + 1}월 ${nextKST.getUTCDate()}일 (월)`;
 }
 
 window.openMeetupDetail = function (id) {
@@ -5266,7 +5424,13 @@ window.detailSwipeLeft = function () {
 
   // 넘기기 누른 카드
   passedSet.add(card.id);
-  browseQueue.shift(); // remove from queue
+  browseQueue.shift();
+
+  if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
+  if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
+    window.weeklyViewedProfiles.push(card);
+    localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
+  }
 
   closeModal();
   renderDiscoverTab();
@@ -5292,6 +5456,12 @@ window.detailSwipeRight = function () {
   const alreadySaved = savedBooks.some(b => b.id === card.id);
   if (!alreadySaved) {
     savedBooks.push(card);
+  }
+
+  if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
+  if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
+    window.weeklyViewedProfiles.push(card);
+    localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
   }
 
   browseQueue.shift(); // remove from queue
@@ -5445,13 +5615,17 @@ window.renderDiscoverTab = function () {
   // Current browse queue
   const remaining = browseQueue;
 
+  const weeklyUndecided = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false)).length;
   let headerHTML = `
       <div style="padding: 10px 24px 0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin:0;">발견</h2>
-          <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
-            <i data-lucide="library" style="width: 24px; height: 24px;"></i>
-          </button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:12px; font-weight:600; color:#9B72CC; background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
+            <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+              <i data-lucide="library" style="width: 24px; height: 24px;"></i>
+            </button>
+          </div>
         </div>
         <p style="margin-bottom: 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
       </div>
@@ -5462,65 +5636,56 @@ window.renderDiscoverTab = function () {
     const undecidedInPool = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
     const allDone = undecidedInPool.length === 0;
 
+    const nextMondayStr = getNextMondayKSTStr();
+    const viewedList = window.weeklyViewedProfiles || [];
+
+    const viewedListHTML = viewedList.length > 0 ? `
+      <div style="width:100%; text-align:left; margin-top:32px; padding: 0 4px;">
+        <div style="font-size:13px; font-weight:700; color:#444; margin-bottom:12px;">이번 주 프로필북 다시보기</div>
+        ${viewedList.map(item => {
+          const vp = item.profile;
+          return `<div onclick="handleCardClick(${parseInt(item.id.replace('p',''))})" style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:#FFF; border-radius:12px; margin-bottom:8px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="width:44px; height:44px; border-radius:50%; background-image:url('${vp.image}'); background-size:cover; background-position:center; flex-shrink:0;"></div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:600; color:#2C2C2A;">${vp.name}</div>
+              <div style="font-size:12px; color:#888; margin-top:2px;">${vp.bio ? vp.bio.slice(0,28) + (vp.bio.length > 28 ? '…' : '') : ''}</div>
+            </div>
+            <i data-lucide="chevron-right" style="width:16px; height:16px; color:#CCC; flex-shrink:0;"></i>
+          </div>`;
+        }).join('')}
+      </div>
+    ` : '';
+
     contentArea.innerHTML = `
         ${headerHTML}
-        <div class="discover-tab-container" id="discover-empty-state" style="justify-content: center; align-items: center; text-align: center; height: calc(100vh - 160px);">
-          <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px;"></i>
-          <p style="margin-bottom: 8px; font-size: 20px; font-weight: 700;">오늘의 프로필북을 모두 읽었어요.</p>
-          <p style="color: #8E8E8A; margin-bottom: 32px; font-size: 15px;">내일 새로운 책이 도착해요.</p>
+        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 160px); overflow-y:auto; padding-bottom:32px;">
+          <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px; margin-top: 32px;"></i>
+          <p style="margin-bottom: 6px; font-size: 20px; font-weight: 700;">이번 주 프로필북을 모두 읽었어요.</p>
+          <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
+          <p style="color: #9B72CC; font-size:14px; font-weight:600; margin-bottom:0;">${nextMondayStr}</p>
 
-          <div class="p-qurated-promo-card">
+          <button id="discover-retry-btn" style="display:block; margin:20px auto 0; border:1.5px solid #9B72CC; color:#9B72CC; background:transparent; border-radius:24px; padding:10px 28px; font-size:14px; font-family:inherit; cursor:pointer;">다시 읽기</button>
+
+          <div class="p-qurated-promo-card" style="margin-top:24px;">
             <div style="font-size: 14px; font-weight: 700; color: #9B72CC; margin-bottom: 6px;">p.Qurated</div>
             <div style="font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
             <div onclick="window.openQuratedPage()" style="font-size: 13px; font-weight: 700; color: #9B72CC; cursor: pointer;">자세히 보기</div>
           </div>
+
+          ${viewedListHTML}
         </div>
       `;
 
-    // FORCE ADD retry button
-    const emptyCont = document.getElementById('discover-empty-state');
-    if (emptyCont) {
-      const retryBtn = document.createElement('button');
-      retryBtn.textContent = '다시 읽기';
-      retryBtn.style.cssText = `
-          display: block;
-          margin: 20px auto 32px;
-          border: 1.5px solid #9B72CC;
-          color: #9B72CC;
-          background: transparent;
-          border-radius: 24px;
-          padding: 12px 32px;
-          font-size: 14px;
-          font-family: 'Poppins', sans-serif;
-          cursor: pointer;
-        `;
-      retryBtn.addEventListener('click', () => {
-        console.log('Retry clicked. dailyProfiles count:', dailyProfiles.length);
-
-        let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
-        console.log('Remaining undecided cards:', rem.length);
-
-        if (rem.length === 0) {
-          console.log('All 6 cards were resolved. Performing full deck reset.');
-          pagedSet.clear();
-          passedSet.clear();
-          rem = [...dailyProfiles];
-        }
-
-        browseQueue = [...rem];
-        console.log('browseQueue reset to:', browseQueue.length);
-
-        // Re-render the whole tab to ensure clean state
-        renderDiscoverTab();
-      });
-      // Insert before the promo card
-      const promo = emptyCont.querySelector('.p-qurated-promo-card');
-      if (promo) {
-        emptyCont.insertBefore(retryBtn, promo);
-      } else {
-        emptyCont.appendChild(retryBtn);
+    document.getElementById('discover-retry-btn')?.addEventListener('click', () => {
+      let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
+      if (rem.length === 0) {
+        pagedSet.clear();
+        passedSet.clear();
+        rem = [...dailyProfiles];
       }
-    }
+      browseQueue = [...rem];
+      renderDiscoverTab();
+    });
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
@@ -5920,6 +6085,7 @@ window.openInvitePage = function () {
         `;
       } else if (card.state === 1) {
         // Active
+        const shareText = `p.2에 초대합니다 🩷 코드: ${card.code}`;
         return `
           <div class="invite-card-slot state-active">
             <div class="invite-inner-card">
@@ -5928,8 +6094,8 @@ window.openInvitePage = function () {
               <div class="invite-timer">23시간 59분 남음</div>
             </div>
             <div class="invite-actions">
-              <button class="invite-btn-copy" onclick="event.stopPropagation(); alert('링크가 복사되었습니다.')">링크 복사</button>
-              <button class="invite-btn-share" onclick="event.stopPropagation(); if(navigator.share){navigator.share({title:'p.2 초대',text:'p.2에 초대합니다 🩷 코드: ${card.code}'});}else{alert('p.2에 초대합니다 🩷 코드: ${card.code}');}">공유하기</button>
+              <button class="invite-btn-copy" onclick="event.stopPropagation(); navigator.clipboard && navigator.clipboard.writeText('${card.code}').then(()=>alert('코드가 복사되었습니다.')).catch(()=>alert('${card.code}')); return false;">링크 복사</button>
+              <button class="invite-btn-share" onclick="event.stopPropagation(); if(navigator.share){navigator.share({title:'p.2 초대장',text:'${shareText}'});}else{alert('${shareText}');}">공유하기</button>
             </div>
           </div>
         `;
