@@ -2283,16 +2283,25 @@ window.switchTab = function (tabName) {
   if (tabName === 'discover') {
     window.showLikedCollection = false;
 
-    // On App Load / First Discover Visit: Fresh Start
+    // On App Load / First Discover Visit: check weekly cadence
     if (!window.isDiscoverInitialized) {
+      const weekTs = getWeeklyResetTimestamp();
+      const storedTs = parseInt(localStorage.getItem('sp_week_start') || '0');
+      const isNewWeek = storedTs !== weekTs;
+
+      if (isNewWeek) {
+        localStorage.setItem('sp_week_start', String(weekTs));
+        localStorage.removeItem('sp_viewed_this_week');
+        pagedSet.clear();
+        passedSet.clear();
+        savedBooks.length = 0;
+      }
+
       const allProfiles = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
-      // Shuffle
       const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
       dailyProfiles = shuffled.slice(0, 6);
       browseQueue = [...dailyProfiles];
-      pagedSet.clear();
-      passedSet.clear();
-      savedBooks.length = 0;
+      window.weeklyViewedProfiles = JSON.parse(localStorage.getItem('sp_viewed_this_week') || '[]');
       window.isDiscoverInitialized = true;
     }
 
@@ -2998,19 +3007,19 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
           <!-- Benefit Dashboard -->
           <div style="margin-bottom:24px; padding:16px; background:#F8FAFE; border-radius:12px; border:1px solid #E8EEFB;">
             <div style="font-size:13px; color:#666; margin-bottom:4px;">
-              📖 오늘 열람 가능한 프로필북 
+              📖 이번 주 열람 가능한 프로필북
               <span style="font-size:13px; font-weight:700; color:var(--text-dark); background: linear-gradient(transparent 60%, rgba(226,255,116,0.7) 60%); padding: 0 3px;">
                 ${benefitCount}권
               </span>
             </div>
-            
+
             <div style="font-size:12px; color:#9B72CC; margin-top:8px; font-weight:500;">
               ${answersToday < 3 ? `답변 ${3 - answersToday}개 더 작성하면 +1권` :
-        (answersToday < 6 ? `답변 ${6 - answersToday}개 더 작성하면 +1권` : '오늘의 답변 보너스 완료! ✨')}
+        (answersToday < 6 ? `답변 ${6 - answersToday}개 더 작성하면 +1권` : '이번 주 답변 보너스 완료! ✨')}
             </div>
             ${chapters.some(cl => cl.count < 9) ? `
               <div style="font-size:11px; color:#999; margin-top:4px;">
-                한 Chapter를 완성하면 매일 +1권 열람 가능!
+                한 Chapter를 완성하면 +1권 열람 가능!
               </div>
             ` : ''}
           </div>
@@ -4110,6 +4119,26 @@ function getDetailDateString(m) {
   const period = h >= 12 ? '오후' : '오전';
   const dh = h > 12 ? h - 12 : (h === 0 ? 12 : h);
   return `${dt.getMonth()+1}/${dt.getDate()} (${dow}) ${period} ${dh}시`;
+}
+
+// Returns UTC timestamp of the most recent Monday 7:00 AM KST (UTC+9)
+function getWeeklyResetTimestamp() {
+  const now = new Date();
+  const kst = new Date(now.getTime() + 9 * 3600 * 1000);
+  const dow = kst.getUTCDay(); // 0=Sun, 1=Mon … in KST
+  const hour = kst.getUTCHours();
+  let daysSince = dow === 0 ? 6 : dow - 1;
+  if (dow === 1 && hour < 7) daysSince = 7; // Monday before 7AM → previous cycle
+  const resetKST = new Date(kst);
+  resetKST.setUTCDate(kst.getUTCDate() - daysSince);
+  resetKST.setUTCHours(7, 0, 0, 0);
+  return resetKST.getTime() - 9 * 3600 * 1000;
+}
+
+function getNextMondayKSTStr() {
+  const nextTs = getWeeklyResetTimestamp() + 7 * 24 * 3600 * 1000;
+  const nextKST = new Date(nextTs + 9 * 3600 * 1000);
+  return `${nextKST.getUTCMonth() + 1}월 ${nextKST.getUTCDate()}일 (월)`;
 }
 
 window.openMeetupDetail = function (id) {
@@ -5395,7 +5424,13 @@ window.detailSwipeLeft = function () {
 
   // 넘기기 누른 카드
   passedSet.add(card.id);
-  browseQueue.shift(); // remove from queue
+  browseQueue.shift();
+
+  if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
+  if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
+    window.weeklyViewedProfiles.push(card);
+    localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
+  }
 
   closeModal();
   renderDiscoverTab();
@@ -5421,6 +5456,12 @@ window.detailSwipeRight = function () {
   const alreadySaved = savedBooks.some(b => b.id === card.id);
   if (!alreadySaved) {
     savedBooks.push(card);
+  }
+
+  if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
+  if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
+    window.weeklyViewedProfiles.push(card);
+    localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
   }
 
   browseQueue.shift(); // remove from queue
@@ -5574,13 +5615,17 @@ window.renderDiscoverTab = function () {
   // Current browse queue
   const remaining = browseQueue;
 
+  const weeklyUndecided = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false)).length;
   let headerHTML = `
       <div style="padding: 10px 24px 0;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
           <h2 style="margin:0;">발견</h2>
-          <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
-            <i data-lucide="library" style="width: 24px; height: 24px;"></i>
-          </button>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:12px; font-weight:600; color:#9B72CC; background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
+            <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+              <i data-lucide="library" style="width: 24px; height: 24px;"></i>
+            </button>
+          </div>
         </div>
         <p style="margin-bottom: 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
       </div>
@@ -5591,65 +5636,56 @@ window.renderDiscoverTab = function () {
     const undecidedInPool = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
     const allDone = undecidedInPool.length === 0;
 
+    const nextMondayStr = getNextMondayKSTStr();
+    const viewedList = window.weeklyViewedProfiles || [];
+
+    const viewedListHTML = viewedList.length > 0 ? `
+      <div style="width:100%; text-align:left; margin-top:32px; padding: 0 4px;">
+        <div style="font-size:13px; font-weight:700; color:#444; margin-bottom:12px;">이번 주 프로필북 다시보기</div>
+        ${viewedList.map(item => {
+          const vp = item.profile;
+          return `<div onclick="handleCardClick(${parseInt(item.id.replace('p',''))})" style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:#FFF; border-radius:12px; margin-bottom:8px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+            <div style="width:44px; height:44px; border-radius:50%; background-image:url('${vp.image}'); background-size:cover; background-position:center; flex-shrink:0;"></div>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:600; color:#2C2C2A;">${vp.name}</div>
+              <div style="font-size:12px; color:#888; margin-top:2px;">${vp.bio ? vp.bio.slice(0,28) + (vp.bio.length > 28 ? '…' : '') : ''}</div>
+            </div>
+            <i data-lucide="chevron-right" style="width:16px; height:16px; color:#CCC; flex-shrink:0;"></i>
+          </div>`;
+        }).join('')}
+      </div>
+    ` : '';
+
     contentArea.innerHTML = `
         ${headerHTML}
-        <div class="discover-tab-container" id="discover-empty-state" style="justify-content: center; align-items: center; text-align: center; height: calc(100vh - 160px);">
-          <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px;"></i>
-          <p style="margin-bottom: 8px; font-size: 20px; font-weight: 700;">오늘의 프로필북을 모두 읽었어요.</p>
-          <p style="color: #8E8E8A; margin-bottom: 32px; font-size: 15px;">내일 새로운 책이 도착해요.</p>
+        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 160px); overflow-y:auto; padding-bottom:32px;">
+          <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px; margin-top: 32px;"></i>
+          <p style="margin-bottom: 6px; font-size: 20px; font-weight: 700;">이번 주 프로필북을 모두 읽었어요.</p>
+          <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
+          <p style="color: #9B72CC; font-size:14px; font-weight:600; margin-bottom:0;">${nextMondayStr}</p>
 
-          <div class="p-qurated-promo-card">
+          <button id="discover-retry-btn" style="display:block; margin:20px auto 0; border:1.5px solid #9B72CC; color:#9B72CC; background:transparent; border-radius:24px; padding:10px 28px; font-size:14px; font-family:inherit; cursor:pointer;">다시 읽기</button>
+
+          <div class="p-qurated-promo-card" style="margin-top:24px;">
             <div style="font-size: 14px; font-weight: 700; color: #9B72CC; margin-bottom: 6px;">p.Qurated</div>
             <div style="font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
             <div onclick="window.openQuratedPage()" style="font-size: 13px; font-weight: 700; color: #9B72CC; cursor: pointer;">자세히 보기</div>
           </div>
+
+          ${viewedListHTML}
         </div>
       `;
 
-    // FORCE ADD retry button
-    const emptyCont = document.getElementById('discover-empty-state');
-    if (emptyCont) {
-      const retryBtn = document.createElement('button');
-      retryBtn.textContent = '다시 읽기';
-      retryBtn.style.cssText = `
-          display: block;
-          margin: 20px auto 32px;
-          border: 1.5px solid #9B72CC;
-          color: #9B72CC;
-          background: transparent;
-          border-radius: 24px;
-          padding: 12px 32px;
-          font-size: 14px;
-          font-family: 'Poppins', sans-serif;
-          cursor: pointer;
-        `;
-      retryBtn.addEventListener('click', () => {
-        console.log('Retry clicked. dailyProfiles count:', dailyProfiles.length);
-
-        let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
-        console.log('Remaining undecided cards:', rem.length);
-
-        if (rem.length === 0) {
-          console.log('All 6 cards were resolved. Performing full deck reset.');
-          pagedSet.clear();
-          passedSet.clear();
-          rem = [...dailyProfiles];
-        }
-
-        browseQueue = [...rem];
-        console.log('browseQueue reset to:', browseQueue.length);
-
-        // Re-render the whole tab to ensure clean state
-        renderDiscoverTab();
-      });
-      // Insert before the promo card
-      const promo = emptyCont.querySelector('.p-qurated-promo-card');
-      if (promo) {
-        emptyCont.insertBefore(retryBtn, promo);
-      } else {
-        emptyCont.appendChild(retryBtn);
+    document.getElementById('discover-retry-btn')?.addEventListener('click', () => {
+      let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
+      if (rem.length === 0) {
+        pagedSet.clear();
+        passedSet.clear();
+        rem = [...dailyProfiles];
       }
-    }
+      browseQueue = [...rem];
+      renderDiscoverTab();
+    });
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
