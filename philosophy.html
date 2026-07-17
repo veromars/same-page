@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>p.2 · Design Philosophy & Product Definition v6</title>
+<title>p.2 · Design Philosophy & Product Definition v6.3</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,26 +101,24 @@
     <div class="logo">p.2</div>
     <div class="doc-meta">
       <span>Design Philosophy & Product Definition</span>
-      <span class="version-badge">v6</span>
-      <span>2026.05</span>
+      <span class="version-badge">v6.3</span>
+      <span>2026.07</span>
       <span>by Dawn Works</span>
     </div>
   </div>
 
   <!-- Changelog -->
   <div class="changelog">
-    <div class="changelog-title">v6.2 업데이트 — 2026.06.15</div>
+    <div class="changelog-title">v6.3 업데이트 — 2026.07.17</div>
     <div class="changelog-body">
-      + p.2+ 가격 구조 확정 (₩5,900 / ₩17,900 / ₩39,900)<br>
-      + 단체 메시지방 삭제 → 모임 게시판 구조로 대체<br>
-      + 1:1 메시지방 유지 근거 명시 (p.M 공간)<br>
-      + p.Qurated 매칭 방식 수정 (Q AI 인터뷰 → 운영자 최종 결정)<br>
-      + p.Qurated 베타 — 숫자 제거, 자격 요건 프레이밍<br>
-      + 초기 유저 확보 커뮤니티 규모 수정 (우바세 ~100명, 엘밴드 ~80명)<br>
-      + Date Drop 분석 심화 — 4단계 프로필, 고갈 곡선, 대응 자산 매핑, 2세대 경쟁군<br>
-      + 이혼 패턴 역공학 인사이트 추가 (Gottman 연구 기반)<br>
-      + 수익 추산 p.2+ 가격 반영<br>
+      + 발견 탭 추천 주기 변경: 매일 → <strong>주 1회 (월요일 오전 7시 KST 갱신)</strong><br>
+      + 발견 탭 소진 상태 리디자인 — 다음 월요일 날짜 + "이번 주 프로필북 다시보기" 목록<br>
+      + 발견 탭 헤더 "이번 주 N권 남음" 잔여 카운트 배지 추가<br>
+      + 나의 챕터 섹션 텍스트 주간 반영 ("오늘 열람 가능" → "이번 주 열람 가능", "매일 +1권" → "+1권")<br>
+      + 온보딩 플로우 재활성화 (스플래시 → 온보딩 0~5 → 메인앱)<br>
+      + 사진 블러 정책 재확정 — 세부 프로필 페이지는 매칭 전/후 동일하게 선명 유지<br>
       <br>
+      v6.2 — 2026.06.15: p.2+ 가격 확정·단체방 삭제·Qurated 매칭 방식·Date Drop 심화·이혼 역공학<br>
       v6.1 — 2026.06.15: 블러 정책·1.5단계 매칭·발견 탭 철학·엘팅·Date Drop 알고리즘<br>
       v6 — 2026.05.27: p.2+ 혜택·라이브러리·책등·모임 완료 화면·HER 인수·Grindr
     </div>
@@ -169,7 +167,7 @@
       <div class="card-body">
         <table>
           <tr><th>탭</th><th>역할</th></tr>
-          <tr><td>발견</td><td>하루 최대 6명 추천 프로필북 — 북 스택 UI</td></tr>
+          <tr><td>발견</td><td>주간 최대 6명 추천 프로필북 — 북 스택 UI (월요일 오전 7시 KST 갱신)</td></tr>
           <tr><td>모임</td><td>소모임 탐색 및 참여 — 소셜·문화생활·액티비티·식도락·스터디·크리에이티브·행사·커뮤니티</td></tr>
           <tr><td>메시지</td><td>1:1 매칭 채팅 + 모임 단체 메시지방</td></tr>
           <tr><td>나</td><td>프로필북, 설정, p.Qurated 신청, 친구 초대</td></tr>
@@ -367,12 +365,19 @@
     </div>
 
     <div class="card">
-      <div class="card-title">발견 탭 UX</div>
+      <div class="card-title">발견 탭 UX (v6.3 확정)</div>
       <div class="card-body">
-        북 스택 UI (카드 겹침 구조) — 하루 최대 6명, 추천 기반<br>
-        Page her → 라이브러리 담기 / 넘기기 → 패스<br>
-        당일 되돌리기 가능<br>
-        6명 소진 후 → p.Qurated 안내 화면 노출<br><br>
+        북 스택 UI (카드 겹침 구조) — <strong>주간 최대 6명</strong>, 추천 기반<br>
+        추천 풀 갱신: <strong>매주 월요일 오전 7시 KST</strong><br>
+        Page her → 라이브러리 담기 / 넘기기 → 패스<br><br>
+        <strong>헤더 배지:</strong> "이번 주 N권 남음" — 미결정 잔여 카운트 실시간 표시<br><br>
+        <strong>소진 상태 (6명 모두 결정 후):</strong><br>
+        "이번 주 프로필북을 모두 읽었어요."<br>
+        "다음 월요일에 새로운 프로필북이 도착해요 · M월 D일 (월)" — 구체 날짜 표시<br>
+        "이번 주 프로필북 다시보기" — 이번 주 열람한 프로필 목록, 탭 시 재열람 가능 (Page her·패스 액션 여전히 유효)<br>
+        p.Qurated 안내 카드 함께 노출<br><br>
+        <strong>나의 챕터 혜택 텍스트 (v6.3):</strong><br>
+        "이번 주 열람 가능한 프로필북 N권" / "+1권 열람 가능!" (Chapter 완성 시)<br><br>
         <strong>라이브러리 구조 (v6 확정)</strong><br>
         탭 1: 나를 Page한 사람 — 블러 처리, p.2+ 구독 시 해제<br>
         탭 2: 내가 패스한 사람 — 히스토리 및 되살리기 (p.2+)
@@ -985,7 +990,7 @@
     </div>
   </div>
 
-  <div class="updated">Last updated: 2026.06.15 · v6.2 · p.2 by Dawn Works</div>
+  <div class="updated">Last updated: 2026.07.17 · v6.3 · p.2 by Dawn Works</div>
 
 </div>
 </body>
