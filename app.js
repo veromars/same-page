@@ -3988,6 +3988,8 @@ window.openProfileModal = function (profileId, fromChat = false) {
   const backAction = fromChat ? `onclick="closeModal()"` : `onclick="closeModal()"`;
   // Technically same for now but logic is: if from chat, we are a modal on top of chat.
 
+  const alreadyPaged = pagedSet?.has('p' + profileId) ?? false;
+
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
        <div class="modal-fixed-close" ${backAction}>
@@ -3998,14 +4000,64 @@ window.openProfileModal = function (profileId, fromChat = false) {
            ${getProfileDetailedHTML(p, false)}
          </div>
        </div>
-       <div class="detail-action-bar">
-          <div class="detail-btn-pass" onclick="detailSwipeLeft()">Pass</div>
-          <div class="detail-btn-like" onclick="detailSwipeRight()">Page her ♥</div>
-       </div>
+       <button id="prof-page-fab" class="prof-fab" onclick="window._handleProfFabTap(${profileId})">
+         <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:24px; height:24px; color:#fff;"></i>
+       </button>
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
   initPhotoCarousels();
+
+  window._handleProfFabTap = function (pid) {
+    const fab = document.getElementById('prof-page-fab');
+    const fabSvg = document.getElementById('prof-fab-icon');
+    const cardId = 'p' + pid;
+
+    if (pagedSet?.has(cardId)) {
+      showToast('이미 Page했어요 ♥');
+      return;
+    }
+    if (window.__actionLocked) return;
+    window.__actionLocked = true;
+    setTimeout(() => { window.__actionLocked = false; }, 1000);
+
+    // Fill heart
+    if (fabSvg) {
+      const path = fabSvg.querySelector('path');
+      if (path) { path.setAttribute('fill', '#fff'); path.setAttribute('stroke', 'none'); }
+    }
+
+    // Pulse animation
+    if (fab) {
+      fab.classList.add('pulsing');
+      fab.addEventListener('animationend', () => fab.classList.remove('pulsing'), { once: true });
+    }
+
+    // Toast
+    showToast('Page her ♥');
+
+    // Page logic
+    const card = browseQueue[0];
+    if (card && card.id === cardId) {
+      pagedSet.add(card.id);
+      if (!savedBooks.some(b => b.id === card.id)) savedBooks.push(card);
+      if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
+      if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
+        window.weeklyViewedProfiles.push(card);
+        localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
+      }
+      browseQueue.shift();
+
+      // Mutual match check — show overlay after toast settles
+      const isMutualMatch = !window.__hasMockedMutualMatch;
+      if (isMutualMatch) {
+        window.__hasMockedMutualMatch = true;
+        setTimeout(() => showMutualMatchOverlay(card.profile), 1700);
+      }
+    } else {
+      pagedSet.add(cardId);
+    }
+  };
 
   // Populate answers grid for the selected user
   const gridContainer = mc.querySelector('#my-answers-grid');

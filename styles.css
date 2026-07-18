@@ -3665,6 +3665,40 @@ p {
   pointer-events: none;
 }
 
+/* Profile Detail FAB */
+.prof-fab {
+  position: absolute;
+  bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 24px));
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #9B72CC;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(155, 114, 204, 0.45);
+  z-index: 150;
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prof-fab:active {
+  transform: scale(0.92);
+}
+
+@keyframes fabPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.22); }
+  100% { transform: scale(1); }
+}
+
+.prof-fab.pulsing {
+  animation: fabPulse 0.35s ease-out forwards;
+}
+
 /* Library Screen */
 .lib-tab-bar {
   display: flex;
