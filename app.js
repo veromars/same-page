@@ -6310,11 +6310,11 @@ window.openLibraryPage = function () {
         <span style="width:28px;"></span>
       </div>
       <div class="lib-tab-bar">
-        <div id="lib-tab-review" class="lib-tab active" onclick="window._switchLibTab('review')">다시보기</div>
-        <div id="lib-tab-liked" class="lib-tab" onclick="window._switchLibTab('liked')">받은 ♥</div>
+        <div id="lib-tab-liked" class="lib-tab active" onclick="window._switchLibTab('liked')">받은 ♥</div>
+        <div id="lib-tab-review" class="lib-tab" onclick="window._switchLibTab('review')">다시보기</div>
       </div>
       <div id="lib-content" class="scroll-y" style="height:calc(100vh - 118px); padding-top:0;">
-        ${renderTabContent('review')}
+        ${renderTabContent('liked')}
       </div>
     </div>
   `;
