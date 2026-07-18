@@ -6171,15 +6171,150 @@ window.activateInvite = function (index) {
 
 window.openLibraryPage = function () {
   const mc = getModalContainer();
-  mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 2000; background: var(--bg-color);">
-      <div style="padding:20px 24px; display:flex; align-items:center; border-bottom:1px solid var(--border-color);">
-        <button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-dark);">←</button>
-        <span style="flex:1;text-align:center;font-weight:600;font-size:17px;">라이브러리</span>
-        <span style="width:32px;"></span>
+
+  // 다시보기: past-week profiles (ids 6-10)
+  const reviewProfiles = [6, 7, 8, 9, 10]
+    .map(id => MOCK_PROFILES.find(p => p.id === id)).filter(Boolean);
+
+  // 받은 ♥: people who liked the user — first is unblurred teaser
+  const likedProfiles = [12, 11, 13, 4]
+    .map(id => MOCK_PROFILES.find(p => p.id === id)).filter(Boolean);
+
+  function reviewCardHTML(p) {
+    const sc = getSpineColor(p.id);
+    const age = getAge(p.birthYear);
+    const bio = p.bio || '';
+    return `
+      <div class="saved-book-cover" onclick="handleCardClick(${p.id})"
+           style="border-radius:12px; box-shadow:-2px 0 4px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.15);">
+        <div class="book-spine" style="background:linear-gradient(to right,${sc}CC,${sc}66); width:8px;"></div>
+        <div class="book-bg-photo" style="background-image:url('${p.image}'); filter:blur(1.5px); transform:scale(1.05);"></div>
+        <div class="book-overlay"></div>
+        <div style="position:absolute;top:0;left:0;width:100%;height:45%;background:linear-gradient(to bottom,rgba(0,0,0,0.35),transparent);z-index:3;"></div>
+        <div style="position:absolute;bottom:0;left:0;width:100%;height:55%;background:linear-gradient(to top,rgba(0,0,0,0.65),transparent);z-index:3;"></div>
+        <div onclick="event.stopPropagation();window._openPlus2Prompt()"
+             style="position:absolute;top:8px;left:12px;z-index:6;background:rgba(155,114,204,0.75);backdrop-filter:blur(4px);border-radius:20px;padding:4px 9px;cursor:pointer;">
+          <span style="font-size:10px;color:#fff;font-weight:600;">되살리기 🔒</span>
+        </div>
+        <div style="position:absolute;top:8px;right:8px;z-index:6;background:rgba(0,0,0,0.45);border-radius:20px;padding:2px 7px;">
+          <span style="font-size:9px;color:#E2FF74;font-weight:700;letter-spacing:0.04em;">p.2+</span>
+        </div>
+        <div style="position:absolute;bottom:${bio ? '30px' : '12px'};left:0;width:100%;padding:0 10px 0 14px;box-sizing:border-box;z-index:4;">
+          <div style="font-size:15px;font-weight:700;color:#fff;">${p.name}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px;">${age}세 · 서울</div>
+        </div>
+        ${bio ? `<div style="position:absolute;bottom:10px;left:14px;right:10px;z-index:4;font-size:10px;color:rgba(255,255,255,0.55);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">"${bio}"</div>` : ''}
+      </div>`;
+  }
+
+  function likedCardHTML(p, isTeaser) {
+    const sc = getSpineColor(p.id);
+    const age = getAge(p.birthYear);
+    if (isTeaser) {
+      return `
+        <div class="saved-book-cover" onclick="handleCardClick(${p.id})"
+             style="border-radius:12px; box-shadow:-2px 0 4px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.15);">
+          <div class="book-spine" style="background:linear-gradient(to right,${sc}CC,${sc}66); width:8px;"></div>
+          <div class="book-bg-photo" style="background-image:url('${p.image}'); filter:none; transform:none;"></div>
+          <div class="book-overlay"></div>
+          <div style="position:absolute;top:0;left:0;width:100%;height:45%;background:linear-gradient(to bottom,rgba(0,0,0,0.3),transparent);z-index:3;"></div>
+          <div style="position:absolute;bottom:0;left:0;width:100%;height:55%;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:3;"></div>
+          <div style="position:absolute;top:8px;left:12px;z-index:6;background:rgba(226,255,116,0.88);border-radius:20px;padding:3px 9px;">
+            <span style="font-size:9px;color:#2C2C2A;font-weight:700;">p.2+ 미리보기</span>
+          </div>
+          <div style="position:absolute;top:8px;right:10px;z-index:6;font-size:14px;color:#ff6b9d;">♥</div>
+          <div style="position:absolute;bottom:12px;left:0;width:100%;padding:0 10px 0 14px;box-sizing:border-box;z-index:4;">
+            <div style="font-size:15px;font-weight:700;color:#fff;">${p.name}</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px;">${age}세 · 서울</div>
+          </div>
+        </div>`;
+    }
+    return `
+      <div class="saved-book-cover" onclick="window._openPlus2Prompt()"
+           style="border-radius:12px; box-shadow:-2px 0 4px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.15); cursor:pointer;">
+        <div class="book-spine" style="background:linear-gradient(to right,${sc}CC,${sc}66); width:8px;"></div>
+        <div class="book-bg-photo" style="background-image:url('${p.image}'); filter:blur(8px); transform:scale(1.15);"></div>
+        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);z-index:2;"></div>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;">
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:14px;padding:14px 18px;text-align:center;backdrop-filter:blur(6px);">
+            <div style="font-size:18px;margin-bottom:4px;">🔒</div>
+            <div style="font-size:11px;font-weight:700;color:#E2FF74;margin-bottom:3px;">p.2+</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.75);">구독 시 확인 가능</div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function renderTabContent(tab) {
+    if (tab === 'review') {
+      if (!reviewProfiles.length) {
+        return `<div style="display:flex;align-items:center;justify-content:center;height:50vh;color:var(--text-muted);font-size:14px;">아직 지나간 프로필북이 없어요</div>`;
+      }
+      return `
+        <div style="font-size:12px;color:var(--text-muted);padding:10px 20px 8px;">지난주 프로필북 · 되살리기는 p.2+ 필요</div>
+        <div class="lib-grid">${reviewProfiles.map(p => reviewCardHTML(p)).join('')}</div>`;
+    } else {
+      if (!likedProfiles.length) {
+        return `<div style="display:flex;align-items:center;justify-content:center;height:50vh;color:var(--text-muted);font-size:14px;">아직 받은 ♥가 없어요</div>`;
+      }
+      return `
+        <div style="font-size:12px;color:var(--text-muted);padding:10px 20px 8px;">나를 Page한 사람 · p.2+ 구독으로 모두 확인</div>
+        <div class="lib-grid">${likedProfiles.map((p, i) => likedCardHTML(p, i === 0)).join('')}</div>`;
+    }
+  }
+
+  window._switchLibTab = function (tab) {
+    document.getElementById('lib-tab-review').classList.toggle('active', tab === 'review');
+    document.getElementById('lib-tab-liked').classList.toggle('active', tab === 'liked');
+    document.getElementById('lib-content').innerHTML = renderTabContent(tab);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+
+  window._openPlus2Prompt = function () {
+    const existingBackdrop = document.getElementById('lib-plus2-backdrop');
+    const existingSheet = document.getElementById('lib-plus2-sheet');
+    if (existingBackdrop) existingBackdrop.remove();
+    if (existingSheet) existingSheet.remove();
+
+    const backdrop = document.createElement('div');
+    backdrop.id = 'lib-plus2-backdrop';
+    backdrop.style.cssText = 'position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,0.35);';
+    backdrop.onclick = () => { backdrop.remove(); document.getElementById('lib-plus2-sheet')?.remove(); };
+
+    const sheet = document.createElement('div');
+    sheet.id = 'lib-plus2-sheet';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:#FFF;border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
+    sheet.innerHTML = `
+      <div style="width:36px;height:4px;background:#E8E8E8;border-radius:4px;margin:0 auto 22px;"></div>
+      <div style="font-size:18px;font-weight:700;color:#2C2C2A;margin-bottom:8px;">되살리기는 p.2+ 기능이에요</div>
+      <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">지나간 프로필북을 다시 Page할 수 있어요.<br>나를 Page한 사람도 모두 확인할 수 있어요.</div>
+      <div style="background:#F5EFFE;border-radius:12px;padding:16px;margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;color:#9B72CC;margin-bottom:8px;letter-spacing:0.06em;">P.2+ 혜택</div>
+        <div style="font-size:13px;color:#555;line-height:2;">나를 Page한 사람 모두 보기<br>지나간 프로필북 되살리기<br>광고 제거</div>
       </div>
-      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height: calc(100vh - 100px); color:var(--text-muted);">
-        <div style="font-size:18px; font-weight:600;">준비 중이에요 ☺️</div>
+      <div style="font-size:12px;color:#AAA;text-align:center;margin-bottom:16px;">₩5,900 / 주 &nbsp;·&nbsp; ₩17,900 / 월 &nbsp;·&nbsp; ₩39,900 / 3개월</div>
+      <button onclick="document.getElementById('lib-plus2-sheet')?.remove(); document.getElementById('lib-plus2-backdrop')?.remove();"
+              style="width:100%;padding:15px;background:#9B72CC;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">구독하기</button>
+      <button onclick="document.getElementById('lib-plus2-sheet')?.remove(); document.getElementById('lib-plus2-backdrop')?.remove();"
+              style="width:100%;padding:12px;background:transparent;color:#AAA;border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
+    `;
+    document.body.appendChild(backdrop);
+    document.body.appendChild(sheet);
+  };
+
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index:2000; background:var(--bg-color);">
+      <div style="padding:20px 24px 0; display:flex; align-items:center;">
+        <button onclick="closeModal()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-dark);padding:0;line-height:1;">←</button>
+        <span style="flex:1;text-align:center;font-weight:700;font-size:17px;">라이브러리</span>
+        <span style="width:28px;"></span>
+      </div>
+      <div class="lib-tab-bar">
+        <div id="lib-tab-review" class="lib-tab active" onclick="window._switchLibTab('review')">다시보기</div>
+        <div id="lib-tab-liked" class="lib-tab" onclick="window._switchLibTab('liked')">받은 ♥</div>
+      </div>
+      <div id="lib-content" class="scroll-y" style="height:calc(100vh - 118px); padding-top:0;">
+        ${renderTabContent('review')}
       </div>
     </div>
   `;

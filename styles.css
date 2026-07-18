@@ -3665,6 +3665,45 @@ p {
   pointer-events: none;
 }
 
+/* Library Screen */
+.lib-tab-bar {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-color);
+  margin-top: 16px;
+}
+
+.lib-tab {
+  flex: 1;
+  padding: 13px 0;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.lib-tab.active {
+  color: var(--primary);
+  font-weight: 700;
+  border-bottom: 2.5px solid var(--primary);
+}
+
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 12px;
+  row-gap: 16px;
+  padding: 0 20px 60px;
+}
+
+@keyframes sheetUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
 /* Full Screen Invite Page */
 .invite-summary-bar {
   display: flex;
