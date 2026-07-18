@@ -1,7 +1,7 @@
 console.log('app loaded');
 
 // Dev flag: set true to skip onboarding and jump straight to the app
-const SKIP_ONBOARDING = true;
+const SKIP_ONBOARDING = false;
 let myAnswers = window.myAnswers || window.currentUser?.answers || {};
 let dailyProfiles = [];
 let browseQueue = [];
