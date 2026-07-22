@@ -3991,4 +3991,24 @@ p {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
 }
+
+/* Tab watermark */
+.tab-watermark {
+  text-align: center;
+  padding: 32px 0 12px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.15);
+  letter-spacing: 1px;
+  font-style: italic;
+  font-family: 'Style Script', cursive;
+  font-size: 16px;
+  user-select: none;
+  pointer-events: none;
+}
+
+/* Meetup search bar */
+#meetup-search-input:focus {
+  border-color: #9B72CC;
+  box-shadow: 0 0 0 3px rgba(155, 114, 204, 0.12);
+}
 }
