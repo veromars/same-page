@@ -222,6 +222,56 @@ p {
   line-height: 1;
 }
 
+.tab-watermark {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 13px;
+  color: #9B72CC;
+  opacity: 0.18;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  line-height: 1;
+  padding: 20px 0 12px;
+  user-select: none;
+}
+
+/* ── Shared tab header layout ────────────────────────── */
+.tab-header {
+  padding: 10px 24px 0;
+}
+
+.tab-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  min-height: 40px;
+}
+
+.tab-header-row h2 {
+  margin: 0;
+}
+
+.tab-header-subtitle {
+  margin: 4px 0 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.tab-header-icons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* For containers whose own top padding already matches .tab-header
+   (10px) but that don't supply the 24px side padding themselves. */
+.tab-header-pad-x {
+  padding: 0 24px;
+}
+
 
 
 /* Nav Bar */
@@ -233,7 +283,7 @@ p {
   background: #FFFFFF;
   display: flex;
   justify-content: space-between;
-  padding: 16px 40px 32px;
+  padding: 18px 24px 30px;
   border-top: 1px solid #F0F0F0;
   z-index: 150;
   /* Ensure nav is above modals */
@@ -246,14 +296,17 @@ p {
 
 .nav-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
   color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 500;
   cursor: pointer;
   transition: color 0.3s;
+  flex: 1;
+}
+
+.nav-item i {
+  width: 27px;
+  height: 27px;
 }
 
 .nav-item.active {
@@ -2881,31 +2934,13 @@ p {
   pointer-events: none;
 }
 
-.notif-panel {
-  position: absolute;
-  top: 56px;
-  right: 12px;
-  width: 280px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  z-index: 500;
-  overflow: hidden;
-  animation: fadeIn 0.15s ease;
-}
-
-.notif-panel-header {
-  font-family: 'Poppins', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
-  color: #2C2C2A;
-  padding: 16px 20px 12px;
-  border-bottom: 1px solid #F0EDE8;
+.notif-list {
+  padding: 4px 4px 0;
 }
 
 .notif-empty {
-  padding: 24px 20px;
-  font-size: 13px;
+  padding: 80px 20px;
+  font-size: 14px;
   color: #bbb;
   text-align: center;
 }
@@ -2914,16 +2949,22 @@ p {
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 16px 20px;
   border-bottom: 1px solid #F8F6F2;
+  border-left: 3px solid transparent;
 }
 
 .notif-item:last-child {
   border-bottom: none;
 }
 
+.notif-item.unread {
+  background: var(--primary-transparent);
+  border-left-color: var(--primary);
+}
+
 .notif-icon {
-  font-size: 16px;
+  font-size: 20px;
   flex-shrink: 0;
   margin-top: 1px;
 }
@@ -2933,7 +2974,7 @@ p {
 }
 
 .notif-text {
-  font-size: 13px;
+  font-size: 14px;
   color: #2C2C2A;
   line-height: 1.5;
 }
@@ -2943,7 +2984,7 @@ p {
 }
 
 .notif-time {
-  font-size: 11px;
+  font-size: 12px;
   color: #bbb;
   margin-top: 4px;
 }
