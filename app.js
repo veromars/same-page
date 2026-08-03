@@ -1,7 +1,7 @@
 console.log('app loaded');
 
 // Dev flag: set true to skip onboarding and jump straight to the app
-const SKIP_ONBOARDING = false;
+const SKIP_ONBOARDING = true;
 let myAnswers = window.myAnswers || window.currentUser?.answers || {};
 let dailyProfiles = [];
 let browseQueue = [];
@@ -1083,6 +1083,26 @@ function getProgressBarHTML(step) {
   `;
 }
 
+function getTabWatermarkHTML() {
+  return `<div class="tab-watermark">p<svg viewBox="0 0 24 24" width="9" height="9" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:1px;left:-1px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#9B72CC"/></svg>2</div>`;
+}
+
+// Single source of truth for the title/subtitle/icons row on every
+// main tab. All 5 tabs render this exact markup — same classes,
+// same h2, same row — so they can never drift apart in
+// padding/margin/font again. Each tab wraps the result in whatever
+// outer container it already needs (which supplies the 10px-top /
+// 24px-side spacing); this function never adds its own outer padding.
+function getTabHeaderHTML(title, subtitle, iconsHTML) {
+  return `
+    <div class="tab-header-row">
+      <h2>${title}</h2>
+      <div class="tab-header-icons">${iconsHTML || ''}</div>
+    </div>
+    ${subtitle ? `<p class="tab-header-subtitle">${subtitle}</p>` : ''}
+  `;
+}
+
 function getProfileSetupProgressBarHTML(step) {
   const pct = (step / 6) * 100;
   return `
@@ -1440,19 +1460,13 @@ function renderScreen(screenId) {
 
   else if (screenId === 'main') {
     screenElem = createScreen('main', `
-      <div class="app-header">
-        <div class="app-logo">p<svg viewBox="0 0 24 24" width="12" height="12" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:1px;left:-1px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#9B72CC"/></svg>2</div>
-        <button onclick="toggleNotifPanel()" style="background:none;border:none;cursor:pointer;padding:4px;position:relative;display:flex;align-items:center;">
-          <i data-lucide="bell" style="width: 20px; color: var(--text-muted)"></i>
-          <span id="bell-dot" style="display:none;position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:#E25C5C;border:1.5px solid #fff;"></span>
-        </button>
-      </div>
       <div id="main-content" style="flex: 1; position: relative;"></div>
       <div class="bottom-nav">
-        <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><i data-lucide="book-open"></i><span>발견</span></div>
-        <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><i data-lucide="calendar"></i><span>모임</span></div>
-        <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><i data-lucide="message-circle"></i><span>메시지</span></div>
-        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><i data-lucide="user"></i><span>나</span></div>
+        <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><i data-lucide="book-open"></i></div>
+        <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><i data-lucide="calendar"></i></div>
+        <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><i data-lucide="message-circle"></i></div>
+        <div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><i data-lucide="bell"></i></div>
+        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><i data-lucide="user"></i></div>
       </div>
       <!-- Fixed Modals Container -->
       <div id="modal-container"></div>
@@ -1627,48 +1641,13 @@ function applyHighlights(text) {
 }
 
 // ── Notification system ─────────────────────────────────────────
-const notifications = [];
-
-function timeAgo(ts) {
-  const diff = Math.floor((Date.now() - ts) / 1000);
-  if (diff < 60) return '방금 전';
-  if (diff < 3600) return `${Math.floor(diff / 60)}분 전`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)}시간 전`;
-  return `${Math.floor(diff / 86400)}일 전`;
-}
-
-function addNotification(profileName) {
-  notifications.unshift({ profileName, ts: Date.now() });
-  updateBellDot();
-}
-
-function updateBellDot() {
-  const dot = document.getElementById('bell-dot');
-  if (dot) dot.style.display = notifications.length ? 'block' : 'none';
-}
-
-window.toggleNotifPanel = function () {
-  let panel = document.getElementById('notif-panel');
-  if (panel) { panel.remove(); return; }
-  panel = document.createElement('div');
-  panel.id = 'notif-panel';
-  panel.className = 'notif-panel';
-  panel.innerHTML = `
-    <div class="notif-panel-header">알림</div>
-    ${notifications.length === 0
-      ? '<div class="notif-empty">아직 알림이 없어요</div>'
-      : notifications.map(n => `
-        <div class="notif-item">
-          <span class="notif-icon">💜</span>
-          <div class="notif-body">
-            <div class="notif-text">누군가가 <strong>${n.profileName}</strong>님의 페이지에 ♥를 눌렀어요.</div>
-            <div class="notif-time">${timeAgo(n.ts)}</div>
-          </div>
-        </div>`).join('')
-    }
-  `;
-  document.querySelector('.app-header').appendChild(panel);
-};
+const DUMMY_NOTIFICATIONS = [
+  { icon: '📚', text: '새로운 프로필북이 도착했어요 📚', time: '월요일 오전 7시', unread: true },
+  { icon: '♥', text: 'zoe님이 나를 paged 했어요 ♥', time: '3시간 전', unread: true },
+  { icon: '📅', text: "레즈비언 독서 모임 '달빛책방'이 곧 시작돼요", time: '어제', unread: true },
+  { icon: '💌', text: '이번 주 프로필북을 아직 안 열어봤어요. 확인해볼까요?', time: '수요일 오후 8시', unread: false },
+  { icon: '🎁', text: '프로필을 더 채워보세요! 챕터 완료 시 프로필북 +1권 🎁', time: '지난주', unread: false },
+];
 
 window.openAnswerRevealModal = function (profileId, qId) {
   const isMyProfile = profileId === 'myProfile';
@@ -2308,15 +2287,23 @@ window.switchTab = function (tabName) {
     renderDiscoverTab();
   } else if (tabName === 'meetups') {
     window.showSavedMeetups = false;
+    window._meetupSearchOpen = window._meetupSearchOpen || false;
+    window._meetupSearchQuery = window._meetupSearchQuery || '';
     contentArea.innerHTML = `
-        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 140px); background: var(--bg-color);">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <h2 style="margin:0;">모임</h2>
+        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); background: var(--bg-color);">
+        ${getTabHeaderHTML('모임', '', `
+          <button id="meetup-search-toggle" onclick="window._toggleMeetupSearch()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+            <i data-lucide="search" style="width: 22px; height: 22px;"></i>
+          </button>
           <button id="meetup-collection-toggle" class="folder-heart-btn" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="archive" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
           </button>
+        `)}
+        <div id="meetup-search-bar" style="display:${window._meetupSearchOpen ? 'block' : 'none'}; margin-bottom:12px;">
+          <input id="meetup-search-input" type="text" value="${window._meetupSearchQuery}" placeholder="모임 검색..." oninput="window._onMeetupSearch(this.value)"
+            style="width:100%; box-sizing:border-box; padding:10px 16px; border:1.5px solid #E0D8F0; border-radius:24px; font-size:14px; font-family:inherit; outline:none; background:#fff; color:#2C2C2A;">
         </div>
-        <p style="margin-bottom: 24px;">같은 페이지의 사람들과 함께해요.</p>
+        <p class="tab-header-subtitle">같은 페이지의 사람들과 함께해요.</p>
         <div class="filter-section">
           <div class="filter-row">
             ${['전체', '서울', '경기', '부산', '대구', '인천', '광주', '대전', '제주'].map(loc =>
@@ -2330,16 +2317,43 @@ window.switchTab = function (tabName) {
           </div>
         </div>
         <div id="meetups-list-container"></div>
+        ${getTabWatermarkHTML()}
       </div>
       <div class="fab-add" onclick="openCreateMeetupModal()"><i data-lucide="plus" style="width:24px; height:24px; color:#FFF;"></i></div>
     `;
     renderMeetupList();
+
+    window._toggleMeetupSearch = function () {
+      window._meetupSearchOpen = !window._meetupSearchOpen;
+      const bar = document.getElementById('meetup-search-bar');
+      if (bar) {
+        bar.style.display = window._meetupSearchOpen ? 'block' : 'none';
+        if (window._meetupSearchOpen) {
+          const inp = document.getElementById('meetup-search-input');
+          if (inp) { inp.value = window._meetupSearchQuery; setTimeout(() => inp.focus(), 50); }
+        }
+      }
+    };
+
+    window._onMeetupSearch = function (val) {
+      window._meetupSearchQuery = val;
+      renderMeetupList();
+    };
+
+    const _savedToggleBtn = document.getElementById('meetup-collection-toggle');
+    if (_savedToggleBtn) {
+      _savedToggleBtn.addEventListener('click', () => {
+        window.showSavedMeetups = !window.showSavedMeetups;
+        const icon = document.getElementById('meetup-collection-toggle-icon');
+        if (icon) icon.style.color = window.showSavedMeetups ? '#9B72CC' : '';
+        renderMeetupList();
+      });
+    }
   } else if (tabName === 'messages') {
     contentArea.innerHTML = `
       <div class="message-list" style="padding-top: 10px; display: flex; flex-direction: column; height: 100%;">
-        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0 24px;">
-          <h2 style="margin-bottom: 8px;">메시지</h2>
-          <span style="font-size: 12px; color: #9B72CC; text-decoration: underline; cursor: pointer; font-weight: 600;" onclick="triggerPostMeetingCheckin()">p.M 체크인 테스트</span>
+        <div class="tab-header-pad-x">
+          ${getTabHeaderHTML('메시지', '', `<span style="font-size: 12px; color: #9B72CC; text-decoration: underline; cursor: pointer; font-weight: 600;" onclick="triggerPostMeetingCheckin()">p.M 체크인 테스트</span>`)}
         </div>
         
         <!-- Section 1: Matched Profiles -->
@@ -2417,6 +2431,7 @@ window.switchTab = function (tabName) {
               </div>
             `;
     }).join('')}
+          ${getTabWatermarkHTML()}
         </div>
       </div>
     `;
@@ -2439,16 +2454,19 @@ window.switchTab = function (tabName) {
     };
     contentArea.innerHTML = `
       <div class="scroll-y" style="height: calc(100vh - 84px);">
-        <div style="padding: 16px 24px 4px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="tab-header-row" style="padding: 10px 24px 0;">
           <div style="display:flex; align-items:center; gap:12px;">
-            <h2 style="margin:0;">내 프로필</h2>
+            <h2>내 프로필</h2>
             <div onclick="openMyProfilePreview()" style="font-size:13px; color:#9B72CC; cursor:pointer; font-weight:500;">미리보기</div>
           </div>
-          <button style="background:none; border:none; color:#9B72CC; opacity: 0.3; pointer-events: none; cursor: default; padding:4px; display:flex; align-items:center; justify-content:center;">
-            <i data-lucide="settings" style="width:24px; height:24px;"></i>
-          </button>
+          <div class="tab-header-icons">
+            <button style="background:none; border:none; color:#9B72CC; opacity: 0.3; pointer-events: none; cursor: default; padding:4px; display:flex; align-items:center; justify-content:center;">
+              <i data-lucide="settings" style="width:24px; height:24px;"></i>
+            </button>
+          </div>
         </div>
         ${getProfileDetailedHTML(p, true)}
+        ${getTabWatermarkHTML()}
       </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -2457,6 +2475,26 @@ window.switchTab = function (tabName) {
     const gridHtml = renderAnswersGrid(MY_ANSWERS, true, 'myProfile');
     document.getElementById('my-answers-grid').innerHTML = gridHtml;
     bindCardInteractions();
+  } else if (tabName === 'notifications') {
+    contentArea.innerHTML = `
+        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); background: var(--bg-color);">
+        ${getTabHeaderHTML('알림', '', '')}
+        <div class="notif-list">
+          ${DUMMY_NOTIFICATIONS.length === 0
+        ? '<div class="notif-empty">아직 알림이 없어요</div>'
+        : DUMMY_NOTIFICATIONS.map(n => `
+              <div class="notif-item${n.unread ? ' unread' : ''}">
+                <span class="notif-icon">${n.icon}</span>
+                <div class="notif-body">
+                  <div class="notif-text">${n.text}</div>
+                  <div class="notif-time">${n.time}</div>
+                </div>
+              </div>`).join('')
+      }
+        </div>
+        ${getTabWatermarkHTML()}
+      </div>
+    `;
   }
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
@@ -2495,6 +2533,15 @@ window.renderMeetupList = function () {
 
   if (window.showSavedMeetups) {
     filtered = MOCK_MEETUPS.filter(m => m.isSaved);
+  }
+
+  const _sq = (window._meetupSearchQuery || '').trim().toLowerCase();
+  if (_sq) {
+    filtered = filtered.filter(m =>
+      (m.title || '').toLowerCase().includes(_sq) ||
+      (m.desc || '').toLowerCase().includes(_sq) ||
+      (m.tags || []).some(tag => tag.toLowerCase().includes(_sq))
+    );
   }
 
   if (filtered.length === 0) {
@@ -5664,24 +5711,58 @@ window.renderDiscoverTab = function () {
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
 
-  // Current browse queue
-  const remaining = browseQueue;
+  // Apply discover filters if active
+  const _dfActive = window._dfAgeMin !== null || window._dfAgeMax !== null || (window._dfRoles && window._dfRoles.length) || window._dfMaxDist < 200;
+  let remaining = browseQueue;
+  if (_dfActive) {
+    const _amin = window._dfAgeMin ?? targetDecadeRange.min;
+    const _amax = window._dfAgeMax ?? targetDecadeRange.max;
+    remaining = browseQueue.filter(item => {
+      const p = item.profile;
+      const age = getAge(p.birthYear);
+      // Map age to decade index
+      let aidx = 0;
+      if (age < 23) aidx = 0; else if (age < 27) aidx = 1; else if (age < 30) aidx = 2;
+      else if (age < 33) aidx = 3; else if (age < 37) aidx = 4; else if (age < 40) aidx = 5;
+      else if (age < 43) aidx = 6; else if (age < 47) aidx = 7; else if (age < 50) aidx = 8;
+      else aidx = 9;
+      if (aidx < _amin || aidx > _amax) return false;
+      if (window._dfRoles && window._dfRoles.length && !window._dfRoles.includes('none')) {
+        const pRole = p.role === 'F' ? 'F' : (p.role === 'B' ? 'B' : 'V');
+        if (!window._dfRoles.includes(pRole)) return false;
+      }
+      if (window._dfMaxDist < 200) {
+        const d = getDistance(item.id);
+        if (d > window._dfMaxDist) return false;
+      }
+      return true;
+    });
+  }
 
   const weeklyUndecided = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false)).length;
-  let headerHTML = `
-      <div style="padding: 10px 24px 0;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <h2 style="margin:0;">발견</h2>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:12px; font-weight:600; color:#9B72CC; background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
-            <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
-              <i data-lucide="library" style="width: 24px; height: 24px;"></i>
-            </button>
-          </div>
-        </div>
-        <p style="margin-bottom: 24px;">가치관, 취향이 맞는 사람을 만나보세요</p>
+  let headerHTML = `<div class="tab-header">${getTabHeaderHTML('발견', '가치관, 취향이 맞는 사람을 만나보세요', `
+    <span style="font-size:12px; font-weight:600; color:#9B72CC; background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
+    <button onclick="window.openDiscoverFilterSheet()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: ${_dfActive ? '#fff' : '#9B72CC'}; background:${_dfActive ? '#9B72CC' : 'none'}; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+      <i data-lucide="sliders-horizontal" style="width: 22px; height: 22px;"></i>
+    </button>
+    <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+      <i data-lucide="library" style="width: 24px; height: 24px;"></i>
+    </button>
+  `)}</div>`;
+
+  if (_dfActive && remaining.length === 0) {
+    contentArea.innerHTML = `
+      ${headerHTML}
+      <div class="discover-tab-container" style="align-items:center;text-align:center;height:calc(100vh - 100px);overflow-y:auto;padding-bottom:32px;">
+        <i data-lucide="search-x" style="width:48px;height:48px;color:var(--text-muted);opacity:0.5;margin-bottom:24px;margin-top:40px;"></i>
+        <p style="font-size:17px;font-weight:700;margin-bottom:8px;">필터 조건에 맞는<br>프로필이 없어요</p>
+        <p style="color:#8E8E8A;font-size:14px;margin-bottom:24px;">조건을 조정해보세요</p>
+        <button onclick="window.openDiscoverFilterSheet()" style="border:1.5px solid #9B72CC;color:#9B72CC;background:transparent;border-radius:24px;padding:10px 28px;font-size:14px;font-family:inherit;cursor:pointer;">필터 수정</button>
       </div>
     `;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    return;
+  }
 
   if (remaining.length === 0) {
     // Check if any undecided cards from original 6 remain
@@ -5710,7 +5791,7 @@ window.renderDiscoverTab = function () {
 
     contentArea.innerHTML = `
         ${headerHTML}
-        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 160px); overflow-y:auto; padding-bottom:32px;">
+        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 100px); overflow-y:auto; padding-bottom:32px;">
           <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px; margin-top: 32px;"></i>
           <p style="margin-bottom: 6px; font-size: 20px; font-weight: 700;">이번 주 프로필북을 모두 읽었어요.</p>
           <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
@@ -5725,6 +5806,7 @@ window.renderDiscoverTab = function () {
           </div>
 
           ${viewedListHTML}
+          ${getTabWatermarkHTML()}
         </div>
       `;
 
@@ -5798,11 +5880,12 @@ window.renderDiscoverTab = function () {
 
   html += `
         </div>
-        
+
         <div class="paged-heart-overlay" id="paged-heart-overlay">
           <i data-lucide="heart" fill="#9B72CC" style="color:#9B72CC; width:48px; height:48px;"></i>
           <span class="paged-heart-text">Paged ♥</span>
         </div>
+        ${getTabWatermarkHTML()}
       </div>
     `;
 
@@ -6491,6 +6574,141 @@ window.openQuratedPage = function () {
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+// ── Discover filter state ────────────────────────────────────────
+window._dfAgeMin = null; // null = use onboarding default (targetDecadeRange.min)
+window._dfAgeMax = null;
+window._dfRoles  = null; // null = no role filter
+window._dfMaxDist = 200;
+
+window.openDiscoverFilterSheet = function () {
+  const amin = window._dfAgeMin ?? targetDecadeRange.min;
+  const amax = window._dfAgeMax ?? targetDecadeRange.max;
+  const roles = window._dfRoles ?? (targetRoles.length ? [...targetRoles] : []);
+  const dist  = window._dfMaxDist;
+
+  const roleOptions = [
+    { key: 'F', label: 'F 팸' },
+    { key: 'B', label: 'B 부치' },
+    { key: 'V', label: 'V 무성향' },
+    { key: 'none', label: '상관없음' },
+  ];
+
+  const sheet = document.createElement('div');
+  sheet.id = 'discover-filter-sheet';
+  sheet.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:#fff;border-radius:20px 20px 0 0;padding:24px 24px 40px;box-sizing:border-box;z-index:600;animation:sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards;max-height:90%;overflow-y:auto;';
+  sheet.innerHTML = `
+    <div style="width:40px;height:4px;background:#E0D8F0;border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="font-size:16px;font-weight:700;color:#2C2C2A;margin-bottom:20px;">발견 필터</div>
+
+    <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px;">선호 나이대</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span id="df-age-label" style="font-size:14px;font-weight:700;color:#9B72CC;">${DECADE_POINTS[amin]} ~ ${DECADE_POINTS[amax]}</span>
+    </div>
+    <div style="position:relative;height:36px;margin-bottom:4px;">
+      <div style="position:absolute;top:50%;left:0;right:0;height:4px;background:#EDE0FF;border-radius:2px;transform:translateY(-50%);"></div>
+      <div id="df-range-fill" style="position:absolute;top:50%;height:4px;background:#9B72CC;border-radius:2px;transform:translateY(-50%);left:${(amin/9)*100}%;right:${100-(amax/9)*100}%;"></div>
+      <input type="range" id="df-min-slider" min="0" max="9" value="${amin}" step="1"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;"
+        oninput="window._dfSliderInput('min',+this.value)">
+      <input type="range" id="df-max-slider" min="0" max="9" value="${amax}" step="1"
+        style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:3;"
+        oninput="window._dfSliderInput('max',+this.value)">
+      <div id="df-thumb-min" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#9B72CC;box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amin/9)*100}%;pointer-events:none;z-index:4;"></div>
+      <div id="df-thumb-max" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#9B72CC;box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amax/9)*100}%;pointer-events:none;z-index:4;"></div>
+    </div>
+
+    <div style="font-size:13px;font-weight:600;color:#555;margin-top:24px;margin-bottom:12px;">선호 성향</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;" id="df-role-chips">
+      ${roleOptions.map(r => `
+        <div class="filter-chip${roles.includes(r.key) ? ' selected' : ''}" onclick="window._dfToggleRole('${r.key}')">${r.label}</div>
+      `).join('')}
+    </div>
+
+    <div style="font-size:13px;font-weight:600;color:#555;margin-top:24px;margin-bottom:8px;">거리</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+      <span id="df-dist-label" style="font-size:14px;font-weight:700;color:#9B72CC;">${dist >= 200 ? '제한 없음' : '최대 ' + dist + 'km'}</span>
+    </div>
+    <input type="range" id="df-dist-slider" min="0" max="200" step="10" value="${dist}"
+      style="width:100%;accent-color:#9B72CC;cursor:pointer;"
+      oninput="window._dfDistInput(+this.value)">
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:2px;"><span>0km</span><span>200km+</span></div>
+
+    <div style="display:flex;gap:10px;margin-top:28px;">
+      <button onclick="window._dfReset()" style="flex:1;padding:12px;border:1.5px solid #E0D8F0;border-radius:24px;background:#fff;font-size:14px;font-family:inherit;color:#888;cursor:pointer;">초기화</button>
+      <button onclick="window._dfApply()" style="flex:2;padding:12px;border:none;border-radius:24px;background:#9B72CC;font-size:14px;font-family:inherit;color:#fff;font-weight:600;cursor:pointer;">적용</button>
+    </div>
+  `;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'discover-filter-overlay';
+  overlay.style.cssText = 'position:absolute;inset:0;background:rgba(0,0,0,0.35);z-index:599;';
+  overlay.onclick = () => { sheet.remove(); overlay.remove(); };
+
+  const container = document.getElementById('app-container');
+  container.appendChild(overlay);
+  container.appendChild(sheet);
+
+  // Sync current state into sheet-local vars
+  let _sheetMin = amin, _sheetMax = amax, _sheetRoles = [...roles], _sheetDist = dist;
+
+  window._dfSliderInput = function (handle, val) {
+    if (handle === 'min') {
+      _sheetMin = Math.min(val, _sheetMax);
+      document.getElementById('df-min-slider').value = _sheetMin;
+    } else {
+      _sheetMax = Math.max(val, _sheetMin);
+      document.getElementById('df-max-slider').value = _sheetMax;
+    }
+    document.getElementById('df-age-label').textContent = `${DECADE_POINTS[_sheetMin]} ~ ${DECADE_POINTS[_sheetMax]}`;
+    document.getElementById('df-thumb-min').style.left = `${(_sheetMin/9)*100}%`;
+    document.getElementById('df-thumb-max').style.left = `${(_sheetMax/9)*100}%`;
+    document.getElementById('df-range-fill').style.left = `${(_sheetMin/9)*100}%`;
+    document.getElementById('df-range-fill').style.right = `${100-(_sheetMax/9)*100}%`;
+  };
+
+  window._dfToggleRole = function (key) {
+    if (_sheetRoles.includes(key)) {
+      _sheetRoles = _sheetRoles.filter(r => r !== key);
+    } else {
+      _sheetRoles.push(key);
+    }
+    document.querySelectorAll('#df-role-chips .filter-chip').forEach(chip => {
+      chip.classList.toggle('selected', _sheetRoles.includes(chip.textContent.split(' ')[0] === 'F' ? 'F' : chip.textContent.split(' ')[0] === 'B' ? 'B' : chip.textContent.includes('무성향') ? 'V' : 'none'));
+    });
+    // Re-render chips cleanly
+    document.getElementById('df-role-chips').innerHTML = roleOptions.map(r =>
+      `<div class="filter-chip${_sheetRoles.includes(r.key) ? ' selected' : ''}" onclick="window._dfToggleRole('${r.key}')">${r.label}</div>`
+    ).join('');
+  };
+
+  window._dfDistInput = function (val) {
+    _sheetDist = val;
+    document.getElementById('df-dist-label').textContent = val >= 200 ? '제한 없음' : `최대 ${val}km`;
+  };
+
+  window._dfReset = function () {
+    _sheetMin = targetDecadeRange.min;
+    _sheetMax = targetDecadeRange.max;
+    _sheetRoles = targetRoles.length ? [...targetRoles] : [];
+    _sheetDist = 200;
+    window._dfAgeMin = null;
+    window._dfAgeMax = null;
+    window._dfRoles = null;
+    window._dfMaxDist = 200;
+    sheet.remove(); overlay.remove();
+    renderDiscoverTab();
+  };
+
+  window._dfApply = function () {
+    window._dfAgeMin = _sheetMin;
+    window._dfAgeMax = _sheetMax;
+    window._dfRoles = _sheetRoles.length ? [..._sheetRoles] : null;
+    window._dfMaxDist = _sheetDist;
+    sheet.remove(); overlay.remove();
+    renderDiscoverTab();
+  };
 };
 
 window.showToast = function (msg) {
