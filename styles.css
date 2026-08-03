@@ -304,17 +304,20 @@ p {
   flex: 1;
 }
 
-.nav-item i {
-  width: 27px;
-  height: 27px;
-}
-
 .nav-item.active {
   color: var(--primary);
 }
 
-.nav-item.active i {
-  stroke-width: 2.5px;
+.nav-icon {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 27px;
+  color: var(--text-muted);
+  transition: none;
+}
+
+.nav-item.active .nav-icon {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  color: #C89FDB;
 }
 
 /* ── Splash Screen — Book Cover ────────────────────────── */

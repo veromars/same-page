@@ -1,7 +1,7 @@
 console.log('app loaded');
 
 // Dev flag: set true to skip onboarding and jump straight to the app
-const SKIP_ONBOARDING = true;
+const SKIP_ONBOARDING = false;
 let myAnswers = window.myAnswers || window.currentUser?.answers || {};
 let dailyProfiles = [];
 let browseQueue = [];
@@ -1462,11 +1462,11 @@ function renderScreen(screenId) {
     screenElem = createScreen('main', `
       <div id="main-content" style="flex: 1; position: relative;"></div>
       <div class="bottom-nav">
-        <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><i data-lucide="book-open"></i></div>
-        <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><i data-lucide="calendar"></i></div>
-        <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><i data-lucide="message-circle"></i></div>
-        <div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><i data-lucide="bell"></i></div>
-        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><i data-lucide="user"></i></div>
+        <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><span class="material-symbols-rounded nav-icon" data-icon="auto_stories">auto_stories</span></div>
+        <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><span class="material-symbols-rounded nav-icon" data-icon="calendar_month">calendar_month</span></div>
+        <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><span class="material-symbols-rounded nav-icon" data-icon="chat_bubble">chat_bubble</span></div>
+        <div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><span class="material-symbols-rounded nav-icon" data-icon="notifications">notifications</span></div>
+        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="material-symbols-rounded nav-icon" data-icon="person">person</span></div>
       </div>
       <!-- Fixed Modals Container -->
       <div id="modal-container"></div>
