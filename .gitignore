@@ -1,3 +1,11 @@
 .env
 env-config.js
 node_modules/
+
+# macOS
+.DS_Store
+
+# Claude Code local tooling (launch.json, settings.local.json, …);
+# only the shared permission allowlist is committed
+.claude/*
+!.claude/settings.json
