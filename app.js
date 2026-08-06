@@ -6898,7 +6898,22 @@ function setupDecadeSlider(userPoint) {
 //   expired  everything else (used OR timed out, same UI)  → disabled
 const INVITE_SLOT_COUNT = 10;
 const INVITE_TTL_MS = 24 * 60 * 60 * 1000;
-const INVITE_BASE_URL = 'https://veromars.github.io/same-page';
+
+// Derived from wherever the app is actually being served, so invite links work
+// both under a sub-path (GitHub Pages: https://host/same-page) and at a root
+// domain (Vercel et al.) without a build-time constant to keep in sync. A
+// trailing slash or an explicit index.html is stripped, so buildInviteLink can
+// append '?invite_code=' without doubling up or leaking the filename.
+const INVITE_BASE_URL = (() => {
+  const loc = (typeof window !== 'undefined' && window.location) || null;
+  if (!loc || typeof loc.origin !== 'string') {
+    // No DOM (SSR, bare node, a jsdom without a URL) — links fall back to
+    // relative, which is useless for sharing but must not throw at load time.
+    console.warn('[invite] window.location unavailable; invite links will be relative');
+    return '';
+  }
+  return loc.origin + String(loc.pathname || '').replace(/\/(index\.html?)?$/, '');
+})();
 
 window.inviteCardStates = [];
 
