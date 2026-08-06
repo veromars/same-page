@@ -230,6 +230,50 @@ p {
   border-color: var(--primary);
 }
 
+/* Terminal failure screen — see showFatalError() in app.js. Sits above every
+   other layer, including modals (z-index 9999) and toasts. */
+.fatal-error-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+  background: var(--bg-color, #FAF9F6);
+}
+
+.fatal-error-card {
+  width: 100%;
+  max-width: 320px;
+  text-align: center;
+}
+
+.fatal-error-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+}
+
+.fatal-error-text {
+  margin: 0 0 24px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text-dark);
+}
+
+.fatal-error-btn {
+  border: none;
+  border-radius: 24px;
+  padding: 14px 28px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  background: #E2FF74;
+  color: #2D2A2B;
+  cursor: pointer;
+}
+
 /* Confirms the invite code was picked out of a pasted message.
    See handleInviteCodePaste() in app.js. */
 @keyframes inviteCodeAutofill {

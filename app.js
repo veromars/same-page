@@ -6691,6 +6691,27 @@ async function markBasicInfoComplete() {
   if (window.currentUserRow) window.currentUserRow.basic_info_complete = true;
 }
 
+// Terminal failure screen. Covers everything and offers only a retry — there
+// is no degraded mode to fall back to, so nothing behind it should stay usable.
+window.showFatalError = function (message) {
+  stopInviteCountdown();
+
+  const existing = document.getElementById('fatal-error-screen');
+  if (existing) existing.remove();
+
+  const screen = document.createElement('div');
+  screen.id = 'fatal-error-screen';
+  screen.className = 'fatal-error-screen';
+  screen.innerHTML = `
+    <div class="fatal-error-card">
+      <div class="fatal-error-icon">🌙</div>
+      <p class="fatal-error-text">${message}</p>
+      <button class="fatal-error-btn" onclick="window.location.reload()">다시 시도</button>
+    </div>
+  `;
+  document.body.appendChild(screen);
+};
+
 function startApp() {
   if (!appContainer) return;
 
@@ -6744,9 +6765,11 @@ function startApp() {
         // skip the auth screen specifically, resume where they left off.
         navigateTo('onboarding-1');
       } else if (result.status === 'no-client') {
-        // No backend to validate against — skip the gate so the mock demo
-        // flow stays walkable.
-        navigateTo('onboarding-0');
+        // Deliberately no mock-demo fallback: without a backend the invite
+        // gate and PASS 인증 can't be enforced, so failing loudly beats
+        // silently letting anyone walk into onboarding.
+        showFatalError('서비스에 연결할 수 없어요. 잠시 후 다시 시도해주세요.');
+        console.error('[app] Supabase client unavailable — check env-config.js deployment.');
       } else {
         // signed-out / error — fresh start, invite gate first.
         navigateTo('onboarding-invite');
