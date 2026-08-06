@@ -2,6 +2,13 @@ console.log('app loaded');
 
 // Dev flag: set true to skip onboarding and jump straight to the app
 const SKIP_ONBOARDING = false;
+
+// Dev flag: set true to disable session/onboarding persistence across
+// reloads. Supabase normally keeps the auth session in localStorage, so a
+// completed onboarding stays completed after a refresh; with this on,
+// every page load signs out and starts fresh at onboarding-0 instead.
+// Set back to false to restore normal persistence.
+const DISABLE_PERSISTENCE = false;
 let myAnswers = window.myAnswers || window.currentUser?.answers || {};
 let dailyProfiles = [];
 let browseQueue = [];
@@ -926,9 +933,9 @@ let targetRoles = []; // ['F', 'B', 'V']
 let hasShownCTA = false;
 let selectedQuizOpt = null;
 
-// Profile Setup State
+// Profile Setup State — profileComplete is the in-session half of
+// isProfileBookComplete(); nothing else may gate on its own flag.
 window.profileComplete = false;
-window.profileIncomplete = false;
 let userProfilePhoto = null;
 window.myPhotos = [
   'https://images.unsplash.com/photo-1704731267944-c93c8d059cdc?w=400',
@@ -1021,6 +1028,9 @@ document.addEventListener('click', (e) => {
     const profileIdRaw = parts[0].replace('user', '');
     const profileId = profileIdRaw === 'myProfile' ? 'myProfile' : parseInt(profileIdRaw);
     const qId = parseInt(parts[1]);
+    // Someone else's answer card is a detail entry and gets gated; the user's
+    // own cards never are — that's how the profile book gets written.
+    if (profileId !== 'myProfile' && window.blockedByProfileGate()) return;
     openAnswerRevealModal(profileId, qId);
     return;
   }
@@ -1039,6 +1049,7 @@ document.addEventListener('click', (e) => {
     // Only if it doesn't also have data-page-id (handled above)
     if (!profCard.dataset.pageId) {
       e.stopPropagation();
+      if (window.blockedByProfileGate()) return;
       openProfileModal(parseInt(profCard.dataset.profileId));
     }
   }
@@ -1156,7 +1167,34 @@ function navigateTo(screenId) {
 function renderScreen(screenId) {
   let screenElem;
 
-  if (screenId === 'onboarding-0') {
+  if (screenId === 'onboarding-invite') {
+    // Codes are 8 uppercase hex chars; stripping anything else also keeps a
+    // hostile ?invite_code= value out of the attribute.
+    const prefill = String(captureInviteCodeFromURL() || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 32);
+    screenElem = createScreen('onboarding-invite', `
+      <div class="content-padding scroll-y">
+        <h1 style="margin-top: 40px;">초대코드를 입력해주세요</h1>
+        <p style="margin-bottom: 40px;">p.2는 초대를 받은 분만 가입할 수 있어요.</p>
+
+        <input type="text" class="input-field" id="invite-code-input" value="${prefill}"
+               placeholder="코드 입력 또는 메시지 전체 붙여넣기" autocomplete="off" autocapitalize="characters"
+               spellcheck="false" oninput="window.clearInviteCodeError()"
+               onpaste="window.handleInviteCodePaste(event)" />
+
+        <div id="invite-code-error" style="display:none; margin-top:12px; font-size:13px; color:#E05B5B; line-height:1.5;"></div>
+
+        <div style="margin-top:24px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.6;">
+          초대장을 받은 링크로 들어오시면<br/>코드가 자동으로 입력돼요 🩷
+        </div>
+      </div>
+      <div class="bottom-action-bar">
+        <button class="btn-primary" id="invite-submit-btn" onclick="submitInviteCode()">확인 →</button>
+      </div>
+    `);
+    // A code that arrived via the share link shouldn't need a second tap.
+    if (prefill) setTimeout(() => window.submitInviteCode(), 400);
+  }
+  else if (screenId === 'onboarding-0') {
     screenElem = createScreen('onboarding-0', `
       <div class="content-padding scroll-y">
         <h1 style="margin-top: 40px;">본인 인증이 필요해요</h1>
@@ -1484,6 +1522,82 @@ function renderScreen(screenId) {
     }, 20);
   }
 }
+
+// ── Invite gate (first onboarding step) ──────────────────────────────
+
+window.clearInviteCodeError = function () {
+  const box = document.getElementById('invite-code-error');
+  if (box) { box.style.display = 'none'; box.textContent = ''; }
+};
+
+// Codes are 8 uppercase hex characters.
+const INVITE_CODE_PATTERN = /[A-F0-9]{8}/;
+
+function flashInviteInput(input) {
+  input.classList.remove('invite-code-autofilled');
+  void input.offsetWidth; // reflow so the animation restarts on a repeated paste
+  input.classList.add('invite-code-autofilled');
+  setTimeout(() => input.classList.remove('invite-code-autofilled'), 900);
+}
+
+// People paste the whole KakaoTalk message, not just the code. Pull the code
+// out of it and keep only that; anything without a recognisable code pastes
+// through untouched so hand-typed or hand-trimmed input still works.
+window.handleInviteCodePaste = function (e) {
+  const input = e?.target;
+  if (!input) return;
+
+  const clipboard = e.clipboardData || window.clipboardData;
+  const pasted = clipboard ? clipboard.getData('text') : '';
+  const match = String(pasted || '').toUpperCase().match(INVITE_CODE_PATTERN);
+  if (!match) return; // let the browser handle it normally
+
+  e.preventDefault();
+  input.value = match[0];
+  window.clearInviteCodeError();
+  flashInviteInput(input);
+};
+
+function showInviteCodeError(msg) {
+  const box = document.getElementById('invite-code-error');
+  if (!box) return;
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+// Validates whatever is in the input (URL-prefilled or hand-typed) and only
+// lets a real, live code through to PASS 인증.
+window.submitInviteCode = async function () {
+  const input = document.getElementById('invite-code-input');
+  const btn = document.getElementById('invite-submit-btn');
+  if (!input) return;
+
+  const code = window.normalizeInviteCode(input.value);
+  if (!code) {
+    showInviteCodeError('초대코드를 입력해주세요');
+    return;
+  }
+
+  window.clearInviteCodeError();
+  const originalLabel = btn ? btn.innerHTML : '';
+  if (btn) { btn.disabled = true; btn.innerHTML = '확인 중…'; }
+
+  const result = await window.validateInviteCode(code);
+
+  if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
+
+  if (!result.valid) {
+    // Wrong, already used, expired, or never activated — all the same to the
+    // person typing, and we deliberately don't say which.
+    showInviteCodeError('유효하지 않거나 만료된 코드예요');
+    input.value = '';
+    input.focus();
+    return;
+  }
+
+  rememberPendingInvite({ code, ownerUserId: result.ownerUserId });
+  navigateTo('onboarding-0');
+};
 
 // Simple logic handlers
 
@@ -2001,6 +2115,13 @@ window.goToMyPage = function () {
   switchTab('profile');
 }
 
+// "지금 답변하러 가기" on a viewer-locked chapter. The profile book is rendered
+// inside #modal-container, so the modal has to come down before the tab swap.
+window.goToMyChapters = function () {
+  closeModal();
+  switchTab('profile');
+}
+
 window.toggleFilterChip = function (elem, type) {
   const textVal = elem.innerText.trim();
 
@@ -2124,13 +2245,47 @@ window.handleWheelScroll = function (elem) {
   }, 50);
 }
 
+// ── Profile-book gating ──────────────────────────────────────────────
+// Two gates that used to overlap, now split by trigger point:
+//   1. full-screen intro modal — once ever, on the first 발견 entry after onboarding
+//   2. contextual popup — every time a 프로필북/모임 card's detail is opened
+// Browsing (scroll, list view) is never gated, and 메시지 탭 is never gated.
+const INTRO_MODAL_SHOWN_KEY = 'p2_intro_modal_shown';
+const PROFILE_BOOK_DONE_KEY = 'p2_profile_book_complete';
+
+function readGateFlag(key) {
+  try { return window.localStorage.getItem(key) === '1'; } catch (e) { return false; }
+}
+function writeGateFlag(key) {
+  try { window.localStorage.setItem(key, '1'); } catch (e) { /* storage unavailable */ }
+}
+
+// The single answer to "has this user written their own profile book?".
+// Backend truth wins while signed in; otherwise localStorage carries it across
+// reloads so the no-Supabase demo flow gates identically.
+window.isProfileBookComplete = function () {
+  if (window.profileComplete) return true;
+  if (window.supabaseClient && window.currentAuthUser) return !!window.basicInfoComplete;
+  return readGateFlag(PROFILE_BOOK_DONE_KEY);
+};
+
 window.initMainApp = function () {
   navigateTo('main');
   setTimeout(() => {
     switchTab('discover');
-    setTimeout(showPostOnboardingModal, 800);
+    setTimeout(maybeShowPostOnboardingModal, 800);
   }, 300);
 }
+
+// Gate 1 — fires only on the first 발견 entry, and never again once shown.
+// The flag is written before the modal opens so a reload mid-modal can't
+// resurrect it.
+window.maybeShowPostOnboardingModal = function () {
+  if (window.isProfileBookComplete()) return;
+  if (readGateFlag(INTRO_MODAL_SHOWN_KEY)) return;
+  writeGateFlag(INTRO_MODAL_SHOWN_KEY);
+  showPostOnboardingModal();
+};
 
 window.showPostOnboardingModal = function () {
   const container = document.getElementById('modal-container') || document.body;
@@ -2153,26 +2308,53 @@ window.startProfileSetup = function () {
   setTimeout(() => navigateTo('profile-setup-1'), 300);
 };
 
+// "나중에 하기" — closes the intro modal and nothing else. 발견/모임 stay fully
+// browsable; the contextual gate takes over from here.
 window.skipProfileSetup = function () {
-  window.profileIncomplete = true;
   dismissPostOnboardingModal();
 };
 
+// Gate 2 — contextual popup over whatever card the user just tapped.
+// Repeats on every detail attempt until the profile book is written, so it
+// carries no "나중에 하기" dismissal state; tapping the dim backdrop closes it
+// and leaves the user on the card list.
 window.showLockedProfileModal = function () {
-  // Reuse the post-onboarding modal styles for consistency
+  if (document.getElementById('locked-profile-modal')) return; // never stack
   const container = document.getElementById('modal-container') || document.body;
   const modal = document.createElement('div');
   modal.className = 'post-onboarding-backdrop';
   modal.id = 'locked-profile-modal';
   modal.innerHTML = `
       <div class="post-onboarding-card">
-        <div class="post-onboarding-title">프로필을 먼저 작성해주세요</div>
-        <div class="post-onboarding-sub">내 프로필을 작성해야<br/>다른 사람의 프로필북을<br/>열어볼 수 있어요!</div>
-        <button class="post-onboarding-btn" style="background:#E2FF74; color:#2D2A2B;" onclick="dismissLockedModal(); navigateTo('profile-setup-1');">프로필 작성하기</button>
-        <button class="post-onboarding-link" onclick="dismissLockedModal()">나중에 하기</button>
+        <div class="post-onboarding-title">프로필북을 먼저 작성해주세요</div>
+        <button class="post-onboarding-btn" style="background:#E2FF74; color:#2D2A2B;" onclick="dismissLockedModal(); navigateTo('profile-setup-1');">프로필북 작성하기</button>
       </div>
     `;
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) dismissLockedModal(); // backdrop only, not the card
+  });
   container.appendChild(modal);
+};
+
+// Blocks detail entry for 프로필북/모임 cards. Returns true when the caller
+// should stop. Browsing paths must never call this.
+window.blockedByProfileGate = function () {
+  if (window.isProfileBookComplete()) return false;
+  showLockedProfileModal();
+  return true;
+};
+
+// 모임 탭 list cards route through here rather than calling openMeetupDetail
+// directly, so the same meetup opened from a chat (메시지 탭) stays ungated.
+window.openMeetupFromList = function (id) {
+  if (window.blockedByProfileGate()) return;
+  openMeetupDetail(id);
+};
+
+// Same gate for the sponsored cards that leave the app instead of opening a detail.
+window.openMeetupLinkFromList = function (url) {
+  if (window.blockedByProfileGate()) return;
+  window.open(url, '_blank');
 };
 
 window.dismissLockedModal = function () {
@@ -2194,13 +2376,12 @@ window.dismissPostOnboardingModal = function () {
 };
 
 window.skipSetupToDiscover = function () {
-  window.profileIncomplete = true;
   switchTab('discover');
 };
 
 window.finalizeProfile = function () {
   window.profileComplete = true;
-  window.profileIncomplete = false;
+  writeGateFlag(PROFILE_BOOK_DONE_KEY); // survives reload even without a backend
   markBasicInfoComplete(); // fire-and-forget; unlocks gated tabs immediately, DB write is best-effort
   navigateTo('main');
   setTimeout(() => {
@@ -2257,12 +2438,6 @@ window.switchTab = function (tabName) {
   if (!contentArea) return;
   contentArea.innerHTML = '';
 
-  const GATED_TABS = ['discover', 'meetups', 'messages'];
-  if (GATED_TABS.includes(tabName) && !window.basicInfoComplete) {
-    renderTabLockScreen(contentArea);
-    return;
-  }
-
   if (tabName === 'discover') {
     window.showLikedCollection = false;
 
@@ -2282,7 +2457,7 @@ window.switchTab = function (tabName) {
 
       const allProfiles = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
       const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
-      dailyProfiles = shuffled.slice(0, 6);
+      dailyProfiles = shuffled.slice(0, getWeeklyBookCount());
       browseQueue = [...dailyProfiles];
       window.weeklyViewedProfiles = JSON.parse(localStorage.getItem('sp_viewed_this_week') || '[]');
       window.isDiscoverInitialized = true;
@@ -2500,6 +2675,10 @@ window.switchTab = function (tabName) {
       </div>
     `;
   }
+
+  // No tab-level gate: 발견/모임 lists stay fully browsable and 메시지 is never
+  // gated. Gating happens only on detail entry — see blockedByProfileGate().
+
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
@@ -2564,9 +2743,9 @@ window.renderMeetupList = function () {
   }
   container.innerHTML = filtered.map(m => {
     if (m.type.includes('행사') && m.isAd === true) {
-      const clickAction = m.linkType === 'internal'
-        ? `openMeetupDetail(${m.id})`
-        : (m.externalUrl ? `window.open('${m.externalUrl}', '_blank')` : `openMeetupDetail(${m.id})`);
+      const clickAction = m.linkType !== 'internal' && m.externalUrl
+        ? `openMeetupLinkFromList('${m.externalUrl}')`
+        : `openMeetupFromList(${m.id})`;
       const posterUrl = m.image || 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800';
       return `
             <div class="meetup-item fade-in" style="overflow: hidden; border: none; position: relative; aspect-ratio: 4/5; cursor: pointer; display: flex; flex-direction: column; justify-content: space-between;" onclick="${clickAction}">
@@ -2619,7 +2798,7 @@ window.renderMeetupList = function () {
         ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>${m.ageRange}</div>`
         : `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>연령 무관</div>`;
       return `
-            <div class="meetup-item fade-in" onclick="openMeetupDetail(${m.id})">
+            <div class="meetup-item fade-in" onclick="openMeetupFromList(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
                 <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: #9B72CC; background: none;">
                   <i data-lucide="share" style="width: 24px; height: 24px;"></i>
@@ -2641,7 +2820,7 @@ window.renderMeetupList = function () {
               </div>
               <div class="meetup-footer" style="margin-top:16px;">
                 <div class="attendee-stack">${hostAvatarHtml}</div>
-                <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">더 보기 →</button>
+                <button class="rsvp-btn" onclick="event.stopPropagation(); openMeetupFromList(${m.id})">더 보기 →</button>
               </div>
             </div>
       `;
@@ -2651,7 +2830,7 @@ window.renderMeetupList = function () {
     const isEndingSoon = (m.currentCap / m.maxCap) >= 0.8 && m.currentCap < m.maxCap;
     const isFull = m.currentCap >= m.maxCap;
     return `
-            <div class="meetup-item fade-in ${m.hasRSVPd ? 'meetup-item-rsvpd' : ''}" onclick="openMeetupDetail(${m.id})">
+            <div class="meetup-item fade-in ${m.hasRSVPd ? 'meetup-item-rsvpd' : ''}" onclick="openMeetupFromList(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
                 <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: #9B72CC; background: none;">
                   <i data-lucide="share" style="width: 24px; height: 24px;"></i>
@@ -2688,7 +2867,7 @@ window.renderMeetupList = function () {
                    ${(m.participants || []).slice(0, 5).map(url => `<div class="attendee-avatar" style="background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')}
                    ${m.currentCap > 5 ? `<div style="font-size: 12px; color: var(--text-muted); margin-left: 8px; line-height: 28px;">+${m.currentCap - 5}</div>` : ''}
                 </div>
-                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupDetail(${m.id})">${m.hasRSVPd ? '신청 완료 ✓' : '더 보기 →'}</button>`}
+                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupFromList(${m.id})">${m.hasRSVPd ? '신청 완료 ✓' : '더 보기 →'}</button>`}
               </div>
             </div>
           `;
@@ -2701,9 +2880,30 @@ function getLikedBadgeHTML(pageId) {
   return `<span class="card-liked-badge" style="visibility: ${isLiked ? 'visible' : 'hidden'}; position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: #888; pointer-events: none;">♥</span>`;
 }
 
+// Chapter names + the particle that follows them, so the lock copy reads
+// naturally ("나를 채우면" / "사랑을 채우면").
+const CHAPTER_META = {
+  1: { label: '나', particle: '를' },
+  2: { label: '사랑', particle: '을' },
+  3: { label: '관계', particle: '를' },
+};
+
+// Reciprocity gate: you can read someone else's chapter only once you've
+// started your own. Judged purely on MY_ANSWERS, so the verdict is the same
+// no matter whose profile book is open. One answer is enough to unlock.
+window.isChapterUnlockedForViewer = function (chapNum) {
+  const chapQuestions = QUESTIONS.filter(q => q.chapter === chapNum);
+  return chapQuestions.some(q => MY_ANSWERS[q.id]);
+};
+
 window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profileObj) {
   let html = '';
   const chapColors = { 1: '#F0F7D4', 2: '#F7EDE3', 3: '#EDE3F5' };
+
+  // The viewer lock only ever applies to someone else's book. 'myProfile' is
+  // the profile tab, 'preview' is my own book seen as others would see it —
+  // both render with isCurrentUser false but must never be locked.
+  const isOtherPersonsBook = !isCurrentUser && profileId !== 'myProfile' && profileId !== 'preview';
   const chap1 = QUESTIONS.filter(q => q.chapter === 1);
   const chap2 = QUESTIONS.filter(q => q.chapter === 2);
   const chap3 = QUESTIONS.filter(q => q.chapter === 3);
@@ -2722,16 +2922,23 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profi
   };
 
   const renderGroup = (group, chapTitle, chapNum) => {
+    const dividerHtml = `<div class="grid-chapter-divider" style="grid-column: 1 / -1; margin-top: ${chapTitle.includes('Chapter 1') ? '0' : '24px'};">${chapTitle}</div>`;
+
+    // They haven't written this chapter — nothing to gate.
     if (isChapterLocked(chapNum)) {
       return `
-        <div class="grid-chapter-divider" style="grid-column: 1 / -1; margin-top: ${chapTitle.includes('Chapter 1') ? '0' : '24px'};">${chapTitle}</div>
+        ${dividerHtml}
         <div class="chapter-locked-placeholder" style="grid-column: 1 / -1;">아직 작성되지 않았어요</div>
       `;
     }
+
+    // They wrote it, but I haven't started mine yet.
+    const viewerLocked = isOtherPersonsBook && !window.isChapterUnlockedForViewer(chapNum);
+
     let visibleQuestions = group;
     if (!isCurrentUser) visibleQuestions = group.filter(q => answersObj[q.id]);
     if (visibleQuestions.length === 0) return '';
-    let gHtml = `<div class="grid-chapter-divider" style="grid-column: 1 / -1; margin-top: ${chapTitle.includes('Chapter 1') ? '0' : '24px'};">${chapTitle}</div>`;
+    let gHtml = '';
     visibleQuestions.forEach((q) => {
       const ans = answersObj[q.id];
       const pidStr = (profileId === 'myProfile' || profileId === 1) ? 'myProfile' : `user${profileId}`;
@@ -2752,7 +2959,7 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profi
           const bgStyle = ans.polaroid ? `background-image: url('${ans.polaroid}'); background-size: cover; background-position: center; filter: blur(12px) brightness(0.85);` : '';
           const chapBg = chapColors[q.chapter] || '#FAFAF8';
           gHtml += `
-            <div data-page-id="${pageId}" class="teaser-card" style="background: ${chapBg};">
+            <div ${viewerLocked ? '' : `data-page-id="${pageId}"`} class="teaser-card" style="background: ${chapBg};">
                ${ans.polaroid ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; ${bgStyle} z-index:1;"></div>` : ''}
                <div class="teaser-frosted-overlay"></div>
                <div class="teaser-q-num ${ans.polaroid ? 'on-dark' : ''}" style="z-index:2;">Q.${q.id}</div>
@@ -2770,7 +2977,24 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profi
           `;
       }
     });
-    return gHtml;
+
+    if (!viewerLocked) return dividerHtml + gHtml;
+
+    const { label, particle } = CHAPTER_META[chapNum] || { label: '', particle: '을' };
+    return `
+      ${dividerHtml}
+      <div class="chapter-viewer-lock" style="grid-column: 1 / -1;">
+        <div class="chapter-viewer-lock-cards" aria-hidden="true">${gHtml}</div>
+        <div class="chapter-viewer-lock-veil">
+          <svg class="chapter-viewer-lock-icon" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          <p class="chapter-viewer-lock-text">Chapter ${chapNum} · ${label}${particle} 채우면<br/>이 챕터를 볼 수 있어요</p>
+          <p class="chapter-viewer-lock-sub">한 문장이면 충분해요. 천천히 채워도 괜찮아요 🌙</p>
+          <button class="chapter-viewer-lock-btn" onclick="goToMyChapters()">지금 답변하러 가기</button>
+        </div>
+      </div>
+    `;
   };
   html += renderGroup(chap1, 'Chapter 1 · 나', 1);
   html += renderGroup(chap2, 'Chapter 2 · 사랑', 2);
@@ -2970,6 +3194,20 @@ window.renderBasicInfoRows = function (p, isMine, isPreview = false) {
   return html;
 };
 
+// How many answers I've written in a chapter (0–9).
+window.getChapterAnswerCount = function (chapNum) {
+  return QUESTIONS.filter(q => q.chapter === chapNum && MY_ANSWERS[q.id]).length;
+};
+
+// Weekly profile-book allowance: 3 by default, +1 per fully written chapter
+// (9/9), capped at 6. Single source of truth — the dashboard copy and the
+// number of books 발견 actually deals out both read from here, so they can't
+// drift apart. There is no per-answer bonus.
+window.getWeeklyBookCount = function () {
+  const completedChapters = [1, 2, 3].filter(c => window.getChapterAnswerCount(c) === 9).length;
+  return Math.min(6, 3 + completedChapters);
+};
+
 window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
   const currentYear = 2026;
   const birthYear = p.birthYear || (currentYear - (p.age || 28) + 1);
@@ -2977,19 +3215,11 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
   const yearSuffix = (birthYear % 100).toString().padStart(2, '0');
 
   // Calculate actual counts for owner
-  const getChapterCount = (c) => QUESTIONS.filter(q => q.chapter === c && MY_ANSWERS[q.id]).length;
-  const c1Count = getChapterCount(1);
-  const c2Count = getChapterCount(2);
-  const c3Count = getChapterCount(3);
+  const c1Count = window.getChapterAnswerCount(1);
+  const c2Count = window.getChapterAnswerCount(2);
+  const c3Count = window.getChapterAnswerCount(3);
 
-  // Benefit Logic (Mocking 0 answers today for demo)
-  const answersToday = 0;
-  let benefitCount = 3;
-  if (c1Count === 9) benefitCount++;
-  if (c2Count === 9) benefitCount++;
-  if (c3Count === 9) benefitCount++;
-  const todayBonus = Math.min(2, Math.floor(answersToday / 3));
-  benefitCount += todayBonus;
+  const benefitCount = window.getWeeklyBookCount();
 
   const chapters = [
     { num: 1, label: '나', count: c1Count, pct: (c1Count / 9) * 100 },
@@ -3095,14 +3325,10 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
             </div>
 
             <div style="font-size:12px; color:#9B72CC; margin-top:8px; font-weight:500;">
-              ${answersToday < 3 ? `답변 ${3 - answersToday}개 더 작성하면 +1권` :
-        (answersToday < 6 ? `답변 ${6 - answersToday}개 더 작성하면 +1권` : '이번 주 답변 보너스 완료! ✨')}
+              ${chapters.some(cl => cl.count < 9)
+        ? '한 Chapter를 완성할 때마다 +1권 열람할 수 있어요'
+        : '세 Chapter를 모두 완성했어요. 최대 6권 ✨'}
             </div>
-            ${chapters.some(cl => cl.count < 9) ? `
-              <div style="font-size:11px; color:#999; margin-top:4px;">
-                한 Chapter를 완성하면 +1권 열람 가능!
-              </div>
-            ` : ''}
           </div>
 
            ${chapters.map(ch => `
@@ -4050,10 +4276,7 @@ window.openMyProfilePreview = function () {
 
 
 window.handleCardClick = function (profileId, qId = null) {
-  if (window.profileIncomplete && !window.profileComplete) {
-    showLockedProfileModal();
-    return;
-  }
+  if (window.blockedByProfileGate()) return;
   if (qId) {
     openAnswerRevealModal(profileId, qId);
   } else {
@@ -6210,8 +6433,71 @@ function captureInviteCodeFromURL() {
   try { return window.sessionStorage.getItem('sp_invite_code') || null; } catch (e) { return code || null; }
 }
 
+// ── Invite code validation ───────────────────────────────────────────
+// The invite the signup flow has already validated: { code, ownerUserId }.
+// ownerUserId is captured here rather than re-queried later on purpose —
+// invite_codes is readable only by its owner under RLS, so a signing-up user
+// gets an empty result from a direct SELECT. validate_invite_code() runs
+// SECURITY DEFINER and hands the owner back, which is the only way the new
+// user can learn who invited them.
+window.pendingInvite = null;
+
+const PENDING_INVITE_KEY = 'sp_pending_invite';
+
+function rememberPendingInvite(invite) {
+  window.pendingInvite = invite;
+  try {
+    if (invite) window.sessionStorage.setItem(PENDING_INVITE_KEY, JSON.stringify(invite));
+    else window.sessionStorage.removeItem(PENDING_INVITE_KEY);
+  } catch (e) { /* storage unavailable */ }
+}
+
+// Survives a reload partway through onboarding.
+window.getPendingInvite = function () {
+  if (window.pendingInvite) return window.pendingInvite;
+  try {
+    const raw = window.sessionStorage.getItem(PENDING_INVITE_KEY);
+    if (raw) window.pendingInvite = JSON.parse(raw);
+  } catch (e) { /* storage unavailable or corrupt */ }
+  return window.pendingInvite;
+};
+
+// Codes are stored uppercase (8 hex chars), so normalise what the user types.
+window.normalizeInviteCode = function (raw) {
+  return String(raw || '').trim().toUpperCase();
+};
+
+// Returns { valid, ownerUserId, skipped?, error? }.
+// validate_invite_code returns a JSON object: { valid: bool, owner_user_id?: uuid }.
+// It is true only for a code that is activated, unexpired and unused.
+window.validateInviteCode = async function (rawCode) {
+  const code = window.normalizeInviteCode(rawCode);
+  if (!code) return { valid: false, ownerUserId: null };
+
+  const sb = window.supabaseClient;
+  if (!sb) {
+    // No backend configured — the mock demo flow must stay walkable.
+    console.warn('[invite] no Supabase client; skipping invite validation');
+    return { valid: true, ownerUserId: null, skipped: true };
+  }
+
+  const { data, error } = await sb.rpc('validate_invite_code', { input_code: code });
+  if (error) {
+    console.error(
+      '[invite] validate_invite_code failed\n' +
+      `  message: ${error.message}\n` +
+      `  code:    ${error.code ?? '(none)'}`,
+      error
+    );
+    return { valid: false, ownerUserId: null, error };
+  }
+
+  return { valid: data?.valid === true, ownerUserId: data?.owner_user_id || null };
+};
+
 // Ensures a `users` row exists for this auth user; returns the row (existing or newly created).
-async function ensureUserRow(authUser, inviteCode) {
+// `invite` is the validated { code, ownerUserId } pair, not a raw URL parameter.
+async function ensureUserRow(authUser, invite) {
   const sb = window.supabaseClient;
   if (!sb || !authUser) return null;
 
@@ -6232,8 +6518,8 @@ async function ensureUserRow(authUser, inviteCode) {
     .insert({
       id: authUser.id,
       phone: null,
-      invite_code_used: inviteCode,
-      invited_by: null,
+      invite_code_used: invite?.code || null,
+      invited_by: null, // filled in by redeemInviteForUser once the code is burned
       basic_info_complete: false,
     })
     .select()
@@ -6243,7 +6529,48 @@ async function ensureUserRow(authUser, inviteCode) {
     console.error('ensureUserRow: insert failed', insertErr);
     return null;
   }
+
+  // Redeem only after the row exists — invite_codes.used_by is an FK to users.id.
+  if (invite?.code) await redeemInviteForUser(created, invite);
   return created;
+}
+
+// Burns the invite code and records who invited this user.
+async function redeemInviteForUser(userRow, invite) {
+  const sb = window.supabaseClient;
+  if (!sb || !userRow || !invite?.code) return;
+
+  const { data: redeemed, error } = await sb.rpc('redeem_invite_code', {
+    input_code: invite.code,
+    new_user_id: userRow.id,
+  });
+
+  if (error) {
+    console.error('[invite] redeem_invite_code failed', error);
+    return;
+  }
+  if (redeemed !== true) {
+    // Someone else used it, or it expired between validation and signup.
+    console.warn('[invite] code was no longer redeemable:', invite.code);
+    return;
+  }
+
+  if (!invite.ownerUserId) {
+    console.warn('[invite] redeemed but no owner captured; invited_by left null');
+    return;
+  }
+
+  const { error: linkErr } = await sb
+    .from('users')
+    .update({ invited_by: invite.ownerUserId })
+    .eq('id', userRow.id);
+
+  if (linkErr) {
+    console.error('[invite] invited_by update failed', linkErr);
+    return;
+  }
+  userRow.invited_by = invite.ownerUserId;
+  rememberPendingInvite(null); // consumed
 }
 
 // Called once at splash time to decide where the flow should resume.
@@ -6252,13 +6579,17 @@ async function resumeExistingSession() {
   const sb = window.supabaseClient;
   if (!sb) return { status: 'no-client' };
 
+  if (DISABLE_PERSISTENCE) {
+    try { await sb.auth.signOut(); } catch (e) { /* no session to clear, ignore */ }
+    return { status: 'signed-out' };
+  }
+
   try {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) return { status: 'signed-out' };
 
     window.currentAuthUser = session.user;
-    const inviteCode = captureInviteCodeFromURL();
-    window.currentUserRow = await ensureUserRow(session.user, inviteCode);
+    window.currentUserRow = await ensureUserRow(session.user, window.getPendingInvite());
 
     if (window.currentUserRow?.nickname) userName = window.currentUserRow.nickname;
     window.basicInfoComplete = !!window.currentUserRow?.basic_info_complete;
@@ -6292,12 +6623,12 @@ window.confirmIdentity = async function (btn) {
   btn.disabled = true;
 
   try {
-    const inviteCode = captureInviteCodeFromURL();
+    const invite = window.getPendingInvite();
     const { data, error } = await sb.auth.signInAnonymously();
     if (error) throw error;
 
     window.currentAuthUser = data.user;
-    window.currentUserRow = await ensureUserRow(data.user, inviteCode);
+    window.currentUserRow = await ensureUserRow(data.user, invite);
     window.basicInfoComplete = !!window.currentUserRow?.basic_info_complete;
 
     btn.innerHTML = '인증 완료 ✓';
@@ -6360,17 +6691,6 @@ async function markBasicInfoComplete() {
   if (window.currentUserRow) window.currentUserRow.basic_info_complete = true;
 }
 
-// Tab lock screen shown in place of 발견/모임/메시지 while basic_info_complete is false.
-// Bare-bones on purpose — real layout comes in a later pass.
-function renderTabLockScreen(contentArea) {
-  contentArea.innerHTML = `
-    <div class="tab-locked-screen">
-      <p>프로필북을 먼저 작성해주세요</p>
-      <button onclick="navigateTo('profile-setup-1')">프로필북 작성하기</button>
-    </div>
-  `;
-}
-
 function startApp() {
   if (!appContainer) return;
 
@@ -6423,9 +6743,13 @@ function startApp() {
         // Already authenticated but hasn't finished onboarding —
         // skip the auth screen specifically, resume where they left off.
         navigateTo('onboarding-1');
-      } else {
-        // signed-out / no-client / error — normal fresh-start flow.
+      } else if (result.status === 'no-client') {
+        // No backend to validate against — skip the gate so the mock demo
+        // flow stays walkable.
         navigateTo('onboarding-0');
+      } else {
+        // signed-out / error — fresh start, invite gate first.
+        navigateTo('onboarding-invite');
       }
     });
   };
@@ -6565,71 +6889,245 @@ function setupDecadeSlider(userPoint) {
   updateUI();
 }
 
-window.openInvitePage = function () {
-  const mc = getModalContainer();
+// ── Invite cards (Supabase-backed) ───────────────────────────────────
+// invite_codes rows are provisioned per user by the backend (10 per user, on
+// users INSERT), so the client never mints a code — it only activates one.
+// Card state is always derived from the row, never stored locally:
+//   idle     activated_at === null                        → "사용하기"
+//   active   activated && now < expires_at && !used_by     → countdown + share
+//   expired  everything else (used OR timed out, same UI)  → disabled
+const INVITE_SLOT_COUNT = 10;
+const INVITE_TTL_MS = 24 * 60 * 60 * 1000;
+const INVITE_BASE_URL = 'https://veromars.github.io/same-page';
 
-  if (!window.inviteCardStates) {
-    window.inviteCardStates = [
-      { state: 2, num: 1, code: "XY78-MN12" },
-      { state: 2, num: 2, code: "JK45-PQ90" },
-      { state: 1, num: 3, code: "AB12-XY34" },
-      ...Array(7).fill(0).map((_, i) => ({ state: 0, num: i + 4 }))
-    ];
+window.inviteCardStates = [];
+
+window.getInviteCardState = function (row, nowMs) {
+  if (!row || !row.code) return 'empty';
+  if (!row.activated_at) return 'idle';
+  const expiresMs = row.expires_at ? Date.parse(row.expires_at) : 0;
+  if (!row.used_by && nowMs < expiresMs) return 'active';
+  return 'expired';
+};
+
+window.buildInviteLink = function (code) {
+  return `${INVITE_BASE_URL}?invite_code=${encodeURIComponent(code)}`;
+};
+
+// "23시간 59분 남음" / "12분 남음" / "곧 만료돼요"
+window.formatInviteRemaining = function (expiresAt, nowMs) {
+  const remaining = Date.parse(expiresAt) - nowMs;
+  if (!(remaining > 0)) return '만료됨';
+  const totalMinutes = Math.floor(remaining / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}시간 ${minutes}분 남음`;
+  if (minutes > 0) return `${minutes}분 남음`;
+  return '곧 만료돼요';
+};
+
+window.loadInviteCards = async function () {
+  const sb = window.supabaseClient;
+  if (!sb || !window.currentAuthUser) {
+    // Silent here once meant the whole page rendered as empty "준비 중" slots
+    // with nothing in the console to explain it — say which half is missing.
+    console.warn(
+      '[invite] loadInviteCards called with no session — ' +
+      `supabaseClient: ${sb ? 'ok' : 'missing'}, window.currentAuthUser: ${window.currentAuthUser ? 'ok' : 'null'}`
+    );
+    window.inviteCardStates = [];
+    return { error: 'no-session' };
   }
 
+  const { data, error } = await sb
+    .from('invite_codes')
+    .select('code, activated_at, expires_at, used_by, used_at')
+    .eq('owner_user_id', window.currentAuthUser.id)
+    // Sort by the primary key, not created_at: the seeding trigger inserts all
+    // 10 rows in one statement so their created_at values are identical, and a
+    // tied sort key lets Postgres reorder rows freely — an activated row moves
+    // to the end of the heap, so the card appeared to jump slots after a tap.
+    .order('code', { ascending: true });
+
+  if (error) {
+    console.error('[invite] failed to load invite_codes', error);
+    window.inviteCardStates = [];
+    return { error };
+  }
+
+  window.inviteCardStates = (data || []).slice(0, INVITE_SLOT_COUNT);
+  if (window.inviteCardStates.length < INVITE_SLOT_COUNT) {
+    console.warn(`[invite] expected ${INVITE_SLOT_COUNT} codes, got ${window.inviteCardStates.length}`);
+  }
+  return { data: window.inviteCardStates };
+};
+
+const INVITE_EXPIRY_NOTE = '(24시간 이내 사용 가능)';
+
+// The share sheet gets the code in the body text — a link preview alone leaves
+// the recipient with nothing to type in if they open the app another way.
+window.buildInviteShareText = function (code) {
+  return `p.2에 초대합니다 💜\n\n초대코드: ${code}\n${INVITE_EXPIRY_NOTE}`;
+};
+
+// The clipboard has no separate url field, so the link leads and the code follows.
+window.buildInviteClipboardText = function (code) {
+  return `${window.buildInviteLink(code)}\n\n초대코드: ${code}\n${INVITE_EXPIRY_NOTE}`;
+};
+
+// Copies the invite text, or explains why it couldn't. The clipboard API only
+// exists in a secure context, so plain http on a LAN IP has no navigator.clipboard
+// at all — that reads as a dead button unless we say so.
+async function copyInviteText(text) {
+  if (!navigator.clipboard) {
+    console.error(
+      '[invite] navigator.clipboard is unavailable — this page is not a secure context.\n' +
+      `  origin: ${location.origin}\n` +
+      '  fix:    serve over https, or use http://localhost instead of a LAN IP.'
+    );
+    window.showToast('복사는 https에서만 돼요');
+    return false;
+  }
+
+  try {
+    await navigator.clipboard.writeText(text);
+    window.showToast('링크가 복사됐어요');
+    return true;
+  } catch (err) {
+    console.error(`[invite] clipboard write failed (origin: ${location.origin})`, err);
+    window.showToast('복사에 실패했어요 · https에서만 지원돼요');
+    return false;
+  }
+}
+
+window.shareInvite = async function (code) {
+  if (!code) {
+    console.warn('[invite] shareInvite called with no code — the card has no invite_codes row');
+    return;
+  }
+  const url = window.buildInviteLink(code);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: window.buildInviteShareText(code), url });
+      return; // actually shared — don't also copy
+    } catch (err) {
+      // AbortError means either "the user dismissed the sheet" or "the sheet
+      // never opened" (desktop Chrome with no share target throws the same
+      // thing). Those are indistinguishable here, so fall through to the
+      // clipboard instead of leaving the tap with no visible effect.
+      console.warn('[invite] navigator.share did not complete; falling back to clipboard', err);
+    }
+  }
+
+  await copyInviteText(window.buildInviteClipboardText(code));
+};
+
+// Ticks the countdown on active cards without re-rendering the whole page.
+function startInviteCountdown() {
+  stopInviteCountdown();
+  window._inviteCountdownTimer = setInterval(() => {
+    const nodes = document.querySelectorAll('[data-invite-expires]');
+    if (!nodes.length) { stopInviteCountdown(); return; }
+    const nowMs = Date.now();
+    let anyExpired = false;
+    nodes.forEach(node => {
+      const expiresAt = node.getAttribute('data-invite-expires');
+      if (Date.parse(expiresAt) <= nowMs) anyExpired = true;
+      node.textContent = window.formatInviteRemaining(expiresAt, nowMs);
+    });
+    // A card just crossed its expiry — re-derive states from the rows.
+    if (anyExpired) window.renderInvitePage();
+  }, 1000);
+}
+
+function stopInviteCountdown() {
+  if (window._inviteCountdownTimer) {
+    clearInterval(window._inviteCountdownTimer);
+    window._inviteCountdownTimer = null;
+  }
+}
+
+window.openInvitePage = async function () {
+  const mc = getModalContainer();
+
   window.renderInvitePage = function () {
-    const usedCount = window.inviteCardStates.filter(c => c.state === 2).length;
-    const progressPercent = (usedCount / 10) * 100;
+    const nowMs = Date.now();
+    const rows = window.inviteCardStates;
+    const usedCount = rows.filter(r => r.used_by).length;
+    const progressPercent = (usedCount / INVITE_SLOT_COUNT) * 100;
 
     const _ordSuffix = n => { const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); };
-    const cardsHTML = window.inviteCardStates.map(card => {
-      if (card.state === 2) {
-        // Used
+
+    // Always draw 10 slots; any missing row renders as an inert placeholder.
+    const slots = Array.from({ length: INVITE_SLOT_COUNT }, (_, i) => rows[i] || null);
+
+    const cardsHTML = slots.map((card, i) => {
+      const num = i + 1;
+      const state = window.getInviteCardState(card, nowMs);
+
+      if (state === 'expired') {
         return `
           <div class="invite-card-slot state-used">
             <div class="envelope-flap envelope-flap-top"></div>
             <div class="envelope-flap envelope-flap-bottom"></div>
             <div class="envelope-content">
-              <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">INVITED</div>
+              <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">${card.used_by ? 'INVITED' : 'EXPIRED'}</div>
               <div class="invite-circle">
                 <i data-lucide="heart" style="width:20px; height:20px; color:#999;"></i>
               </div>
               <div style="color:#888; font-size:13px; font-family:monospace;">${card.code}</div>
+              <div style="color:#999; font-size:12px;">만료됨</div>
             </div>
           </div>
         `;
-      } else if (card.state === 1) {
-        // Active
-        const shareText = `p.2에 초대합니다 🩷 코드: ${card.code}`;
+      }
+
+      if (state === 'active') {
         return `
           <div class="invite-card-slot state-active">
             <div class="invite-inner-card">
               <div class="invite-inner-label">INVITATION</div>
               <div class="invite-code">${card.code}</div>
-              <div class="invite-timer">23시간 59분 남음</div>
+              <div class="invite-timer" data-invite-expires="${card.expires_at}">${window.formatInviteRemaining(card.expires_at, nowMs)}</div>
             </div>
             <div class="invite-actions">
-              <button class="invite-btn-copy" onclick="event.stopPropagation(); navigator.clipboard && navigator.clipboard.writeText('${card.code}').then(()=>alert('코드가 복사되었습니다.')).catch(()=>alert('${card.code}')); return false;">링크 복사</button>
-              <button class="invite-btn-share" onclick="event.stopPropagation(); if(navigator.share){navigator.share({title:'p.2 초대장',text:'${shareText}'});}else{alert('${shareText}');}">공유하기</button>
+              <button class="invite-btn-share" onclick="event.stopPropagation(); window.shareInvite('${card.code}'); return false;">공유하기</button>
             </div>
           </div>
         `;
-      } else {
-        // Unused
+      }
+
+      if (state === 'idle') {
         return `
           <div class="invite-card-slot state-unused">
             <div class="envelope-flap envelope-flap-top"></div>
             <div class="envelope-flap envelope-flap-bottom"></div>
             <div class="envelope-content">
-              <div class="invite-number">${_ordSuffix(card.num)} Invitation</div>
+              <div class="invite-number">${_ordSuffix(num)} Invitation</div>
               <div class="invite-circle">
                 <i data-lucide="heart" style="width:20px; height:20px; color:#9B7FD4;"></i>
               </div>
-              <button class="use-invite-btn" onclick="window.activateInvite(${card.num - 1})">사용하기</button>
+              <button class="use-invite-btn" onclick="window.activateInvite(${i})">사용하기</button>
             </div>
           </div>
         `;
       }
+
+      // No row for this slot.
+      return `
+        <div class="invite-card-slot state-unused" style="opacity:0.45;">
+          <div class="envelope-flap envelope-flap-top"></div>
+          <div class="envelope-flap envelope-flap-bottom"></div>
+          <div class="envelope-content">
+            <div class="invite-number">${_ordSuffix(num)} Invitation</div>
+            <div class="invite-circle">
+              <i data-lucide="heart" style="width:20px; height:20px; color:#CCC;"></i>
+            </div>
+            <button class="use-invite-btn" disabled style="opacity:0.5; cursor:default;">준비 중</button>
+          </div>
+        </div>
+      `;
     }).join('');
 
     mc.innerHTML = `
@@ -6665,22 +7163,51 @@ window.openInvitePage = function () {
       </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    startInviteCountdown();
   };
 
+  window.renderInvitePage();       // paint the shell immediately
+  await window.loadInviteCards();  // then fill it from the backend
   window.renderInvitePage();
 };
 
-window.activateInvite = function (index) {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const nums = '0123456789';
-  const code =
-    chars[Math.floor(Math.random() * 26)] + chars[Math.floor(Math.random() * 26)] +
-    nums[Math.floor(Math.random() * 10)] + nums[Math.floor(Math.random() * 10)] + '-' +
-    chars[Math.floor(Math.random() * 26)] + chars[Math.floor(Math.random() * 26)] +
-    nums[Math.floor(Math.random() * 10)] + nums[Math.floor(Math.random() * 10)];
+// Activates an existing invite_codes row — the code itself is never generated
+// client-side. The `.is('activated_at', null)` filter makes a double tap (or a
+// stale card) a no-op instead of resetting a live countdown.
+window.activateInvite = async function (index) {
+  const sb = window.supabaseClient;
+  const card = window.inviteCardStates[index];
+  if (!card?.code) return;
 
-  window.inviteCardStates[index].state = 1; // Active
-  window.inviteCardStates[index].code = code;
+  if (!sb) {
+    console.warn('[invite] no Supabase client; cannot activate invite code');
+    window.showToast('지금은 초대장을 발급할 수 없어요');
+    return;
+  }
+
+  const activatedAt = new Date();
+  const expiresAt = new Date(activatedAt.getTime() + INVITE_TTL_MS);
+
+  const { data, error } = await sb
+    .from('invite_codes')
+    .update({
+      activated_at: activatedAt.toISOString(),
+      expires_at: expiresAt.toISOString(),
+    })
+    .eq('code', card.code)
+    .is('activated_at', null)
+    .select();
+
+  if (error) {
+    console.error('[invite] activation failed', error);
+    window.showToast('초대장 발급에 실패했어요');
+    return;
+  }
+  if (!data || data.length === 0) {
+    console.warn('[invite] code was already activated:', card.code);
+  }
+
+  await window.loadInviteCards();
   window.renderInvitePage();
 };
 

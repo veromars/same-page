@@ -230,6 +230,23 @@ p {
   border-color: var(--primary);
 }
 
+/* Confirms the invite code was picked out of a pasted message.
+   See handleInviteCodePaste() in app.js. */
+@keyframes inviteCodeAutofill {
+  0% {
+    background: rgba(226, 255, 116, 0.85);
+    border-color: var(--primary);
+  }
+  100% {
+    background: var(--surface);
+    border-color: var(--border);
+  }
+}
+
+.input-field.invite-code-autofilled {
+  animation: inviteCodeAutofill 0.9s ease-out;
+}
+
 .input-field::placeholder {
   color: #C4C4C4;
 }
@@ -2179,6 +2196,72 @@ p {
   margin-top: 24px;
   margin-bottom: 12px;
   color: var(--text-dark);
+}
+
+/* Viewer lock — someone else's chapter stays behind frosted glass until the
+   reader has started the same chapter. See renderAnswersGrid() in app.js. */
+.chapter-viewer-lock {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden; /* clips the blur bleeding past the card bounds */
+}
+
+.chapter-viewer-lock-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  filter: blur(8px);
+  -webkit-filter: blur(8px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chapter-viewer-lock-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 16px;
+  box-sizing: border-box;
+  text-align: center;
+  background: rgba(250, 249, 246, 0.62);
+}
+
+.chapter-viewer-lock-icon {
+  color: #9B72CC;
+  opacity: 0.85;
+}
+
+.chapter-viewer-lock-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-dark);
+}
+
+.chapter-viewer-lock-sub {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.chapter-viewer-lock-btn {
+  margin-top: 4px;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 18px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  background: #E2FF74;
+  color: #2D2A2B;
+  cursor: pointer;
 }
 
 .ans-text-only {
