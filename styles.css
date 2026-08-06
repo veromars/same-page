@@ -15,6 +15,18 @@
   --border: #F0EBEF;
   --glass: rgba(255, 255, 255, 0.8);
   --pass-lilac: #C9A8E0;
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+/* Home-screen(standalone) 실행에서는 콘텐츠가 상태바 아래로 깔린다.
+   WebKit이 첫 페인트에 env()를 0으로 돌려주는 구간이 있어 그동안의
+   바닥값을 깔아둔다. 실제 값이 잡히면 app.js의 primeSafeArea()가
+   --safe-top을 측정값으로 덮어쓴다. 가로 모드는 상단 인셋이 없으므로 제외. */
+@media (display-mode: standalone) and (orientation: portrait),
+       (display-mode: fullscreen) and (orientation: portrait) {
+  :root {
+    --safe-top: max(env(safe-area-inset-top, 0px), 44px);
+  }
 }
 
 
@@ -31,24 +43,37 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 100vh;
+  min-height: 100vh; min-height: 100dvh; min-height: var(--app-vh, 100dvh);
   color: var(--text-dark);
+  /* NOT overflow:hidden — standalone iOS needs a real, user-reachable
+     scroll for WebKit to recompute env(safe-area-inset-top) (see
+     primeSafeArea() in app.js). #app-container below clips its own
+     content, so this never causes visible scrolling. */
 }
 
+/* 실기기: 뷰포트를 그대로 채운다. 높이 상한(812px)을 두면 iOS Safari
+   툴바가 접혔다 펼쳐질 때 dvh가 상한을 넘나들며 컨테이너가 상단 정렬 ↔
+   중앙 정렬로 튀어, 스플래시가 붙었다 내려오는 것처럼 보인다.
+   100dvh 자체도 standalone 콜드 런치 시 한 박자 늦게 안정되는 별도의
+   WebKit 버그가 있어(env(safe-area-inset-top)과는 다른 메커니즘), CSS
+   dvh 대신 app.js의 syncAppHeight()가 실측해 넣는 --app-vh를 우선한다.
+   --app-vh가 아직 없으면(JS 실행 전 아주 짧은 순간, 또는 JS 비활성)
+   dvh로 자연 폴백. */
 #app-container {
   width: 100%;
-  max-width: 375px;
-  height: 100vh;
-  max-height: 812px;
+  height: 100vh; height: 100dvh; height: var(--app-vh, 100dvh);
   background-color: var(--bg-color);
   position: relative;
   overflow: hidden;
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
 }
 
-@media (min-width: 376px) {
+/* 데스크톱 프리뷰용 폰 목업 프레임. 실제 폰 폭(390~430px)에는 걸리지
+   않도록 브레이크포인트를 넉넉히 잡는다. */
+@media (min-width: 700px) {
   #app-container {
-    height: 812px;
+    max-width: 375px;
+    max-height: 812px;
     border-radius: 40px;
     border: 8px solid #FFFFFF;
   }
@@ -65,6 +90,10 @@ body {
   flex-direction: column;
   transition: transform 0.45s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.45s ease;
   z-index: 1;
+  /* Single source of truth for status-bar clearance — every screen
+     goes through createScreen() and gets class="screen", so this
+     can't be missed the way per-screen header classes were. */
+  padding-top: var(--safe-top);
 }
 
 .screen.hidden-right {
@@ -332,6 +361,8 @@ p {
   overflow: hidden;
   position: relative;
   z-index: 100;
+  /* Full-bleed cover — must extend under the status bar, not be pushed down. */
+  padding-top: 0;
 }
 
 @keyframes spineIn {
@@ -383,7 +414,7 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 40px 0 24px 0;
+  padding: calc(40px + var(--safe-top)) 0 calc(24px + env(safe-area-inset-bottom, 0px)) 0;
   z-index: 5;
   animation: spineIn 0.4s ease-out both;
 }
@@ -435,7 +466,7 @@ p {
 
 /* TOP zone */
 .splash-tagline-top {
-  padding-top: 48px;
+  padding-top: calc(48px + var(--safe-top));
   font-size: 15px;
   font-weight: 700;
   color: #E2FF74;
@@ -467,7 +498,7 @@ p {
 
 /* BOTTOM zone */
 .splash-studio {
-  padding-bottom: 48px;
+  padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
   font-size: 14px;
   font-weight: 700;
   color: #B36AE2;
@@ -1151,6 +1182,11 @@ p {
   background: var(--bg-color);
   display: flex;
   flex-direction: column;
+  /* #modal-container (this element's positioned ancestor) sits at the
+     screen's true top edge, outside .screen's own safe-area padding —
+     absolute/fixed positioning always escapes an ancestor's padding.
+     So .modal needs its own clearance. */
+  padding-top: var(--safe-top);
 }
 
 .modal-fixed-close {
@@ -1814,7 +1850,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 160px); height: calc(100dvh - 160px - var(--safe-top));
 }
 
 .chat-scroller::-webkit-scrollbar {
@@ -2168,7 +2204,7 @@ p {
 .discover-tab-container {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 140px);
+  height: calc(100vh - 140px); height: calc(100dvh - 140px - var(--safe-top));
   padding: 20px 24px 80px;
   /* Added bottom padding to avoid tab bar overlap */
   position: relative;
@@ -2872,7 +2908,7 @@ p {
   justify-content: flex-start;
   padding: 48px 28px;
   background: transparent;
-  min-height: calc(100vh - 140px);
+  min-height: calc(100vh - 140px); min-height: calc(100dvh - 140px - var(--safe-top));
 }
 
 .nb-cover-chapter {
@@ -3473,6 +3509,9 @@ p {
   flex-direction: column;
   pointer-events: auto;
   overflow: hidden;
+  /* Appended straight to <body> (#answer-modal-container), outside
+     #app-container/.screen entirely — needs its own safe-area clearance. */
+  padding-top: var(--safe-top);
 }
 
 .match-intro-visual {

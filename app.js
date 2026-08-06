@@ -2294,7 +2294,7 @@ window.switchTab = function (tabName) {
     window._meetupSearchOpen = window._meetupSearchOpen || false;
     window._meetupSearchQuery = window._meetupSearchQuery || '';
     contentArea.innerHTML = `
-        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); background: var(--bg-color);">
+        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); height: calc(100dvh - 80px); background: var(--bg-color);">
         ${getTabHeaderHTML('모임', '', `
           <button id="meetup-search-toggle" onclick="window._toggleMeetupSearch()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="search" style="width: 22px; height: 22px;"></i>
@@ -2457,7 +2457,7 @@ window.switchTab = function (tabName) {
       chapterProgress: { c1: 80, c2: 40, c3: 20 }
     };
     contentArea.innerHTML = `
-      <div class="scroll-y" style="height: calc(100vh - 84px);">
+      <div class="scroll-y" style="height: calc(100vh - 84px); height: calc(100dvh - 84px);">
         <div class="tab-header-row" style="padding: 10px 24px 0;">
           <div style="display:flex; align-items:center; gap:12px;">
             <h2>내 프로필</h2>
@@ -2481,7 +2481,7 @@ window.switchTab = function (tabName) {
     bindCardInteractions();
   } else if (tabName === 'notifications') {
     contentArea.innerHTML = `
-        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); background: var(--bg-color);">
+        <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); height: calc(100dvh - 80px); background: var(--bg-color);">
         ${getTabHeaderHTML('알림', '', '')}
         <div class="notif-list">
           ${DUMMY_NOTIFICATIONS.length === 0
@@ -4474,7 +4474,7 @@ window.joinMeetupChat = function (meetupId) {
   const mc = getModalContainer();
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
-      <div style="height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 0 24px; box-sizing: border-box;">
+      <div style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 0 24px; box-sizing: border-box;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 12px;">
           <div style="font-size: 48px; text-align: center;">🎉</div>
           <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;">참여 완료</div>
@@ -4548,8 +4548,8 @@ window.openProfileFromModal = function (profileId, backTarget) {
   if (!contentArea) return;
   const backAction = backTarget === 'grid' ? `openAllMatchesGrid()` : `closeAnswerCard(); switchTab('messages')`;
   contentArea.innerHTML = `
-    <div style="position:absolute; top:-60px; left:0; width:100%; height:calc(100vh - 84px); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
-      <div class="app-header" style="background:var(--bg-color);">
+    <div style="position:absolute; top: calc(-1 * var(--safe-top)); left:0; width:100%; height:calc(100vh - 84px); height:calc(100dvh - 144px + var(--safe-top)); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color); padding-top: calc(20px + var(--safe-top));">
         <button class="back-btn" onclick="${backAction}"><i data-lucide="chevron-left" style="width:28px;"></i></button>
         <div style="font-size:15px; font-weight:600;">${p.name}</div>
         <div style="width:32px;"></div>
@@ -4566,8 +4566,8 @@ window.openProfileForChat = function (profileId, chatId) {
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
   contentArea.innerHTML = `
-    <div style="position:absolute; top:-60px; left:0; width:100%; height:calc(100vh - 84px); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
-      <div class="app-header" style="background:var(--bg-color);">
+    <div style="position:absolute; top: calc(-1 * var(--safe-top)); left:0; width:100%; height:calc(100vh - 84px); height:calc(100dvh - 144px + var(--safe-top)); background:var(--bg-color); z-index:50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color); padding-top: calc(20px + var(--safe-top));">
         <button class="back-btn" onclick="openChat(${chatId})"><i data-lucide="chevron-left" style="width:28px;"></i></button>
         <div style="font-size:15px; font-weight:600;">${p.name}</div>
         <div style="width:32px;"></div>
@@ -5047,8 +5047,8 @@ function openGroupChat(chatId) {
 
   const renderGroupChatView = () => {
     contentArea.innerHTML = `
-      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
-        <div class="chat-header" style="position: relative; justify-content: center; padding: 12px 20px; min-height: 60px;">
+      <div style="position: absolute; top: calc(-1 * var(--safe-top)); left:0; width: 100%; height: calc(100vh - 84px); height: calc(100dvh - 144px + var(--safe-top)); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
+        <div class="chat-header" style="position: relative; justify-content: center; padding: calc(12px + var(--safe-top)) 20px 12px; min-height: 60px;">
           <button class="back-btn" onclick="switchTab('messages')" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 0;">
             <i data-lucide="chevron-left" style="width:28px;"></i>
           </button>
@@ -5122,8 +5122,8 @@ function openGroupChat(chatId) {
     const parts = c.participants || [];
 
     contentArea.innerHTML = `
-      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
-        <div class="app-header" style="background:var(--bg-color);">
+      <div style="position: absolute; top: calc(-1 * var(--safe-top)); left:0; width: 100%; height: calc(100vh - 84px); height: calc(100dvh - 144px + var(--safe-top)); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
+        <div class="app-header" style="background:var(--bg-color); padding-top: calc(20px + var(--safe-top));">
           <button class="back-btn" onclick="openChat('${cId}')">
             <i data-lucide="chevron-left" style="width:28px;"></i>
           </button>
@@ -5184,8 +5184,8 @@ window.openLimitedProfile = function (profileId, chatId) {
   `).join('');
 
   contentArea.innerHTML = `
-    <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
-      <div class="app-header" style="background:var(--bg-color);">
+    <div style="position: absolute; top: calc(-1 * var(--safe-top)); left:0; width: 100%; height: calc(100vh - 84px); height: calc(100dvh - 144px + var(--safe-top)); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
+      <div class="app-header" style="background:var(--bg-color); padding-top: calc(20px + var(--safe-top));">
         <button class="back-btn" onclick="openGroupParticipants('${chatId}')">
           <i data-lucide="chevron-left" style="width:28px;"></i>
         </button>
@@ -5253,8 +5253,8 @@ window.openChat = function (chatId) {
 
   const renderChatView = () => {
     contentArea.innerHTML = `
-      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
-        <div class="chat-header" style="position: relative; justify-content: center; padding: 12px 20px; min-height: 60px;">
+      <div style="position: absolute; top: calc(-1 * var(--safe-top)); left:0; width: 100%; height: calc(100vh - 84px); height: calc(100dvh - 144px + var(--safe-top)); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column;">
+        <div class="chat-header" style="position: relative; justify-content: center; padding: calc(12px + var(--safe-top)) 20px 12px; min-height: 60px;">
           <button class="back-btn" onclick="switchTab('messages')" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 0;"><i data-lucide="chevron-left" style="width:28px;"></i></button>
           <div class="chat-header-user-info" style="display:flex; flex-direction:column; align-items:center;">
             <div style="font-size:16px; font-weight:700; color:#333;">${chat.name}</div>
@@ -5324,8 +5324,8 @@ window.openChat = function (chatId) {
     if (!p) return;
 
     contentArea.innerHTML = `
-      <div style="position: absolute; top:-60px; left:0; width: 100%; height: calc(100vh - 84px); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
-        <div class="app-header" style="background:var(--bg-color);">
+      <div style="position: absolute; top: calc(-1 * var(--safe-top)); left:0; width: 100%; height: calc(100vh - 84px); height: calc(100dvh - 144px + var(--safe-top)); background: var(--bg-color); z-index: 50; display:flex; flex-direction:column; overflow:hidden;">
+        <div class="app-header" style="background:var(--bg-color); padding-top: calc(20px + var(--safe-top));">
           <button class="back-btn" onclick="openChat(${cId})"><i data-lucide="chevron-left" style="width:28px;"></i></button>
           <div style="font-size:15px; font-weight:600;">${p.name}</div>
           <div style="width:32px;"></div>
@@ -5789,7 +5789,7 @@ window.renderDiscoverTab = function () {
   if (_dfActive && remaining.length === 0) {
     contentArea.innerHTML = `
       ${headerHTML}
-      <div class="discover-tab-container" style="align-items:center;text-align:center;height:calc(100vh - 100px);overflow-y:auto;padding-bottom:32px;">
+      <div class="discover-tab-container" style="align-items:center;text-align:center;height:calc(100vh - 100px); height:calc(100dvh - 100px);overflow-y:auto;padding-bottom:32px;">
         <i data-lucide="search-x" style="width:48px;height:48px;color:var(--text-muted);opacity:0.5;margin-bottom:24px;margin-top:40px;"></i>
         <p style="font-size:17px;font-weight:700;margin-bottom:8px;">필터 조건에 맞는<br>프로필이 없어요</p>
         <p style="color:#8E8E8A;font-size:14px;margin-bottom:24px;">조건을 조정해보세요</p>
@@ -5827,7 +5827,7 @@ window.renderDiscoverTab = function () {
 
     contentArea.innerHTML = `
         ${headerHTML}
-        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 100px); overflow-y:auto; padding-bottom:32px;">
+        <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 100px); height: calc(100dvh - 100px); overflow-y:auto; padding-bottom:32px;">
           <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px; margin-top: 32px;"></i>
           <p style="margin-bottom: 6px; font-size: 20px; font-weight: 700;">이번 주 프로필북을 모두 읽었어요.</p>
           <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
@@ -5986,7 +5986,7 @@ window.openAllMatchesGrid = function () {
       <div style="flex:1; text-align:center; font-size:16px; font-weight:700;">매칭된 프로필북</div>
       <div style="width:48px;"></div>
     </div>
-    <div class="scroll-y" style="height:calc(100vh - 140px); padding-top:20px;">
+    <div class="scroll-y" style="height:calc(100vh - 140px); height:calc(100dvh - 140px - var(--safe-top)); padding-top:20px;">
       ${gridHTML}
     </div>
   `;
@@ -6040,7 +6040,7 @@ window.renderSavedBox = function () {
           <i data-lucide="heart" fill="#9B72CC" style="width:24px;"></i>
         </button>
       </div>
-      <div class="scroll-y" style="height: calc(100vh - 140px); padding-top: 20px;">
+      <div class="scroll-y" style="height: calc(100vh - 140px); height: calc(100dvh - 140px - var(--safe-top)); padding-top: 20px;">
         ${gridHTML}
       </div>
     `;
@@ -6828,7 +6828,7 @@ window.openLibraryPage = function () {
         <div id="lib-tab-liked" class="lib-tab active" onclick="window._switchLibTab('liked')">받은 ♥</div>
         <div id="lib-tab-review" class="lib-tab" onclick="window._switchLibTab('review')">다시보기</div>
       </div>
-      <div id="lib-content" class="scroll-y" style="height:calc(100vh - 118px); padding-top:0;">
+      <div id="lib-content" class="scroll-y" style="height:calc(100vh - 118px); height:calc(100dvh - 118px); padding-top:0;">
         ${renderTabContent('liked')}
       </div>
     </div>
@@ -6856,7 +6856,7 @@ window.openQuratedPage = function () {
   window.submitQuratedApplication = function () {
     mc.innerHTML = `
       <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
-         <div class="app-header" style="background:var(--bg-color); position: absolute; top: 0; width: 100%;">
+         <div class="app-header" style="background:var(--bg-color); position: absolute; top: 0; width: 100%; padding-top: var(--safe-top);">
            <button class="back-btn" onclick="closeModal()"><i data-lucide="x" style="width:28px;"></i></button>
            <div style="font-weight: 700; font-size: 16px;"></div>
            <div style="width: 48px;"></div>
