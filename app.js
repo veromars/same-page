@@ -2255,6 +2255,12 @@ window.switchTab = function (tabName) {
   if (!contentArea) return;
   contentArea.innerHTML = '';
 
+  const GATED_TABS = ['discover', 'meetups', 'messages'];
+  if (GATED_TABS.includes(tabName) && !window.basicInfoComplete) {
+    renderTabLockScreen(contentArea);
+    return;
+  }
+
   if (tabName === 'discover') {
     window.showLikedCollection = false;
 
@@ -2693,14 +2699,33 @@ function getLikedBadgeHTML(pageId) {
   return `<span class="card-liked-badge" style="visibility: ${isLiked ? 'visible' : 'hidden'}; position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: #888; pointer-events: none;">♥</span>`;
 }
 
-window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId) {
+window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profileObj) {
   let html = '';
   const chapColors = { 1: '#F0F7D4', 2: '#F7EDE3', 3: '#EDE3F5' };
   const chap1 = QUESTIONS.filter(q => q.chapter === 1);
   const chap2 = QUESTIONS.filter(q => q.chapter === 2);
   const chap3 = QUESTIONS.filter(q => q.chapter === 3);
 
-  const renderGroup = (group, chapTitle) => {
+  // Chapter-view gate (skeleton) — when viewing someone else's profile,
+  // a chapter with zero answers gets a placeholder instead of the section
+  // just silently disappearing. Prefers profileObj.chapterProgress[cN] as
+  // the answer-count source of truth when a profile object is passed in;
+  // otherwise falls back to counting answersObj directly (e.g. self-preview).
+  const isChapterLocked = (chapNum) => {
+    if (isCurrentUser) return false;
+    const progressVal = profileObj?.chapterProgress?.[`c${chapNum}`];
+    if (progressVal !== undefined) return progressVal === 0;
+    const group = chapNum === 1 ? chap1 : chapNum === 2 ? chap2 : chap3;
+    return group.every(q => !answersObj[q.id]);
+  };
+
+  const renderGroup = (group, chapTitle, chapNum) => {
+    if (isChapterLocked(chapNum)) {
+      return `
+        <div class="grid-chapter-divider" style="grid-column: 1 / -1; margin-top: ${chapTitle.includes('Chapter 1') ? '0' : '24px'};">${chapTitle}</div>
+        <div class="chapter-locked-placeholder" style="grid-column: 1 / -1;">아직 작성되지 않았어요</div>
+      `;
+    }
     let visibleQuestions = group;
     if (!isCurrentUser) visibleQuestions = group.filter(q => answersObj[q.id]);
     if (visibleQuestions.length === 0) return '';
@@ -2745,9 +2770,9 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId) {
     });
     return gHtml;
   };
-  html += renderGroup(chap1, 'Chapter 1 · 나');
-  html += renderGroup(chap2, 'Chapter 2 · 사랑');
-  html += renderGroup(chap3, 'Chapter 3 · 관계');
+  html += renderGroup(chap1, 'Chapter 1 · 나', 1);
+  html += renderGroup(chap2, 'Chapter 2 · 사랑', 2);
+  html += renderGroup(chap3, 'Chapter 3 · 관계', 3);
 
   return html;
 };
@@ -2970,6 +2995,15 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
     { num: 3, label: '관계', count: c3Count, pct: (c3Count / 9) * 100 }
   ];
 
+  // Item 6 skeleton: nudge banner on my own profile when any chapter has
+  // zero answers. Bare markup only — real popup/banner styling comes later.
+  const hasEmptyChapter = isMine && !isPreview && chapters.some(ch => ch.count === 0);
+  const chapterIncompleteBannerHTML = hasEmptyChapter ? `
+    <div class="chapter-incomplete-banner" onclick="document.getElementById('my-answers-grid')?.scrollIntoView({behavior:'smooth'})">
+      챕터 작성하고 프로필북 완성하기
+    </div>
+  ` : '';
+
   const photos = p.photos || (p.image ? [p.image] : []);
 
   // --- My Profile: 3×2 photo grid ---
@@ -3038,6 +3072,8 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
         <div style="font-size:15px; margin-top:20px; line-height:1.5; color:var(--text-dark); white-space: pre-line;">
           ${p.bio || '새로운 시작을 기대하며!'}
         </div>
+
+        ${chapterIncompleteBannerHTML}
 
         <div class="profile-section-title" style="margin-top:40px;">나에 대해</div>
         <div class="info-card">
@@ -4106,7 +4142,7 @@ window.openProfileModal = function (profileId, fromChat = false) {
   const gridContainer = mc.querySelector('#my-answers-grid');
   if (gridContainer) {
     const profileAnswers = p.answers || {};
-    gridContainer.innerHTML = renderAnswersGrid(profileAnswers, false, p.id);
+    gridContainer.innerHTML = renderAnswersGrid(profileAnswers, false, p.id, p);
     bindCardInteractions();
   }
 
