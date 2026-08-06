@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>p.2 · Design Philosophy & Product Definition v7</title>
+<title>p.2 · Design Philosophy & Product Definition v7.1</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -101,13 +101,27 @@
     <div class="logo">p.2</div>
     <div class="doc-meta">
       <span>Design Philosophy & Product Definition</span>
-      <span class="version-badge">v7</span>
+      <span class="version-badge">v7.1</span>
       <span>2026.08</span>
       <span>by Dawn Works</span>
     </div>
   </div>
 
   <!-- Changelog -->
+  <div class="changelog">
+    <div class="changelog-title">v7.1 업데이트 — 2026.08.07</div>
+    <div class="changelog-body">
+      + 만료 정책 변경 — 무반응 프로필 영구 제외 → 8주 쿨다운 후 재배달 풀 재진입 (유한 커뮤니티 풀 고갈 방지)<br>
+      + 숨기기 기능 신설 — 명시적 "다시 안 보고 싶어요", 프로필 상세 부가 메뉴 위치, 영구 제외 (쿨다운 없음)<br>
+      + 라이브러리 보완 — "내가 ♥한 사람" 비노출(강박적 체크 유발 우려), "숨긴 프로필"은 설정 > 내 프로필 하위로 이동<br>
+      + 발견 탭 단계적 오픈 전략 신설 — 모임 탭은 가입 즉시, 발견 탭은 세그먼트별 최소 풀 확보 후 오픈<br>
+      + 주간 배달 풀 크기 역산 공식 정립 (N ≥ 주당 소비량 × 쿨다운 주수 + 1)<br>
+      + 테스트 단계 3분화 — 프로토타입 사용성 테스트 / 클로즈드 베타(인프라·콜드스타트 목적, 매칭 품질 검증 아님) / 베타 오픈(지인 밖 초대 기반)<br>
+      + 공식 도메인 확정 — page2.social (메인), page2official.com·page2.co.kr (방어 등록)<br>
+      <br>
+    </div>
+  </div>
+
   <div class="changelog">
     <div class="changelog-title">v7 업데이트 — 2026.08.03</div>
     <div class="changelog-body">
@@ -381,7 +395,7 @@
         Pass 버튼 제거 — ♥ 북마크만 남김<br>
         프로필 상세: 우측 하단 플로팅 ♥ 버튼 (56px 원형, 보라색, 펄스 애니메이션)<br>
         ♥ 탭 시 "paged her" 토스트 메시지 (1.5초 페이드아웃)<br>
-        북마크 안 한 프로필 → 주 끝나면 자연 만료 → 다시보기 탭으로 이동<br><br>
+        북마크 안 한 프로필 → 주 끝나면 자연 만료 → 다시보기 탭으로 이동 (v7.1: 8주 쿨다운 후 재배달 풀 재진입)<br><br>
         <strong>소진 후 화면:</strong><br>
         "다음 월요일에 새로운 프로필북이 도착해요" + 날짜 표시<br>
         이번 주 프로필북 다시보기 목록 제공<br><br>
@@ -390,12 +404,32 @@
         선호 나이대 (레인지 슬라이더, 온보딩 5/5 기본값 연동)<br>
         선호 성향 (F팸/B부치/V무성향/상관없음, 온보딩 5/5 기본값 연동)<br>
         거리 (0~200km 슬라이더, 기본 200km)<br><br>
-        <strong>라이브러리 구조 (v7 개정)</strong><br>
+        <strong>라이브러리 구조 (v7.1 개정)</strong><br>
         상위 명칭: 라이브러리 (한글 유지)<br>
         탭 1: 받은 ♥ — 나를 북마크한 사람, 강한 블러(8px), 1개 언블러 티저 (p.2+ 미리보기)<br>
-        탭 2: 다시보기 — 주간 만료된 프로필북, 블러(1.5px), 되살리기 (p.2+)
+        탭 2: 다시보기 — 무반응 만료 프로필북, 블러(1.5px), 되살리기(♥ 전환) (p.2+)<br>
+        · 보존 기간은 재등장 쿨다운(8주)과 동일 — 재등장 시점에 자동으로 사라짐<br>
+        비노출: "내가 ♥한 사람" — 강박적 체크 행동 유발 우려로 라이브러리 미노출<br>
+        이동: "숨긴 프로필" — 설정 > 내 프로필 하위 (콘텐츠 아닌 관리 기능)
       </div>
     </div>
+
+    <div class="card">
+      <div class="card-title">만료 · 숨기기 정책 (v7.1 신설)</div>
+      <div class="card-body">
+        <table>
+          <tr><th>유형</th><th>트리거</th><th>재등장 여부</th></tr>
+          <tr><td>♥ 페이지함</td><td>명시적 관심 표시</td><td>영구 보관 (매칭/보관함)</td></tr>
+          <tr><td>무반응/만료</td><td>그냥 지나감 (아무 행동 없음)</td><td>8주 쿨다운 후 재배달 풀 재진입</td></tr>
+          <tr><td>숨기기</td><td>명시적 "다시 안 보고 싶어요" — 프로필 상세 부가 메뉴</td><td>영구 제외, 쿨다운 없음</td></tr>
+        </table>
+        <br>
+        "한 번 배달되면 영구 제외"는 유한한 커뮤니티 규모에서 지속 불가능 — 세그먼트 단위로 쪼개면 한 달 내 풀 소진 위험.<br>
+        무반응은 쿨다운 후 재등장, 명시적 거절만 영구 제외로 분리해 지속가능성과 사용자 통제권을 동시 확보.<br>
+        숨기기 버튼은 카드에 상시 노출하지 않고 상세 부가 메뉴에 위치 — 강요된 O/X 판단 없이 필요할 때만 사용하도록.
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-title">프로필북 책등 효과 (v6 확정)</div>
       <div class="card-body">
@@ -713,7 +747,10 @@
           인스타그램 ✓ — 비주얼 포스팅, 스토리<br>
           스레드 △ — 보조 채널<br><br>
           DM 문의 시 초대 링크 발송<br>
-          "베타 멤버" 프레이밍 유지
+          "베타 멤버" 프레이밍 유지<br><br>
+          <strong>공식 도메인 (v7.1 확정)</strong><br>
+          메인: page2.social<br>
+          방어 등록: page2official.com · page2.co.kr
         </div>
       </div>
       <div class="card purple">
@@ -736,6 +773,33 @@
         시드 유저 1인당 초대코드 10개 보유<br>
         코드 소진 후 추가 요청 가능 → 활성 유저 관리 지표로 활용<br><br>
         정식 오픈 이후 초대코드 구조 유지 여부는 추후 결정
+      </div>
+    </div>
+
+    <div class="card dark">
+      <div class="card-title">테스트 단계 3분화 (v7.1 신설)</div>
+      <div class="card-body">
+        <table>
+          <tr><th style="color:rgba(255,255,255,0.4)">단계</th><th style="color:rgba(255,255,255,0.4)">목적</th><th style="color:rgba(255,255,255,0.4)">전제조건</th></tr>
+          <tr><td>프로토타입 사용성 테스트</td><td>흐름·톤·온보딩 이해도 검증. 매칭 품질 검증 아님</td><td>백엔드 불필요, 더미 데이터로 가능</td></tr>
+          <tr><td>클로즈드 베타</td><td>기능/인프라 작동 검증 + 초기 콘텐츠 시딩(콜드스타트 해소). 지인 풀에서 매칭 품질은 검증 불가 — 목적에서 제외</td><td>Supabase 연동, 우바세·엘밴드 약 180명</td></tr>
+          <tr><td>베타 오픈</td><td>낯선 사용자 간 매칭이 실제로 작동하는지 최초 검증</td><td>지인 네트워크를 벗어난 초대 기반 (완전 퍼블릭 아님)</td></tr>
+        </table>
+        <br>
+        클로즈드 베타는 참가자에게 "진짜 인연 탐색"이 아니라 "서비스 작동 확인 + 초기 커뮤니티 형성" 목적임을 명시적으로 안내.
+      </div>
+    </div>
+
+    <div class="card purple">
+      <div class="card-title">발견 탭 단계적 오픈 전략 (v7.1 신설)</div>
+      <div class="card-body">
+        가입 직후 <strong>모임 탭은 즉시 오픈</strong> — 매칭 기능 잠금 기간에도 이탈 방지 및 대기 경험 제공.<br>
+        <strong>발견 탭은 세그먼트별 최소 풀이 확보된 지역부터 순차 오픈.</strong><br><br>
+        <strong>풀 크기 역산 공식</strong><br>
+        N ≥ k(주당 소비량) × W(재등장 쿨다운 주수) + 1<br>
+        예: k=4권/주, W=8주 → N≥33명 → 활성 보정(÷0.6) → 고갈 버퍼(+25%) 적용 시 세그먼트당 약 65~70명 목표<br><br>
+        지역(수도권/그 외)을 1차 세그먼트 기준으로 삼고, 나이·성향은 필터 유연성으로 흡수 — 세그먼트 조합을 전부 정밀 계산하지 않음.<br>
+        장기적으로는 가입 시점에 반경 내 세그먼트 인원을 자동 계산해 지역별로 발견 탭을 순차 오픈하는 로직화를 검토.
       </div>
     </div>
   </div>
@@ -961,7 +1025,7 @@
     </div>
   </div>
 
-  <div class="updated">Last updated: 2026.08.03 · v7 · p.2 by Dawn Works</div>
+  <div class="updated">Last updated: 2026.08.07 · v7.1 · p.2 by Dawn Works</div>
 
 </div>
 </body>
