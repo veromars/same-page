@@ -1586,6 +1586,13 @@ window.submitInviteCode = async function () {
 
   if (btn) { btn.disabled = false; btn.innerHTML = originalLabel; }
 
+  if (result.reason === 'no-client') {
+    // Our fault, not theirs — don't let a broken deployment read as a bad code.
+    console.error('[invite] cannot verify code: Supabase client unavailable — check env-config.js deployment.');
+    showFatalError('서비스에 연결할 수 없어요. 잠시 후 다시 시도해주세요.');
+    return;
+  }
+
   if (!result.valid) {
     // Wrong, already used, expired, or never activated — all the same to the
     // person typing, and we deliberately don't say which.
@@ -6467,7 +6474,7 @@ window.normalizeInviteCode = function (raw) {
   return String(raw || '').trim().toUpperCase();
 };
 
-// Returns { valid, ownerUserId, skipped?, error? }.
+// Returns { valid, ownerUserId, reason?, error? }.
 // validate_invite_code returns a JSON object: { valid: bool, owner_user_id?: uuid }.
 // It is true only for a code that is activated, unexpired and unused.
 window.validateInviteCode = async function (rawCode) {
@@ -6476,9 +6483,11 @@ window.validateInviteCode = async function (rawCode) {
 
   const sb = window.supabaseClient;
   if (!sb) {
-    // No backend configured — the mock demo flow must stay walkable.
-    console.warn('[invite] no Supabase client; skipping invite validation');
-    return { valid: true, ownerUserId: null, skipped: true };
+    // Never pass without checking. A missing backend is a deployment fault,
+    // not a demo mode — reported as 'no-client' so the caller can say so
+    // rather than blaming the code the user typed.
+    console.error('[invite] Supabase client unavailable — cannot validate invite code.');
+    return { valid: false, ownerUserId: null, reason: 'no-client' };
   }
 
   const { data, error } = await sb.rpc('validate_invite_code', { input_code: code });
@@ -6606,16 +6615,14 @@ async function resumeExistingSession() {
 window.confirmIdentity = async function (btn) {
   const sb = window.supabaseClient;
   if (!sb) {
-    // No backend configured — keep the old cosmetic-only behavior so local
-    // demo usage without env-config.js still works.
-    console.warn(
-      '[auth] window.supabaseClient is undefined — running in cosmetic-only mode ' +
-      '(no real sign-in). Check that env-config.js loads before supabase-client.js.'
+    // Previously this faked a successful 인증 and walked on to onboarding-1,
+    // which let anyone through whenever the config was broken. There is no
+    // sign-in to fake here — stop.
+    console.error(
+      '[auth] Supabase client unavailable — cannot sign in. ' +
+      'Check that env-config.js is deployed and loads before supabase-client.js.'
     );
-    btn.innerHTML = '인증 완료 ✓';
-    btn.style.borderColor = '#4CAF50';
-    btn.style.color = '#4CAF50';
-    setTimeout(() => navigateTo('onboarding-1'), 1000);
+    showFatalError('서비스에 연결할 수 없어요. 잠시 후 다시 시도해주세요.');
     return;
   }
 
