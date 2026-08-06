@@ -1115,14 +1115,9 @@ function getProfileSetupProgressBarHTML(step) {
   `;
 }
 
-window.confirmIdentity = function (btn) {
-  btn.innerHTML = '인증 완료 ✓';
-  btn.style.borderColor = '#4CAF50';
-  btn.style.color = '#4CAF50';
-  setTimeout(() => {
-    navigateTo('onboarding-1');
-  }, 1000);
-}
+// window.confirmIdentity is defined later, in the auth/gate section, where
+// it calls supabase.auth.signInAnonymously() (falling back to this same
+// cosmetic-only behavior when no Supabase client is configured).
 
 window.selectRole = function (role, btn) {
   userRole = role;
@@ -1187,7 +1182,7 @@ function renderScreen(screenId) {
         <input type="text" class="input-field" id="name-input" placeholder="닉네임" oninput="userName=this.value" />
       </div>
       <div class="bottom-action-bar">
-        <button class="btn-primary" onclick="navigateTo('onboarding-2')">다음 →</button>
+        <button class="btn-primary" onclick="confirmNickname()">다음 →</button>
       </div>
     `);
   }
@@ -2204,6 +2199,7 @@ window.skipSetupToDiscover = function () {
 window.finalizeProfile = function () {
   window.profileComplete = true;
   window.profileIncomplete = false;
+  markBasicInfoComplete(); // fire-and-forget; unlocks gated tabs immediately, DB write is best-effort
   navigateTo('main');
   setTimeout(() => {
     switchTab('profile');
@@ -6012,8 +6008,339 @@ window.renderSavedBox = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+// ── iOS standalone viewport-height priming ─────────────────────
+// 별개의 WebKit 버그: standalone 홈 화면 앱 콜드 런치 시 `100dvh`가
+// 첫 레이아웃에서 실제 화면 크기와 다르게 잡히고, 이후 자연히(또는 실제
+// 리사이즈가 있어야) 맞게 재계산된다. env(safe-area-inset-top)과 달리
+// dvh는 우리가 흉내낸 스크롤로 재계산이 보장되지 않는 별도 메커니즘이라,
+// 애초에 CSS dvh에 기대지 않고 JS가 실측한 값을 px로 박아 넣는다.
+// 스플래시는 로드 첫 순간(dvh가 아직 안정되기 전)에 뜨는 유일한 화면이라
+// 이 버그의 영향을 가장 먼저/가장 크게 받는다 — 온보딩은 그 사이 dvh가
+// 스스로 안정될 시간을 벌어서 멀쩡해 보였을 뿐, #app-container 자체의
+// 문제였다.
+// 이 스크립트 태그는 body 최하단에 있어 document.body는 이미 존재하므로
+// DOMContentLoaded를 기다리지 않고 첫 페인트 전에 곧바로 실행한다.
+function syncAppHeight() {
+  const h = Math.round((window.visualViewport && window.visualViewport.height) || window.innerHeight);
+  document.documentElement.style.setProperty('--app-vh', h + 'px');
+}
+syncAppHeight();
+window.addEventListener('resize', syncAppHeight);
+window.addEventListener('orientationchange', () => setTimeout(syncAppHeight, 100));
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', syncAppHeight);
+}
+
+// ── iOS standalone safe-area priming ──────────────────────────
+// WebKit 버그: 홈 화면 앱(standalone + black-translucent)에서
+// env(safe-area-inset-top)이 첫 페인트엔 0으로 잡히고 한 박자 뒤에야
+// 실제 값으로 재계산된다. 예전엔 window.scrollTo()로 스크롤을 흉내내
+// 재계산을 "유발"하려 했지만, 실기기에서 확인해보니 프로그래매틱 스크롤은
+// WebKit의 내부 재계산 파이프라인을 타지 않는다 — 사용자가 손가락으로
+// 직접 스크롤할 때만 값이 갱신됐다. 그래서 억지로 트리거하는 대신,
+// WebKit이 스스로 값을 확정할 때까지 매 프레임 프로브를 다시 읽고
+// 기다리는 방식으로 바꾼다.
+
+let safeAreaProbe = null;
+
+// env()를 그대로 높이로 쓰는 숨은 프로브. --safe-top을 참조하지 않으므로
+// JS가 써넣은 값에 영향받지 않고 항상 브라우저의 원값을 읽는다.
+function measureSafeAreaTop() {
+  if (!safeAreaProbe || !safeAreaProbe.isConnected) {
+    safeAreaProbe = document.createElement('div');
+    safeAreaProbe.setAttribute('aria-hidden', 'true');
+    safeAreaProbe.style.cssText =
+      'position:fixed;top:0;left:0;width:0;visibility:hidden;pointer-events:none;' +
+      'height:env(safe-area-inset-top, 0px);';
+    document.body.appendChild(safeAreaProbe);
+  }
+  return safeAreaProbe.getBoundingClientRect().height;
+}
+
+let lastSafeTop = -1;
+
+function applySafeAreaTop(top) {
+  if (top === lastSafeTop) return;
+  lastSafeTop = top;
+  if (top > 0) {
+    document.documentElement.style.setProperty('--safe-top', top + 'px');
+  } else {
+    // 가로 모드나 일반 Safari처럼 실제로 0인 경우 — CSS 기본값에 돌려준다.
+    document.documentElement.style.removeProperty('--safe-top');
+  }
+}
+
+// 이벤트 콜백용 단발 측정 — resize/visualViewport 이벤트는 이미 실제
+// 지오메트리 변화에 반응해 발화하는 것이므로 한 번만 읽어도 충분하다.
+function syncSafeAreaTop() {
+  applySafeAreaTop(measureSafeAreaTop());
+}
+
+// 연속 몇 프레임 동안 값이 안 바뀌어야 "안정됐다"로 본다. WebKit이 값을
+// 고쳐 쓰는 도중엔 프레임마다 흔들릴 수 있어 1프레임 일치만으론 부족하다.
+const SAFE_AREA_STABLE_FRAMES = 6;
+// 이 프레임 수를 넘기면 더 기다리지 않고 그 시점 값으로 확정한다
+// (rAF가 느린 기기/저전력 모드에서도 무한정 폴링하지 않도록).
+const SAFE_AREA_MAX_FRAMES = 180;
+
+let safeAreaPolling = false;
+
+function pollSafeAreaUntilStable() {
+  if (safeAreaPolling) return;
+  safeAreaPolling = true;
+
+  let frame = 0;
+  let stableCount = 0;
+  let prevValue = -1;
+  let finished = false;
+
+  function finish(value) {
+    if (finished) return;
+    finished = true;
+    applySafeAreaTop(value);
+    safeAreaPolling = false;
+  }
+
+  function tick() {
+    if (finished) return;
+    const value = measureSafeAreaTop();
+    if (value === prevValue) {
+      stableCount++;
+    } else {
+      stableCount = 0;
+      prevValue = value;
+    }
+
+    if (stableCount >= SAFE_AREA_STABLE_FRAMES || frame >= SAFE_AREA_MAX_FRAMES) {
+      finish(value);
+      return;
+    }
+
+    frame++;
+    requestAnimationFrame(tick);
+  }
+
+  requestAnimationFrame(tick);
+  // rAF는 스펙상 탭/앱이 비가시 상태면 아예 멈출 수 있다(백그라운드에서
+  // 콜드 런치되는 경우 등). 그래도 무한정 멈춰있지 않도록, rAF와 무관한
+  // 시간 기반 워치독으로 최소한 그 시점까지의 측정값을 확정한다.
+  setTimeout(() => finish(measureSafeAreaTop()), 3000);
+}
+
+// 앱이 백그라운드 상태로 열려 rAF가 멈춰 있었을 경우, 다시 보이게 되는
+// 시점에 한 번 더 폴링한다.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') pollSafeAreaUntilStable();
+});
+
+function primeSafeArea() {
+  syncAppHeight();
+  syncSafeAreaTop();
+  pollSafeAreaUntilStable();
+}
+
+document.addEventListener('DOMContentLoaded', primeSafeArea);
+window.addEventListener('pageshow', primeSafeArea);
+window.addEventListener('resize', () => { syncAppHeight(); syncSafeAreaTop(); });
+window.addEventListener('orientationchange', () => setTimeout(() => { syncAppHeight(); pollSafeAreaUntilStable(); }, 100));
+if (window.visualViewport) {
+  // WebKit이 안쪽에서 스스로 안전영역을 재계산하는 시점을 가장 직접적으로
+  // 포착하는 신호 — 사용자의 실제 스크롤/제스처로 값이 바뀌면 여기서 잡힌다.
+  window.visualViewport.addEventListener('resize', () => { syncAppHeight(); syncSafeAreaTop(); });
+  window.visualViewport.addEventListener('scroll', syncSafeAreaTop);
+}
+
+// ── Auth / Onboarding Gate (Supabase) — skeleton only ────────────────
+// No UI here: locked screens / popups get their real layout in a later pass.
+// Everything below fails open (treats the user as authenticated /
+// basic-info-complete) whenever window.supabaseClient isn't configured,
+// so the existing mock-data demo flow keeps working untouched until a
+// real Supabase project is wired up via env-config.js.
+
+window.currentAuthUser = null;  // Supabase auth user, once signed in
+window.currentUserRow = null;   // matching row from the `users` table
+window.basicInfoComplete = true; // local mirror of users.basic_info_complete, checked synchronously by the tab gate
+
+function captureInviteCodeFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('invite_code');
+  if (code) {
+    try { window.sessionStorage.setItem('sp_invite_code', code); } catch (e) { /* storage unavailable */ }
+  }
+  try { return window.sessionStorage.getItem('sp_invite_code') || null; } catch (e) { return code || null; }
+}
+
+// Ensures a `users` row exists for this auth user; returns the row (existing or newly created).
+async function ensureUserRow(authUser, inviteCode) {
+  const sb = window.supabaseClient;
+  if (!sb || !authUser) return null;
+
+  const { data: existing, error: fetchErr } = await sb
+    .from('users')
+    .select('*')
+    .eq('id', authUser.id)
+    .maybeSingle();
+
+  if (fetchErr) {
+    console.error('ensureUserRow: fetch failed', fetchErr);
+    return null;
+  }
+  if (existing) return existing;
+
+  const { data: created, error: insertErr } = await sb
+    .from('users')
+    .insert({
+      id: authUser.id,
+      phone: null,
+      invite_code_used: inviteCode,
+      invited_by: null,
+      basic_info_complete: false,
+    })
+    .select()
+    .single();
+
+  if (insertErr) {
+    console.error('ensureUserRow: insert failed', insertErr);
+    return null;
+  }
+  return created;
+}
+
+// Called once at splash time to decide where the flow should resume.
+// Returns one of: 'complete' | 'signed-in-incomplete' | 'signed-out' | 'no-client' | 'error'.
+async function resumeExistingSession() {
+  const sb = window.supabaseClient;
+  if (!sb) return { status: 'no-client' };
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) return { status: 'signed-out' };
+
+    window.currentAuthUser = session.user;
+    const inviteCode = captureInviteCodeFromURL();
+    window.currentUserRow = await ensureUserRow(session.user, inviteCode);
+
+    if (window.currentUserRow?.nickname) userName = window.currentUserRow.nickname;
+    window.basicInfoComplete = !!window.currentUserRow?.basic_info_complete;
+
+    return { status: window.basicInfoComplete ? 'complete' : 'signed-in-incomplete' };
+  } catch (err) {
+    console.error('resumeExistingSession failed', err);
+    return { status: 'error' };
+  }
+}
+
+// "PASS 인증" button handler — existing markup/design untouched, only the
+// click behavior changes: it now performs a real anonymous Supabase sign-in.
+window.confirmIdentity = async function (btn) {
+  const sb = window.supabaseClient;
+  if (!sb) {
+    // No backend configured — keep the old cosmetic-only behavior so local
+    // demo usage without env-config.js still works.
+    console.warn(
+      '[auth] window.supabaseClient is undefined — running in cosmetic-only mode ' +
+      '(no real sign-in). Check that env-config.js loads before supabase-client.js.'
+    );
+    btn.innerHTML = '인증 완료 ✓';
+    btn.style.borderColor = '#4CAF50';
+    btn.style.color = '#4CAF50';
+    setTimeout(() => navigateTo('onboarding-1'), 1000);
+    return;
+  }
+
+  const originalLabel = btn.innerHTML;
+  btn.disabled = true;
+
+  try {
+    const inviteCode = captureInviteCodeFromURL();
+    const { data, error } = await sb.auth.signInAnonymously();
+    if (error) throw error;
+
+    window.currentAuthUser = data.user;
+    window.currentUserRow = await ensureUserRow(data.user, inviteCode);
+    window.basicInfoComplete = !!window.currentUserRow?.basic_info_complete;
+
+    btn.innerHTML = '인증 완료 ✓';
+    btn.style.borderColor = '#4CAF50';
+    btn.style.color = '#4CAF50';
+    setTimeout(() => navigateTo('onboarding-1'), 1000);
+  } catch (err) {
+    // No alert() — it hides the only useful information. Everything the
+    // Supabase auth API actually returned goes to the console instead.
+    console.error(
+      '[auth] signInAnonymously failed\n' +
+      `  message: ${err?.message ?? String(err)}\n` +
+      `  status:  ${err?.status ?? '(none)'}\n` +
+      `  code:    ${err?.code ?? err?.error_code ?? '(none)'}\n` +
+      '  hint:    "anonymous_provider_disabled" means Anonymous Sign-Ins are off in\n' +
+      '           Supabase Dashboard → Authentication → Sign In / Providers.',
+      err
+    );
+
+    // Inline, non-blocking feedback so the screen still reacts to the tap.
+    btn.disabled = false;
+    btn.innerHTML = '인증 실패 — 다시 시도';
+    btn.style.borderColor = '#E05B5B';
+    btn.style.color = '#E05B5B';
+    setTimeout(() => {
+      btn.innerHTML = originalLabel;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2500);
+  }
+};
+
+// Nickname screen "다음" — persists users.nickname, then proceeds as before.
+window.confirmNickname = async function () {
+  const sb = window.supabaseClient;
+  if (sb && window.currentAuthUser && userName) {
+    const { error } = await sb.from('users').update({ nickname: userName }).eq('id', window.currentAuthUser.id);
+    if (error) console.error('nickname update failed', error);
+    else if (window.currentUserRow) window.currentUserRow.nickname = userName;
+  }
+  navigateTo('onboarding-2');
+};
+
+// Marks the "1차 작성" (profile-setup-1~6, chapter questions excluded) as
+// done — flips users.basic_info_complete, which the tab gate reads.
+async function markBasicInfoComplete() {
+  window.basicInfoComplete = true; // unlock tabs immediately; DB write below is best-effort
+  const sb = window.supabaseClient;
+  if (!sb || !window.currentAuthUser) return;
+
+  const { error } = await sb
+    .from('users')
+    .update({ basic_info_complete: true })
+    .eq('id', window.currentAuthUser.id);
+
+  if (error) {
+    console.error('basic_info_complete update failed', error);
+    return;
+  }
+  if (window.currentUserRow) window.currentUserRow.basic_info_complete = true;
+}
+
+// Tab lock screen shown in place of 발견/모임/메시지 while basic_info_complete is false.
+// Bare-bones on purpose — real layout comes in a later pass.
+function renderTabLockScreen(contentArea) {
+  contentArea.innerHTML = `
+    <div class="tab-locked-screen">
+      <p>프로필북을 먼저 작성해주세요</p>
+      <button onclick="navigateTo('profile-setup-1')">프로필북 작성하기</button>
+    </div>
+  `;
+}
+
 function startApp() {
   if (!appContainer) return;
+
+  // Kick off the session check in parallel with the splash animation so
+  // it's already resolved by the time doTransition fires.
+  const sessionCheckPromise = resumeExistingSession().catch((err) => {
+    console.error('resumeExistingSession failed', err);
+    return { status: 'error' };
+  });
+
   const splash = createScreen('splash', `
   <!-- Book spine: text reads top→bottom (writing-mode: vertical-lr) -->
   <div class="splash-spine">
@@ -6045,9 +6372,22 @@ function startApp() {
     if (SKIP_ONBOARDING) {
       navigateTo('main');
       setTimeout(() => switchTab('discover'), 300);
-    } else {
-      navigateTo('onboarding-0');
+      return;
     }
+    sessionCheckPromise.then((result) => {
+      if (result.status === 'complete') {
+        // Fully onboarded, returning user — skip onboarding entirely.
+        navigateTo('main');
+        setTimeout(() => switchTab('discover'), 300);
+      } else if (result.status === 'signed-in-incomplete') {
+        // Already authenticated but hasn't finished onboarding —
+        // skip the auth screen specifically, resume where they left off.
+        navigateTo('onboarding-1');
+      } else {
+        // signed-out / no-client / error — normal fresh-start flow.
+        navigateTo('onboarding-0');
+      }
+    });
   };
 
   setTimeout(doTransition, 2200);
