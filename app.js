@@ -1457,11 +1457,13 @@ function renderScreen(screenId) {
     screenElem = createScreen('main', `
       <div id="main-content" style="flex: 1; position: relative;"></div>
       <div class="bottom-nav">
-        <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><span class="material-symbols-rounded nav-icon" data-icon="auto_stories">auto_stories</span></div>
-        <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><span class="material-symbols-rounded nav-icon" data-icon="calendar_month">calendar_month</span></div>
-        <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><span class="material-symbols-rounded nav-icon" data-icon="chat_bubble">chat_bubble</span></div>
-        <div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><span class="material-symbols-rounded nav-icon" data-icon="notifications">notifications</span></div>
-        <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="material-symbols-rounded nav-icon" data-icon="person">person</span></div>
+        <div class="bottom-nav-row">
+          <div class="nav-item active" data-tab="discover" onclick="switchTab('discover')"><i data-lucide="book-open" class="nav-icon"></i></div>
+          <div class="nav-item" data-tab="meetups" onclick="switchTab('meetups')"><i data-lucide="calendar" class="nav-icon"></i></div>
+          <div class="nav-item" data-tab="messages" onclick="switchTab('messages')"><i data-lucide="message-circle" class="nav-icon"></i></div>
+          <div class="nav-item" data-tab="notifications" onclick="switchTab('notifications')"><i data-lucide="bell" class="nav-icon"></i></div>
+          <div class="nav-item" data-tab="profile" onclick="switchTab('profile')"><i data-lucide="user" class="nav-icon"></i></div>
+        </div>
       </div>
       <!-- Fixed Modals Container -->
       <div id="modal-container"></div>
@@ -4204,9 +4206,11 @@ document.addEventListener('scroll', function (e) {
     if (st > lastScrollTop && st > 80) {
       // Scrolling down
       nav.classList.add('nav-hidden');
+      e.target.classList.add('nav-hidden-content');
     } else if (st < lastScrollTop) {
       // Scrolling up
       nav.classList.remove('nav-hidden');
+      e.target.classList.remove('nav-hidden-content');
     }
     lastScrollTop = st <= 0 ? 0 : st;
   }
