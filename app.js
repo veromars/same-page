@@ -1168,31 +1168,30 @@ function renderScreen(screenId) {
   let screenElem;
 
   if (screenId === 'onboarding-invite') {
-    // Codes are 8 uppercase hex chars; stripping anything else also keeps a
-    // hostile ?invite_code= value out of the attribute.
-    const prefill = String(captureInviteCodeFromURL() || '').replace(/[^A-Za-z0-9-]/g, '').slice(0, 32);
+    // Always starts empty. The code never travels in the URL, so there is
+    // nothing to prefill and nothing to auto-submit — the person types or
+    // pastes it, then taps 확인 themselves.
     screenElem = createScreen('onboarding-invite', `
       <div class="content-padding scroll-y">
         <h1 style="margin-top: 40px;">초대코드를 입력해주세요</h1>
         <p style="margin-bottom: 40px;">p.2는 초대를 받은 분만 가입할 수 있어요.</p>
 
-        <input type="text" class="input-field" id="invite-code-input" value="${prefill}"
+        <input type="text" class="input-field" id="invite-code-input" value=""
                placeholder="코드 입력 또는 메시지 전체 붙여넣기" autocomplete="off" autocapitalize="characters"
                spellcheck="false" oninput="window.clearInviteCodeError()"
                onpaste="window.handleInviteCodePaste(event)" />
 
         <div id="invite-code-error" style="display:none; margin-top:12px; font-size:13px; color:#E05B5B; line-height:1.5;"></div>
+        <div id="invite-code-success" style="display:none; margin-top:12px; text-align:center; font-size:14px; font-weight:600; color:#9B72CC; line-height:1.5;"></div>
 
         <div style="margin-top:24px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.6;">
-          초대장을 받은 링크로 들어오시면<br/>코드가 자동으로 입력돼요 🩷
+          받은 메시지를 그대로 붙여넣어도<br/>코드만 알아서 입력돼요 💜
         </div>
       </div>
       <div class="bottom-action-bar">
         <button class="btn-primary" id="invite-submit-btn" onclick="submitInviteCode()">확인 →</button>
       </div>
     `);
-    // A code that arrived via the share link shouldn't need a second tap.
-    if (prefill) setTimeout(() => window.submitInviteCode(), 400);
   }
   else if (screenId === 'onboarding-0') {
     screenElem = createScreen('onboarding-0', `
@@ -1543,6 +1542,7 @@ function flashInviteInput(input) {
 // People paste the whole KakaoTalk message, not just the code. Pull the code
 // out of it and keep only that; anything without a recognisable code pastes
 // through untouched so hand-typed or hand-trimmed input still works.
+// This fills the field and stops there — it is an input aid, never a submit.
 window.handleInviteCodePaste = function (e) {
   const input = e?.target;
   if (!input) return;
@@ -1565,8 +1565,20 @@ function showInviteCodeError(msg) {
   box.style.display = 'block';
 }
 
-// Validates whatever is in the input (URL-prefilled or hand-typed) and only
-// lets a real, live code through to PASS 인증.
+function showInviteCodeSuccess(msg) {
+  const box = document.getElementById('invite-code-success');
+  if (!box) return;
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+// How long the "확인되었습니다 💜" beat holds before PASS 인증. Long enough to
+// read as a completed step rather than a screen that flicked past.
+const INVITE_SUCCESS_HOLD_MS = 1200;
+
+// Validates whatever the user typed or pasted, and only lets a real, live code
+// through to PASS 인증. Only ever runs from a deliberate tap on 확인 — nothing
+// on this screen submits on the user's behalf.
 window.submitInviteCode = async function () {
   const input = document.getElementById('invite-code-input');
   const btn = document.getElementById('invite-submit-btn');
@@ -1603,7 +1615,13 @@ window.submitInviteCode = async function () {
   }
 
   rememberPendingInvite({ code, ownerUserId: result.ownerUserId });
-  navigateTo('onboarding-0');
+
+  // Confirm the step visibly before moving on. The button stays disabled for
+  // the hold so a second tap can't fire a second navigation.
+  showInviteCodeSuccess('확인되었습니다 💜');
+  input.disabled = true;
+  if (btn) { btn.disabled = true; btn.innerHTML = '확인됨'; }
+  setTimeout(() => navigateTo('onboarding-0'), INVITE_SUCCESS_HOLD_MS);
 };
 
 // Simple logic handlers
@@ -6431,15 +6449,6 @@ window.currentAuthUser = null;  // Supabase auth user, once signed in
 window.currentUserRow = null;   // matching row from the `users` table
 window.basicInfoComplete = true; // local mirror of users.basic_info_complete, checked synchronously by the tab gate
 
-function captureInviteCodeFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const code = params.get('invite_code');
-  if (code) {
-    try { window.sessionStorage.setItem('sp_invite_code', code); } catch (e) { /* storage unavailable */ }
-  }
-  try { return window.sessionStorage.getItem('sp_invite_code') || null; } catch (e) { return code || null; }
-}
-
 // ── Invite code validation ───────────────────────────────────────────
 // The invite the signup flow has already validated: { code, ownerUserId }.
 // ownerUserId is captured here rather than re-queried later on purpose —
@@ -6932,8 +6941,8 @@ const INVITE_TTL_MS = 24 * 60 * 60 * 1000;
 // Derived from wherever the app is actually being served, so invite links work
 // both under a sub-path (GitHub Pages: https://host/same-page) and at a root
 // domain (Vercel et al.) without a build-time constant to keep in sync. A
-// trailing slash or an explicit index.html is stripped, so buildInviteLink can
-// append '?invite_code=' without doubling up or leaking the filename.
+// trailing slash or an explicit index.html is stripped so the shared link is
+// the bare entry point — it never carries the code.
 const INVITE_BASE_URL = (() => {
   const loc = (typeof window !== 'undefined' && window.location) || null;
   if (!loc || typeof loc.origin !== 'string') {
@@ -6955,8 +6964,11 @@ window.getInviteCardState = function (row, nowMs) {
   return 'expired';
 };
 
-window.buildInviteLink = function (code) {
-  return `${INVITE_BASE_URL}?invite_code=${encodeURIComponent(code)}`;
+// The plain entry point, with no code attached. The code only ever travels in
+// the message body, so opening the link can never auto-fill or auto-advance
+// anything — the invitee has to enter it deliberately.
+window.buildInviteLink = function () {
+  return INVITE_BASE_URL;
 };
 
 // "23시간 59분 남음" / "12분 남음" / "곧 만료돼요"
@@ -7007,17 +7019,17 @@ window.loadInviteCards = async function () {
   return { data: window.inviteCardStates };
 };
 
-const INVITE_EXPIRY_NOTE = '(24시간 이내 사용 가능)';
+const INVITE_EXPIRY_NOTE = '발급 후 24시간 안에 입력해주세요.';
 
-// The share sheet gets the code in the body text — a link preview alone leaves
-// the recipient with nothing to type in if they open the app another way.
+// The code lives in the message body and nowhere else — the link is just the
+// front door — so the text has to say plainly what to do with it.
 window.buildInviteShareText = function (code) {
-  return `p.2에 초대합니다 💜\n\n초대코드: ${code}\n${INVITE_EXPIRY_NOTE}`;
+  return `같은 페이지를 찾는 공간, p.2에 초대할게요 💜\n\n초대코드: ${code}\n\n앱을 열고 이 코드를 입력하면 가입할 수 있어요.\n${INVITE_EXPIRY_NOTE}`;
 };
 
-// The clipboard has no separate url field, so the link leads and the code follows.
+// The clipboard has no separate url field, so the link is appended to the text.
 window.buildInviteClipboardText = function (code) {
-  return `${window.buildInviteLink(code)}\n\n초대코드: ${code}\n${INVITE_EXPIRY_NOTE}`;
+  return `${window.buildInviteShareText(code)}\n\n${window.buildInviteLink()}`;
 };
 
 // Copies the invite text, or explains why it couldn't. The clipboard API only
@@ -7050,7 +7062,7 @@ window.shareInvite = async function (code) {
     console.warn('[invite] shareInvite called with no code — the card has no invite_codes row');
     return;
   }
-  const url = window.buildInviteLink(code);
+  const url = window.buildInviteLink();
 
   if (navigator.share) {
     try {
@@ -7093,6 +7105,94 @@ function stopInviteCountdown() {
   }
 }
 
+const _inviteOrdSuffix = n => { const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); };
+
+// One slot's markup, keyed by index so a single card can be swapped in place
+// without redrawing the grid around it. The root element carries
+// data-invite-slot, which is what refreshInviteCardSlot looks up.
+function buildInviteCardHTML(card, i, nowMs) {
+  const num = i + 1;
+  const state = window.getInviteCardState(card, nowMs);
+
+  if (state === 'expired') {
+    return `
+      <div class="invite-card-slot state-used" data-invite-slot="${i}">
+        <div class="envelope-flap envelope-flap-top"></div>
+        <div class="envelope-flap envelope-flap-bottom"></div>
+        <div class="envelope-content">
+          <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">${card.used_by ? 'INVITED' : 'EXPIRED'}</div>
+          <div class="invite-circle">
+            <i data-lucide="heart" style="width:20px; height:20px; color:#999;"></i>
+          </div>
+          <div style="color:#888; font-size:13px; font-family:monospace;">${card.code}</div>
+          <div style="color:#999; font-size:12px;">만료됨</div>
+        </div>
+      </div>
+    `;
+  }
+
+  if (state === 'active') {
+    return `
+      <div class="invite-card-slot state-active" data-invite-slot="${i}">
+        <div class="invite-inner-card">
+          <div class="invite-inner-label">INVITATION</div>
+          <div class="invite-code">${card.code}</div>
+          <div class="invite-timer" data-invite-expires="${card.expires_at}">${window.formatInviteRemaining(card.expires_at, nowMs)}</div>
+        </div>
+        <div class="invite-actions">
+          <button class="invite-btn-share" onclick="event.stopPropagation(); window.shareInvite('${card.code}'); return false;">공유하기</button>
+        </div>
+      </div>
+    `;
+  }
+
+  if (state === 'idle') {
+    return `
+      <div class="invite-card-slot state-unused" data-invite-slot="${i}">
+        <div class="envelope-flap envelope-flap-top"></div>
+        <div class="envelope-flap envelope-flap-bottom"></div>
+        <div class="envelope-content">
+          <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
+          <div class="invite-circle">
+            <i data-lucide="heart" style="width:20px; height:20px; color:#9B7FD4;"></i>
+          </div>
+          <button class="use-invite-btn" onclick="window.activateInvite(${i})">사용하기</button>
+        </div>
+      </div>
+    `;
+  }
+
+  // No row for this slot.
+  return `
+    <div class="invite-card-slot state-unused" data-invite-slot="${i}" style="opacity:0.45;">
+      <div class="envelope-flap envelope-flap-top"></div>
+      <div class="envelope-flap envelope-flap-bottom"></div>
+      <div class="envelope-content">
+        <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
+        <div class="invite-circle">
+          <i data-lucide="heart" style="width:20px; height:20px; color:#CCC;"></i>
+        </div>
+        <button class="use-invite-btn" disabled style="opacity:0.5; cursor:default;">준비 중</button>
+      </div>
+    </div>
+  `;
+}
+
+// Redraws exactly one card from its current row. Everything else on the page —
+// the other nine slots, the summary bar, the scroll position — is left alone,
+// which is what stops the whole screen from flashing on 사용하기.
+// Returns false when the slot isn't on screen, so callers can fall back.
+window.refreshInviteCardSlot = function (index) {
+  const slot = document.querySelector(`[data-invite-slot="${index}"]`);
+  if (!slot) return false;
+
+  slot.outerHTML = buildInviteCardHTML(window.inviteCardStates[index] || null, index, Date.now());
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  // The replacement may have introduced (or removed) the only countdown node.
+  startInviteCountdown();
+  return true;
+};
+
 window.openInvitePage = async function () {
   const mc = getModalContainer();
 
@@ -7102,78 +7202,10 @@ window.openInvitePage = async function () {
     const usedCount = rows.filter(r => r.used_by).length;
     const progressPercent = (usedCount / INVITE_SLOT_COUNT) * 100;
 
-    const _ordSuffix = n => { const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); };
-
     // Always draw 10 slots; any missing row renders as an inert placeholder.
-    const slots = Array.from({ length: INVITE_SLOT_COUNT }, (_, i) => rows[i] || null);
-
-    const cardsHTML = slots.map((card, i) => {
-      const num = i + 1;
-      const state = window.getInviteCardState(card, nowMs);
-
-      if (state === 'expired') {
-        return `
-          <div class="invite-card-slot state-used">
-            <div class="envelope-flap envelope-flap-top"></div>
-            <div class="envelope-flap envelope-flap-bottom"></div>
-            <div class="envelope-content">
-              <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">${card.used_by ? 'INVITED' : 'EXPIRED'}</div>
-              <div class="invite-circle">
-                <i data-lucide="heart" style="width:20px; height:20px; color:#999;"></i>
-              </div>
-              <div style="color:#888; font-size:13px; font-family:monospace;">${card.code}</div>
-              <div style="color:#999; font-size:12px;">만료됨</div>
-            </div>
-          </div>
-        `;
-      }
-
-      if (state === 'active') {
-        return `
-          <div class="invite-card-slot state-active">
-            <div class="invite-inner-card">
-              <div class="invite-inner-label">INVITATION</div>
-              <div class="invite-code">${card.code}</div>
-              <div class="invite-timer" data-invite-expires="${card.expires_at}">${window.formatInviteRemaining(card.expires_at, nowMs)}</div>
-            </div>
-            <div class="invite-actions">
-              <button class="invite-btn-share" onclick="event.stopPropagation(); window.shareInvite('${card.code}'); return false;">공유하기</button>
-            </div>
-          </div>
-        `;
-      }
-
-      if (state === 'idle') {
-        return `
-          <div class="invite-card-slot state-unused">
-            <div class="envelope-flap envelope-flap-top"></div>
-            <div class="envelope-flap envelope-flap-bottom"></div>
-            <div class="envelope-content">
-              <div class="invite-number">${_ordSuffix(num)} Invitation</div>
-              <div class="invite-circle">
-                <i data-lucide="heart" style="width:20px; height:20px; color:#9B7FD4;"></i>
-              </div>
-              <button class="use-invite-btn" onclick="window.activateInvite(${i})">사용하기</button>
-            </div>
-          </div>
-        `;
-      }
-
-      // No row for this slot.
-      return `
-        <div class="invite-card-slot state-unused" style="opacity:0.45;">
-          <div class="envelope-flap envelope-flap-top"></div>
-          <div class="envelope-flap envelope-flap-bottom"></div>
-          <div class="envelope-content">
-            <div class="invite-number">${_ordSuffix(num)} Invitation</div>
-            <div class="invite-circle">
-              <i data-lucide="heart" style="width:20px; height:20px; color:#CCC;"></i>
-            </div>
-            <button class="use-invite-btn" disabled style="opacity:0.5; cursor:default;">준비 중</button>
-          </div>
-        </div>
-      `;
-    }).join('');
+    const cardsHTML = Array.from({ length: INVITE_SLOT_COUNT }, (_, i) =>
+      buildInviteCardHTML(rows[i] || null, i, nowMs)
+    ).join('');
 
     mc.innerHTML = `
       <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
@@ -7248,12 +7280,32 @@ window.activateInvite = async function (index) {
     window.showToast('초대장 발급에 실패했어요');
     return;
   }
+
   if (!data || data.length === 0) {
+    // Already activated elsewhere — our copy of the row is stale, so this is
+    // the one case that has to go back to the backend and redraw everything.
     console.warn('[invite] code was already activated:', card.code);
+    await window.loadInviteCards();
+    window.renderInvitePage();
+    return;
   }
 
-  await window.loadInviteCards();
-  window.renderInvitePage();
+  // The update returned the row it wrote, so the new state is already in hand:
+  // patch this one card and swap only its DOM node. No refetch, no full
+  // re-render, no flash across the other nine slots.
+  const updated = data[0];
+  window.inviteCardStates[index] = {
+    ...card,
+    activated_at: updated.activated_at,
+    expires_at: updated.expires_at,
+    used_by: updated.used_by ?? card.used_by,
+    used_at: updated.used_at ?? card.used_at,
+  };
+
+  // A false return means the page was closed mid-request. The state is already
+  // updated, so the next open renders it correctly — repainting here would just
+  // pop the closed modal back up.
+  window.refreshInviteCardSlot(index);
 };
 
 window.openLibraryPage = function () {
