@@ -8,3 +8,4 @@ node_modules/
 # only the shared permission allowlist is committed
 .claude/*
 !.claude/settings.json
+.impeccable/config.local.json

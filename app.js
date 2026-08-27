@@ -1,6 +1,12 @@
 console.log('app loaded');
 
 // Dev flag: set true to skip onboarding and jump straight to the app
+
+// ══════════════════════════════════════════════════════════════
+// 설정 · 전역 상태
+// 개발 플래그와 앱 전역에서 공유하는 상태
+// ══════════════════════════════════════════════════════════════
+
 const SKIP_ONBOARDING = false;
 
 // Dev flag: set true to disable session/onboarding persistence across
@@ -19,6 +25,7 @@ window.isQurated = false;
 
 
 
+// ── 유틸 — 나이 계산 · 연도 라벨 ──────────────────────
 function getAge(birthInput) {
   if (!birthInput) return '';
   const today = new Date();
@@ -43,6 +50,11 @@ window.getYearLabel = function (year) {
   if (!year) return '';
   return (year % 100).toString().padStart(2, '0');
 };
+
+// ══════════════════════════════════════════════════════════════
+// 데이터 정의
+// 프로필북 문항 · 더미 프로필 / 모임 / 매칭 / 채팅
+// ══════════════════════════════════════════════════════════════
 
 const QUESTIONS = [
   // Chapter 1 · 나
@@ -147,6 +159,7 @@ const QUESTIONS = [
   { id: 27, chapter: 3, text: "내가 생각하는 함께하는 삶이란", type: "text" }
 ];
 
+// ── 더미 데이터 — 프로필 · 아바타 ──────────────────────
 const MOCK_PROFILES = [
   {
     id: 1, name: "Heej", birthYear: 2001, role: 'V', score: "98% 매칭", tags: ["영화", "와인", "자연"],
@@ -649,6 +662,7 @@ const MOCK_AVATARS = [
   "https://images.unsplash.com/photo-1719306625386-3e610c3dd5ae?w=200"
 ];
 
+// ── 더미 데이터 — 모임 ────────────────────────────────────
 const MOCK_MEETUPS = [
   {
     id: 101,
@@ -877,6 +891,8 @@ const MOCK_MEETUPS = [
 ];
 
 // Single source of truth for matched users — both messages tab and grid page reference this
+
+// ── 더미 데이터 — 매칭 · 채팅 ──────────────────────────
 const MATCHED_USER_ANSWERS = {
   4: ["같이 있어도 조용할 수 있는 것", "재즈바에서 혼자 술 한 잔", "느린 아침을 좋아해요"],
   5: ["바람 부는 날 드라이브", "책 한 권과 카페 구석 자리", "말보다 눈빛으로 통하는 것"],
@@ -917,6 +933,7 @@ const MOCK_CHATS = [
   }
 ];
 
+// ── 온보딩 입력 상태 — 닉네임 · 생년 · 성향 · 선호 조건 ────
 const appContainer = document.getElementById('app-container');
 
 // State Variables
@@ -967,6 +984,7 @@ Object.assign(MY_ANSWERS, {
   26: { text: "아침에 각자 커피 내려서 같이 마시는 것" }
 });
 
+// ── ♥ 페이지 상태 · 카드 인터랙션 ──────────────────────
 window.likedPages = window.likedPages || {};
 const chapterColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
 
@@ -1071,9 +1089,15 @@ function formatUserHeader(p, context) {
 
 
 
+// ══════════════════════════════════════════════════════════════
+// 화면 셸 & 네비게이션
+// 스크린 생성, 탭 헤더, 진행바, 화면 전환
+// ══════════════════════════════════════════════════════════════
+
 let meetupFilterLocation = '전체';
 let meetupFilterCategory = '전체';
 
+// ── 스크린 생성 · 진행바 · 탭 헤더 ────────────────────
 function createScreen(id, contentHTML) {
   const div = document.createElement('div');
   div.className = 'screen hidden-right fade-in';
@@ -1139,6 +1163,7 @@ window.selectRole = function (role, btn) {
 
 
 
+// ── 네비게이션 · 화면 렌더링 ──────────────────────────────
 function navigateTo(screenId) {
   const currentElem = document.querySelector('.screen.active');
   const newElem = document.getElementById(screenId);
@@ -1524,6 +1549,7 @@ function renderScreen(screenId) {
 
 // ── Invite gate (first onboarding step) ──────────────────────────────
 
+// ── 초대코드 — 입력 · 검증 · 에러 표시 ──────────────
 window.clearInviteCodeError = function () {
   const box = document.getElementById('invite-code-error');
   if (box) { box.style.display = 'none'; box.textContent = ''; }
@@ -1626,6 +1652,7 @@ window.submitInviteCode = async function () {
 
 // Simple logic handlers
 
+// ── 온보딩 — 인텐트 · 태그 · 선호 성향 선택 ────────
 window.selectIntent = function (el, intent) {
   userIntent = intent;
   document.querySelectorAll('.intent-option').forEach(opt => opt.classList.remove('selected'));
@@ -1702,6 +1729,12 @@ window.toggleTargetRole = function (el, role) {
 // ── Highlight helper ────────────────────────────────────────────
 // Wraps 1-3 key words per answer in highlight spans.
 // Cycles: yellow → sage → lavender
+
+// ══════════════════════════════════════════════════════════════
+// 프로필북 — 열람 · 작성
+// 답변 렌더링, 공개 모달, 프로필 상세, 온보딩 게이트
+// ══════════════════════════════════════════════════════════════
+
 function formatAnswerText(ansText, q) {
   if (typeof ansText === 'string') return ansText;
   if (Array.isArray(ansText)) return ansText.join(', ');
@@ -1777,6 +1810,8 @@ function applyHighlights(text) {
 }
 
 // ── Notification system ─────────────────────────────────────────
+
+// ── 더미 데이터 — 알림 ────────────────────────────────────
 const DUMMY_NOTIFICATIONS = [
   { icon: '📚', text: '새로운 프로필북이 도착했어요 📚', time: '월요일 오전 7시', unread: true },
   { icon: '♥', text: 'zoe님이 나를 paged 했어요 ♥', time: '3시간 전', unread: true },
@@ -1785,6 +1820,7 @@ const DUMMY_NOTIFICATIONS = [
   { icon: '🎁', text: '프로필을 더 채워보세요! 챕터 완료 시 프로필북 +1권 🎁', time: '지난주', unread: false },
 ];
 
+// ── 답변 공개 모달 — 열기 · 닫기 · 제스처 ──────────
 window.openAnswerRevealModal = function (profileId, qId) {
   const isMyProfile = profileId === 'myProfile';
   const p = isMyProfile ?
@@ -2012,6 +2048,7 @@ window.closeAnswerCard = function () {
   }
 };
 
+// ── 프로필 상세 · ♥ 토글 · 더블탭 ────────────────────
 window.showProfileDetail = function (profileId) {
   console.log('showProfileDetail called for:', profileId);
   const mc = getModalContainer();
@@ -2147,6 +2184,7 @@ window.goToMyChapters = function () {
   switchTab('profile');
 }
 
+// ── 필터 칩 · 모임 폼 카테고리 분기 ────────────────────
 window.toggleFilterChip = function (elem, type) {
   const textVal = elem.innerText.trim();
 
@@ -2275,6 +2313,8 @@ window.handleWheelScroll = function (elem) {
 //   1. full-screen intro modal — once ever, on the first 발견 entry after onboarding
 //   2. contextual popup — every time a 프로필북/모임 card's detail is opened
 // Browsing (scroll, list view) is never gated, and 메시지 탭 is never gated.
+
+// ── 게이트 — 프로필 완성 판정 · 온보딩 후 모달 ──────
 const INTRO_MODAL_SHOWN_KEY = 'p2_intro_modal_shown';
 const PROFILE_BOOK_DONE_KEY = 'p2_profile_book_complete';
 
@@ -2414,6 +2454,7 @@ window.finalizeProfile = function () {
   }, 300);
 };
 
+// ── 성향 배지 (F/B/V) · 툴팁 ──────────────────────
 // ----------------------------------------------------
 window.getRoleBadgeHTML = function (role) {
   if (!role) return '';
@@ -2451,6 +2492,11 @@ window.hideRoleTooltip = function () {
     existing.remove();
   }
 };
+
+// ══════════════════════════════════════════════════════════════
+// 탭 & 모임
+// 탭 전환, 모임 목록·상세·만들기, 내 프로필, 사진
+// ══════════════════════════════════════════════════════════════
 
 window.switchTab = function (tabName) {
   currentTab = tabName;
@@ -2707,6 +2753,7 @@ window.switchTab = function (tabName) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+// ── 모임 목록 렌더링 ────────────────────────────────────────
 function formatCardDate(dateStr) {
   if (!dateStr) return dateStr;
   // Structured format from submitCreateMeetup: "2026년 5월 25일 (월) 오후 7시 00분"
@@ -2900,6 +2947,7 @@ window.renderMeetupList = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+// ── 챕터 메타 · 답변 그리드 ──────────────────────────────
 function getLikedBadgeHTML(pageId) {
   const isLiked = window.likedPages && window.likedPages[pageId];
   return `<span class="card-liked-badge" style="visibility: ${isLiked ? 'visible' : 'hidden'}; position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: #888; pointer-events: none;">♥</span>`;
@@ -3029,6 +3077,7 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profi
 };
 
 
+// ── 답변 입력 모달 — 저장 · 선택지 ────────────────────
 // ----------------------------------------------------
 // MODALS LOGIC
 // ----------------------------------------------------
@@ -3177,6 +3226,7 @@ window.saveAnswer = function (qId) {
   }
 }
 
+// ── 내 프로필 — 기본 정보 · 상세 HTML ────────────
 window.renderMyProfile = function () {
   const _grid = document.getElementById('my-answers-grid');
   if (!_grid) return;
@@ -3430,6 +3480,7 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
   `;
 };
 
+// ── 사진 — 캐러셀 · 그리드 편집 · 업로드 ────────────
 window.initPhotoCarousels = function () {
   // --- Discover profile card carousels ---
   document.querySelectorAll('[id^="carousel-"]').forEach(carousel => {
@@ -3601,6 +3652,7 @@ window.initPhotoGrid = function () {
   }, { passive: true });
 };
 
+// ── 모임 만들기 — 모달 · 캘린더 · 슬라이더 · 이미지 · 링크 · 제출 ────
 window.openCreateMeetupModal = function () {
   const mc = getModalContainer();
   window._meetupImages = [];
@@ -4240,6 +4292,7 @@ window.submitCreateMeetup = function () {
   window.showToast("모임이 생성됐어요 🎉");
 };
 
+// ── 내 프로필 미리보기 · 프로필 모달 ────────────────────
 window.openMyProfilePreview = function () {
   const mc = getModalContainer();
 
@@ -4444,6 +4497,8 @@ window.openProfileModal = function (profileId, fromChat = false) {
 
 
 // Bottom Nav Hide/Show on Scroll
+
+// ── 스크롤 핸들러 · 모임 날짜 포맷 · 주간 리셋 ──────
 let lastScrollTop = 0;
 document.addEventListener('scroll', function (e) {
   if (e.target.classList && e.target.classList.contains('scroll-y')) {
@@ -4524,6 +4579,7 @@ function getNextMondayKSTStr() {
   return `${nextKST.getUTCMonth() + 1}월 ${nextKST.getUTCDate()}일 (월)`;
 }
 
+// ── 모임 상세 — 참여 · 북마크 · 오픈카톡 ────────────
 window.openMeetupDetail = function (id) {
   const m = MOCK_MEETUPS.find(x => x.id === id);
   const mc = getModalContainer();
@@ -4825,6 +4881,11 @@ window.openProfileForChat = function (profileId, chatId) {
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
+
+// ══════════════════════════════════════════════════════════════
+// 매칭 · 메시지 · p.M
+// 매칭 소개 플로우, 모임 후 팔로업, 그룹/1:1 채팅
+// ══════════════════════════════════════════════════════════════
 
 window.openMatchIntroModal = function (profileId, isQurated = false, from = 'messages') {
   const match = MATCHED_PROFILES.find(m => m.id === profileId);
@@ -5144,6 +5205,7 @@ window.sendFirstMessage = function (profileId) {
   }, 100);
 };
 
+// ── 모임 후 p.M 팔로업 체크인 ──────────────────────────
 window.triggerPostMeetingCheckin = function () {
   let amc = document.getElementById('answer-modal-container');
   if (!amc) {
@@ -5221,6 +5283,7 @@ window.triggerPostMeetingCheckin = function () {
 };
 
 
+// ── 그룹 채팅 · 사이드 패널 · 제한 프로필 ────────────
 window.closeGroupSidePanel = function () {
   const el = document.getElementById('group-side-panel-overlay');
   if (el) el.remove();
@@ -5481,6 +5544,7 @@ window.openLimitedProfile = function (profileId, chatId) {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+// ── 1:1 채팅 ──────────────────────────────────────────────
 window.openChat = function (chatId) {
   const chat = MOCK_CHATS.find(c => c.id === chatId);
   if (!chat) return;
@@ -5593,6 +5657,7 @@ window.openChat = function (chatId) {
   renderChatView();
 }
 
+// ── 내 모임 탭 · 저장한 모임 ────────────────────────────
 window.setDiscoverFilter = function (f) { discoverFilterType = f; renderDiscoverTab(); };
 window.toggleLikedCollection = function () { window.showLikedCollection = !window.showLikedCollection; renderDiscoverTab(); };
 function renderMyMeetingsTab(tabName) {
@@ -5730,6 +5795,12 @@ window.restartDiscover = function () {
   browseQueue = [...remaining];
   renderDiscoverTab();
 };
+
+// ══════════════════════════════════════════════════════════════
+// 발견 탭
+// 스택 제스처, 스와이프, 매칭 오버레이, 렌더링
+// ══════════════════════════════════════════════════════════════
+
 let currentDragCard = null;
 let startX = 0;
 let startY = 0;
@@ -5979,6 +6050,7 @@ window.undoSwipe = function () {
   renderDiscoverTab();
 };
 
+// ── 책등 색상 · 거리 계산 ────────────────────────────────
 const SPINE_COLORS = ['#C89FDB', '#A8C5A0', '#E8B4A0', '#9FB8D8', '#D4B896', '#B8A0C8'];
 function getSpineColor(id) {
   const s = String(id).replace('p', '');
@@ -5991,6 +6063,7 @@ function getDistance(id) {
   return (0.5 + (seed % 45) / 10).toFixed(1);
 }
 
+// ── 발견 탭 렌더링 · 매칭 그리드 · 보관함 ────────────
 window.renderDiscoverTab = function () {
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
@@ -6308,6 +6381,12 @@ window.renderSavedBox = function () {
 // 문제였다.
 // 이 스크립트 태그는 body 최하단에 있어 document.body는 이미 존재하므로
 // DOMContentLoaded를 기다리지 않고 첫 페인트 전에 곧바로 실행한다.
+
+// ══════════════════════════════════════════════════════════════
+// 플랫폼 · 인증 · 앱 시작
+// 레이아웃 동기화, Safe Area, Supabase 인증, startApp
+// ══════════════════════════════════════════════════════════════
+
 function syncAppHeight() {
   const h = Math.round((window.visualViewport && window.visualViewport.height) || window.innerHeight);
   document.documentElement.style.setProperty('--app-vh', h + 'px');
@@ -6329,6 +6408,7 @@ if (window.visualViewport) {
 // WebKit이 스스로 값을 확정할 때까지 매 프레임 프로브를 다시 읽고
 // 기다리는 방식으로 바꾼다.
 
+// ── Safe Area 측정 · 적용 ────────────────────────
 let safeAreaProbe = null;
 
 // env()를 그대로 높이로 쓰는 숨은 프로브. --safe-top을 참조하지 않으므로
@@ -6445,6 +6525,7 @@ if (window.visualViewport) {
 // so the existing mock-data demo flow keeps working untouched until a
 // real Supabase project is wired up via env-config.js.
 
+// ── Supabase 인증 — 세션 · 유저 row · 초대코드 사용 ────
 window.currentAuthUser = null;  // Supabase auth user, once signed in
 window.currentUserRow = null;   // matching row from the `users` table
 window.basicInfoComplete = true; // local mirror of users.basic_info_complete, checked synchronously by the tab gate
@@ -6728,6 +6809,7 @@ window.showFatalError = function (message) {
   document.body.appendChild(screen);
 };
 
+// ── 앱 시작 (startApp) · 슬라이더 셋업 ────────
 function startApp() {
   if (!appContainer) return;
 
@@ -6935,6 +7017,12 @@ function setupDecadeSlider(userPoint) {
 //   idle     activated_at === null                        → "사용하기"
 //   active   activated && now < expires_at && !used_by     → countdown + share
 //   expired  everything else (used OR timed out, same UI)  → disabled
+
+// ══════════════════════════════════════════════════════════════
+// 초대장 · 라이브러리 · 그 외 페이지
+// 초대 슬롯, 라이브러리, p.Qurated, 필터 시트, 토스트
+// ══════════════════════════════════════════════════════════════
+
 const INVITE_SLOT_COUNT = 10;
 const INVITE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -7308,6 +7396,7 @@ window.activateInvite = async function (index) {
   window.refreshInviteCardSlot(index);
 };
 
+// ── 라이브러리 페이지 ────────────────────────────────────────
 window.openLibraryPage = function () {
   const mc = getModalContainer();
 
@@ -7460,6 +7549,7 @@ window.openLibraryPage = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
+// ── p.Qurated 페이지 ────────────────────────────────
 window.openQuratedPage = function () {
   const mc = getModalContainer();
   let selectedPlan = null;
@@ -7581,6 +7671,8 @@ window.openQuratedPage = function () {
 };
 
 // ── Discover filter state ────────────────────────────────────────
+
+// ── 발견 탭 필터 시트 ──────────────────────────────────────
 window._dfAgeMin = null; // null = use onboarding default (targetDecadeRange.min)
 window._dfAgeMax = null;
 window._dfRoles  = null; // null = no role filter
@@ -7715,6 +7807,7 @@ window.openDiscoverFilterSheet = function () {
   };
 };
 
+// ── 토스트 · 공유 시트 ────────────────────────────────────
 window.showToast = function (msg) {
   let toast = document.getElementById('global-toast');
   if (!toast) {
