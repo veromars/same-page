@@ -7187,7 +7187,9 @@ let dismissedBridgeIds = new Set();
 window.resetBridgeDismissed = function () { dismissedBridgeIds = new Set(); };
 
 function shouldShowMeetupBridge() {
-  return userSeekingIntent === 'dating';
+  // 연애를 기대하는 쪽이면 보여준다. '둘 다 열려있어요'도 연애 의사가 있으니
+  // 포함. 친구·네트워크만 찾는 community 유저에게는 소개 성격이 어긋난다.
+  return userSeekingIntent === 'dating' || userSeekingIntent === 'both';
 }
 
 // 브릿지 카드를 넘긴다. 다음은 소진 화면이다.
