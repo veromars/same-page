@@ -38,12 +38,13 @@
 
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="env-config.js"></script>
-  <script src="supabase-client.js"></script>
-
-  <!-- ?v= 는 캐시 무효화용. app.js·styles.css를 고칠 때마다 이 날짜를 올린다.
+  <!-- ?v= 는 캐시 무효화용. 로컬 파일(app.js·styles.css·env-config.js·
+       supabase-client.js)을 고칠 때마다 이 날짜를 네 군데 모두 올린다.
        빌드 단계가 없어서 파일명이 그대로라, 이게 없으면 브라우저가 예전 사본을
        계속 쓴다 (고친 게 반영 안 되는 것처럼 보임). -->
+  <script src="env-config.js?v=20260901"></script>
+  <script src="supabase-client.js?v=20260901"></script>
+
   <link rel="stylesheet" href="styles.css?v=20260901">
 </head>
 <body>
