@@ -4970,6 +4970,13 @@ p {
   cursor: default;
 }
 
+/* 대표 사진 한 장뿐이라 라이트박스를 걸지 않은 헤더. 눌리지 않으니
+   손가락을 부르지 않는다. */
+.prof-header-banner.is-static,
+.prof-header-avatar.is-static {
+  cursor: default;
+}
+
 .prof-header-count {
   position: absolute;
   right: 14px;

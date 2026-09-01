@@ -3732,17 +3732,31 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
         <div class="prof-header-banner is-empty"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>
       </div>`;
     }
-    const cover = phs[0]; // 대표 사진
+    // 대표 사진(사진1)은 원형 썸네일 전용이다. 배너와 라이트박스는 사진2부터 —
+    // 같은 사진을 두 자리에서 두 번 보여주지 않는다.
+    const cover = phs[0];
+    const extras = phs.slice(1); // 사진2~6, 최대 5장
+    if (!extras.length) {
+      // 대표 사진 한 장뿐. 배너에 쓸 사진이 그것밖에 없으니 폴백으로 깔되,
+      // 확대해서 보여줄 게 없으므로 라이트박스는 아예 걸지 않는다.
+      return `
+    <div class="prof-header">
+      <div class="prof-header-banner is-static" style="background-image:url('${cover}');">${indicator}</div>
+      <div class="prof-header-avatar is-static" style="background-image:url('${cover}');"></div>
+    </div>
+  `;
+    }
+    const zoomLabel = `사진 ${extras.length}장 크게 보기`;
     return `
     <div class="prof-header">
       <button type="button" class="prof-header-banner" data-prof-lightbox
-        aria-label="사진 ${phs.length}장 크게 보기"
-        style="background-image:url('${cover}');">
+        aria-label="${zoomLabel}"
+        style="background-image:url('${extras[0]}');">
         ${indicator}
-        ${phs.length > 1 ? `<span class="prof-header-count" aria-hidden="true">1/${phs.length}</span>` : ''}
+        ${extras.length > 1 ? `<span class="prof-header-count" aria-hidden="true">1/${extras.length}</span>` : ''}
       </button>
       <button type="button" class="prof-header-avatar" data-prof-lightbox
-        aria-label="사진 ${phs.length}장 크게 보기"
+        aria-label="${zoomLabel}"
         style="background-image:url('${cover}');"></button>
     </div>
   `;
@@ -3753,7 +3767,8 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
     : buildCarousel(carouselPhotos, pagedIndicatorDetail);
 
   // 라이트박스가 열 사진 목록. 헤더를 그리는 시점에 확정해둔다.
-  window.__profLightboxPhotos = carouselPhotos;
+  // 대표 사진은 원형 썸네일에만 남고 라이트박스에는 등장하지 않는다.
+  window.__profLightboxPhotos = carouselPhotos.slice(1);
 
   // 내 프로필이면 내 위치, 남의 프로필이면 그 사람의 위치. 둘을 섞지 않는다.
   // 예전에는 상대에게 location이 없으면 내 지역이 상대 지역처럼 찍혔다.
