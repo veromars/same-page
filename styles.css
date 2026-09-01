@@ -132,8 +132,11 @@ body {
 h1 {
   font-size: 32px;
   font-weight: 600;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.5px;
+  /* 한글은 단어 중간에서 끊기면 급격히 읽기 어려워진다.
+     "…계신가 / 요?" 처럼 어절이 쪼개지는 걸 막는다. */
+  word-break: keep-all;
   margin-bottom: 8px;
 }
 
@@ -2658,14 +2661,19 @@ p {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  /* 알약. 원형이면 "G&T" 세 글자가 눌려 보인다. 폭은 글자 수에 따라 늘고
+     높이만 고정이라 G / T / G&T가 한 줄에서 같은 높이로 정렬된다. */
+  min-width: 20px;
+  height: 20px;
+  padding: 0 7px;
   border: none;
-  border-radius: 50%;
-  background-color: #C9A8E0;
+  border-radius: 999px;
+  background-color: #8D64BC;
   color: #FFF;
   font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
   cursor: pointer;
   flex-shrink: 0;
   transition: transform 0.2s, background-color 0.2s;
@@ -4227,4 +4235,1328 @@ p {
   border-color: #9B72CC;
   box-shadow: 0 0 0 3px rgba(155, 114, 204, 0.12);
 }
+
+
+/* ══════════════════════════════════════════════════════
+   발견 → 모임 브릿지 카드
+   스택의 마지막 장. 표지가 아니라 속지(彩紙)에 가깝게 — 사진 없이
+   페이퍼 그라운드에 조판만 올라간다.
+   ══════════════════════════════════════════════════════ */
+.bridge-card {
+  background: var(--bg-color);
+  color: var(--text-dark);
+  cursor: default;
+  touch-action: auto;
+}
+
+.bridge-card-inner {
+  position: relative;
+  z-index: 3;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  padding: 34px 24px 26px 34px;
+}
+
+.bridge-lead {
+  font-family: 'Noto Serif KR', serif;
+  font-weight: 400;
+  font-size: 17px;
+  /* DESIGN.md: 본문 line-height 1.7 이상 */
+  line-height: 1.8;
+  color: var(--text-dark);
+  /* 한글은 단어 중간에서 끊기면 급격히 읽기 어려워진다. */
+  word-break: keep-all;
+  margin-bottom: 28px;
+}
+
+/* 권유 문구와 실제 제안 사이를 가르는 얇은 선. 그림자 대신 헤어라인. */
+.bridge-rule {
+  width: 40px;
+  height: 1px;
+  background: var(--border);
+  margin-bottom: 28px;
+}
+
+.bridge-people {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.bridge-people .attendee-avatar {
+  border-color: var(--bg-color);
+}
+
+.bridge-people-more {
+  font-size: 12px;
+  color: #6E696B;
+  margin-left: 8px;
+  line-height: 28px;
+}
+
+.bridge-people-label {
+  font-size: 13px;
+  color: #6E696B;
+}
+
+.bridge-title {
+  font-family: 'Noto Serif KR', serif;
+  font-weight: 500;
+  font-size: 21px;
+  line-height: 1.45;
+  color: var(--text-dark);
+  word-break: keep-all;
+  margin: 0 0 8px;
+  /* 긴 제목이 표지 밖으로 나가지 않게. */
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.bridge-meta {
+  font-size: 13px;
+  color: #6E696B;
+  /* 남는 높이를 흡수해 CTA를 카드 바닥에 붙인다. */
+  margin-bottom: auto;
+}
+
+.bridge-cta {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  margin-top: 16px;
+  min-height: 48px;
+  padding: 13px 20px;
+  border: none;
+  /* 흰 글자를 얹으므로 #9B72CC(3.70:1)가 아니라 한 단 어두운 채움을 쓴다. */
+  background: #8D64BC;
+  color: #FFF;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.bridge-cta:hover {
+  background: #7C55A8;
+}
+
+.bridge-card .book-spine-soft {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  z-index: 5;
+  border-radius: 6px 0 0 6px;
+  background: linear-gradient(to right, #C89FDB, #B98FD0);
+}
+
+.bridge-card .book-spine-soft::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   발견 탭 — 세 가지 반응
+   좋아요와 책 덮기는 짝이 아니다. 형태(채워진 원 vs 맨 텍스트),
+   크기(56px vs 12px), 위치(하단 vs 상단)를 전부 어긋나게 둔다.
+   ══════════════════════════════════════════════════════ */
+
+/* ── 좋아요 — 명시적 ─────────────────────────────────── */
+.discover-like-fab {
+  position: absolute;
+  /* 컨테이너의 좌우 여백(24px)과 눈으로 맞춘다. 4px은 화면 끝에 너무 붙었다. */
+  right: 20px;
+  bottom: 84px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  /* DESIGN.md: Lavender 채움 위에는 Ink 하트. 흰 하트는 2.23:1로 통과 못 한다. */
+  background: #C89FDB;
+  color: #2D2A2B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 40;
+  box-shadow: 0 4px 16px rgba(200, 159, 219, 0.45);
+  transition: transform 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.discover-like-fab:active {
+  transform: scale(0.92);
+}
+
+.discover-like-icon {
+  width: 26px;
+  height: 26px;
+  fill: currentColor;
+}
+
+/* ── 책 덮기 — 보조적 ────────────────────────────────── */
+/* 카드 우측 상단 구석. 아이콘 버튼이 아니라 맨 텍스트다. */
+.close-book-link {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 6;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 6px 2px 6px 10px;
+  font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  text-shadow: 0 1px 3px rgba(45, 42, 43, 0.55);
+}
+
+.close-book-link:hover,
+.close-book-link:focus-visible {
+  color: #FFF;
+}
+
+/* 메타바는 이제 두 덩어리다: 왼쪽 No. / 오른쪽 거리·성향.
+   우측 상단 구석은 '책 덮기'에 내준다. */
+.book-meta-facts {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-right: 56px;
+}
+
+/* ── 책 덮기 확인 ────────────────────────────────────── */
+.close-book-sheet {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--bg-color);
+  border-radius: 14px 14px 0 0;
+  padding: 12px 24px calc(28px + env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+  z-index: 600;
+  animation: sheetUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  box-shadow: 0 -8px 32px rgba(46, 42, 38, 0.12);
+}
+
+.close-book-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-dark);
+  word-break: keep-all;
+  margin: 8px 0 10px;
+}
+
+.close-book-body {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #6E696B;
+  word-break: keep-all;
+  margin-bottom: 24px;
+}
+
+.close-book-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* ── 최초 진입 안내 ──────────────────────────────────── */
+.reactions-intro-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 42, 43, 0.45);
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.reactions-intro-card {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-color);
+  border-radius: 14px;
+  padding: 28px 24px 24px;
+  box-shadow: 0 12px 40px rgba(46, 42, 38, 0.18);
+}
+
+.reactions-intro-title {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 19px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--text-dark);
+  word-break: keep-all;
+  margin: 0 0 20px;
+}
+
+.reactions-intro-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 26px;
+}
+
+.reactions-intro-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  /* DESIGN.md: 한글 본문 1.7 이상 */
+  line-height: 1.75;
+  color: var(--text-dark);
+  word-break: keep-all;
+  margin-bottom: 14px;
+}
+
+.reactions-intro-list li:last-child {
+  margin-bottom: 0;
+}
+
+.reactions-intro-list b {
+  font-weight: 600;
+}
+
+.reactions-intro-mark {
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.9;
+  color: #6E696B;
+}
+
+.reactions-intro-mark--heart {
+  color: #8960B8;
+  font-size: 15px;
+}
+
+.reactions-intro-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 48px;
+  border: none;
+  border-radius: 14px;
+  /* 흰 글자를 얹으므로 한 단 어두운 채움 (4.50:1) */
+  background: #8D64BC;
+  color: #FFF;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 포커스 링은 브라우저 표면이다 — 두면 어느 디자인 시스템에도 속하지 않는
+   파란 후광이 뜬다. 이번에 추가한 컨트롤에는 팔레트에서 그린다. */
+.discover-like-fab:focus-visible,
+.close-book-link:focus-visible,
+.close-book-sheet .sheet-btn:focus-visible,
+.reactions-intro-btn:focus-visible,
+.bridge-cta:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+.discover-like-fab:focus-visible {
+  border-radius: 50%;
+}
+
+.close-book-link:focus-visible {
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+
+/* ── 바텀 시트 프리미티브 ─────────────────────────────
+   이 앱에는 바텀 시트가 여러 개인데 저마다 인라인 스타일로 스크림과 그래버를
+   다시 그리고 있었다. 여기서 한 번만 정의한다. */
+.sheet-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(45, 42, 43, 0.4);
+  z-index: 599;
+}
+
+.sheet-grabber {
+  width: 40px;
+  height: 4px;
+  background: #E4DEE8;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+.sheet-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  min-height: 48px;
+  padding: 12px;
+  border-radius: 14px;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* 물러나는 쪽이 기본값이다. 되돌릴 수 없는 행동을 기본 버튼으로 두지 않는다. */
+.sheet-btn--ghost {
+  border: none;
+  background: #8D64BC;
+  color: #FFF;
+}
+
+/* 되돌릴 수 없는 쪽. 이 제품에서 거절은 죄가 아니라 빨강으로 겁주지 않고,
+   Ink 테두리로 무게만 준다. */
+.sheet-btn--commit {
+  border: 1.5px solid var(--text-dark);
+  background: transparent;
+  color: var(--text-dark);
+}
+
+
+/* ══════════════════════════════════════════════════════
+   이번 주 다시보기
+   좋아요 · 책 덮음 · 무반응 세 상태가 한 줄에서 구분돼야 한다.
+   ══════════════════════════════════════════════════════ */
+.revisit-list {
+  width: 100%;
+  text-align: left;
+  margin-top: 32px;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.revisit-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0 0 12px;
+}
+
+.revisit-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 8px;
+  min-height: 64px;
+  cursor: pointer;
+  transition: opacity 0.2s, background 0.2s;
+}
+
+.revisit-row:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+/* 덮은 책은 한 단 물러나 있다. 완전히 지우지 않는 건 이번 주 안에는
+   되돌릴 수 있기 때문 — 사라진 게 아니라 접어둔 상태로 읽혀야 한다. */
+.revisit-row.is-closed {
+  background: transparent;
+  border-style: dashed;
+}
+
+.revisit-row.is-closed .revisit-avatar {
+  filter: grayscale(100%);
+  opacity: 0.55;
+}
+
+.revisit-row.is-closed .revisit-name,
+.revisit-row.is-closed .revisit-line {
+  color: #8B8689;
+}
+
+.revisit-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  background-color: var(--border);
+  flex-shrink: 0;
+}
+
+.revisit-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.revisit-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  overflow-wrap: anywhere;
+}
+
+.revisit-line {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6E696B;
+  margin-top: 2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.revisit-mark {
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.revisit-mark--paged {
+  /* 페이퍼 위 4.52:1 */
+  color: #8960B8;
+  font-size: 16px;
+}
+
+.revisit-mark--closed {
+  color: #6E696B;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  white-space: nowrap;
+}
+
+.revisit-chevron {
+  width: 16px;
+  height: 16px;
+  color: #A9A4A6;
+  flex-shrink: 0;
+}
+
+/* ── 상세 화면의 책 덮기 취소 ────────────────────────
+   하트 자리를 대신한다. 되돌리기 전에는 좋아요가 의미를 갖지 않으므로
+   둘을 나란히 두지 않는다. */
+.prof-reopen-btn {
+  position: absolute;
+  bottom: max(24px, calc(env(safe-area-inset-bottom, 0px) + 24px));
+  right: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 13px 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-color);
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 150;
+  box-shadow: 0 4px 16px rgba(46, 42, 38, 0.12);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prof-reopen-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   위치 — 온보딩 항목 · 미설정 유도 배너
+   ══════════════════════════════════════════════════════ */
+.location-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6E696B;
+  word-break: keep-all;
+  margin: 0 0 14px;
+}
+
+.location-note--denied {
+  margin: 12px 0 0;
+}
+
+.location-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 11px 18px;
+  border: 1.5px solid #8960B8;
+  border-radius: 14px;
+  background: transparent;
+  color: #8960B8;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, opacity 0.2s;
+}
+
+.location-btn:hover {
+  background: rgba(137, 96, 184, 0.1);
+}
+
+.location-btn.is-busy,
+.location-btn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.location-btn:focus-visible,
+.location-banner-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
+}
+
+.location-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-bottom: 6px;
+}
+
+.location-icon {
+  width: 18px;
+  height: 18px;
+  color: #8960B8;
+  flex-shrink: 0;
+}
+
+.location-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2D2A2B;
+}
+
+/* ── 미설정 유도 배너 ────────────────────────────────── */
+.location-banner {
+  margin-bottom: 24px;
+}
+
+.location-banner-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(137, 96, 184, 0.08);
+  border: 1px solid #F0EBEF;
+  border-radius: 14px;
+}
+
+.location-banner-icon {
+  width: 20px;
+  height: 20px;
+  color: #8960B8;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.location-banner-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.location-banner-title {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: #2D2A2B;
+  word-break: keep-all;
+}
+
+.location-banner-sub {
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6E696B;
+  margin-top: 4px;
+  word-break: keep-all;
+}
+
+.location-banner-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  align-self: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 14px;
+  /* 흰 글자를 얹으므로 4.50:1 채움 */
+  background: #8D64BC;
+  color: #FFF;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.location-banner-btn:disabled,
+.location-banner-btn.is-busy {
+  opacity: 0.55;
+  cursor: default;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   프로필 상세 헤더 — 가로 배너 + 원형 썸네일
+   ══════════════════════════════════════════════════════ */
+.prof-header {
+  position: relative;
+  width: 100%;
+  /* 원형 썸네일이 배너 아래로 절반 걸치므로 그만큼 자리를 비워둔다. */
+  padding-bottom: 44px;
+}
+
+.prof-header-banner {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  position: relative;
+  width: 100%;
+  /* 더 납작한 배너. 헤더는 사진을 보는 자리가 아니라 사람을 소개하는
+     자리이므로, 화면 세로를 덜 먹고 아래 정보가 빨리 올라오게 한다. */
+  aspect-ratio: 21 / 9;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background-color: #EDEAE5;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prof-header-banner.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F0F0EE;
+  cursor: default;
+}
+
+.prof-header-count {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(45, 42, 43, 0.55);
+  color: #FFF;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.prof-header-avatar {
+  appearance: none;
+  -webkit-appearance: none;
+  position: absolute;
+  left: 24px;
+  bottom: 0;
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  border-radius: 50%;
+  /* 페이퍼 링으로 배너에서 떼어놓는다. 그림자 대신 테두리 — 헤어라인 우선. */
+  border: 4px solid var(--bg-color);
+  background-color: #EDEAE5;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.prof-header-banner:focus-visible,
+.prof-header-avatar:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
+}
+
+/* ── 사진 라이트박스 ─────────────────────────────────── */
+.photo-lightbox {
+  /* 화면 전체를 덮어야 한다. app-container 기준 absolute로는 상·하단이
+     남아 뒤 내용이 그대로 보였다. */
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  /* 사진만 보는 화면이다. 반투명일 이유가 없고, 레터박스 여백으로 뒤 내용이
+     비치면 사진에 집중이 안 된다. */
+  background: #181617;
+  overflow: hidden;
+}
+
+/* 트랙을 절대 배치로 깔아야 폭 N00%가 그대로 산다. flex 센터링 안에 두면
+   컨테이너가 눌러버려 슬라이드가 화면을 못 채운다. */
+.photo-lightbox-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  display: flex;
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.photo-lightbox-slide {
+  height: 100%;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.photo-lightbox-close {
+  position: absolute;
+  top: calc(16px + var(--safe-top));
+  right: 16px;
+  z-index: 2;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(250, 249, 246, 0.16);
+  color: #FFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.photo-lightbox-close:focus-visible {
+  outline: 2px solid #FFF;
+  outline-offset: 2px;
+}
+
+.photo-lightbox-dots {
+  position: absolute;
+  bottom: calc(28px + env(safe-area-inset-bottom, 0px));
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 2;
+}
+
+.photo-lightbox-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background 0.2s;
+}
+
+.photo-lightbox-dot.active {
+  background: #FFF;
+}
+
+
+/* 내 프로필 상단 톱니바퀴. 이제 설정 페이지로 들어가는 실제 입구다. */
+.profile-settings-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  color: #8960B8;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-settings-btn:hover {
+  background: rgba(137, 96, 184, 0.1);
+}
+
+.profile-settings-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+
+/* 내 프로필 상단 "수정" — 톱니바퀴와 나란히 서는 보조 액션. */
+.profile-edit-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: transparent;
+  color: #8960B8;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.profile-edit-btn:hover {
+  background: rgba(137, 96, 184, 0.1);
+}
+
+.profile-edit-btn:focus-visible,
+.profile-edit-done:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
+/* 편집 화면 우측 상단 "완료" */
+.profile-edit-done {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  min-height: 44px;
+  padding: 0 4px;
+  color: #8960B8;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+
+/* 프로필 편집 폼. 온보딩과 같은 컴포넌트를 쓰되 섹션 간격만 잡아준다. */
+.profile-edit-form h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 28px 0 12px;
+}
+
+.profile-edit-form h3:first-child {
+  margin-top: 4px;
+}
+
+.profile-edit-form .role-pills {
+  margin: 0;
+}
+
+.profile-edit-form .intent-option {
+  margin-bottom: 8px;
+}
+
+.profile-edit-form .interest-counter {
+  margin-bottom: 8px;
+}
+
+.profile-edit-form .input-field {
+  margin-bottom: 0;
+}
+
+/* "나에 대해" 8항목. 라벨을 입력 위에 얹어 무엇을 쓰는 칸인지 보이게 한다. */
+.edit-field {
+  display: block;
+  margin-bottom: 14px;
+}
+
+.edit-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6E696B;
+  margin-bottom: 6px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   프로필 수정 — 섹션 행 · 개별 편집 화면
+   ══════════════════════════════════════════════════════ */
+.edit-field-hint {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #6E696B;
+  margin-top: 6px;
+}
+
+.edit-field-hint.is-locked {
+  color: #8960B8;
+}
+
+.edit-field .input-field:disabled {
+  background: #F3F0F1;
+  color: #8B8689;
+  cursor: default;
+}
+
+/* 생년월일처럼 영구 고정된 값. 입력처럼 보이지 않게 테두리를 뺀다. */
+.edit-field-readonly {
+  padding: 14px 0 6px;
+  font-size: 16px;
+  color: var(--text-dark);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── 섹션 행 (라벨 + 요약 + 연필) ────────────────────── */
+.edit-section-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-section-row {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-section-row:hover {
+  background: rgba(137, 96, 184, 0.05);
+}
+
+.edit-section-row:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.edit-section-label {
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.edit-section-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  color: #6E696B;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-section-icon {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: #8960B8;
+}
+
+.edit-section-note {
+  padding: 14px;
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6E696B;
+  word-break: keep-all;
+}
+
+/* ── 개별 편집 화면 ──────────────────────────────────── */
+#sub-editor .sub-editor-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  background: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sub-editor-note {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #6E696B;
+  margin-bottom: 16px;
+}
+
+.sub-editor-heading {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 28px 0 12px;
+}
+
+.sub-editor-question {
+  font-family: 'Noto Serif KR', serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--text-dark);
+  word-break: keep-all;
+  margin: 8px 0 18px;
+}
+
+.sub-editor-textarea {
+  width: 100%;
+  min-height: 140px;
+  resize: vertical;
+  line-height: 1.8;
+}
+
+.sub-editor-save {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 14px;
+  background: #8D64BC;
+  color: #FFF;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ── 챕터 편집 ───────────────────────────────────────── */
+.chapter-summary {
+  padding: 16px;
+  background: rgba(137, 96, 184, 0.08);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 8px;
+}
+
+.chapter-summary-top {
+  font-size: 13px;
+  color: #6E696B;
+  margin-bottom: 8px;
+}
+
+.chapter-summary-count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dark);
+  background: linear-gradient(transparent 60%, rgba(226, 255, 116, 0.7) 60%);
+  padding: 0 3px;
+}
+
+.chapter-q-row {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 14px;
+  margin-bottom: 8px;
+  /* 아직 답 안 한 문항은 점선 — 목록에서 남은 게 바로 보인다. */
+  border: 1px dashed var(--border);
+  border-radius: 14px;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.chapter-q-row.is-answered {
+  border-style: solid;
+  background: var(--surface);
+}
+
+.chapter-q-row:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.chapter-q-no {
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8960B8;
+  line-height: 1.6;
+}
+
+.chapter-q-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.chapter-q-text {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text-dark);
+  word-break: keep-all;
+}
+
+.chapter-q-answer {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #8B8689;
+  margin-top: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chapter-q-icon {
+  flex-shrink: 0;
+  width: 15px;
+  height: 15px;
+  color: #8960B8;
+  margin-top: 2px;
+}
+
+/* ── 프로필 배지 줄 (연애 상태 + 의도) ───────────────── */
+.profile-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.profile-badge-row .profile-badge {
+  margin-top: 0;
+}
+
+.profile-badge--relationship {
+  background: rgba(137, 96, 184, 0.12);
+  color: #6E4E96;
+}
+
+/* ── 나의 페이지 — 챕터 탭 ─────────────────────────────
+   27문항을 한 줄로 늘어놓으면 스크롤이 화면 몇 배가 된다.
+   진행 요약 행을 그대로 탭으로 쓰고, 아래에는 고른 챕터의 9문항만 세운다. */
+.chapter-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chapter-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  /* 진행 표시줄 한 줄이라 그냥 두면 35px — 손가락으로 칠 수 있는 크기가 아니다. */
+  min-height: 44px;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.chapter-tab .chapter-label {
+  width: auto;
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6E696B;
+  white-space: nowrap;
+}
+
+.chapter-tab .chapter-track {
+  display: block;
+  flex: 1;
+  height: 8px;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.07);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chapter-tab .chapter-fill {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: var(--primary);
+}
+
+.chapter-tab .chapter-pct {
+  width: 30px;
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+.chapter-tab.is-active {
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+
+.chapter-tab.is-active .chapter-label { color: #8960B8; }
+.chapter-tab.is-active .chapter-pct { color: var(--text-dark); }
+
+.chapter-tab:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.chapter-q-list {
+  margin-top: 20px;
+}
+
+.chapter-q-list.is-swapping {
+  animation: chapter-q-swap 0.18s ease-out;
+}
+
+@keyframes chapter-q-swap {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chapter-tab { transition: none; }
+  .chapter-q-list.is-swapping { animation: none; }
 }

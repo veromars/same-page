@@ -41,14 +41,17 @@
   <script src="env-config.js"></script>
   <script src="supabase-client.js"></script>
 
-  <link rel="stylesheet" href="styles.css">
+  <!-- ?v= 는 캐시 무효화용. app.js·styles.css를 고칠 때마다 이 날짜를 올린다.
+       빌드 단계가 없어서 파일명이 그대로라, 이게 없으면 브라우저가 예전 사본을
+       계속 쓴다 (고친 게 반영 안 되는 것처럼 보임). -->
+  <link rel="stylesheet" href="styles.css?v=20260901">
 </head>
 <body>
   <div id="app-container">
     <!-- Screens will be injected here by app.js -->
   </div>
 
-  <script src="app.js" charset="utf-8"></script>
+  <script src="app.js?v=20260901" charset="utf-8"></script>
 
 
 </body></html>

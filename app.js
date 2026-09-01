@@ -21,6 +21,12 @@ let browseQueue = [];
 let pagedSet = new Set();
 let passedSet = new Set();
 let savedBooks = [];
+// p.Qurated는 v2로 연기됐다. 코드는 전부 남겨두되 유저에게 닿는 진입점만 막는다.
+// 재활성화: true로 바꾸면 내 프로필의 신청 카드와 발견 탭 소진 화면의 프로모
+// 카드가 다시 렌더되고, 그 둘이 p.Qurated 페이지로 가는 유일한 경로다.
+const P_QURATED_ENABLED = false; // v2로 연기, 재활성화 시 true로 변경
+window.P_QURATED_ENABLED = P_QURATED_ENABLED;
+
 window.isQurated = false;
 
 
@@ -162,7 +168,8 @@ const QUESTIONS = [
 // ── 더미 데이터 — 프로필 · 아바타 ──────────────────────
 const MOCK_PROFILES = [
   {
-    id: 1, name: "Heej", birthYear: 2001, role: 'V', score: "98% 매칭", tags: ["영화", "와인", "자연"],
+    id: 1, name: "Heej", birthYear: 2001, role: 'GT', score: "98% 매칭", tags: ["영화", "와인", "자연"],
+    coords: { lat: 37.5563, lng: 126.9236 }, // 마포 홍대
     bio: "프로젝트 헤일메리 10번 봤어요 🎬",
     image: "https://images.unsplash.com/photo-1704731267944-c93c8d059cdc?w=400",
     photos: [
@@ -190,7 +197,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 2, name: "s", birthYear: 1992, role: 'F', score: "91% 매칭", tags: ["자연", "여행", "맛집"],
+    id: 2, name: "s", birthYear: 1992, role: 'T', score: "91% 매칭", tags: ["자연", "여행", "맛집"],
+    coords: { lat: 37.5443, lng: 127.0557 }, // 성동 성수
     bio: "주말마다 산 타요. 강아지도 같이 가요 🐕",
     image: "https://images.unsplash.com/photo-1566139884643-d6c62cc13b49?w=400",
     photos: [
@@ -217,7 +225,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 3, name: "달", birthYear: 1995, role: 'V', score: "87% 매칭", tags: ["독서", "카페", "여행"],
+    id: 3, name: "달", birthYear: 1995, role: 'GT', score: "87% 매칭", tags: ["독서", "카페", "여행"],
+    coords: { lat: 37.5735, lng: 126.9788 }, // 종로
     bio: "북클럽 운영 중이에요. 같이 읽어요 📚",
     image: "https://images.unsplash.com/photo-1708533296070-b3e49fbdb08e?w=400",
     photos: [
@@ -245,7 +254,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 4, name: "bora", birthYear: 1998, role: 'B', score: "83% 매칭", tags: ["아트", "영화", "독서"],
+    id: 4, name: "bora", birthYear: 1998, role: 'G', score: "83% 매칭", tags: ["아트", "영화", "독서"],
+    coords: { lat: 37.4979, lng: 127.0276 }, // 강남
     bio: "갤러리 큐레이터예요. 전시 같이 가실 분 ☕",
     image: "https://images.unsplash.com/photo-1602421110952-01a3057d8987?w=400",
     photos: [
@@ -273,7 +283,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 5, name: "밍", birthYear: 2002, role: 'V', score: "79% 매칭", tags: ["음악", "아트", "카페"],
+    id: 5, name: "밍", birthYear: 2002, role: 'GT', score: "79% 매칭", tags: ["음악", "아트", "카페"],
+    coords: { lat: 37.5791, lng: 126.9368 }, // 서대문
     bio: "재즈바 투어 중입니다 🎵",
     image: "https://images.unsplash.com/photo-1719306625386-3e610c3dd5ae?w=400",
     photos: [
@@ -299,7 +310,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 6, name: "jj", birthYear: 1998, role: 'V', score: "76% 매칭", tags: ["독서", "와인바", "아트갤러리"],
+    id: 6, name: "jj", birthYear: 1998, role: 'GT', score: "76% 매칭", tags: ["독서", "와인바", "아트갤러리"],
+    coords: { lat: 37.5326, lng: 126.9905 }, // 용산
     bio: "책과 와인이 있는 금요일 🍷",
     image: "https://images.unsplash.com/photo-1713751429134-3d049a83b694?w=400",
     photos: [
@@ -326,7 +338,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 7, name: "milk", birthYear: 1995, role: 'F', score: "74% 매칭", tags: ["카페", "사진", "빈티지"],
+    id: 7, name: "milk", birthYear: 1995, role: 'T', score: "74% 매칭", tags: ["카페", "사진", "빈티지"],
+    coords: { lat: 37.5403, lng: 127.0695 }, // 광진 건대
     bio: "성수동 카페 투어 중 ☕",
     image: "https://images.unsplash.com/photo-1653196709875-427673568d12?w=400",
     photos: [
@@ -352,7 +365,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 8, name: "서연", birthYear: 2000, role: 'B', score: "72% 매칭", tags: ["운동", "음악", "요리"],
+    id: 8, name: "서연", birthYear: 2000, role: 'G', score: "72% 매칭", tags: ["운동", "음악", "요리"],
+    coords: { lat: 37.5124, lng: 126.9393 }, // 동작
     bio: "헬스 후 맥주 한 잔 🍺",
     image: "https://images.unsplash.com/photo-1632242219460-938944e38947?w=400",
     photos: [
@@ -379,7 +393,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 9, name: "🐶", birthYear: 1997, role: 'F', score: "70% 매칭", tags: ["재즈", "칵테일", "영화"],
+    id: 9, name: "🐶", birthYear: 1997, role: 'T', score: "70% 매칭", tags: ["재즈", "칵테일", "영화"],
+    coords: { lat: 37.6027, lng: 126.9291 }, // 은평
     bio: "재즈바에서 만나요 🎷",
     image: "https://images.unsplash.com/photo-1599314785151-49a35a619b1b?w=400",
     photos: [
@@ -406,7 +421,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 10, name: "ssol", birthYear: 1993, role: 'V', score: "68% 매칭", tags: ["전시", "클래식", "뜨개질"],
+    id: 10, name: "ssol", birthYear: 1993, role: 'GT', score: "68% 매칭", tags: ["전시", "클래식", "뜨개질"],
+    coords: { lat: 37.6542, lng: 127.0568 }, // 노원
     bio: "조용한 사람, 시끄러운 취향 🎻",
     image: "https://images.unsplash.com/photo-1570441102939-ca93df98ffdb?w=400",
     photos: [
@@ -432,7 +448,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 11, name: "하늘", birthYear: 1999, role: 'B', score: "66% 매칭", tags: ["고양이", "게임", "만화"],
+    id: 11, name: "하늘", birthYear: 1999, role: 'G', score: "66% 매칭", tags: ["고양이", "게임", "만화"],
+    coords: { lat: 37.5509, lng: 126.8495 }, // 강서
     bio: "고양이 두 마리와 삽니다 🐱🐱",
     image: "https://images.unsplash.com/photo-1679628751127-7706cced9819?w=400",
     photos: [
@@ -453,7 +470,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 12, name: "ryo", birthYear: 1996, role: 'F', score: "64% 매칭", tags: ["맛집", "드라마", "쇼핑"],
+    id: 12, name: "ryo", birthYear: 1996, role: 'T', score: "64% 매칭", tags: ["맛집", "드라마", "쇼핑"],
+    coords: { lat: 37.5145, lng: 127.1059 }, // 송파
     bio: "건대 앞 단골 가게 세 개 🍜",
     image: "https://images.unsplash.com/photo-1737041315827-5d9ceda7f27e?w=400",
     photos: [
@@ -474,7 +492,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 13, name: "🌙", birthYear: 2001, role: 'V', score: "62% 매칭", tags: ["역사", "한복", "사진"],
+    id: 13, name: "🌙", birthYear: 2001, role: 'GT', score: "62% 매칭", tags: ["역사", "한복", "사진"],
+    coords: { lat: 37.5638, lng: 126.9975 }, // 중구
     bio: "경복궁 근처에서 산책 중 🏯",
     image: "https://images.unsplash.com/photo-1704731268191-e744c6d96b26?w=400",
     photos: [
@@ -495,7 +514,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 14, name: "비", birthYear: 1994, role: 'F', score: "60% 매칭", tags: ["러닝", "요가", "건강식"],
+    id: 14, name: "비", birthYear: 1994, role: 'T', score: "60% 매칭", tags: ["러닝", "요가", "건강식"],
+    coords: { lat: 37.4784, lng: 126.9516 }, // 관악
     bio: "잠실 러너 클럽 멤버 🏃",
     image: "https://images.unsplash.com/photo-1691068013523-0f653e498f10?w=400",
     photos: [
@@ -516,7 +536,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 15, name: "peach🍑", birthYear: 1998, role: 'B', score: "58% 매칭", tags: ["음악", "라이브 공연", "맥주"],
+    id: 15, name: "peach🍑", birthYear: 1998, role: 'G', score: "58% 매칭", tags: ["음악", "라이브 공연", "맥주"],
+    coords: { lat: 37.5264, lng: 126.8962 }, // 영등포
     bio: "밴드 보컬, 기타도 조금 🎸",
     image: "https://images.unsplash.com/photo-1669026481679-268f2fd919bf?w=400",
     photos: [
@@ -537,7 +558,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 16, name: "zoe", birthYear: 1997, role: 'F', score: "94% 매칭", tags: ["와인", "카페", "여행"],
+    id: 16, name: "zoe", birthYear: 1997, role: 'T', score: "94% 매칭", tags: ["와인", "카페", "여행"],
+    coords: { lat: 37.5894, lng: 127.0167 }, // 성북
     bio: "홍대 앞 단골 와인바 있어요",
     image: "https://images.unsplash.com/photo-1565150860083-2257da1fbf23?w=400",
     intent: "연애를 기대해요 ❤️",
@@ -549,7 +571,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 17, name: "하람", birthYear: 2000, role: 'V', score: "92% 매칭", tags: ["독서", "영화", "자연"],
+    id: 17, name: "하람", birthYear: 2000, role: 'GT', score: "92% 매칭", tags: ["독서", "영화", "자연"],
+    coords: { lat: 37.4106, lng: 126.6784 }, // 인천 연수
     bio: "책 읽다 잠드는 게 루틴",
     image: "https://images.unsplash.com/photo-1572288236082-e363d5121568?w=400",
     intent: "친구, 연애 둘 다 열려 있어요 ✨",
@@ -561,7 +584,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 18, name: "kira", birthYear: 1995, role: 'B', score: "89% 매칭", tags: ["여행", "맛집", "음악"],
+    id: 18, name: "kira", birthYear: 1995, role: 'G', score: "89% 매칭", tags: ["여행", "맛집", "음악"],
+    coords: { lat: 37.2636, lng: 127.0286 }, // 경기 수원
     bio: "이태원 골목을 제일 잘 알아요",
     image: "https://images.unsplash.com/photo-1698252980771-4bbf18c4439a?w=400",
     intent: "연애를 기대해요 ❤️",
@@ -573,7 +597,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 19, name: "🌿", birthYear: 1998, role: 'F', score: "86% 매칭", tags: ["반려동물", "식물", "집순이"],
+    id: 19, name: "🌿", birthYear: 1998, role: 'T', score: "86% 매칭", tags: ["반려동물", "식물", "집순이"],
+    coords: { lat: 35.8693, lng: 128.6062 }, // 대구 중구
     bio: "고양이 한 마리, 식물 열 개",
     image: "https://images.unsplash.com/photo-1762954419103-43708f0cf893?w=400",
     intent: "친구, 연애 둘 다 열려 있어요 ✨",
@@ -585,7 +610,8 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 20, name: "luna", birthYear: 1993, role: 'V', score: "83% 매칭", tags: ["운동", "수영", "자연"],
+    id: 20, name: "luna", birthYear: 1993, role: 'GT', score: "83% 매칭", tags: ["운동", "수영", "자연"],
+    coords: { lat: 35.1631, lng: 129.1635 }, // 부산 해운대
     bio: "주말엔 무조건 수영",
     image: "https://images.unsplash.com/photo-1620216977705-df5ba73ca1a1?w=400",
     intent: "연애를 기대해요 ❤️",
@@ -597,7 +623,7 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 21, name: "은유", birthYear: 1999, role: 'F', score: "81% 매칭", tags: ["카페", "디저트", "독서"],
+    id: 21, name: "은유", birthYear: 1999, role: 'T', score: "81% 매칭", tags: ["카페", "디저트", "독서"],
     bio: "조용한 카페 맛집 수집 중",
     image: "https://images.unsplash.com/photo-1523177311887-ad300abe97cc?w=400",
     intent: "친구, 연애 둘 다 열려 있어요 ✨",
@@ -609,7 +635,7 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 22, name: "tori", birthYear: 1996, role: 'B', score: "78% 매칭", tags: ["전시", "카페", "사진"],
+    id: 22, name: "tori", birthYear: 1996, role: 'G', score: "78% 매칭", tags: ["전시", "카페", "사진"],
     bio: "을지로 구석구석 탐험가",
     image: "https://images.unsplash.com/photo-1739010577139-6f904e57fe41?w=400",
     intent: "연애를 기대해요 ❤️",
@@ -621,7 +647,7 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 23, name: "솔아", birthYear: 2001, role: 'V', score: "75% 매칭", tags: ["음악", "악기", "공연"],
+    id: 23, name: "솔아", birthYear: 2001, role: 'GT', score: "75% 매칭", tags: ["음악", "악기", "공연"],
     bio: "악기 셋, 음악 취향 하나",
     image: "https://images.unsplash.com/photo-1565050831300-833bcdc08d3b?w=400",
     intent: "친구, 연애 둘 다 열려 있어요 ✨",
@@ -633,7 +659,7 @@ const MOCK_PROFILES = [
     }
   },
   {
-    id: 24, name: "nara", birthYear: 1994, role: 'F', score: "72% 매칭", tags: ["요리", "맛집", "영화"],
+    id: 24, name: "nara", birthYear: 1994, role: 'T', score: "72% 매칭", tags: ["요리", "맛집", "영화"],
     bio: "요리 잘한다는 말 자주 들어요",
     image: "https://images.unsplash.com/photo-1543204607-75cad6df85c3?w=400",
     intent: "연애를 기대해요 ❤️",
@@ -738,7 +764,7 @@ const MOCK_MEETUPS = [
     participants: []
   },
   {
-    id: 1, title: "선데이 필름나이트", date: "일요일 저녁 7시", timestamp: "2026-04-26T19:00:00",
+    id: 1, title: "선데이 필름나이트", date: "일요일 저녁 7시", timestamp: "2026-09-06T19:00:00",
     desc: "'타오르는 여인의 초상' 감상 후 와인 한 잔 🍷", type: "🎬 문화생활", maxCap: 6, currentCap: 6,
     hostName: "bora", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "영화와 와인을 사랑하는 큐레이터 보라입니다.",
     styleTrait: "무관", fee: "1만 5천원 (와인/간식)", tags: [],
@@ -748,7 +774,7 @@ const MOCK_MEETUPS = [
     participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[1].image, MOCK_PROFILES[2].image, MOCK_PROFILES[3].image, MOCK_PROFILES[4].image]
   },
   {
-    id: 2, title: "남산 나이트 하이크", date: "금요일 저녁 8시", timestamp: "2026-04-24T20:00:00",
+    id: 2, title: "남산 나이트 하이크", date: "금요일 저녁 8시", timestamp: "2026-09-11T20:00:00",
     desc: "초보 환영, 강아지 환영 🐾", type: "🏃 액티비티", maxCap: 10, currentCap: 7,
     hostName: "s", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
     styleTrait: "무관", fee: "무료", tags: [],
@@ -758,7 +784,7 @@ const MOCK_MEETUPS = [
     participants: [MOCK_PROFILES[6].image, MOCK_PROFILES[7].image, MOCK_PROFILES[8].image, MOCK_PROFILES[9].image, MOCK_PROFILES[10].image, MOCK_PROFILES[11].image]
   },
   {
-    id: 3, title: "퀴어 문학 읽기 모임", date: "4/20 월요일 오후 3시", timestamp: "2026-04-20T15:00:00",
+    id: 3, title: "퀴어 문학 읽기 모임", date: "9/14 월요일 오후 3시", timestamp: "2026-09-14T15:00:00",
     desc: "이번 달 책: 버지니아 울프 '올랜도' 📖", type: "📚 스터디", maxCap: 8, currentCap: 5,
     hostName: "무지개 북스", hostType: "단체", hostIsPublic: false, hostLogo: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=100",
     hostBio: "다양한 목소리를 담는 독립 서점, 무지개 북스입니다.",
@@ -811,7 +837,7 @@ const MOCK_MEETUPS = [
     hasRSVPd: false
   },
   {
-    id: 4, title: "성수동 카페 브런치", date: "일요일 오전 11시", timestamp: "2026-04-26T11:00:00",
+    id: 4, title: "성수동 카페 브런치", date: "일요일 오전 11시", timestamp: "2026-09-06T11:00:00",
     desc: "새로 생긴 카페 같이 가요 ☕", type: "🍽️ 식도락", maxCap: 6, currentCap: 4,
     hostName: "밍", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "카페 투어가 취미인 밍입니다. 맛있는 브런치 먹어요!",
     styleTrait: "무관", fee: "1/N", tags: ["#일스"],
@@ -821,7 +847,7 @@ const MOCK_MEETUPS = [
     participants: [MOCK_PROFILES[18].image, MOCK_PROFILES[19].image, MOCK_PROFILES[20].image]
   },
   {
-    id: 5, title: "이쪽 바에서 칵테일 한 잔 🍸", date: "5/2 토요일 저녁 9시", timestamp: "2026-05-02T21:00:00",
+    id: 5, title: "이쪽 바에서 칵테일 한 잔 🍸", date: "9/19 토요일 저녁 9시", timestamp: "2026-09-19T21:00:00",
     desc: "프라이빗한 공간에서 편하게 한 잔 해요", type: "✨ 소셜", maxCap: 8, currentCap: 5,
     hostName: "mina", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
     styleTrait: '<span style="background: linear-gradient(transparent 60%, rgba(200,159,219,0.6) 60%); padding: 0 3px;">일스</span>', fee: "1/N", tags: ["#티부환영"],
@@ -877,7 +903,7 @@ const MOCK_MEETUPS = [
     desc: "제12회 서울프라이드엑스포"
   },
   {
-    id: 7, title: "FC빠세 🌈 주말 풋살", date: "이번주 토요일 오전 10시", timestamp: "2026-04-25T10:00:00",
+    id: 7, title: "FC빠세 🌈 주말 풋살", date: "토요일 오전 10시", timestamp: "2026-09-05T10:00:00",
     desc: "실력 무관, 처음이어도 환영해요! 함께 뛰고 땀 흘리고 밥 먹어요 ⚽ 운동화와 긍정 에너지만 챙겨오세요.",
     type: "🏃 액티비티", maxCap: 12, currentCap: 8,
     hostName: "FC빠세", hostType: "단체", hostIsPublic: false, hostLogo: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=100",
@@ -887,6 +913,39 @@ const MOCK_MEETUPS = [
     rules: "운동화 필참. cleats(축구화)는 착용 불가합니다.",
     isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "마포구 (상암)", fullAddress: "서울 마포구 성산동 상암월드컵경기장 풋살구장",
     participants: [MOCK_PROFILES[1].image, MOCK_PROFILES[3].image, MOCK_PROFILES[5].image, MOCK_PROFILES[7].image, MOCK_PROFILES[9].image, MOCK_PROFILES[11].image, MOCK_PROFILES[13].image, MOCK_PROFILES[2].image]
+  },
+  {
+    id: 9, title: "금요일 밤, 성수 와인 한 잔 🍷", date: "9/11 금요일 저녁 8시", timestamp: "2026-09-11T20:00:00",
+    desc: "한 주 끝내고 가볍게 한 잔. 처음 오셔도 어색하지 않게 자리를 잡아둘게요.", type: "✨ 소셜", maxCap: 8, currentCap: 4,
+    hostName: "ssol", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
+    fee: "1/N", tags: ["#티부환영", "#첫참여환영"],
+    ageRange: "30대 중반 ~ 30대 후반",
+    rules: "노쇼는 다음 참여가 어려워요.",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test',
+    shortLocation: "성동구 (성수)", fullAddress: "서울특별시 성동구 연무장길 일대",
+    participants: [MOCK_PROFILES[9].image, MOCK_PROFILES[2].image, MOCK_PROFILES[16].image]
+  },
+  {
+    id: 10, title: "보드게임하며 인사해요 🎲", date: "9/13 일요일 오후 2시", timestamp: "2026-09-13T14:00:00",
+    desc: "말수 적어도 괜찮은 모임. 게임 하다 보면 자연스럽게 친해져요.", type: "✨ 소셜", maxCap: 10, currentCap: 6,
+    hostName: "하람", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
+    fee: "카페 이용료", tags: ["#조용한모임", "#첫참여환영"],
+    ageRange: "20대 초반 ~ 30대 초반",
+    rules: "게임 룰은 현장에서 알려드려요.",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test',
+    shortLocation: "마포구 (합정)", fullAddress: "서울특별시 마포구 양화로 일대",
+    participants: [MOCK_PROFILES[16].image, MOCK_PROFILES[5].image, MOCK_PROFILES[11].image, MOCK_PROFILES[19].image, MOCK_PROFILES[7].image]
+  },
+  {
+    id: 11, title: "느긋한 일요일 티타임 🍵", date: "9/20 일요일 오후 3시", timestamp: "2026-09-20T15:00:00",
+    desc: "술 없이 차 마시며 이야기하는 자리예요. 비음주도 편하게 오세요.", type: "✨ 소셜", maxCap: 6, currentCap: 2,
+    hostName: "달", hostType: "개인", hostPublic: false, hostIsPublic: false, hostBio: "",
+    fee: "1/N", tags: ["#비음주", "#조용한모임"],
+    ageRange: "30대 중반 ~ 40대 중반",
+    rules: "",
+    isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test',
+    shortLocation: "종로구 (익선동)", fullAddress: "서울특별시 종로구 수표로28길 일대",
+    participants: [MOCK_PROFILES[2].image, MOCK_PROFILES[13].image]
   }
 ];
 
@@ -942,11 +1001,263 @@ let userBirthDate = { year: 1990, month: 1, day: 1 };
 const DECADE_POINTS = ['20대 초반', '20대 중반', '20대 후반', '30대 초반', '30대 중반', '30대 후반', '40대 초반', '40대 중반', '40대 후반', '50대 이상'];
 let targetDecadeRange = { min: 2, max: 4 };
 
-let userRole = null; // 'F', 'B', 'V'
-let userIntent = null;
+let userRole = null; // 'G' | 'T' | 'GT'
+
+// 연애 상태 — 저장 필드 relationship_status
+const RELATIONSHIP_STATUSES = [
+  { key: 'single', label: '싱글' },
+  { key: 'dating', label: '연애중' },
+  { key: 'married', label: '기혼' },
+];
+let userRelationshipStatus = null; // 'single' | 'dating' | 'married'
+
+// 연애 중·기혼인 사람의 프로필에 먼저 붙는 배지. 의도 배지 왼쪽에 선다.
+const RELATIONSHIP_BADGE_LABELS = {
+  dating: '연애 중 💑',
+  married: '결혼했어요 💍',
+};
+
+// 닉네임은 한 달에 한 번만 바꿀 수 있다. 서로를 알아보는 이름이 자주 바뀌면
+// 같은 사람인지 확인할 방법이 없다.
+const NICKNAME_COOLDOWN_DAYS = 30;
+let userNicknameChangedAt = null; // epoch ms
+
+function isPartnered() {
+  return userRelationshipStatus === 'dating' || userRelationshipStatus === 'married';
+}
+window.isPartnered = isPartnered;
+
+// 연애 중·기혼이면 "연애할 사람을 찾고 있어요"가 성립하지 않는다. 남는 선택지가
+// 하나뿐이라 질문 자체를 묻지 않고 community로 고정한다.
+function applyRelationshipConstraints() {
+  if (isPartnered() && userSeekingIntent !== 'community') {
+    userSeekingIntent = 'community';
+    return true;
+  }
+  return false;
+}
+window.applyRelationshipConstraints = applyRelationshipConstraints;
+
+function getRelationshipBadgeLabel() {
+  return RELATIONSHIP_BADGE_LABELS[userRelationshipStatus] || '';
+}
+window.getRelationshipBadgeLabel = getRelationshipBadgeLabel;
+
+function nicknameUnlockAt() {
+  if (!userNicknameChangedAt) return null;
+  return userNicknameChangedAt + NICKNAME_COOLDOWN_DAYS * 86400000;
+}
+
+window.canChangeNickname = function () {
+  const at = nicknameUnlockAt();
+  return at === null || Date.now() >= at;
+};
+
+window.nicknameUnlockText = function () {
+  const at = nicknameUnlockAt();
+  if (at === null) return '';
+  const d = new Date(at);
+  return `닉네임은 ${d.getMonth() + 1}월 ${d.getDate()}일부터 다시 바꿀 수 있어요`;
+};
+
+// p.2에서 무엇을 찾고 있는지 — 저장 필드 seeking_intent.
+// label은 온보딩에서 고를 때 누르는 버튼의 문구다.
+const SEEKING_INTENTS = [
+  { key: 'dating', label: '연애할 사람을 찾고 있어요' },
+  { key: 'community', label: '친구나 커뮤니티를 찾고 있어요' },
+  { key: 'both', label: '둘 다 열려있어요' },
+];
+
+// 프로필북 표지·프로필 화면의 의도 배지 문구. 온보딩 버튼과 일부러 다르다 —
+// 고를 때는 내가 하는 행동을 서술하고, 남에게 보일 때는 기대를 말한다.
+// MOCK_PROFILES의 intent 문자열도 이 표와 같은 문구를 쓴다.
+const INTENT_BADGE_LABELS = {
+  dating: '연애를 기대해요 ❤️',
+  community: '친구/네트워크가 생겼으면 해요 👋',
+  both: '친구, 연애 둘 다 열려 있어요 ✨',
+};
+let userSeekingIntent = null; // 'dating' | 'community' | 'both'
+const DEFAULT_BIO = '새로운 시작을 기대하며!';
+let userBio = '';             // 한마디 코멘트. 비어 있으면 DEFAULT_BIO를 쓴다.
+
+// 관심사 선택지. 온보딩과 프로필 편집이 같은 목록을 본다.
+const INTEREST_CATEGORIES = [
+  { name: '문화/예술', tags: ['영화', '드라마', '음악', '아트', '전시', '공연', '사진', '독서'] },
+  { name: '음식/음료', tags: ['맛집', '카페', '와인', '칵테일', '요리', '베이킹', '비건'] },
+  { name: '액티비티', tags: ['자연', '여행', '운동', '등산', '러닝', '요가', '수영', '테니스', '풋살', '사이클'] },
+  { name: '라이프', tags: ['반려동물', '식물', '인테리어', '패션', '뷰티', '게임'] },
+  { name: '배움', tags: ['언어', '자기계발', '재테크', '글쓰기', '명상'] },
+];
+const MAX_TAGS = 5;
+
+// ── 이스케이프 ─────────────────────────────────────────
+// 닉네임·한마디는 유저가 쓴 값이고 innerHTML로 들어간다. 따옴표 하나가
+// value 속성을 닫아버리면 입력 필드가 통째로 깨진다.
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+function escapeHTML(value) {
+  if (value === null || value === undefined) return '';
+  return String(value).replace(/[&<>"']/g, ch => HTML_ESCAPES[ch]);
+}
+const escapeAttr = escapeHTML;
+window.escapeHTML = escapeHTML;
+
+// ── 로컬 저장 키 목록 ──────────────────────────────────
+// 키가 sp_* (초기)와 p2_* (이후) 두 계열로 나뉘어 있어서, 리셋할 때마다
+// 한두 개가 빠졌다. 새 키를 만들면 반드시 여기에 함께 등록한다.
+const P2_STORAGE_KEYS = {
+  // 주간 배달 사이클
+  weekStart: 'sp_week_start',
+  viewedThisWeek: 'sp_viewed_this_week',   // ← 발견 탭 "이번 주 다시보기"
+  // 사용자가 남긴 판단
+  closedBooks: 'p2_closed_books',
+  // 온보딩·프로필
+  onboardingChoices: 'p2_onboarding_choices',
+  myAnswers: 'p2_my_answers',
+  userLocation: 'p2_user_location',
+  profileBookDone: 'p2_profile_book_complete',
+  // 1회성 안내
+  introModalShown: 'p2_intro_modal_shown',
+  reactionsIntroShown: 'p2_reactions_intro_shown',
+};
+window.P2_STORAGE_KEYS = P2_STORAGE_KEYS;
+
+// 개발·테스트용 전체 초기화. 콘솔에서 resetLocalState() 한 번이면
+// 첫 진입과 같은 상태가 된다. sessionStorage의 초대 코드까지 함께 지운다.
+window.resetLocalState = function ({ reload = true } = {}) {
+  const cleared = Object.values(P2_STORAGE_KEYS);
+  cleared.forEach(k => {
+    try { window.localStorage.removeItem(k); } catch (e) { /* storage unavailable */ }
+  });
+  try { window.sessionStorage.removeItem('sp_pending_invite'); } catch (e) { /* ignore */ }
+  if (reload) window.location.reload();
+  return cleared;
+};
+
+// 온보딩 선택값 저장.
+//
+// 지금 Supabase로 실제로 나가는 온보딩 값은 users.nickname 하나뿐이고,
+// userRole·userTags 같은 나머지는 전부 메모리에만 있어서 새로고침하면 사라진다.
+// relationship_status / seeking_intent 도 같은 처지가 되지 않게 localStorage에
+// 남긴다. DB 쓰기는 아래 syncOnboardingChoicesToDB()에 준비만 해두고 기본은 꺼둔다
+// — users 테이블에 두 컬럼이 실재하는지 확인할 방법이 리포에 없고, 없는 컬럼에
+// update를 걸면 온보딩 단계마다 실패 에러가 쌓인다.
+const ONBOARDING_CHOICES_KEY = 'p2_onboarding_choices';
+window.__P2_SYNC_ONBOARDING_TO_DB = window.__P2_SYNC_ONBOARDING_TO_DB === true;
+
+// 27문항 답변. 값이 문자열/배열/객체(compound) 셋 다 나오므로 통째로
+// JSON으로 넣고 뺀다 — 구조를 평탄화하면 compound가 깨진다.
+function persistMyAnswers() {
+  try { window.localStorage.setItem(P2_STORAGE_KEYS.myAnswers, JSON.stringify(myAnswers)); }
+  catch (e) { /* private mode / quota */ }
+}
+window.persistMyAnswers = persistMyAnswers;
+
+function restoreMyAnswers() {
+  let saved = null;
+  try { saved = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.myAnswers) || 'null'); }
+  catch (e) { saved = null; }
+  if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
+  // 저장본이 진실이다. 목업 초기값 위에 덮어쓰지 않고 통째로 교체한다.
+  Object.keys(myAnswers).forEach(k => delete myAnswers[k]);
+  Object.entries(saved).forEach(([k, v]) => { myAnswers[k] = v; });
+}
+window.restoreMyAnswers = restoreMyAnswers;
+
+function persistOnboardingChoices() {
+  try {
+    window.localStorage.setItem(ONBOARDING_CHOICES_KEY, JSON.stringify({
+      role: userRole,
+      relationship_status: userRelationshipStatus,
+      seeking_intent: userSeekingIntent,
+      name: userName,
+      birth: userBirthDate,
+      tags: userTags,
+      bio: userBio,
+      nickname_changed_at: userNicknameChangedAt,
+      about: ABOUT_ME_FIELDS.reduce((acc, f) => {
+        acc[f.key] = getAboutMeValue(f.key);
+        return acc;
+      }, {}),
+    }));
+  } catch (e) { /* private mode / quota — 화면 흐름을 막지 않는다 */ }
+  syncOnboardingChoicesToDB();
+}
+window.persistOnboardingChoices = persistOnboardingChoices;
+
+function restoreOnboardingChoices() {
+  let saved = null;
+  try { saved = JSON.parse(window.localStorage.getItem(ONBOARDING_CHOICES_KEY) || 'null'); }
+  catch (e) { saved = null; }
+  if (!saved || typeof saved !== 'object') return;
+  if (getRoleCode(saved.role)) userRole = getRoleCode(saved.role);
+  if (RELATIONSHIP_STATUSES.some(o => o.key === saved.relationship_status)) {
+    userRelationshipStatus = saved.relationship_status;
+  }
+  if (SEEKING_INTENTS.some(o => o.key === saved.seeking_intent)) {
+    userSeekingIntent = saved.seeking_intent;
+  }
+  if (typeof saved.name === 'string' && saved.name.trim()) userName = saved.name;
+  if (saved.birth && Number.isFinite(saved.birth.year)) {
+    userBirthDate = {
+      year: saved.birth.year,
+      month: saved.birth.month || 1,
+      day: saved.birth.day || 1,
+    };
+  }
+  if (Array.isArray(saved.tags)) userTags = saved.tags.filter(t => typeof t === 'string').slice(0, MAX_TAGS);
+  if (typeof saved.bio === 'string') userBio = saved.bio;
+  if (Number.isFinite(saved.nickname_changed_at)) userNicknameChangedAt = saved.nickname_changed_at;
+  if (saved.about && typeof saved.about === 'object') {
+    ABOUT_ME_FIELDS.forEach(f => {
+      const v = saved.about[f.key];
+      if (typeof v === 'string') window.updateAboutMeFieldSilently(f.key, v);
+    });
+  }
+}
+
+// 복원 중에는 저장을 되부르지 않는다 (루프·불필요한 쓰기 방지).
+window.updateAboutMeFieldSilently = function (key, value) {
+  switch (key) {
+    case 'style': userStyle = value; break;
+    case 'ideal': userIdeal = value; break;
+    case 'drink': userDrink = value; break;
+    case 'smoke': userSmoke = value; break;
+    case 'mbti': userMBTI = value; break;
+    case 'saju': userSaju = value; break;
+    case 'religion': userReligion = value; break;
+    case 'job': userJob = value; break;
+  }
+};
+window.restoreOnboardingChoices = restoreOnboardingChoices;
+
+// users 테이블에 role / relationship_status / seeking_intent 컬럼을 추가한 뒤
+// window.__P2_SYNC_ONBOARDING_TO_DB = true 한 줄로 켜면 된다.
+async function syncOnboardingChoicesToDB() {
+  if (!window.__P2_SYNC_ONBOARDING_TO_DB) return;
+  const sb = window.supabaseClient;
+  if (!sb || !window.currentAuthUser) return;
+  const patch = {};
+  if (userRole) patch.role = userRole;
+  if (userRelationshipStatus) patch.relationship_status = userRelationshipStatus;
+  if (userSeekingIntent) patch.seeking_intent = userSeekingIntent;
+  if (!Object.keys(patch).length) return;
+
+  const { error } = await sb.from('users').update(patch).eq('id', window.currentAuthUser.id);
+  if (error) {
+    console.error('onboarding choices update failed', error);
+    return;
+  }
+  if (window.currentUserRow) Object.assign(window.currentUserRow, patch);
+}
+window.syncOnboardingChoicesToDB = syncOnboardingChoicesToDB;
+
+function getIntentBadgeLabel(key) {
+  return INTENT_BADGE_LABELS[key || userSeekingIntent] || '';
+}
+window.getIntentBadgeLabel = getIntentBadgeLabel;
 let userTags = [];
 let targetAgeRange = { min: 20, max: 35 };
-let targetRoles = []; // ['F', 'B', 'V']
+let targetRoles = []; // ['G', 'T', 'GT']
 let hasShownCTA = false;
 let selectedQuizOpt = null;
 
@@ -965,7 +1276,12 @@ let userStyle = '';
 let userIdeal = '';
 let userDrink = '';
 let userSmoke = '';
-let userLocation = '서울';
+// 위치. 온보딩에서 권한을 받으면 좌표와 광역 지역 라벨이 함께 채워진다.
+// 기본값은 '미설정'이다 — 예전처럼 '서울'로 가정하면, 권한을 거부한 부산 유저가
+// 서울 모임만 받게 된다.
+let userLocation = '';           // 광역 라벨. '' = 미설정
+let userCoords = null;           // { lat, lng }. null = 미설정
+let userLocationStatus = 'unset'; // 'unset' | 'granted' | 'denied'
 let userMBTI = '';
 let userSaju = '';
 let userReligion = '';
@@ -1046,6 +1362,14 @@ document.addEventListener('click', (e) => {
     const profileIdRaw = parts[0].replace('user', '');
     const profileId = profileIdRaw === 'myProfile' ? 'myProfile' : parseInt(profileIdRaw);
     const qId = parseInt(parts[1]);
+    // 내 프로필 탭의 감상용 그리드는 profileId가 'preview'다. 남의 책이 아니므로
+    // 게이트를 태우면 안 되고, parseInt('preview')는 NaN이라 MOCK_PROFILES 조회도
+    // 실패한다. 'myProfile'로 넘기면 열람 모달이 MOCK_PROFILES를 건너뛰고
+    // MY_ANSWERS에서 직접 질문+답변을 읽는다 — 편집이 아니라 읽기 전용 열람.
+    if (profileIdRaw === 'preview') {
+      openAnswerRevealModal('myProfile', qId);
+      return;
+    }
     // Someone else's answer card is a detail entry and gets gated; the user's
     // own cards never are — that's how the profile book gets written.
     if (profileId !== 'myProfile' && window.blockedByProfileGate()) return;
@@ -1156,7 +1480,27 @@ function getProfileSetupProgressBarHTML(step) {
 
 window.selectRole = function (role, btn) {
   userRole = role;
-  document.querySelectorAll('.role-pill').forEach(el => el.classList.remove('active'));
+  selectPillInGroup(btn);
+  persistOnboardingChoices();
+}
+
+window.selectRelationshipStatus = function (status, btn) {
+  userRelationshipStatus = status;
+  selectPillInGroup(btn);
+  // 싱글 → 연애중/기혼이면 seeking_intent가 community로 바뀌고,
+  // 반대로 돌아오면 값은 그대로 두되 다시 고를 수 있게 된다.
+  applyRelationshipConstraints();
+  persistOnboardingChoices();
+  // 진입점(수정 아이콘) 노출 여부가 달라지므로 편집 화면을 다시 그린다.
+  if (document.getElementById('profile-edit-modal')) window.renderProfileEditBody();
+}
+
+// 같은 스텝 안에 pill 그룹이 둘 이상 있으므로, 해제는 누른 pill이 속한
+// 그룹 안에서만 한다. 문서 전체를 훑으면 옆 그룹의 선택까지 지워진다.
+function selectPillInGroup(btn) {
+  if (!btn) return;
+  const group = btn.closest('.role-pills, .role-pills-multi') || document;
+  group.querySelectorAll('.role-pill').forEach(el => el.classList.remove('active'));
   btn.classList.add('active');
 }
 
@@ -1282,14 +1626,24 @@ function renderScreen(screenId) {
 
         <h3 style="margin-top: 32px;">성향</h3>
         <div class="role-pills">
-          <div class="role-pill" onclick="selectRole('F', this)">F 팸</div>
-          <div class="role-pill" onclick="selectRole('B', this)">B 부치</div>
-          <div class="role-pill" onclick="selectRole('V', this)">V 무성향</div>
+          ${ROLE_CODES.map(c => `
+            <div class="role-pill${userRole === c ? ' active' : ''}" onclick="selectRole('${c}', this)">${ROLE_LABELS[c]}</div>
+          `).join('')}
         </div>
+
+        <h3 style="margin-top: 32px;">연애 상태</h3>
+        <div class="role-pills">
+          ${RELATIONSHIP_STATUSES.map(o => `
+            <div class="role-pill${userRelationshipStatus === o.key ? ' active' : ''}" onclick="selectRelationshipStatus('${o.key}', this)">${o.label}</div>
+          `).join('')}
+        </div>
+
+        <h3 style="margin-top: 32px;">위치</h3>
+        <div id="location-section">${getLocationSectionHTML()}</div>
       </div>
 
       <div class="bottom-action-bar">
-        <button class="btn-primary" onclick="navigateTo('onboarding-3')">다음 →</button>
+        <button class="btn-primary" onclick="window.goAfterAboutMe()">다음 →</button>
       </div>
     `);
   }
@@ -1300,12 +1654,12 @@ function renderScreen(screenId) {
         <div onclick="navigateTo('onboarding-2')" style="color: var(--text-muted); font-weight: 500; cursor: pointer;">← 이전</div>
       </div>
       <div class="content-padding scroll-y" style="padding-top: 10px;">
-        <h1>어떤 만남을 원하나요?</h1>
-        <p style="margin-bottom: 48px;">이곳에 온 목적을 알려주세요.</p>
-        
-        <div class="intent-option" onclick="selectIntent(this, 'friend')">친구가 생겼으면 해요 👋</div>
-        <div class="intent-option" onclick="selectIntent(this, 'love')">연애를 기대해요 ❤️</div>
-        <div class="intent-option" onclick="selectIntent(this, 'both')">친구, 연애 둘 다 열려 있어요 ✨</div>
+        <h1>p.2에서 무엇을 찾고 계신가요?</h1>
+        <p style="margin-bottom: 48px;">지금 마음에 가까운 쪽으로 골라주세요.</p>
+
+        ${SEEKING_INTENTS.map(o => `
+          <div class="intent-option${userSeekingIntent === o.key ? ' selected' : ''}" onclick="selectSeekingIntent(this, '${o.key}')">${o.label}</div>
+        `).join('')}
       </div>
       <div class="bottom-action-bar">
         <button class="btn-primary" onclick="navigateTo('onboarding-4')">다음 →</button>
@@ -1313,18 +1667,12 @@ function renderScreen(screenId) {
     `);
   }
   else if (screenId === 'onboarding-4') {
-    const categories = [
-      { name: '문화/예술', tags: ['영화', '드라마', '음악', '아트', '전시', '공연', '사진', '독서'] },
-      { name: '음식/음료', tags: ['맛집', '카페', '와인', '칵테일', '요리', '베이킹', '비건'] },
-      { name: '액티비티', tags: ['자연', '여행', '운동', '등산', '러닝', '요가', '수영', '테니스', '풋살', '사이클'] },
-      { name: '라이프', tags: ['반려동물', '식물', '인테리어', '패션', '뷰티', '게임'] },
-      { name: '배움', tags: ['언어', '자기계발', '재테크', '글쓰기', '명상'] }
-    ];
+    const categories = INTEREST_CATEGORIES;
 
     screenElem = createScreen('onboarding-4', `
       ${getProgressBarHTML(4)}
       <div class="app-header" style="background:transparent; padding: 10px 24px;">
-        <div onclick="navigateTo('onboarding-3')" style="color: var(--text-muted); font-weight: 500; cursor: pointer;">← 이전</div>
+        <div onclick="window.goBackFromInterests()" style="color: var(--text-muted); font-weight: 500; cursor: pointer;">← 이전</div>
       </div>
       <div class="content-padding scroll-y" style="padding-top: 10px; padding-bottom: 200px;">
         <h1>관심사를 3~5개 골라주세요</h1>
@@ -1499,9 +1847,9 @@ function renderScreen(screenId) {
 
         <h3 style="margin-top: 60px;">선호 성향</h3>
         <div class="role-choice-grid">
-          <div class="role-pill-multi" onclick="toggleTargetRole(this, 'F')">F 팸</div>
-          <div class="role-pill-multi" onclick="toggleTargetRole(this, 'B')">B 부치</div>
-          <div class="role-pill-multi" onclick="toggleTargetRole(this, 'V')">V 무성향</div>
+          ${ROLE_CODES.map(c => `
+            <div class="role-pill-multi${targetRoles.includes(c) ? ' active' : ''}" onclick="toggleTargetRole(this, '${c}')">${ROLE_LABELS[c]}</div>
+          `).join('')}
           <div class="role-pill-multi" onclick="toggleTargetRole(this, 'none')">상관없음</div>
         </div>
 
@@ -1653,10 +2001,28 @@ window.submitInviteCode = async function () {
 // Simple logic handlers
 
 // ── 온보딩 — 인텐트 · 태그 · 선호 성향 선택 ────────
-window.selectIntent = function (el, intent) {
-  userIntent = intent;
+// 연애 중·기혼이면 "p.2에서 무엇을 찾고 계신가요?"를 묻지 않고 지나간다.
+// 남는 선택지가 하나뿐인 질문을 보여주는 건 시간을 뺏는 일이다.
+window.goAfterAboutMe = function () {
+  if (isPartnered()) {
+    applyRelationshipConstraints();
+    persistOnboardingChoices();
+    navigateTo('onboarding-4');
+    return;
+  }
+  navigateTo('onboarding-3');
+};
+
+// 관심사 단계에서 뒤로 갈 때도 같은 규칙을 따라야 한다.
+window.goBackFromInterests = function () {
+  navigateTo(isPartnered() ? 'onboarding-2' : 'onboarding-3');
+};
+
+window.selectSeekingIntent = function (el, intent) {
+  userSeekingIntent = intent;
   document.querySelectorAll('.intent-option').forEach(opt => opt.classList.remove('selected'));
   if (el) el.classList.add('selected');
+  persistOnboardingChoices();
 }
 
 window.toggleTag = function (el, tagName) {
@@ -1671,6 +2037,7 @@ window.toggleTag = function (el, tagName) {
   }
 
   updateTagUI();
+  persistOnboardingChoices();
 }
 
 window.updateTagUI = function () {
@@ -2457,8 +2824,9 @@ window.finalizeProfile = function () {
 // ── 성향 배지 (F/B/V) · 툴팁 ──────────────────────
 // ----------------------------------------------------
 window.getRoleBadgeHTML = function (role) {
-  if (!role) return '';
-  return `<div class="role-badge" onclick="event.stopPropagation(); showRoleTooltip(event, '${role}')">${role}</div>`;
+  const code = getRoleCode(role);
+  if (!code) return '';
+  return `<div class="role-badge" onclick="event.stopPropagation(); showRoleTooltip(event, '${code}')">${ROLE_SHORT[code]}</div>`;
 };
 
 window.showRoleTooltip = function (event, role) {
@@ -2466,7 +2834,7 @@ window.showRoleTooltip = function (event, role) {
   const tooltip = document.createElement('div');
   tooltip.className = 'role-tooltip';
   tooltip.id = 'role-tooltip';
-  tooltip.innerText = "F 팸 · B 부치 · V 무성향";
+  tooltip.innerText = ROLE_CODES.map(c => `${ROLE_SHORT[c]} ${ROLE_LABELS[c]}`).join(' · ');
   document.body.appendChild(tooltip);
 
   const rect = event.currentTarget.getBoundingClientRect();
@@ -2519,19 +2887,40 @@ window.switchTab = function (tabName) {
       const isNewWeek = storedTs !== weekTs;
 
       if (isNewWeek) {
-        localStorage.setItem('sp_week_start', String(weekTs));
-        localStorage.removeItem('sp_viewed_this_week');
+        localStorage.setItem(P2_STORAGE_KEYS.weekStart, String(weekTs));
+        localStorage.removeItem(P2_STORAGE_KEYS.viewedThisWeek);
         pagedSet.clear();
         passedSet.clear();
         savedBooks.length = 0;
       }
 
-      const allProfiles = MOCK_PROFILES.map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }));
-      const shuffled = [...allProfiles].sort(() => Math.random() - 0.5);
-      dailyProfiles = shuffled.slice(0, getWeeklyBookCount());
+      // 덮은 책은 주가 바뀌어도 다시 배달되지 않는다. 무반응(그냥 넘김)과
+      // 갈리는 지점이 여기다 — 그쪽은 아무 흔적도 남기지 않으므로 8주 쿨다운
+      // 뒤 자연히 다시 후보에 든다.
+      loadClosedBooks();
+      const allProfiles = MOCK_PROFILES
+        .map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }))
+        .filter(item => !closedBooks.has(item.id));
+      dailyProfiles = seededShuffle(allProfiles, weekTs).slice(0, getWeeklyBookCount());
       browseQueue = [...dailyProfiles];
-      window.weeklyViewedProfiles = JSON.parse(localStorage.getItem('sp_viewed_this_week') || '[]');
+
+      // 이번 주 배달에 없는 항목은 목록에서 떨어뜨린다. 지난 주 잔재나
+      // 예전 무작위 배달이 남긴 기록을 여기서 스스로 정리한다.
+      const dealtIds = new Set(dailyProfiles.map(x => x.id));
+      let restoredViewed = [];
+      try { restoredViewed = JSON.parse(localStorage.getItem('sp_viewed_this_week') || '[]'); }
+      catch (e) { restoredViewed = []; }
+      window.weeklyViewedProfiles = Array.isArray(restoredViewed)
+        ? restoredViewed.filter(x => x && dealtIds.has(x.id))
+        : [];
+      try { localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles)); }
+      catch (e) { /* storage unavailable */ }
       window.isDiscoverInitialized = true;
+      window.resetBridgeDismissed();
+      setTimeout(() => {
+        if (document.getElementById('post-onboarding-modal')) return; // Gate 1이 떠 있으면 양보
+        maybeShowReactionsIntro();
+      }, 400);
     }
 
     renderDiscoverTab();
@@ -2615,7 +3004,6 @@ window.switchTab = function (tabName) {
           ${MATCHED_PROFILES.map(match => {
       const p = MOCK_PROFILES.find(pr => pr.id === match.id) || MOCK_PROFILES[0];
       const spineColor = getMatchSpineColor(p.id);
-      const distance = getDistance(p.id);
       return `
             <div class="match-thumbnail-wrap" onclick="openMatchIntroModal(${match.id})">
               <div class="match-thumbnail saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.18); border-radius:4px; border-left:3px solid ${spineColor};">
@@ -2686,45 +3074,32 @@ window.switchTab = function (tabName) {
       </div>
     `;
   } else if (tabName === 'profile') {
-    const p = {
-      name: userName || '나나', birthYear: userBirthDate.year || 1987, role: userRole || 'V', tags: userTags.length > 0 ? userTags : ["영화", "카페", "자연", "독서"],
-      intent: userIntent === 'friend' ? '친구가 생겼으면 해요 👋' : (userIntent === 'love' ? '연애를 기대해요 ❤️' : '친구, 연애 둘 다 열려 있어요 ✨'),
-      bio: "새로운 시작을 기대하며!",
-      aboutMe: {
-        style: userStyle,
-        ideal: userIdeal,
-        drink: userDrink,
-        smoke: userSmoke,
-        mbti: userMBTI,
-        saju: userSaju,
-        religion: userReligion,
-        job: userJob
-      },
-      chapterProgress: { c1: 80, c2: 40, c3: 20 }
-    };
+    // 기본 화면은 남들이 보는 그 화면이다. 편집은 "수정"으로 따로 들어간다.
     contentArea.innerHTML = `
       <div class="scroll-y" style="height: calc(100vh - 84px); height: calc(100dvh - 84px);">
         <div class="tab-header-row" style="padding: 10px 24px 0;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <h2>내 프로필</h2>
-            <div onclick="openMyProfilePreview()" style="font-size:13px; color:#9B72CC; cursor:pointer; font-weight:500;">미리보기</div>
-          </div>
+          <h2>내 프로필</h2>
           <div class="tab-header-icons">
-            <button style="background:none; border:none; color:#9B72CC; opacity: 0.3; pointer-events: none; cursor: default; padding:4px; display:flex; align-items:center; justify-content:center;">
-              <i data-lucide="settings" style="width:24px; height:24px;"></i>
+            <button type="button" class="profile-edit-btn" onclick="window.openMyProfileEdit()">
+              <i data-lucide="pencil" style="width:15px; height:15px;" aria-hidden="true"></i>
+              수정
+            </button>
+            <button type="button" class="profile-settings-btn" aria-label="설정" onclick="window.openSettingsPage()">
+              <i data-lucide="settings" style="width:24px; height:24px;" aria-hidden="true"></i>
             </button>
           </div>
         </div>
-        ${getProfileDetailedHTML(p, true)}
+        ${getProfileDetailedHTML(buildMyProfileObject(), false, true)}
         ${getTabWatermarkHTML()}
       </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
     initPhotoCarousels();
-    initPhotoGrid();
-    const gridHtml = renderAnswersGrid(MY_ANSWERS, true, 'myProfile');
-    document.getElementById('my-answers-grid').innerHTML = gridHtml;
-    bindCardInteractions();
+    const previewGrid = document.getElementById('my-answers-grid');
+    if (previewGrid) {
+      previewGrid.innerHTML = renderAnswersGrid(MY_ANSWERS, false, 'preview');
+      bindCardInteractions();
+    }
   } else if (tabName === 'notifications') {
     contentArea.innerHTML = `
         <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); height: calc(100dvh - 80px); background: var(--bg-color);">
@@ -3218,8 +3593,16 @@ window.saveAnswer = function (qId) {
 
   if (val !== null) {
     myAnswers[qId] = { text: val };
+    persistMyAnswers();
   }
   closeModal();
+
+  // 챕터 목록에서 들어왔다면 그리로 돌아간다 — 목록 → 문항 → 목록.
+  if (window.__returnToChapterList) {
+    window.returnToChapterList();
+    return;
+  }
+
   const _grid = document.getElementById('my-answers-grid');
   if (_grid) {
     renderMyProfile();
@@ -3230,21 +3613,28 @@ window.saveAnswer = function (qId) {
 window.renderMyProfile = function () {
   const _grid = document.getElementById('my-answers-grid');
   if (!_grid) return;
-  _grid.innerHTML = renderAnswersGrid(MY_ANSWERS, true, 'myProfile');
+  // 프로필 탭 그리드는 감상용 렌더다. 저장 후 재렌더에서 편집 스타일로
+  // 되돌리면 탭을 다시 밟기 전까지 화면이 달라 보인다 — 진입 시와 같은 인자로.
+  _grid.innerHTML = renderAnswersGrid(MY_ANSWERS, false, 'preview');
   bindCardInteractions();
 }
 
+// "나에 대해" 8항목. 전부 자유 텍스트다 — 선택형으로 가두면 MBTI를 안 쓰는
+// 사람이나 "가끔 마셔요" 같은 답을 담을 자리가 없어진다.
+const ABOUT_ME_FIELDS = [
+  { key: 'style', label: '내 스타일', placeholder: '예) 긴머리 차분 163', required: true },
+  { key: 'ideal', label: '이상형', placeholder: '예) 웃는 모습이 매력적인 사람', required: true },
+  { key: 'drink', label: '주량', placeholder: '예) 가끔 한두 잔', required: true },
+  { key: 'smoke', label: '흡연 여부', placeholder: '예) 비흡연', required: true },
+  { key: 'mbti', label: 'MBTI', placeholder: '예) INFJ', required: false },
+  { key: 'saju', label: '사주 일주', placeholder: '예) 갑자일주', required: false },
+  { key: 'religion', label: '종교', placeholder: '예) 무교', required: false },
+  { key: 'job', label: '직업군', placeholder: '예) 디자인', required: false },
+];
+window.ABOUT_ME_FIELDS = ABOUT_ME_FIELDS;
+
 window.renderBasicInfoRows = function (p, isMine, isPreview = false) {
-  const fields = [
-    { label: '내 스타일', value: p.aboutMe?.style, required: true },
-    { label: '이상형', value: p.aboutMe?.ideal, required: true },
-    { label: '주량', value: p.aboutMe?.drink, required: true },
-    { label: '흡연 여부', value: p.aboutMe?.smoke, required: true },
-    { label: 'MBTI', value: p.aboutMe?.mbti, required: false },
-    { label: '사주 일주', value: p.aboutMe?.saju, required: false },
-    { label: '종교', value: p.aboutMe?.religion, required: false },
-    { label: '직업군', value: p.aboutMe?.job, required: false }
-  ];
+  const fields = ABOUT_ME_FIELDS.map(f => ({ ...f, value: p.aboutMe?.[f.key] }));
 
   let html = '';
   fields.forEach((f, idx) => {
@@ -3283,7 +3673,7 @@ window.getWeeklyBookCount = function () {
   return Math.min(6, 3 + completedChapters);
 };
 
-window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
+window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEditForm = false) {
   const currentYear = 2026;
   const birthYear = p.birthYear || (currentYear - (p.age || 28) + 1);
   const age = currentYear - birthYear + 1;
@@ -3334,27 +3724,44 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
 
   // --- Photo section ---
   const carouselPhotos = isPreview ? (window.myPhotos || []).filter(Boolean) : photos;
+  // 헤더는 가로로 긴 배너 한 장 + 그 아래 경계에 걸친 원형 썸네일.
+  // 인라인 dot 캐러셀은 없앴다 — 사진 전체는 탭해서 라이트박스로 본다.
   const buildCarousel = (phs, indicator) => {
-    if (phs.length > 1) return `
-    <div id="prof-carousel" style="position:relative; width:100%; height:360px; overflow:hidden;">
-      ${indicator}
-      <div id="prof-carousel-inner" style="display:flex; width:${phs.length * 100}%; height:100%; transition:transform 0.3s ease;">
-        ${phs.map(ph => `<div style="flex:0 0 ${100 / phs.length}%; height:100%; background-image:url('${ph}'); background-size:cover; background-position:center;"></div>`).join('')}
-      </div>
-      <div style="position:absolute; bottom:12px; left:0; width:100%; display:flex; justify-content:center; gap:6px; z-index:5;">
-        ${phs.map((_, pi) => `<div style="width:6px; height:6px; border-radius:50%; background:${pi === 0 ? '#FFF' : 'rgba(255,255,255,0.5)'}; transition:background 0.2s;" data-prof-dot="${pi}"></div>`).join('')}
-      </div>
+    if (!phs.length) {
+      return `<div class="prof-header">
+        <div class="prof-header-banner is-empty"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>
+      </div>`;
+    }
+    const cover = phs[0]; // 대표 사진
+    return `
+    <div class="prof-header">
+      <button type="button" class="prof-header-banner" data-prof-lightbox
+        aria-label="사진 ${phs.length}장 크게 보기"
+        style="background-image:url('${cover}');">
+        ${indicator}
+        ${phs.length > 1 ? `<span class="prof-header-count" aria-hidden="true">1/${phs.length}</span>` : ''}
+      </button>
+      <button type="button" class="prof-header-avatar" data-prof-lightbox
+        aria-label="사진 ${phs.length}장 크게 보기"
+        style="background-image:url('${cover}');"></button>
     </div>
   `;
-    if (phs.length === 1) return `<div class="prof-modal-photo" style="position:relative; background-image:url('${phs[0]}'); height:360px; background-size:cover; background-position:center;">${indicator}</div>`;
-    return `<div style="width:100%; height:260px; background:#F0F0EE; display:flex; align-items:center; justify-content:center;"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>`;
   };
 
   const photoSectionHTML = isMine
     ? myPhotoSectionHTML
     : buildCarousel(carouselPhotos, pagedIndicatorDetail);
 
-  const locationStr = p.location || userLocation;
+  // 라이트박스가 열 사진 목록. 헤더를 그리는 시점에 확정해둔다.
+  window.__profLightboxPhotos = carouselPhotos;
+
+  // 내 프로필이면 내 위치, 남의 프로필이면 그 사람의 위치. 둘을 섞지 않는다.
+  // 예전에는 상대에게 location이 없으면 내 지역이 상대 지역처럼 찍혔다.
+  // 값이 없을 땐 거리와 같은 톤으로 '--' — 칸은 지키되 없다는 걸 분명히 한다.
+  // 광역까지만. 구·동이 들어와도 여기서 잘린다.
+  const locationStr = (isMine
+    ? (toBroadRegion(userLocation) || getProfileRegion(p, userCoords))
+    : getProfileRegion(p)) || '--';
   const locationSpan = `<span style="font-size:16px; font-weight:400; color:var(--text-muted);"> · ${locationStr}</span>`;
   const headerContent = isMine ? `${formatUserHeader(p, 'detail')}${locationSpan} ${getRoleBadgeHTML(p.role)}` :
     `${p.name} <span style="font-size:16px; font-weight:400; color:var(--text-muted);"> ${age}세 (${yearSuffix}년생) · ${locationStr}</span> ${getRoleBadgeHTML(p.role)}`;
@@ -3364,6 +3771,7 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
       ${photoSectionHTML}
       
       <div style="padding: 24px;">
+        ${showEditForm ? getProfileEditFormHTML() : `
         <div class="card-name" style="font-size:${(isMine || isPreview) ? '28px' : '22px'}; display:flex; align-items:center; gap:8px; font-weight:${(isMine || isPreview) ? '700' : '600'}; color:${(isMine || isPreview) ? 'var(--text-dark)' : 'var(--text-dark)'}; flex-wrap:wrap;">
           ${headerContent}
         </div>
@@ -3372,22 +3780,27 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
           ${(p.tags || []).map(t => `<div class="card-tag">${t}</div>`).join('')}
         </div>
 
-        <div class="profile-badge" style="margin-top:24px; display:inline-block;">
-          ${p.intent || '연애를 기대해요 ❤️'}
+        <div class="profile-badge-row">
+          ${(isMine || isPreview) && getRelationshipBadgeLabel()
+            ? `<div class="profile-badge profile-badge--relationship">${getRelationshipBadgeLabel()}</div>`
+            : ''}
+          <div class="profile-badge">${p.intent || '연애를 기대해요 ❤️'}</div>
         </div>
 
         <div style="font-size:15px; margin-top:20px; line-height:1.5; color:var(--text-dark); white-space: pre-line;">
-          ${p.bio || '새로운 시작을 기대하며!'}
+          ${p.bio || DEFAULT_BIO}
         </div>
+        `}
 
         ${chapterIncompleteBannerHTML}
 
+        ${showEditForm ? '' : `
         <div class="profile-section-title" style="margin-top:40px;">나에 대해</div>
         <div class="info-card">
            ${renderBasicInfoRows(p, isMine, isPreview)}
-        </div>
+        </div>`}
         
-        ${isMine ? `
+        ${(isMine || isPreview) && !showEditForm ? `
         <div class="profile-section-title">나의 챕터</div>
         <div class="info-card" style="padding-bottom: 24px;">
           <!-- Benefit Dashboard -->
@@ -3413,18 +3826,21 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
                 <div class="chapter-pct" style="font-size:12px; color:#888; flex-shrink:0; width:30px; text-align:right;">${ch.count}/9</div>
              </div>
            `).join('')}
-           ${isMine && c1Count >= 8 ? `<div class="chapter-badge" style="margin-top:8px;">나를 아는 사람 ✨</div>` : ''}
-           <button class="btn-secondary" style="margin-top: 24px; color: var(--primary); border: 1px solid var(--primary); padding: 12px; font-size:14px; background:transparent; font-weight:600;">페이지 채우기 &darr;</button>
+           ${c1Count >= 8 ? `<div class="chapter-badge" style="margin-top:8px;">나를 아는 사람 ✨</div>` : ''}
+           <button class="btn-secondary" style="margin-top: 24px; color: var(--primary); border: 1px solid var(--primary); padding: 12px; font-size:14px; background:transparent; font-weight:600;" onclick="window.openMyProfileEdit(); window.openEditChapters();">페이지 채우기 &darr;</button>
         </div>
         ` : ''}
 
+      ${showEditForm ? '' : `
       <div class="profile-section-title" style="margin-top:40px;">${isMine ? '나의 페이지' : p.name + '님의 페이지'}</div>
-      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">가치관을 보여줄 수 있는 27개의 질문에 답해보세요.</p>
+      <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">가치관을 보여줄 수 있는 27개의 질문에 답해보세요.</p>`}
       
+      ${showEditForm ? '' : `
       <div id="my-answers-grid" class="answers-grid" style="column-gap:8px; row-gap:8px;">
-      </div>
+      </div>`}
 
       ${isMine && !isPreview ? `
+        ${P_QURATED_ENABLED ? `
         <div class="profile-section-label">p.Qurated</div>
         <div class="qurated-card">
           <div class="qurated-info">
@@ -3433,46 +3849,10 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
           </div>
           <button class="qurated-apply-btn" onclick="window.openQuratedPage()">${window.isQurated ? '신청 현황 보기' : '신청하기'}</button>
         </div>
+        ` : ''}
 
-        <div class="profile-section-label">친구 초대</div>
-        <div class="settings-card" onclick="window.openInvitePage()" style="cursor: pointer; margin-bottom: 8px;">
-          <div class="settings-row">
-            <span style="font-weight: 600;">초대하기</span>
-            <i data-lucide="chevron-right"></i>
-          </div>
-        </div>
-        <div style="font-size: 12px; color: var(--text-muted); margin-left: 4px; margin-bottom: 24px;">
-          나만의 초대코드로 소중한 사람을 초대해보세요
-        </div>
-
-        <div class="profile-section-label">설정</div>
-        <div class="settings-card">
-          <div class="settings-row">
-            <span>알림 설정</span>
-            <i data-lucide="chevron-right"></i>
-          </div>
-          <div class="settings-row">
-            <span>차단 목록</span>
-            <i data-lucide="chevron-right"></i>
-          </div>
-          <div class="settings-row">
-            <span>개인정보 처리방침</span>
-            <i data-lucide="chevron-right"></i>
-          </div>
-          <div class="settings-row">
-            <span>이용약관</span>
-            <i data-lucide="chevron-right"></i>
-          </div>
-          <div class="settings-row no-chevron">
-            <span>버전 정보</span>
-            <span class="version-text">v0.1.0</span>
-          </div>
-        </div>
-
-        <div class="settings-footer-links">
-          <div class="footer-link">로그아웃</div>
-          <div class="footer-link danger">계정 탈퇴</div>
-        </div>
+        <!-- 친구 초대·위치·설정·로그아웃은 톱니바퀴 → 설정 페이지로 옮겼다.
+             이 화면에는 프로필 콘텐츠만 남긴다. openSettingsPage() 참조. -->
       ` : ''}
 
       </div>
@@ -3481,6 +3861,74 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false) {
 };
 
 // ── 사진 — 캐러셀 · 그리드 편집 · 업로드 ────────────
+// ── 사진 라이트박스 ────────────────────────────────────
+// 헤더에서 dot 캐러셀을 걷어낸 대신, 배너나 원형 썸네일을 누르면 전체화면으로
+// 열려 좌우 스와이프로 모든 사진을 본다.
+window.openPhotoLightbox = function (photos, startIndex = 0) {
+  const list = (photos || []).filter(Boolean);
+  if (!list.length || document.getElementById('photo-lightbox')) return;
+  const opener = document.activeElement;
+  let cur = Math.max(0, Math.min(startIndex, list.length - 1));
+
+  const box = document.createElement('div');
+  box.id = 'photo-lightbox';
+  box.className = 'photo-lightbox';
+  box.setAttribute('role', 'dialog');
+  box.setAttribute('aria-modal', 'true');
+  box.setAttribute('aria-label', `사진 ${list.length}장`);
+  box.innerHTML = `
+    <button type="button" class="photo-lightbox-close" id="photo-lightbox-close" aria-label="닫기">
+      <i data-lucide="x" style="width:22px;height:22px;" aria-hidden="true"></i>
+    </button>
+    <div class="photo-lightbox-track" id="photo-lightbox-track" style="width:${list.length * 100}%; transform:translateX(-${cur * (100 / list.length)}%);">
+      ${list.map(ph => `<div class="photo-lightbox-slide" style="flex:0 0 ${100 / list.length}%; background-image:url('${ph}');"></div>`).join('')}
+    </div>
+    ${list.length > 1 ? `<div class="photo-lightbox-dots" id="photo-lightbox-dots">
+      ${list.map((_, i) => `<span class="photo-lightbox-dot${i === cur ? ' active' : ''}"></span>`).join('')}
+    </div>` : ''}
+  `;
+  (document.getElementById('app-container') || document.body).appendChild(box);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  const track = box.querySelector('#photo-lightbox-track');
+  const dots = [...box.querySelectorAll('.photo-lightbox-dot')];
+  function paint() {
+    track.style.transform = `translateX(-${cur * (100 / list.length)}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === cur));
+  }
+  function go(delta) {
+    const next = cur + delta;
+    if (next < 0 || next > list.length - 1) return;
+    cur = next;
+    paint();
+  }
+
+  let sx = 0;
+  track.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) < 30) return;
+    go(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  function close() {
+    document.removeEventListener('keydown', onKey, true);
+    box.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+  }
+  document.addEventListener('keydown', onKey, true);
+
+  // 배경 탭으로 닫기. 사진 자체를 누른 건 통과시킨다.
+  box.addEventListener('click', e => { if (e.target === box) close(); });
+  box.querySelector('#photo-lightbox-close').addEventListener('click', close);
+  requestAnimationFrame(() => box.querySelector('#photo-lightbox-close')?.focus());
+};
+
 window.initPhotoCarousels = function () {
   // --- Discover profile card carousels ---
   document.querySelectorAll('[id^="carousel-"]').forEach(carousel => {
@@ -3505,23 +3953,15 @@ window.initPhotoCarousels = function () {
   });
 
   // --- Other profile detail carousel ---
-  const profCarousel = document.getElementById('prof-carousel');
-  if (profCarousel) {
-    const inner = document.getElementById('prof-carousel-inner');
-    const dotEls = profCarousel.querySelectorAll('[data-prof-dot]');
-    const total = dotEls.length;
-    let cur = 0;
-    let tsX = 0;
-    profCarousel.addEventListener('touchstart', e => { tsX = e.touches[0].clientX; }, { passive: true });
-    profCarousel.addEventListener('touchend', e => {
-      const dx = e.changedTouches[0].clientX - tsX;
-      if (Math.abs(dx) < 30) return;
-      if (dx < 0 && cur < total - 1) cur++;
-      if (dx > 0 && cur > 0) cur--;
-      inner.style.transform = `translateX(-${cur * (100 / total)}%)`;
-      dotEls.forEach((d, i) => { d.style.background = i === cur ? '#FFF' : 'rgba(255,255,255,0.5)'; });
-    }, { passive: true });
-  }
+  // --- Profile header → lightbox ---
+  // 배너든 원형 썸네일이든 누르면 같은 라이트박스가 열린다.
+  document.querySelectorAll('[data-prof-lightbox]').forEach(el => {
+    el.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const photos = window.__profLightboxPhotos || [];
+      window.openPhotoLightbox(photos, 0);
+    });
+  });
 
   // --- My Profile circular carousel ---
   const myCarousel = document.getElementById('my-photo-carousel');
@@ -4292,27 +4732,88 @@ window.submitCreateMeetup = function () {
   window.showToast("모임이 생성됐어요 🎉");
 };
 
-// ── 내 프로필 미리보기 · 프로필 모달 ────────────────────
-window.openMyProfilePreview = function () {
+// ── 설정 페이지 ────────────────────────────────────────
+// 예전에는 내 프로필 화면 하단에 인라인으로 붙어 있었다. 프로필은 남에게
+// 보여줄 내용이고 설정은 나만 쓰는 도구라, 같은 스크롤에 있을 이유가 없다.
+window.openSettingsPage = function () {
   const mc = getModalContainer();
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index: 200; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+        <button class="back-btn" aria-label="뒤로" onclick="closeModal()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">설정</div>
+        <div style="width:32px;"></div>
+      </div>
 
-  // Use real user state collected during onboarding
-  const birthYear = userBirthDate.year || 1990;
-  const age = getAge(birthYear);
-  const yearShort = getYearLabel(birthYear);
-  const role = userRole || 'V';
-  const tags = userTags.length > 0 ? userTags : ['영화', '카페', '자연', '독서'];
-  const displayName = userName || '나나';
-  const answeredCount = Object.keys(MY_ANSWERS).length;
+      <div class="scroll-y" style="flex:1;">
+        <div style="padding: 8px 24px 40px;">
+          <div class="profile-section-label">친구 초대</div>
+          <div class="settings-card" onclick="window.openInvitePage()" style="cursor: pointer; margin-bottom: 8px;">
+            <div class="settings-row">
+              <span style="font-weight: 600;">초대하기</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
+          </div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-left: 4px; margin-bottom: 24px;">
+            나만의 초대코드로 소중한 사람을 초대해보세요
+          </div>
 
-  const p = {
-    name: displayName,
-    birthYear: birthYear,
-    role: role,
+          <div class="profile-section-label">위치</div>
+          <div class="location-banner" id="location-banner">${getLocationBannerHTML()}</div>
+          ${window.hasUserLocation() ? `
+          <div class="settings-card" style="margin-bottom:24px;">
+            <div class="settings-row no-chevron">
+              <span>현재 지역</span>
+              <span class="version-text">${toBroadRegion(userLocation) || '--'}</span>
+            </div>
+          </div>` : ''}
+
+          <div class="profile-section-label">설정</div>
+          <div class="settings-card">
+            <div class="settings-row">
+              <span>알림 설정</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
+            <div class="settings-row">
+              <span>차단 목록</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
+            <div class="settings-row">
+              <span>개인정보 처리방침</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
+            <div class="settings-row">
+              <span>이용약관</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
+            <div class="settings-row no-chevron">
+              <span>버전 정보</span>
+              <span class="version-text">v0.1.0</span>
+            </div>
+          </div>
+
+          <div class="settings-footer-links">
+            <div class="footer-link">로그아웃</div>
+            <div class="footer-link danger">계정 탈퇴</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+// ── 내 프로필 편집 · 프로필 모달 ────────────────────────
+// 내 프로필 객체. 탭의 기본 화면과 편집 화면이 같은 데이터를 본다.
+window.buildMyProfileObject = function () {
+  return {
+    name: userName || '나나',
+    birthYear: userBirthDate.year || 1990,
+    role: userRole || 'GT',
     location: userLocation,
-    tags: tags,
-    intent: userIntent === 'friend' ? '친구가 생겼으면 해요 👋' : (userIntent === 'love' ? '연애를 기대해요 ❤️' : '친구, 연애 둘 다 열려 있어요 ✨'),
-    bio: "새로운 시작을 기대하며!",
+    tags: userTags.length > 0 ? userTags : ['영화', '카페', '자연', '독서'],
+    intent: getIntentBadgeLabel(),
+    bio: userBio || DEFAULT_BIO,
     aboutMe: {
       style: userStyle,
       ideal: userIdeal,
@@ -4323,33 +4824,411 @@ window.openMyProfilePreview = function () {
       religion: userReligion,
       job: userJob
     },
-    chapterProgress: { c1: 0, c2: 0, c3: 0 },
+    // 목업 고정값이 아니라 실제 저장된 답변 수. renderAnswersGrid가 이 값으로
+    // 챕터 잠금을 판정하므로, 0개인 챕터가 채워진 것처럼 보이면 안 된다.
+    chapterProgress: {
+      c1: window.getChapterAnswerCount(1),
+      c2: window.getChapterAnswerCount(2),
+      c3: window.getChapterAnswerCount(3),
+    },
     photos: (window.myPhotos || []).filter(Boolean),
     image: (window.myPhotos || []).find(Boolean) || null,
   };
+};
 
-  mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 200; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
-      <!-- Header -->
-      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
-        <button class="back-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
-        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">미리보기</div>
-        <div style="width:32px;"></div>
+// ── 편집 폼 — 기본 정보 ────────────────────────────────
+// 온보딩에서 정해진 값들을 나중에 고칠 자리. 온보딩과 같은 컴포넌트(.role-pills,
+// .intent-option, .tag-pill, .date-selects)를 그대로 써서 두 화면이 같은 물건으로
+// 읽히게 한다. 입력은 즉시 상태에 반영되고 persistOnboardingChoices()가 저장한다.
+function getProfileEditFormHTML() {
+  const b = userBirthDate;
+  const birthText = b && b.year ? `${b.year}년 ${b.month || 1}월 ${b.day || 1}일` : '—';
+  const nickOk = window.canChangeNickname();
+
+  // 섹션 한 줄 = 라벨 + 현재 값 요약 + 연필. 항목마다 별도 화면으로 들어간다.
+  const row = (label, summary, handler) => `
+    <button type="button" class="edit-section-row" onclick="${handler}">
+      <span class="edit-section-label">${label}</span>
+      <span class="edit-section-summary">${summary || '아직 없어요'}</span>
+      <i data-lucide="pencil" class="edit-section-icon" aria-hidden="true"></i>
+    </button>
+  `;
+
+  const aboutFilled = ABOUT_ME_FIELDS.filter(f => (getAboutMeValue(f.key) || '').trim()).length;
+  const seekingLabel = (SEEKING_INTENTS.find(o => o.key === userSeekingIntent) || {}).label || '';
+
+  return `
+    <div class="profile-edit-form">
+      <h3>기본 정보</h3>
+
+      <label class="edit-field">
+        <span class="edit-field-label">닉네임</span>
+        <input type="text" class="input-field" id="edit-name" maxlength="20"
+          placeholder="닉네임" value="${escapeAttr(userName || '')}"
+          ${nickOk ? '' : 'disabled'}
+          oninput="window.updateProfileField('name', this.value)" />
+        ${nickOk
+          ? '<span class="edit-field-hint">닉네임은 한 달에 한 번 바꿀 수 있어요</span>'
+          : `<span class="edit-field-hint is-locked">${escapeHTML(window.nicknameUnlockText())}</span>`}
+      </label>
+
+      <label class="edit-field">
+        <span class="edit-field-label">생년월일</span>
+        <!-- 온보딩 이후 영구 고정. 나이는 매칭의 기준값이라 나중에 못 바꾼다. -->
+        <div class="edit-field-readonly">${escapeHTML(birthText)}</div>
+      </label>
+
+      <h3>성향</h3>
+      <div class="role-pills">
+        ${ROLE_CODES.map(c => `
+          <div class="role-pill${userRole === c ? ' active' : ''}" onclick="selectRole('${c}', this)">${ROLE_LABELS[c]}</div>
+        `).join('')}
       </div>
 
-      <!-- Scrollable content -->
-      <div class="scroll-y" style="flex:1;">
-        ${getProfileDetailedHTML(p, false, true)}
+      <h3>연애 상태</h3>
+      <div class="role-pills">
+        ${RELATIONSHIP_STATUSES.map(o => `
+          <div class="role-pill${userRelationshipStatus === o.key ? ' active' : ''}" onclick="selectRelationshipStatus('${o.key}', this)">${o.label}</div>
+        `).join('')}
+      </div>
+
+      <h3 style="margin-top:32px;">더 채우기</h3>
+      <div class="edit-section-list">
+        ${isPartnered()
+          ? `<div class="edit-section-note">연애 중이거나 결혼하신 분께는 "친구/네트워크가 생겼으면 해요"로 표시돼요.</div>`
+          : row('p.2에서 찾는 것', escapeHTML(seekingLabel), 'window.openEditSeeking()')}
+        ${row('관심사', userTags.length ? escapeHTML(userTags.join(', ')) : '', 'window.openEditTags()')}
+        ${row('한마디', escapeHTML(userBio), 'window.openEditBioAbout()')}
+        ${row('나에 대해', aboutFilled ? `${aboutFilled}/${ABOUT_ME_FIELDS.length}개 작성` : '', 'window.openEditBioAbout()')}
+        ${row('나의 페이지', `${Object.keys(MY_ANSWERS).length}/${QUESTIONS.length}개 답변`, 'window.openEditChapters()')}
       </div>
     </div>
-    `;
+  `;
+}
 
+// 8항목이 각각 전역 변수라 키↔변수 매핑이 한 곳에 있어야 한다.
+function getAboutMeValue(key) {
+  switch (key) {
+    case 'style': return userStyle;
+    case 'ideal': return userIdeal;
+    case 'drink': return userDrink;
+    case 'smoke': return userSmoke;
+    case 'mbti': return userMBTI;
+    case 'saju': return userSaju;
+    case 'religion': return userReligion;
+    case 'job': return userJob;
+    default: return '';
+  }
+}
+
+window.updateAboutMeField = function (key, value) {
+  switch (key) {
+    case 'style': userStyle = value; break;
+    case 'ideal': userIdeal = value; break;
+    case 'drink': userDrink = value; break;
+    case 'smoke': userSmoke = value; break;
+    case 'mbti': userMBTI = value; break;
+    case 'saju': userSaju = value; break;
+    case 'religion': userReligion = value; break;
+    case 'job': userJob = value; break;
+    default: return;
+  }
+  persistOnboardingChoices();
+};
+
+// 입력 즉시 상태에 반영하고 저장한다. "완료"를 눌러야만 반영되는 구조는
+// 중간에 이탈했을 때 무엇이 남았는지 알 수 없게 만든다.
+window.updateProfileField = function (field, value) {
+  if (field === 'name') userName = value;
+  else if (field === 'bio') userBio = value;
+  else if (field === 'year') userBirthDate = { ...userBirthDate, year: value };
+  else if (field === 'month') userBirthDate = { ...userBirthDate, month: value };
+  else if (field === 'day') userBirthDate = { ...userBirthDate, day: value };
+  persistOnboardingChoices();
+};
+
+// 편집 화면 전용 태그 토글. 온보딩의 updateTagUI()는 온보딩 DOM을 찾으므로
+// 여기서는 이 화면의 카운터와 pill만 갱신한다.
+window.toggleProfileTag = function (el, tagName) {
+  const selected = userTags.includes(tagName);
+  if (selected) userTags = userTags.filter(t => t !== tagName);
+  else if (userTags.length < MAX_TAGS) userTags = [...userTags, tagName];
+  else { showToast(`관심사는 최대 ${MAX_TAGS}개까지 고를 수 있어요`); return; }
+
+  el.classList.toggle('selected', !selected);
+  const counter = document.getElementById('edit-tag-counter');
+  if (counter) {
+    counter.textContent = `${userTags.length}/${MAX_TAGS}개 선택됨`;
+    counter.classList.toggle('ready', userTags.length >= 3);
+  }
+  persistOnboardingChoices();
+};
+
+// ── 개별 항목 편집 화면 ────────────────────────────────
+// 편집 화면 위에 한 겹 더 올린다. 닫으면 편집 화면 본문만 다시 그려
+// 방금 바꾼 값이 섹션 요약에 반영된다.
+function openSubEditor(title, bodyHTML, afterRender) {
+  let host = document.getElementById('sub-editor');
+  if (!host) {
+    host = document.createElement('div');
+    host.id = 'sub-editor';
+    (document.getElementById('app-container') || document.body).appendChild(host);
+  }
+  host.innerHTML = `
+    <div class="modal fade-in active sub-editor-modal" role="dialog" aria-modal="true" aria-label="${escapeAttr(title)}">
+      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+        <button class="back-btn" aria-label="뒤로" onclick="window.closeSubEditor()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">${escapeHTML(title)}</div>
+        <button type="button" class="profile-edit-done" onclick="window.closeSubEditor()">완료</button>
+      </div>
+      <div class="scroll-y" style="flex:1;">
+        <div style="padding: 8px 24px 40px;">${bodyHTML}</div>
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  if (afterRender) afterRender();
+}
+
+window.closeSubEditor = function () {
+  const host = document.getElementById('sub-editor');
+  if (host) host.remove();
+  window.renderProfileEditBody();
+};
+
+// 1) p.2에서 찾는 것 — 연애 중·기혼이면 애초에 진입점이 없다.
+window.openEditSeeking = function () {
+  if (isPartnered()) return;
+  openSubEditor('p.2에서 찾는 것', `
+    <p class="sub-editor-note">지금 마음에 가까운 쪽으로 골라주세요.</p>
+    ${SEEKING_INTENTS.map(o => `
+      <div class="intent-option${userSeekingIntent === o.key ? ' selected' : ''}" onclick="selectSeekingIntent(this, '${o.key}')">${o.label}</div>
+    `).join('')}
+  `);
+};
+
+// 2) 관심사
+window.openEditTags = function () {
+  openSubEditor('관심사', `
+    <div id="edit-tag-counter" class="interest-counter ${userTags.length >= 3 ? 'ready' : ''}">${userTags.length}/${MAX_TAGS}개 선택됨</div>
+    ${INTEREST_CATEGORIES.map(cat => `
+      <div class="tag-category">
+        <span class="tag-category-title">${cat.name}</span>
+        <div class="tags-container">
+          ${cat.tags.map(tag => `
+            <div class="tag-pill${userTags.includes(tag) ? ' selected' : ''}" onclick="window.toggleProfileTag(this, '${tag}')">${tag}</div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('')}
+  `);
+};
+
+// 3) 한마디 + 나에 대해 — 두 섹션의 연필이 같은 화면으로 온다.
+window.openEditBioAbout = function () {
+  openSubEditor('한마디 · 나에 대해', `
+    <label class="edit-field">
+      <span class="edit-field-label">한마디</span>
+      <input type="text" class="input-field" id="edit-bio" maxlength="40"
+        placeholder="${escapeAttr(DEFAULT_BIO)}" value="${escapeAttr(userBio)}"
+        oninput="window.updateProfileField('bio', this.value)" />
+    </label>
+
+    <h3 class="sub-editor-heading">나에 대해</h3>
+    ${ABOUT_ME_FIELDS.map(f => `
+      <label class="edit-field">
+        <span class="edit-field-label">${f.label}</span>
+        <input type="text" class="input-field" id="edit-about-${f.key}" maxlength="40"
+          placeholder="${escapeAttr(f.placeholder)}" value="${escapeAttr(getAboutMeValue(f.key))}"
+          oninput="window.updateAboutMeField('${f.key}', this.value)" />
+      </label>
+    `).join('')}
+  `);
+};
+
+// 4) 나의 페이지 — 챕터 요약 + 27문항 전체(답변 유무 무관)
+// 마지막으로 보던 챕터. 문항 하나 편집하고 돌아왔을 때(returnToChapterList)
+// 1챕터로 튕기면 답을 채우던 흐름이 끊긴다.
+window.__chapterTab = window.__chapterTab || 1;
+
+const CHAPTER_TAB_LABELS = { 1: '나', 2: '사랑', 3: '관계' };
+
+// 한 챕터(9문항)의 행들. 답변한 것과 안 한 것을 함께 세운다 — 빈 문항이
+// 목록에서 빠지면 "무엇이 남았는지"를 알 방법이 없다.
+window.renderChapterQuestionRows = function (chapNum) {
+  return QUESTIONS.filter(q => q.chapter === chapNum).map(q => {
+    const raw = MY_ANSWERS[q.id];
+    const text = raw && typeof raw === 'object' ? formatAnswerText(raw.text, q) : (raw || '');
+    const has = String(text || '').trim().length > 0;
+    return `
+      <button type="button" class="chapter-q-row${has ? ' is-answered' : ''}" onclick="window.openChapterAnswer(${q.id})">
+        <span class="chapter-q-no">Q.${q.id}</span>
+        <span class="chapter-q-body">
+          <span class="chapter-q-text">${escapeHTML(q.text)}</span>
+          <span class="chapter-q-answer">${has ? escapeHTML(String(text).replace(/\n/g, ' ').slice(0, 40)) : '아직 답하지 않았어요'}</span>
+        </span>
+        <i data-lucide="${has ? 'pencil' : 'plus'}" class="chapter-q-icon" aria-hidden="true"></i>
+      </button>`;
+  }).join('');
+};
+
+// 상단 진행 요약 블록은 그대로 두고 아래 문항 리스트만 갈아끼운다.
+window.selectChapterTab = function (chapNum) {
+  window.__chapterTab = chapNum;
+  const list = document.getElementById('chapter-q-list');
+  if (!list) return;
+
+  document.querySelectorAll('#sub-editor .chapter-tab').forEach((el, i) => {
+    const on = (i + 1) === chapNum;
+    el.classList.toggle('is-active', on);
+    el.setAttribute('aria-selected', String(on));
+    el.tabIndex = on ? 0 : -1;
+  });
+
+  list.setAttribute('aria-labelledby', `chapter-tab-${chapNum}`);
+  list.innerHTML = window.renderChapterQuestionRows(chapNum);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+
+  // 챕터를 바꿨는데 이전 챕터에서 내려둔 스크롤에 남아 있으면 9문항 중
+  // 엉뚱한 지점부터 보인다. 전환할 때마다 맨 위로 되돌린다.
+  const scroller = document.querySelector('#sub-editor .scroll-y');
+  if (scroller) scroller.scrollTop = 0;
+
+  // 내용만 교체하면 전환이 뚝 끊긴다 — 짧은 페이드로 이어준다.
+  list.classList.remove('is-swapping');
+  void list.offsetWidth;
+  list.classList.add('is-swapping');
+};
+
+window.openEditChapters = function () {
+  const answered = ch => QUESTIONS.filter(q => q.chapter === ch && MY_ANSWERS[q.id]).length;
+  const benefit = window.getWeeklyBookCount ? window.getWeeklyBookCount() : 3;
+  const active = [1, 2, 3].includes(window.__chapterTab) ? window.__chapterTab : 1;
+
+  // 진행 요약이 곧 탭이다. 진행률을 보는 자리와 챕터를 고르는 자리를
+  // 따로 두면 같은 정보가 화면에 두 번 나온다.
+  const summary = `
+    <div class="chapter-summary">
+      <div class="chapter-summary-top">
+        📖 이번 주 열람 가능한 프로필북
+        <span class="chapter-summary-count">${benefit}권</span>
+      </div>
+      <div class="chapter-tabs" role="tablist" aria-label="챕터 선택">
+        ${[1, 2, 3].map(n => {
+          const c = answered(n);
+          const on = n === active;
+          return `
+          <button type="button" role="tab" id="chapter-tab-${n}"
+                  class="chapter-tab${on ? ' is-active' : ''}"
+                  aria-selected="${on}" aria-controls="chapter-q-list"
+                  tabindex="${on ? '0' : '-1'}"
+                  onclick="window.selectChapterTab(${n})">
+            <span class="chapter-label">Chapter ${n} · ${CHAPTER_TAB_LABELS[n]}</span>
+            <span class="chapter-track"><span class="chapter-fill" style="width:${Math.round(c / 9 * 100)}%;"></span></span>
+            <span class="chapter-pct">${c}/9</span>
+          </button>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+
+  const panel = `
+    <div id="chapter-q-list" class="chapter-q-list" role="tabpanel" aria-labelledby="chapter-tab-${active}">
+      ${window.renderChapterQuestionRows(active)}
+    </div>
+  `;
+
+  openSubEditor('나의 페이지', summary + panel, () => {
+    // role="tab"을 붙였으면 좌우 방향키가 돌아야 한다.
+    const tabs = [...document.querySelectorAll('#sub-editor .chapter-tab')];
+    tabs.forEach((el, i) => {
+      el.addEventListener('keydown', e => {
+        const d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
+                : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+        if (!d) return;
+        e.preventDefault();
+        const next = (i + d + tabs.length) % tabs.length;
+        window.selectChapterTab(next + 1);
+        tabs[next].focus();
+      });
+    });
+  });
+};
+
+// 문항 하나를 연다. 답변 타입별 입력 UI는 openInputModal이 이미 갖고 있으므로
+// (text / choice / multiple-choice / compound) 그대로 쓴다. 자유 텍스트로 덮어쓰면
+// compound 9문항과 multiple-choice 1문항의 구조가 날아간다.
+window.openChapterAnswer = function (qid) {
+  window.__returnToChapterList = true;
+  // openInputModal은 #modal-container를 통째로 갈아끼운다 — 그 안에 있던
+  // 프로필 수정 모달이 사라지므로, 돌아올 때 다시 세워야 한다.
+  const host = document.getElementById('sub-editor');
+  if (host) host.remove();
+  openInputModal(qid);
+
+  // 저장하지 않고 닫는 경로(X · 건너뛰기)도 문항 목록으로 돌아가야 한다.
+  const modal = document.querySelector('#modal-container .modal');
+  if (!modal) return;
+  modal.querySelectorAll('[onclick*="closeModal()"]').forEach(el => {
+    el.setAttribute('onclick', 'window.returnToChapterList()');
+  });
+};
+
+// 문항 화면 → 수정 화면 → 문항 목록 순으로 다시 세운다.
+window.returnToChapterList = function () {
+  window.__returnToChapterList = false;
+  closeModal();
+  window.openMyProfileEdit();
+  window.openEditChapters();
+};
+
+// 편집 화면. 예전에는 이쪽이 프로필 탭의 기본 화면이었고 완성본이 모달이었다.
+// 둘의 자리를 바꿨다 — 기본은 남에게 보이는 모습, 편집은 의도해서 들어간다.
+window.openMyProfileEdit = function () {
+  const mc = getModalContainer();
+  // 닉네임 잠금은 "실제로 바꿨을 때"만 걸린다. 타자 한 글자마다 잠그면
+  // 입력 도중에 필드가 죽는다. 열 때의 값을 기억해 닫을 때 비교한다.
+  window.__nameAtEditOpen = userName || '';
+  mc.innerHTML = `
+    <div class="modal fade-in active" id="profile-edit-modal" style="z-index: 200; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+        <button class="back-btn" aria-label="뒤로" onclick="window.closeMyProfileEdit()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">프로필 수정</div>
+        <button type="button" class="profile-edit-done" onclick="window.closeMyProfileEdit()">완료</button>
+      </div>
+
+      <div class="scroll-y" id="profile-edit-body" style="flex:1;">
+        ${getProfileDetailedHTML(window.buildMyProfileObject(), true, false, true)}
+      </div>
+    </div>
+  `;
+  window.afterProfileEditRender();
+};
+
+// 편집 화면 본문만 다시 그린다. 연애 상태를 바꾸면 진입점 구성이 달라진다.
+window.renderProfileEditBody = function () {
+  const body = document.getElementById('profile-edit-body');
+  if (!body) return;
+  body.innerHTML = getProfileDetailedHTML(window.buildMyProfileObject(), true, false, true);
+  window.afterProfileEditRender();
+};
+
+window.afterProfileEditRender = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
   initPhotoCarousels();
-  const gridHtml = renderAnswersGrid(MY_ANSWERS, false, 'preview');
-  const gridContainer = mc.querySelector('#my-answers-grid');
-  if (gridContainer) gridContainer.innerHTML = gridHtml;
-  bindCardInteractions();
+  initPhotoGrid();
+};
+
+// 편집을 닫으면 기본 화면을 다시 그려 수정 내용이 곧바로 반영되게 한다.
+window.closeMyProfileEdit = function () {
+  // 닉네임이 실제로 바뀐 경우에만 쿨다운 시계를 돌린다.
+  const before = window.__nameAtEditOpen ?? '';
+  if ((userName || '') !== before && (userName || '').trim()) {
+    userNicknameChangedAt = Date.now();
+    persistOnboardingChoices();
+  }
+  closeModal();
+  if (currentTab === 'profile') switchTab('profile');
 };
 
 
@@ -4367,24 +5246,32 @@ window.openProfileModal = function (profileId, fromChat = false) {
   const p = MOCK_PROFILES.find(x => x.id === profileId);
   const mc = getModalContainer();
 
-  const backAction = fromChat ? `onclick="closeModal()"` : `onclick="closeModal()"`;
-  // Technically same for now but logic is: if from chat, we are a modal on top of chat.
-
   const alreadyPaged = pagedSet?.has('p' + profileId) ?? false;
 
   mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
-       <div class="modal-fixed-close" ${backAction}>
-         <i data-lucide="${fromChat ? 'chevron-left' : 'chevron-down'}" style="color:#FFF;"></i>
+    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+       <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+         <button class="back-btn" aria-label="${fromChat ? '뒤로' : '닫기'}" onclick="closeModal()">
+           <i data-lucide="${fromChat ? 'chevron-left' : 'x'}" style="width:28px;"></i>
+         </button>
+         <div style="font-size:16px; font-weight:600; color:var(--text-dark);">${p ? p.name : ''}</div>
+         <div style="width:32px;"></div>
        </div>
        <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
          <div class="scroll-y" style="height:100%;">
            ${getProfileDetailedHTML(p, false)}
          </div>
        </div>
-       <button id="prof-page-fab" class="prof-fab" onclick="window._handleProfFabTap(${profileId})">
+       ${window.isBookClosed('p' + profileId) ? `
+       <button id="prof-reopen-btn" class="prof-reopen-btn" onclick="window._handleReopenTap(${profileId})">
+         <i data-lucide="rotate-ccw" style="width:18px; height:18px;" aria-hidden="true"></i>
+         책 덮기 취소
+       </button>
+       ` : `
+       <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 좋아요를 보낸 프로필북' : '마음 보내기'}" onclick="window._handleProfFabTap(${profileId})">
          <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:24px; height:24px; color:#fff;"></i>
        </button>
+       `}
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -4418,27 +5305,27 @@ window.openProfileModal = function (profileId, fromChat = false) {
     // Toast
     showToast('Page her ♥');
 
-    // Page logic
-    const card = browseQueue[0];
-    if (card && card.id === cardId) {
-      pagedSet.add(card.id);
-      if (!savedBooks.some(b => b.id === card.id)) savedBooks.push(card);
-      if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
-      if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
-        window.weeklyViewedProfiles.push(card);
-        localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
+    // 발견 카드의 하트와 같은 경로. 다시보기에서 들어와도 저장·매칭이 동작한다.
+    const profile = (browseQueue.find(x => x.id === cardId)
+      || dailyProfiles.find(x => x.id === cardId)
+      || (window.weeklyViewedProfiles || []).find(x => x.id === cardId) || {}).profile;
+    const isMutualMatch = window.pageProfile(cardId);
+    // 다시보기 리스트에서 들어온 경우 그 리스트의 상태 표시가 바로 바뀌어야 한다.
+    if (currentTab === 'discover') renderDiscoverTab();
+    if (isMutualMatch && profile) {
+      if (!MATCHED_PROFILES.find(m => m.id === profile.id)) {
+        MATCHED_PROFILES.unshift({ id: profile.id, name: profile.name, image: profile.image, isNew: true });
       }
-      browseQueue.shift();
-
-      // Mutual match check — show overlay after toast settles
-      const isMutualMatch = !window.__hasMockedMutualMatch;
-      if (isMutualMatch) {
-        window.__hasMockedMutualMatch = true;
-        setTimeout(() => showMutualMatchOverlay(card.profile), 1700);
-      }
-    } else {
-      pagedSet.add(cardId);
+      setTimeout(() => showMutualMatchOverlay(profile), 1700);
     }
+  };
+
+  // 책 덮기 취소 — 무반응으로 되돌리고, 그 자리에서 바로 좋아요가 가능해진다.
+  window._handleReopenTap = function (pid) {
+    if (!window.reopenBook('p' + pid)) return;
+    renderDiscoverTab();
+    // 같은 프로필을 다시 그려 하트 버튼이 돌아오게 한다.
+    openProfileModal(pid, fromChat);
   };
 
   // Populate answers grid for the selected user
@@ -4894,7 +5781,7 @@ window.openMatchIntroModal = function (profileId, isQurated = false, from = 'mes
   const otherProfile = MOCK_PROFILES.find(p => p.id === match.id) || MOCK_PROFILES[0];
   const otherSpineColor = getSpineColor(otherProfile.id);
   const otherAge = getAge(otherProfile.birthYear);
-  const otherDist = getDistance(otherProfile.id);
+  const otherDistLabel = formatDistanceLabel(otherProfile);
 
   let amc = document.getElementById('answer-modal-container');
   if (!amc) {
@@ -4913,7 +5800,7 @@ window.openMatchIntroModal = function (profileId, isQurated = false, from = 'mes
           </button>
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
             <div style="font-size:16px; font-weight:700; color:#333;">${otherProfile.name}</div>
-            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${otherAge} ・ ${otherDist}km</div>
+            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${otherAge}세 ・ ${otherDistLabel}</div>
           </div>
           <button onclick="openProfileFromModal(${otherProfile.id}, '${from}')" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;">
             <div style="width:32px; height:32px; border-radius:50%; background-image:url('${otherProfile.image}'); background-size:cover; background-position:center; background-color:#EDE0FF; border:1px solid rgba(0,0,0,0.08);"></div>
@@ -5558,7 +6445,9 @@ window.openChat = function (chatId) {
   }
 
   const p = MOCK_PROFILES.find(pr => pr.name === chat.name);
-  const ageDistText = p ? `${getAge(p.birthYear)} ・ ${getDistance(p.id)}km` : chat.score;
+  const ageDistText = p
+    ? `${getAge(p.birthYear)}세 ・ ${formatDistanceLabel(p)}`
+    : chat.score;
   const sharedMeetup = MOCK_MEETUPS.find(m =>
     m.hasRSVPd && (m.hostName === chat.name || (m.participants || []).some(img => img === p?.image))
   );
@@ -5842,35 +6731,32 @@ window.initStackGestures = function (cardEl) {
   });
 };
 
-window.swipeLeft = function () {
+// 좌우 스와이프는 판단이 아니라 진행이다. 좋아요도 책 덮기도 아니지만,
+// 그 책은 이번 주 몫으로 읽은 것이므로 스택에서 빠지고 남은 권수도 줄어든다.
+// 아무 흔적도 남기지 않는 무반응이라 8주 쿨다운 뒤 다시 후보에 든다.
+function advanceStack(dir) {
   const card = document.querySelector('.book-card.level-0');
   if (!card) return;
-  card.style.transform = 'translateX(-150%) rotate(-30deg)';
-  card.style.opacity = '0';
-  setTimeout(() => {
-    // Swipe (no action): Card goes to back of browseQueue
-    if (browseQueue.length > 0) {
-      const item = browseQueue.shift();
-      browseQueue.push(item);
-    }
-    renderDiscoverTab();
-  }, 300);
-};
+  if (card.classList.contains('bridge-card')) { slideBridgeAway(card, dir); return; }
 
-window.swipeRight = function () {
-  const card = document.querySelector('.book-card.level-0');
-  if (!card) return;
-  card.style.transform = 'translateX(150%) rotate(30deg)';
+  card.style.transform = `translateX(${dir * 150}%) rotate(${dir * 30}deg)`;
   card.style.opacity = '0';
   setTimeout(() => {
-    // Swipe (no action): Card goes to back of browseQueue
-    if (browseQueue.length > 0) {
+    try {
       const item = browseQueue.shift();
-      browseQueue.push(item);
+      if (item) {
+        passedSet.add(item.id);        // 남은 권수 계산에서 빠진다
+        rememberViewedProfile(item);   // "이번 주 다시보기"에는 남는다
+      }
+    } finally {
+      renderDiscoverTab();
     }
-    renderDiscoverTab();
   }, 300);
-};
+}
+
+window.swipeLeft = function () { advanceStack(-1); };
+
+window.swipeRight = function () { advanceStack(1); };
 
 window.detailSwipeLeft = function () {
   const card = browseQueue[0];
@@ -5965,7 +6851,7 @@ window.showMutualMatchOverlay = function (p) {
 
   const otherSpineColor = getSpineColor(p.id);
   const otherAge = getAge(p.birthYear);
-  const otherDist = getDistance(p.id);
+  const otherDistLabel = formatDistanceLabel(p);
 
   overlay.innerHTML = `
     <div style="font-size:22px; font-weight:700; color:#9B72CC; margin-bottom:60px;">on the same page ♥︎</div>
@@ -5998,7 +6884,7 @@ window.showMutualMatchOverlay = function (p) {
     </div>
 
     <div style="font-size:16px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">
-      ${p.name} · <span style="font-size:14px; font-weight:400;">${otherAge}세 · ${otherDist}km</span>
+      ${p.name} · <span style="font-size:14px; font-weight:400;">${otherAge}세 · ${otherDistLabel}</span>
     </div>
     <div style="font-size:13px; color:var(--text-muted); margin-bottom:80px; text-align:center;">
       어떤 인연이 될지는 두 분이 써내려가요
@@ -6036,19 +6922,821 @@ window.handleMatchOverlayAction = function (action, profileId) {
   }
 };
 
+// ══════════════════════════════════════════════════════════════
+// 발견 탭 — 세 가지 반응
+//
+//   좋아요   명시적. 하트 버튼을 눌러야만 일어난다.
+//   무반응   그냥 넘긴다. 아무 상태도 남지 않고, 8주 쿨다운 정책에 따라
+//            나중에 다시 등장할 수 있다. 그래서 여기 코드가 없다.
+//   책 덮기  영구 제외. 눌러야만 일어나고, 되돌리려면 별도 조치가 필요하다.
+//
+// 좌우 스와이프는 셋 중 어느 것도 아니다 — 다음 책으로 넘기는 내비게이션이다.
+// ══════════════════════════════════════════════════════════════
+
+// 덮은 책은 주간 배달에서 영구히 빠진다. 세션이 아니라 기기에 남아야 하므로
+// (지금은 백엔드가 이 값을 갖고 있지 않다) localStorage에 둔다.
+const CLOSED_BOOKS_KEY = 'p2_closed_books';
+let closedBooks = new Set();
+
+function loadClosedBooks() {
+  try {
+    const raw = JSON.parse(window.localStorage.getItem(CLOSED_BOOKS_KEY) || '[]');
+    closedBooks = new Set(Array.isArray(raw) ? raw.filter(x => typeof x === 'string') : []);
+  } catch (e) {
+    closedBooks = new Set();
+  }
+  return closedBooks;
+}
+
+function saveClosedBooks() {
+  try { window.localStorage.setItem(CLOSED_BOOKS_KEY, JSON.stringify([...closedBooks])); }
+  catch (e) { /* private mode / quota */ }
+}
+
+window.isBookClosed = function (cardId) {
+  return closedBooks.has(cardId);
+};
+
+// 책 덮기 — 영구 제외. 8주 뒤 재등장하는 무반응과 달리 되돌아오지 않는다.
+window.closeBook = function (cardId) {
+  if (!cardId || closedBooks.has(cardId)) return;
+  const item = browseQueue.find(x => x.id === cardId)
+    || dailyProfiles.find(x => x.id === cardId)
+    || (window.weeklyViewedProfiles || []).find(x => x.id === cardId);
+
+  closedBooks.add(cardId);
+  saveClosedBooks();
+
+  // 이번 주 스택에서는 즉시 빠지고, 남은 권수에서도 빠진다.
+  browseQueue = browseQueue.filter(x => x.id !== cardId);
+  passedSet.add(cardId);
+  pagedSet.delete(cardId);
+
+  // 다시보기 목록에는 남는다 — 이번 주 안에는 되돌릴 수 있어야 하기 때문.
+  // 다음 주가 되면 sp_viewed_this_week가 비워지면서 목록에서 사라지고,
+  // 그때부터는 유료 "덮은 책 되돌리기"의 영역이다.
+  rememberViewedProfile(item);
+
+  showToast('책을 덮었어요. 이번 주 다시보기에서 되돌릴 수 있어요.');
+  renderDiscoverTab();
+};
+
+// 책 덮기 취소. 이번 주 다시보기에 남아 있는 동안에만 부를 수 있다.
+window.reopenBook = function (cardId) {
+  if (!cardId || !closedBooks.has(cardId)) return false;
+  closedBooks.delete(cardId);
+  saveClosedBooks();
+  // 무반응으로 되돌린다: 좋아요도 아니고 덮은 것도 아닌 상태.
+  showToast('책을 다시 열었어요.');
+  return true;
+};
+
+// 다시보기 항목의 상태. 셋 중 하나다.
+window.getBookState = function (cardId) {
+  if (closedBooks.has(cardId)) return 'closed';
+  if (pagedSet.has(cardId)) return 'paged';
+  return 'none';
+};
+
+// "이번 주 프로필북 다시보기" 목록. 좋아요든 그냥 넘김이든, 한 번 본 책은
+// 여기 남는다. 저장이 실패해도(프라이빗 모드·용량 초과) 메모리 목록은 유지한다.
+function rememberViewedProfile(item) {
+  if (!item) return;
+  if (!Array.isArray(window.weeklyViewedProfiles)) window.weeklyViewedProfiles = [];
+  if (window.weeklyViewedProfiles.some(v => v.id === item.id)) return;
+  window.weeklyViewedProfiles.push(item);
+  try { window.localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles)); }
+  catch (e) { /* storage unavailable */ }
+}
+window.rememberViewedProfile = rememberViewedProfile;
+
+// 좋아요 — 발견 카드의 하트와 상세 화면의 FAB이 같은 경로를 쓴다.
+// 반환값은 상호 매칭 여부.
+window.pageProfile = function (cardId) {
+  if (!cardId || pagedSet.has(cardId)) return false;
+
+  const item = browseQueue.find(x => x.id === cardId)
+    || dailyProfiles.find(x => x.id === cardId);
+
+  pagedSet.add(cardId);
+  if (item && !savedBooks.some(b => b.id === cardId)) savedBooks.push(item);
+
+  if (item) {
+    rememberViewedProfile(item);
+    browseQueue = browseQueue.filter(x => x.id !== cardId);
+  }
+
+  const mutual = !window.__hasMockedMutualMatch;
+  if (mutual) window.__hasMockedMutualMatch = true;
+  return mutual;
+};
+
+// 발견 카드의 하트. 상세로 들어가지 않고 표지에서 바로 마음을 보낸다.
+window.pageFromCard = function (cardId) {
+  if (window.__actionLocked) return;
+  if (pagedSet.has(cardId)) { showToast('이미 Page했어요 ♥'); return; }
+  window.__actionLocked = true;
+  setTimeout(() => { window.__actionLocked = false; }, 1000);
+
+  const item = browseQueue.find(x => x.id === cardId);
+  const profile = item ? item.profile : null;
+  const mutual = window.pageProfile(cardId);
+
+  const overlay = document.getElementById('paged-heart-overlay');
+  if (overlay) overlay.classList.add('active');
+
+  setTimeout(() => {
+    if (overlay) overlay.classList.remove('active');
+    renderDiscoverTab();
+    if (mutual && profile) {
+      if (!MATCHED_PROFILES.find(m => m.id === profile.id)) {
+        MATCHED_PROFILES.unshift({ id: profile.id, name: profile.name, image: profile.image, isNew: true });
+      }
+      showMutualMatchOverlay(profile);
+    }
+  }, 600);
+};
+
+// ── 최초 진입 안내 ─────────────────────────────────────────
+// 온보딩을 마치고 발견 탭에 처음 들어온 한 번만. 세 가지 반응이 어떻게 다른지
+// 여기서 말해두지 않으면, 그냥 넘긴 것과 덮은 것의 차이를 알 방법이 없다.
+const REACTIONS_INTRO_KEY = 'p2_reactions_intro_shown';
+
+window.maybeShowReactionsIntro = function () {
+  let seen = false;
+  try { seen = window.localStorage.getItem(REACTIONS_INTRO_KEY) === '1'; } catch (e) { seen = false; }
+  if (seen) return;
+  // 플래그를 먼저 쓴다. 안내 도중 새로고침해도 되살아나지 않게.
+  try { window.localStorage.setItem(REACTIONS_INTRO_KEY, '1'); } catch (e) { /* storage unavailable */ }
+  showReactionsIntro();
+};
+
+window.showReactionsIntro = function () {
+  if (document.getElementById('reactions-intro')) return;
+  const opener = document.activeElement;
+
+  const modal = document.createElement('div');
+  modal.id = 'reactions-intro';
+  modal.className = 'reactions-intro-backdrop';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-labelledby', 'reactions-intro-title');
+  modal.innerHTML = `
+    <div class="reactions-intro-card">
+      <h2 class="reactions-intro-title" id="reactions-intro-title">이번 주 책을 읽는 방법</h2>
+      <ul class="reactions-intro-list">
+        <li>
+          <span class="reactions-intro-mark reactions-intro-mark--heart" aria-hidden="true">♥</span>
+          <span>마음에 들면 <b>하트</b>를 눌러주세요.</span>
+        </li>
+        <li>
+          <span class="reactions-intro-mark" aria-hidden="true">→</span>
+          <span>그냥 넘기면, 나중에 다시 만날 수도 있어요.</span>
+        </li>
+        <li>
+          <span class="reactions-intro-mark" aria-hidden="true">―</span>
+          <span>확실히 아니다 싶으면 <b>책을 덮어</b>주세요. 다시 보여드리지 않을게요.</span>
+        </li>
+      </ul>
+      <button type="button" class="reactions-intro-btn" id="reactions-intro-ok">읽기 시작하기</button>
+    </div>
+  `;
+
+  const container = document.getElementById('modal-container') || document.body;
+  container.appendChild(modal);
+
+  function dismiss() {
+    document.removeEventListener('keydown', onKey, true);
+    modal.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } }
+  document.addEventListener('keydown', onKey, true);
+
+  modal.addEventListener('click', (e) => { if (e.target === modal) dismiss(); });
+  modal.querySelector('#reactions-intro-ok').addEventListener('click', dismiss);
+  requestAnimationFrame(() => modal.querySelector('#reactions-intro-ok')?.focus());
+};
+
+// 되돌릴 수 없는 행동인데다 링크가 작아서 오탭이 쉽다. 무엇이 일어나는지
+// 한 번 말해주고, 물러날 길을 같이 준다. 재촉하지 않는 톤으로.
+window.confirmCloseBook = function (cardId) {
+  if (document.getElementById('close-book-sheet')) return;
+  const item = browseQueue.find(x => x.id === cardId) || dailyProfiles.find(x => x.id === cardId);
+  const name = item && item.profile ? item.profile.name : '이 프로필북';
+  const opener = document.activeElement;
+
+  const scrim = document.createElement('div');
+  scrim.className = 'sheet-scrim';
+  scrim.id = 'close-book-scrim';
+
+  const sheet = document.createElement('div');
+  sheet.id = 'close-book-sheet';
+  sheet.className = 'close-book-sheet';
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-labelledby', 'close-book-title');
+  sheet.innerHTML = `
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <h2 class="close-book-title" id="close-book-title">${name} 님의 책을 덮을까요?</h2>
+    <p class="close-book-body">덮은 책은 다시 배달되지 않아요.<br>그냥 넘기면 나중에 다시 만날 수도 있어요.</p>
+    <div class="close-book-actions">
+      <button type="button" class="sheet-btn sheet-btn--ghost" id="close-book-cancel">그냥 넘기기</button>
+      <button type="button" class="sheet-btn sheet-btn--commit" id="close-book-confirm">책 덮기</button>
+    </div>
+  `;
+
+  const container = document.getElementById('app-container') || document.body;
+  container.appendChild(scrim);
+  container.appendChild(sheet);
+
+  function dismiss() {
+    document.removeEventListener('keydown', onKey, true);
+    sheet.remove();
+    scrim.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } }
+  document.addEventListener('keydown', onKey, true);
+
+  scrim.addEventListener('click', dismiss);
+  sheet.querySelector('#close-book-cancel').addEventListener('click', () => {
+    dismiss();
+    // "그냥 넘기기"는 무반응이다 — 아무 상태도 남기지 않고 다음 장으로만 넘긴다.
+    window.swipeLeft();
+  });
+  sheet.querySelector('#close-book-confirm').addEventListener('click', () => {
+    dismiss();
+    window.closeBook(cardId);
+  });
+  requestAnimationFrame(() => sheet.querySelector('#close-book-cancel')?.focus());
+};
+
+// ══════════════════════════════════════════════════════════════
+// 발견 → 모임 브릿지 카드
+// 스택의 마지막 카드. 이번 주 프로필북을 다 넘긴 사람에게 다음 행선지를 준다.
+// ══════════════════════════════════════════════════════════════
+
+// "연애할 사람을 찾고 있어요"를 고른 사람에게만 노출한다. 커뮤니티/양쪽 열려있음
+// 유저는 이번 스펙에서 제외 — 카피가 그들에게는 맞지 않는다.
+// 브릿지를 이미 넘겼는지. 스택의 끝이 아니라 마지막에서 두 번째 장이므로,
+// 한 번 지나가면 그 뒤의 소진 화면으로 넘어간다. 새 주가 시작되면 초기화된다.
+// 브릿지 카드는 이제 한 장이 아니라 최대 세 장이고, 각각 프로필북과 똑같이
+// 스택 슬롯을 꽉 채운다. 넘긴 카드를 모임 단위로 기억해야 한 장씩 지나간다.
+let dismissedBridgeIds = new Set();
+window.resetBridgeDismissed = function () { dismissedBridgeIds = new Set(); };
+
+function shouldShowMeetupBridge() {
+  return userSeekingIntent === 'dating';
+}
+
+// 브릿지 카드를 넘긴다. 다음은 소진 화면이다.
+window.dismissBridgeCard = function (meetupId) {
+  const key = String(meetupId ?? '');
+  if (!key || dismissedBridgeIds.has(key)) return;
+  dismissedBridgeIds.add(key);
+  renderDiscoverTab();
+};
+
+// 모집 마감일 필드가 데이터에 없어서 행사 일시(timestamp)를 마감 시점으로 본다.
+// timestamp가 없는 항목(기간제 행사·상시 커뮤니티)은 "임박"이라는 축에 올릴 수
+// 없으므로 후보에서 뺀다.
+// ── 브릿지 추천 필터 ───────────────────────────────────
+// 소셜 · 마감 전 · 만석 아님 · 지역 일치 · 연령대 포함, 다섯 개를 모두 통과한
+// 모임만 후보다. 통과한 것들 중 마감 임박순 상위 3개를 보여준다.
+
+const BRIDGE_MEETUP_LIMIT = 3;
+
+// 카테고리. type이 "✨ 소셜"처럼 이모지를 달고 오므로 포함 관계로 본다.
+function isSocialMeetup(m) {
+  return /소셜/.test(String(m && m.type || '')) || /소셜/.test(String(m && m.secondaryType || ''));
+}
+
+// "30대 초반 ~ 40대 초반" → { min: 3, max: 6 } (DECADE_POINTS 인덱스).
+// "연령 무관"이나 파싱 불가는 null — 제한 없음으로 보고 통과시킨다.
+function parseAgeBand(ageRange) {
+  const raw = String(ageRange || '').trim();
+  if (!raw || /무관|전체|제한\s*없/.test(raw)) return null;
+  const parts = raw.split(/[~\-–—]/).map(x => x.trim()).filter(Boolean);
+  if (!parts.length) return null;
+  const idx = label => DECADE_POINTS.indexOf(label);
+  const min = idx(parts[0]);
+  const max = idx(parts[parts.length - 1]);
+  if (min < 0 || max < 0) return null;
+  return { min: Math.min(min, max), max: Math.max(min, max) };
+}
+
+// 발견 탭 필터가 쓰는 것과 같은 나이→연령대 구간.
+function getAgeDecadeIndex(age) {
+  if (!Number.isFinite(age)) return null;
+  if (age < 23) return 0;
+  if (age < 27) return 1;
+  if (age < 30) return 2;
+  if (age < 33) return 3;
+  if (age < 37) return 4;
+  if (age < 40) return 5;
+  if (age < 43) return 6;
+  if (age < 47) return 7;
+  if (age < 50) return 8;
+  return 9;
+}
+
+function matchesAgeBand(m, age) {
+  const band = parseAgeBand(m && m.ageRange);
+  if (!band) return true; // 연령 무관
+  const idx = getAgeDecadeIndex(age);
+  if (idx === null) return true; // 나이를 모르면 이 조건으로 거르지 않는다
+  return idx >= band.min && idx <= band.max;
+}
+
+// ── 지역 ───────────────────────────────────────────────
+// 모임 지역 문자열이 "마포구 (홍대)"(구 + 동네)와 "중구 (대구)"(구 + 도시)로
+// 섞여 있어서, 괄호 안팎을 모두 토큰으로 쪼갠 뒤 겹치는 게 있으면 일치로 본다.
+const SEOUL_DISTRICTS = ['종로구','중구','용산구','성동구','광진구','동대문구','중랑구','성북구','강북구','도봉구','노원구','은평구','서대문구','마포구','양천구','강서구','구로구','금천구','영등포구','동작구','관악구','서초구','강남구','송파구','강동구'];
+
+function regionTokens(str) {
+  return String(str || '')
+    .replace(/[()]/g, ' ')
+    .split(/[\s,·]+/)
+    .map(t => t.trim())
+    .filter(Boolean);
+}
+
+// "수도권"은 서울·경기·인천을 아우르는 광역 표기다. 그 안의 어느 도시에 사는
+// 유저에게도 수도권 모임은 걸려야 한다.
+const CAPITAL_AREA = ['서울', '경기', '인천'];
+const OTHER_METROS = /대구|부산|광주|대전|울산|세종|제주|강원|충청|전라|경상/;
+
+function isCapitalAreaToken(t) {
+  return t === '수도권' || CAPITAL_AREA.some(c => t.startsWith(c));
+}
+
+function matchesRegion(m, userRegion) {
+  const want = regionTokens(userRegion);
+  if (!want.length) return true; // 유저 지역을 모르면 이 조건으로 거르지 않는다
+  const have = regionTokens(m && m.shortLocation);
+  if (!have.length) return false;
+
+  // 다른 광역시 이름이 붙어 있으면 서울 계열로 오인하지 않는다.
+  // ("중구 (대구)"의 중구가 서울 중구로 읽히면 안 된다.)
+  const elsewhere = have.some(t => OTHER_METROS.test(t));
+
+  // 유저가 수도권 어딘가에 있고, 모임이 "수도권"으로만 표기돼 있으면 통과.
+  const wantsCapital = want.some(isCapitalAreaToken);
+  if (wantsCapital && have.some(t => t === '수도권')) return true;
+
+  // 도시 단위("서울")로만 알고 있으면 그 도시의 구 전체를 받아들인다.
+  const wantsSeoul = want.some(t => t === '수도권' || t.startsWith('서울'));
+  if (wantsSeoul && !elsewhere && have.some(t => SEOUL_DISTRICTS.includes(t))) return true;
+
+  return have.some(t => want.includes(t));
+}
+
+// ── 광역 단위 축약 ─────────────────────────────────────
+// 사람의 지역은 광역까지만 노출한다. "마포구"나 "성수동"이 프로필에 찍히면
+// 사는 동네가 특정된다 — 커밍아웃하지 않았을 수 있는 사용자에게는 이게
+// 프라이버시가 아니라 안전 문제다. 구·동 단위는 거리 계산 같은 내부 용도로만.
+const BROAD_REGIONS = ['서울', '부산', '대구', '인천', '광주', '대전', '울산', '세종',
+  '경기', '강원', '충북', '충남', '전북', '전남', '경북', '경남', '제주'];
+
+// 광역명이 아닌 표기를 광역으로 끌어올린다. 판단이 안 서면 빈 값을 돌려
+// 잘못된 노출 대신 '--'가 뜨게 한다.
+const BROAD_ALIASES = [
+  [/서울|강남|강북|강서|강동|마포|성동|종로|용산|광진|동대문|중랑|성북|도봉|노원|은평|서대문|양천|구로|금천|영등포|동작|관악|서초|송파/, '서울'],
+  [/부산|해운대|수영구|남포/, '부산'],
+  [/대구|수성구|달서/, '대구'],
+  [/인천|연수구|송도|부평/, '인천'],
+  [/광주광역|서구 광주/, '광주'],
+  [/대전|유성/, '대전'],
+  [/울산/, '울산'],
+  [/세종/, '세종'],
+  [/경기|수원|성남|고양|용인|부천|안양|안산|화성|남양주|의정부|파주|김포/, '경기'],
+  [/강원|춘천|원주|강릉/, '강원'],
+  [/충북|청주/, '충북'],
+  [/충남|천안|아산/, '충남'],
+  [/전북|전주/, '전북'],
+  [/전남|여수|순천/, '전남'],
+  [/경북|포항|경주|구미/, '경북'],
+  [/경남|창원|김해|진주/, '경남'],
+  [/제주|서귀포/, '제주'],
+];
+
+// 프로필의 지역. location 텍스트가 있으면 그걸, 없으면 좌표에서 역산한다.
+// 어느 쪽이든 광역까지만 — 구·동은 여기서 잘린다.
+function getProfileRegion(profile, fallbackCoords) {
+  const named = toBroadRegion(profile && profile.location);
+  if (named) return named;
+  const c = getProfileCoords(profile) || fallbackCoords;
+  if (!c) return '';
+  return toBroadRegion(resolveRegionFromCoords(c.lat, c.lng));
+}
+window.getProfileRegion = getProfileRegion;
+
+function toBroadRegion(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  // 이미 광역명이면 그대로.
+  const exact = BROAD_REGIONS.find(r => raw === r || raw.startsWith(r));
+  if (exact) return exact;
+  if (raw === '수도권') return '수도권';
+  for (const [re, name] of BROAD_ALIASES) {
+    if (re.test(raw)) return name;
+  }
+  return ''; // 알 수 없으면 노출하지 않는다
+}
+window.toBroadRegion = toBroadRegion;
+
+// 디바이스 위치 → 지역명. 모임 데이터에 좌표가 없어서 좌표를 지역 이름으로
+// 바꿔야 하는데, 이 앱에는 역지오코딩 경로가 없다. 아래 표는 그 자리를 메우는
+// 임시 수단이고, 실제 지오코딩 API가 붙으면 이 함수만 교체하면 된다.
+const REGION_ANCHORS = [
+  { name: '서울', lat: 37.5665, lng: 126.9780, radiusKm: 30 },
+  { name: '인천', lat: 37.4563, lng: 126.7052, radiusKm: 25 },
+  { name: '경기', lat: 37.2636, lng: 127.0286, radiusKm: 25 },
+  { name: '대전', lat: 36.3504, lng: 127.3845, radiusKm: 25 },
+  { name: '대구', lat: 35.8714, lng: 128.6014, radiusKm: 25 },
+  { name: '광주', lat: 35.1595, lng: 126.8526, radiusKm: 25 },
+  { name: '부산', lat: 35.1796, lng: 129.0756, radiusKm: 30 },
+  { name: '울산', lat: 35.5384, lng: 129.3114, radiusKm: 25 },
+  { name: '제주', lat: 33.4996, lng: 126.5312, radiusKm: 40 },
+];
+
+function resolveRegionFromCoords(lat, lng) {
+  let best = null;
+  for (const a of REGION_ANCHORS) {
+    const dLat = (lat - a.lat) * 111;
+    const dLng = (lng - a.lng) * 88; // 위도 35~38도 부근의 경도 1도 거리
+    const km = Math.sqrt(dLat * dLat + dLng * dLng);
+    if (km <= a.radiusKm && (!best || km < best.km)) best = { name: a.name, km };
+  }
+  return best ? best.name : null;
+}
+
+// 브릿지 필터가 쓰는 유저 지역. 위치 권한이 있으면 그 값을, 없거나 실패하면
+// 프로필에 저장된 지역으로 폴백한다. 렌더는 동기이므로 결과를 캐시해두고,
+// 위치가 늦게 도착하면 그때 한 번 다시 그린다.
+// 지역 필터가 쓰는 값. 미설정이면 빈 문자열이고, matchesRegion은 빈 값을
+// "이 조건으로 거르지 않음"으로 읽는다 — 콘텐츠를 아예 못 보는 것보다 낫다.
+function getUserRegion() {
+  return userLocation || '';
+}
+window.getUserRegion = getUserRegion;
+
+window.hasUserLocation = function () {
+  return userLocationStatus === 'granted' && !!userCoords;
+};
+
+const LOCATION_KEY = 'p2_user_location';
+
+function persistUserLocation() {
+  try {
+    window.localStorage.setItem(LOCATION_KEY, JSON.stringify({
+      status: userLocationStatus, region: userLocation, coords: userCoords,
+    }));
+  } catch (e) { /* private mode / quota */ }
+}
+
+function restoreUserLocation() {
+  let saved = null;
+  try { saved = JSON.parse(window.localStorage.getItem(LOCATION_KEY) || 'null'); }
+  catch (e) { saved = null; }
+  if (!saved || typeof saved !== 'object') return;
+  if (['unset', 'granted', 'denied'].includes(saved.status)) userLocationStatus = saved.status;
+  if (typeof saved.region === 'string') userLocation = saved.region;
+  if (saved.coords && Number.isFinite(saved.coords.lat) && Number.isFinite(saved.coords.lng)) {
+    userCoords = { lat: saved.coords.lat, lng: saved.coords.lng };
+  }
+}
+window.restoreUserLocation = restoreUserLocation;
+
+// 온보딩의 위치 항목. 광역 라벨까지만 보여준다 — 구 단위는 내부 계산용이다.
+function getLocationSectionHTML() {
+  if (userLocationStatus === 'granted') {
+    return `
+      <div class="location-row is-set">
+        <i data-lucide="map-pin" class="location-icon" aria-hidden="true"></i>
+        <span class="location-text">${userLocation ? `${userLocation} 근처로 설정됐어요` : '위치가 확인됐어요'}</span>
+      </div>
+      <p class="location-note">가까운 사람과 모임을 찾는 데에만 써요. 정확한 주소는 누구에게도 보이지 않아요.</p>
+    `;
+  }
+  const denied = userLocationStatus === 'denied';
+  return `
+    <p class="location-note">더 가까운 사람과 모임을 보여드리기 위해 위치 정보를 사용해요.<br>정확한 주소는 누구에게도 보이지 않아요.</p>
+    <button type="button" class="location-btn" id="location-request-btn" onclick="window.handleLocationRequest('location-section')">
+      <i data-lucide="map-pin" style="width:16px;height:16px;" aria-hidden="true"></i>
+      ${denied ? '위치 다시 시도하기' : '내 위치 사용하기'}
+    </button>
+    ${denied ? '<p class="location-note location-note--denied">위치 없이도 계속할 수 있어요. 대신 모든 지역의 모임을 보여드려요.</p>' : ''}
+  `;
+}
+window.getLocationSectionHTML = getLocationSectionHTML;
+
+// 위치를 아직 안 준 사람에게만 뜨는 배너. 설정해두면 사라진다.
+function getLocationBannerHTML() {
+  if (window.hasUserLocation()) return '';
+  return `
+    <div class="location-banner-inner">
+      <i data-lucide="map-pin" class="location-banner-icon" aria-hidden="true"></i>
+      <div class="location-banner-text">
+        <div class="location-banner-title">위치를 설정하면 더 가까운 모임을 보여드릴 수 있어요</div>
+        <div class="location-banner-sub">지금은 모든 지역의 모임을 보여드리고 있어요.</div>
+      </div>
+      <button type="button" class="location-banner-btn" id="location-banner-btn" onclick="window.handleLocationRequest('location-banner')">위치 설정</button>
+    </div>
+  `;
+}
+window.getLocationBannerHTML = getLocationBannerHTML;
+
+// 온보딩 버튼과 설정 배너가 공유하는 핸들러.
+window.handleLocationRequest = async function (containerId) {
+  const btn = document.getElementById('location-request-btn') || document.getElementById('location-banner-btn');
+  if (btn) { btn.disabled = true; btn.classList.add('is-busy'); }
+
+  const res = await window.requestUserLocation();
+
+  const host = containerId ? document.getElementById(containerId) : null;
+  if (host) {
+    host.innerHTML = containerId === 'location-banner' ? getLocationBannerHTML() : getLocationSectionHTML();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
+  showToast(res.ok
+    ? (res.region ? `${res.region} 근처로 설정했어요` : '위치를 확인했어요')
+    : '위치 없이 계속할게요. 모든 지역의 모임을 보여드려요.');
+
+  const inSettings = containerId === 'location-banner' && !!document.querySelector('.modal.active');
+  if (currentTab === 'discover') renderDiscoverTab();
+  else if (currentTab === 'profile' && !inSettings) switchTab('profile');
+  return res;
+};
+
+// 위치 권한 요청. 온보딩 버튼과 설정 배너가 같은 함수를 쓴다.
+// 성공하면 좌표와 광역 라벨을 저장한다 — 구 단위는 화면에 내보내지 않는다.
+window.requestUserLocation = function () {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      userLocationStatus = 'denied';
+      persistUserLocation();
+      resolve({ ok: false, reason: 'unsupported' });
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        userLocation = resolveRegionFromCoords(userCoords.lat, userCoords.lng) || '';
+        userLocationStatus = 'granted';
+        persistUserLocation();
+        resolve({ ok: true, region: userLocation });
+      },
+      () => {
+        // 거부해도 '서울'로 가정하지 않는다. 미설정으로 남기고 필터를 건너뛴다.
+        userCoords = null;
+        userLocation = '';
+        userLocationStatus = 'denied';
+        persistUserLocation();
+        resolve({ ok: false, reason: 'denied' });
+      },
+      { timeout: 8000, maximumAge: 600000 }
+    );
+  });
+};
+
+// 예전에는 발견 탭이 렌더될 때마다 조용히 위치를 물었다. 이제는 온보딩과
+// 설정 배너에서 명시적으로만 요청한다.
+function ensureUserRegion() { /* no-op: 위치는 명시적 동의로만 받는다 */ }
+window.ensureUserRegion = ensureUserRegion;
+
+// ── 거리 ───────────────────────────────────────────────
+// 두 좌표가 모두 있을 때만 계산한다. 하나라도 없으면 null이고, 화면에서는
+// 거리 칩 자체가 사라진다 — id 해시로 만든 가짜 숫자를 보여주지 않는다.
+function haversineKm(a, b) {
+  const R = 6371;
+  const toRad = d => d * Math.PI / 180;
+  const dLat = toRad(b.lat - a.lat);
+  const dLng = toRad(b.lng - a.lng);
+  const s1 = Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(s1)));
+}
+
+function getProfileCoords(profile) {
+  if (!profile || typeof profile !== 'object') return null;
+  const c = profile.coords;
+  if (c && Number.isFinite(c.lat) && Number.isFinite(c.lng)) return c;
+  if (Number.isFinite(profile.lat) && Number.isFinite(profile.lng)) {
+    return { lat: profile.lat, lng: profile.lng };
+  }
+  return null;
+}
+
+function getDistanceKm(profile) {
+  if (!window.hasUserLocation()) return null;
+  const other = getProfileCoords(profile);
+  if (!other) return null;
+  return haversineKm(userCoords, other);
+}
+window.getDistanceKm = getDistanceKm;
+
+// 거리 칩 문자열. 알 수 없어도 칸을 비우지 않는다 — 표지 메타바는 No./거리/성향
+// 세 칸이 고정이라, 가운데가 사라지면 나머지가 밀린다. 자리는 지키되 값이 없다는
+// 사실은 분명히 보이게 '--km'로 채운다.
+const DISTANCE_UNKNOWN_LABEL = '--km';
+window.DISTANCE_UNKNOWN_LABEL = DISTANCE_UNKNOWN_LABEL;
+
+function formatDistanceLabel(profile) {
+  const km = getDistanceKm(profile);
+  if (km === null) return DISTANCE_UNKNOWN_LABEL;
+  // '--km'과 같은 붙임 형태. 같은 칸에 번갈아 들어가므로 간격이 어긋나면 안 된다.
+  return km < 1 ? `${(Math.round(km * 10) / 10).toFixed(1)}km` : `${Math.round(km)}km`;
+}
+window.formatDistanceLabel = formatDistanceLabel;
+
+// 정원이 찬 모임은 권해봐야 들어갈 수 없다. 날짜가 남았어도 후보에서 뺀다.
+function isMeetupFull(m) {
+  const cap = Number(m && m.maxCap);
+  const cur = Number(m && m.currentCap);
+  if (!Number.isFinite(cap) || cap <= 0) return false; // 정원 개념이 없는 항목
+  return Number.isFinite(cur) && cur >= cap;
+}
+
+// 다섯 조건을 통과한 모임을 마감 임박순으로 최대 3개. 모자라면 있는 만큼만,
+// 하나도 없으면 빈 배열 — 그때는 브릿지 카드 자체가 뜨지 않는다.
+function getBridgeMeetups() {
+  const now = Date.now();
+  const age = getAge(userBirthDate && userBirthDate.year);
+  const region = getUserRegion();
+
+  const eligible = MOCK_MEETUPS.filter(m =>
+    m &&
+    m.timestamp &&                 // 마감 시점을 알 수 있어야 임박순에 올린다
+    isSocialMeetup(m) &&           // ① 카테고리 = 소셜
+    !isMeetupFull(m) &&            // ③ 만석 아님
+    matchesRegion(m, region) &&    // ④ 지역 일치
+    matchesAgeBand(m, age)         // ⑤ 연령대 포함
+  ).map(m => ({ m, t: new Date(m.timestamp).getTime() }))
+   .filter(x => Number.isFinite(x.t));
+
+  const notDismissed = eligible.filter(x => !dismissedBridgeIds.has(String(x.m.id)));
+  const upcoming = notDismissed.filter(x => x.t >= now); // ② 마감 안 지남
+  const pool = upcoming.length || !window.__P2_BRIDGE_ALLOW_PAST
+    ? upcoming
+    // 목업 데이터가 통째로 과거로 밀려 있을 때도 카드가 보이게 하는 개발용 폴백.
+    // 실제 데이터가 들어오면 위 분기에서 항상 걸리므로 여기까지 오지 않는다.
+    : notDismissed;
+
+  return pool
+    .sort((a, b) => a.t - b.t)
+    .slice(0, BRIDGE_MEETUP_LIMIT)
+    .map(x => x.m);
+}
+window.getBridgeMeetups = getBridgeMeetups;
+window.__P2_BRIDGE_ALLOW_PAST = window.__P2_BRIDGE_ALLOW_PAST !== false;
+
+// "9/5 (토)"
+function formatBridgeDate(timestamp) {
+  const d = new Date(timestamp);
+  if (Number.isNaN(d.getTime())) return '';
+  const W = ['일', '월', '화', '수', '목', '금', '토'];
+  return `${d.getMonth() + 1}/${d.getDate()} (${W[d.getDay()]})`;
+}
+
+// 지역만 남긴다: "마포구 (상암)" → "마포구"
+function shortenMeetupArea(shortLocation) {
+  return String(shortLocation || '').split('(')[0].trim();
+}
+
+function getMeetupBridgeCardHTML(m, levelClass, isFront) {
+  const avatars = (m.participants || []).slice(0, 5);
+  const extra = Math.max(0, (m.currentCap || 0) - avatars.length);
+  const metaLine = [
+    formatBridgeDate(m.timestamp),
+    shortenMeetupArea(m.shortLocation),
+    `${m.currentCap}/${m.maxCap}명`,
+  ].filter(Boolean).join(' · ');
+
+  return `
+    <div class="book-card bridge-card ${levelClass}" data-id="__bridge_${m.id}__" data-bridge-meetup="${m.id}"${isFront ? '' : ' aria-hidden="true"'}>
+      <div class="book-spine-soft"></div>
+      <div class="bridge-card-inner">
+        <p class="bridge-lead">이번주 이런 모임은 어떠세요?</p>
+        <div class="bridge-rule"></div>
+
+        <div class="bridge-people">
+          <div class="attendee-stack">
+            ${avatars.map(url => `<div class="attendee-avatar" style="background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')}
+            ${extra > 0 ? `<span class="bridge-people-more">+${extra}</span>` : ''}
+          </div>
+          <span class="bridge-people-label">이런 분들이 모여요</span>
+        </div>
+
+        <h3 class="bridge-title">${m.title}</h3>
+        <p class="bridge-meta">${metaLine}</p>
+
+        <button type="button" class="bridge-cta"${isFront ? '' : ' tabindex="-1"'} onclick="window.openMeetupsFromBridge(${m.id})">모임 탭에서 더 보기</button>
+      </div>
+    </div>
+  `;
+}
+
+// 목록으로 던져놓고 다시 찾게 하지 않는다. 카드에 적힌 그 모임의 상세를 연다.
+// 탭을 먼저 바꿔두는 건 상세를 닫았을 때 뒤에 모임 목록이 남아 있게 하기 위함.
+window.openMeetupsFromBridge = function (meetupId) {
+  switchTab('meetups');
+  const id = Number(meetupId);
+  if (!Number.isFinite(id)) return;
+  setTimeout(() => openMeetupFromList(id), 100);
+};
+
 window.swipeUp = function () {
   const card = document.querySelector('.book-card.level-0');
   if (!card) return;
+  if (card.classList.contains('bridge-card')) { card.style.transform = ''; return; }
   const id = card.dataset.id.replace('p', '');
   handleCardClick(parseInt(id));
   card.style.transform = '';
 };
+
+// 프로필북과 같은 동작으로 밀어낸 뒤 소진 화면을 그린다.
+function slideBridgeAway(card, dir) {
+  const meetupId = card.dataset.bridgeMeetup;
+  card.style.transform = `translateX(${dir * 150}%) rotate(${dir * 30}deg)`;
+  card.style.opacity = '0';
+  setTimeout(() => window.dismissBridgeCard(meetupId), 300);
+}
 
 window.undoSwipe = function () {
   if (swipeHistory.length === 0) return;
   swipeHistory.pop();
   renderDiscoverTab();
 };
+
+// ── 성향 모델 (Give / Take / Give&Take) ─────────────────
+//
+// 저장값은 기존 F/B/V와 같은 짧은 대문자 코드 컨벤션을 따른다: 'G' / 'T' / 'GT'.
+// 화면에 나가는 문자열은 두 종류다.
+//   ROLE_LABELS  풀 텍스트 — 온보딩·필터·툴팁처럼 읽고 고르는 자리
+//   ROLE_SHORT   약어     — 책 표지 메타바처럼 한 글자 자리에 들어가는 곳
+// 데이터는 'F'/'B'/'V'로 들어오는데 카드가 'booker'/'visitor'와 비교하고 있었다.
+// 늘 else로 빠져서 모든 프로필이 F로 보였다. 그래서 매핑은 여기 하나만 둔다.
+const ROLE_CODES = ['G', 'T', 'GT'];
+const ROLE_LABELS = { G: 'Give', T: 'Take', GT: 'Give&Take' };
+const ROLE_SHORT = { G: 'G', T: 'T', GT: 'G&T' };
+
+// 백엔드가 'give' / 'GIVE&TAKE' / 'giveandtake' 중 무엇으로 주든 한 코드로 모은다.
+function getRoleCode(role) {
+  const c = String(role || '').trim().toUpperCase().replace(/[\s_&-]/g, '');
+  // 레거시 F/B/V. 이 축을 되살리는 게 아니라, Give/Take 이전에 저장된 값을
+  // 읽어내기 위한 대응이다: B 부치 → Give, F 팸 → Take, V 무성향 → Give&Take.
+  if (c === 'G' || c === 'GIVE' || c === 'B' || c === 'BUTCH') return 'G';
+  if (c === 'T' || c === 'TAKE' || c === 'F' || c === 'FEMME') return 'T';
+  if (c === 'GT' || c === 'GIVEANDTAKE' || c === 'GIVETAKE' || c === 'V' || c === 'VISITOR') return 'GT';
+  return '';
+}
+
+// 표지처럼 폭이 한 글자뿐인 자리.
+function getRoleShort(role) {
+  const c = getRoleCode(role);
+  return c ? ROLE_SHORT[c] : '';
+}
+
+// 읽고 고르는 자리.
+function getRoleLabel(role) {
+  const c = getRoleCode(role);
+  return c ? ROLE_LABELS[c] : '';
+}
+window.getRoleCode = getRoleCode;
+window.getRoleShort = getRoleShort;
+window.getRoleLabel = getRoleLabel;
+
+// ── 결정론적 셔플 ──────────────────────────────────────
+// 같은 주에는 늘 같은 순서가 나와야 한다. Math.random()을 쓰면 새로고침마다
+// 다른 책이 배달되어 "이번 주 3권"이라는 약속이 성립하지 않는다.
+function seedFrom(value) {
+  const str = String(value);
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function seededRandom(seed) {
+  let t = (seed + 0x6D2B79F5) >>> 0;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+
+function seededShuffle(list, seed) {
+  const out = [...list];
+  const base = seedFrom(seed);
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(seededRandom(base + i) * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 // ── 책등 색상 · 거리 계산 ────────────────────────────────
 const SPINE_COLORS = ['#C89FDB', '#A8C5A0', '#E8B4A0', '#9FB8D8', '#D4B896', '#B8A0C8'];
@@ -6057,11 +7745,6 @@ function getSpineColor(id) {
   return SPINE_COLORS[[...s].reduce((acc, c) => acc + c.charCodeAt(0), 0) % SPINE_COLORS.length];
 }
 const getMatchSpineColor = getSpineColor;
-
-function getDistance(id) {
-  const seed = (typeof id === 'string' ? parseInt(id.replace('p', '')) : id);
-  return (0.5 + (seed % 45) / 10).toFixed(1);
-}
 
 // ── 발견 탭 렌더링 · 매칭 그리드 · 보관함 ────────────
 window.renderDiscoverTab = function () {
@@ -6085,12 +7768,14 @@ window.renderDiscoverTab = function () {
       else aidx = 9;
       if (aidx < _amin || aidx > _amax) return false;
       if (window._dfRoles && window._dfRoles.length && !window._dfRoles.includes('none')) {
-        const pRole = p.role === 'F' ? 'F' : (p.role === 'B' ? 'B' : 'V');
-        if (!window._dfRoles.includes(pRole)) return false;
+        const pRole = getRoleCode(p.role);
+        if (!pRole || !window._dfRoles.includes(pRole)) return false;
       }
       if (window._dfMaxDist < 200) {
-        const d = getDistance(item.id);
-        if (d > window._dfMaxDist) return false;
+        const d = getDistanceKm(p);
+        // 거리를 모르면 이 조건으로 거르지 않는다. 위치 미설정 유저가
+        // 슬라이더를 건드렸다는 이유로 빈 화면을 보면 안 된다.
+        if (d !== null && d > window._dfMaxDist) return false;
       }
       return true;
     });
@@ -6121,7 +7806,12 @@ window.renderDiscoverTab = function () {
     return;
   }
 
-  if (remaining.length === 0) {
+  // 위치 조회는 여기서 한 번만 시작된다. 결과가 늦게 오면 그때 다시 그린다.
+  ensureUserRegion();
+  const bridgeMeetups = shouldShowMeetupBridge() ? getBridgeMeetups() : [];
+  const hasBridge = bridgeMeetups.length > 0;
+
+  if (remaining.length === 0 && !hasBridge) {
     // Check if any undecided cards from original 6 remain
     const undecidedInPool = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
     const allDone = undecidedInPool.length === 0;
@@ -6130,17 +7820,32 @@ window.renderDiscoverTab = function () {
     const viewedList = window.weeklyViewedProfiles || [];
 
     const viewedListHTML = viewedList.length > 0 ? `
-      <div style="width:100%; text-align:left; margin-top:32px; padding: 0 4px;">
-        <div style="font-size:13px; font-weight:700; color:#444; margin-bottom:12px;">이번 주 프로필북 다시보기</div>
+      <div class="revisit-list">
+        <h3 class="revisit-title">이번 주 프로필북 다시보기</h3>
         ${viewedList.map(item => {
-          const vp = item.profile;
-          return `<div onclick="handleCardClick(${parseInt(item.id.replace('p',''))})" style="display:flex; align-items:center; gap:12px; padding:10px 12px; background:#FFF; border-radius:12px; margin-bottom:8px; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
-            <div style="width:44px; height:44px; border-radius:50%; background-image:url('${vp.image}'); background-size:cover; background-position:center; flex-shrink:0;"></div>
-            <div style="flex:1; min-width:0;">
-              <div style="font-size:14px; font-weight:600; color:#2C2C2A;">${vp.name}</div>
-              <div style="font-size:12px; color:#888; margin-top:2px;">${vp.bio ? vp.bio.slice(0,28) + (vp.bio.length > 28 ? '…' : '') : ''}</div>
+          const vp = item.profile || {};
+          const vpId = parseInt(String(item.id).replace('p', ''), 10);
+          if (!Number.isFinite(vpId)) return '';
+          const state = window.getBookState(item.id);
+          const line = (vp.bio || '').trim();
+          const stateLabel = state === 'paged' ? '좋아요를 보낸 프로필북'
+            : state === 'closed' ? '덮은 프로필북, 눌러서 되돌릴 수 있어요'
+            : '';
+          const mark = state === 'paged'
+            ? '<span class="revisit-mark revisit-mark--paged" aria-hidden="true">♥</span>'
+            : state === 'closed'
+              ? '<span class="revisit-mark revisit-mark--closed" aria-hidden="true">책 덮음</span>'
+              : '';
+          return `<div class="revisit-row is-${state}" role="button" tabindex="0"
+              aria-label="${(vp.name || '이름 없음')}${stateLabel ? ', ' + stateLabel : ''}"
+              onclick="handleCardClick(${vpId})">
+            <div class="revisit-avatar" style="background-image:url('${vp.image}');"></div>
+            <div class="revisit-text">
+              <div class="revisit-name">${vp.name || '이름 없음'}</div>
+              ${line ? `<div class="revisit-line">${line}</div>` : ''}
             </div>
-            <i data-lucide="chevron-right" style="width:16px; height:16px; color:#CCC; flex-shrink:0;"></i>
+            ${mark}
+            <i data-lucide="chevron-right" class="revisit-chevron" aria-hidden="true"></i>
           </div>`;
         }).join('')}
       </div>
@@ -6154,29 +7859,18 @@ window.renderDiscoverTab = function () {
           <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
           <p style="color: #9B72CC; font-size:14px; font-weight:600; margin-bottom:0;">${nextMondayStr}</p>
 
-          <button id="discover-retry-btn" style="display:block; margin:20px auto 0; border:1.5px solid #9B72CC; color:#9B72CC; background:transparent; border-radius:24px; padding:10px 28px; font-size:14px; font-family:inherit; cursor:pointer;">다시 읽기</button>
-
+          ${P_QURATED_ENABLED ? `
           <div class="p-qurated-promo-card" style="margin-top:24px;">
             <div style="font-size: 14px; font-weight: 700; color: #9B72CC; margin-bottom: 6px;">p.Qurated</div>
             <div style="font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
             <div onclick="window.openQuratedPage()" style="font-size: 13px; font-weight: 700; color: #9B72CC; cursor: pointer;">자세히 보기</div>
           </div>
+          ` : ''}
 
           ${viewedListHTML}
           ${getTabWatermarkHTML()}
         </div>
       `;
-
-    document.getElementById('discover-retry-btn')?.addEventListener('click', () => {
-      let rem = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false));
-      if (rem.length === 0) {
-        pagedSet.clear();
-        passedSet.clear();
-        rem = [...dailyProfiles];
-      }
-      browseQueue = [...rem];
-      renderDiscoverTab();
-    });
 
     if (typeof lucide !== 'undefined') lucide.createIcons();
     return;
@@ -6188,12 +7882,27 @@ window.renderDiscoverTab = function () {
         <div class="stack-wrapper" id="stack-wrapper">
     `;
 
-  const displayCount = Math.min(remaining.length, 4);
+  // 브릿지 카드는 늘 맨 뒤에 깔린다. 앞의 프로필북을 한 장씩 넘기다 보면
+  // 마지막에 자연스럽게 올라오고, 그 지점이 스택의 끝이다.
+  // 모임 하나당 풀사이즈 카드 하나. 프로필북 뒤에 순서대로(마감 임박순) 깔려,
+  // 한 장씩 스와이프해 넘기는 감각이 프로필북과 같아진다.
+  const stackItems = [
+    ...remaining,
+    ...bridgeMeetups.map(m => ({ id: `__bridge_${m.id}__`, type: 'bridge', meetup: m })),
+  ];
+
+  const displayCount = Math.min(stackItems.length, 4);
   for (let i = displayCount - 1; i >= 0; i--) {
-    const item = remaining[i];
-    const p = item.profile;
+    const item = stackItems[i];
     const levelClass = `level-${i}`;
-    const distance = getDistance(item.id);
+
+    if (item.type === 'bridge') {
+      html += getMeetupBridgeCardHTML(item.meetup, levelClass, i === 0);
+      continue;
+    }
+
+    const p = item.profile;
+    const distanceLabel = formatDistanceLabel(p);
 
     const isPaged = pagedSet?.has(item.id) ?? false;
     const isPassed = passedSet?.has(item.id) ?? false;
@@ -6221,8 +7930,10 @@ window.renderDiscoverTab = function () {
           <div class="book-cover-content">
             <div class="book-meta-bar">
               <span class="book-meta-no">No. ${getAge(p.birthYear)}</span>
-              <span class="book-meta-dist">${distance} km</span>
-              <span class="book-meta-role">${p.role === 'visitor' ? 'V' : (p.role === 'booker' ? 'B' : 'F')}</span>
+              <span class="book-meta-facts">
+                <span class="book-meta-dist">${distanceLabel}</span>
+                <span class="book-meta-role">${getRoleShort(p.role)}</span>
+              </span>
             </div>
             <div class="book-spacer-top"></div>
             <div class="book-title">${p.name}</div>
@@ -6231,12 +7942,24 @@ window.renderDiscoverTab = function () {
           </div>
           <div class="book-bg-photo" style="background-image: url('${p.image}')"></div>
           <div class="book-overlay"></div>
+          ${i === 0 ? `<button type="button" class="close-book-link" aria-label="${p.name} 책 덮기 — 다시 보이지 않게 하기" onclick="event.stopPropagation(); window.confirmCloseBook('${item.id}')">책 덮기</button>` : ''}
         </div>
       `;
   }
 
+  const frontItem = stackItems[0];
+  const likeTarget = frontItem && frontItem.type !== 'bridge' ? frontItem : null;
+
   html += `
         </div>
+
+        ${likeTarget ? `
+          <button type="button" class="discover-like-fab" id="discover-like-fab"
+            aria-label="${likeTarget.profile.name}에게 마음 보내기"
+            onclick="window.pageFromCard('${likeTarget.id}')">
+            <i data-lucide="heart" class="discover-like-icon" aria-hidden="true"></i>
+          </button>
+        ` : ''}
 
         <div class="paged-heart-overlay" id="paged-heart-overlay">
           <i data-lucide="heart" fill="#9B72CC" style="color:#9B72CC; width:48px; height:48px;"></i>
@@ -6251,11 +7974,15 @@ window.renderDiscoverTab = function () {
 
   const frontCard = document.querySelector('.book-card.level-0');
   if (frontCard) {
+    // 브릿지 카드도 넘길 수 있다 — 그 뒤에 소진 화면이 이어진다. 다만 표지를
+    // 눌러도 프로필은 열리지 않는다. 그 위의 버튼만 동작한다.
     initStackGestures(frontCard);
-    frontCard.addEventListener('click', (e) => {
-      const id = frontCard.dataset.id.replace('p', '');
-      handleCardClick(parseInt(id));
-    });
+    if (!frontCard.classList.contains('bridge-card')) {
+      frontCard.addEventListener('click', (e) => {
+        const id = frontCard.dataset.id.replace('p', '');
+        handleCardClick(parseInt(id));
+      });
+    }
   }
 };
 
@@ -6276,7 +8003,7 @@ window.openAllMatchesGrid = function () {
         ${MATCHED_PROFILES.map((match, idx) => {
       const p = MOCK_PROFILES.find(pr => pr.id === match.id);
       const _spineColor = getMatchSpineColor(match.id);
-      const distance = getDistance(match.id);
+      const distanceLabel = formatDistanceLabel(p);
       const age = p ? getAge(p.birthYear) : '';
       const _answers = match.answers || [];
       const _randomAnswer = _answers.length ? _answers[Math.floor(Math.random() * _answers.length)] : '';
@@ -6288,7 +8015,7 @@ window.openAllMatchesGrid = function () {
               <div style="position:absolute; bottom:0; left:0; width:100%; height:35%; background:linear-gradient(to top, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
               <div style="position:absolute; top:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 8px; box-sizing:border-box; z-index:4;">
                 <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">No.${age}</span>
-                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">${distance}km</span>
+                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">${distanceLabel}</span>
               </div>
               <div class="thumbnail-card-content">
                 <div class="thumbnail-nickname" style="top:30%; transform:translateY(-50%);">${p ? p.name : match.name}</div>
@@ -6334,13 +8061,13 @@ window.renderSavedBox = function () {
         <div class="saved-grid">
           ${savedProfiles.map(p => {
       const spineColor = getSpineColor(p.id);
-      const distance = getDistance(p.id);
+      const distanceLabel = formatDistanceLabel(p);
       return `
               <div class="saved-book-cover" onclick="handleCardClick(${p.id})">
                 <div class="book-spine" style="background: linear-gradient(to right, ${spineColor}, rgba(0,0,0,0.15))"></div>
                 <div class="thumbnail-card-content">
                   <div class="thumbnail-nickname">${p.name}</div>
-                  <div class="thumbnail-info">${getAge(p.birthYear)} ・ ${distance}km</div>
+                  <div class="thumbnail-info">${getAge(p.birthYear)} ・ ${distanceLabel}</div>
                 </div>
                 <div class="book-bg-photo" style="background-image: url('${p.image}')"></div>
                 <div class="book-overlay"></div>
@@ -6812,6 +8539,11 @@ window.showFatalError = function (message) {
 // ── 앱 시작 (startApp) · 슬라이더 셋업 ────────
 function startApp() {
   if (!appContainer) return;
+
+  // 온보딩 도중 새로고침해도 성향·연애 상태·seeking_intent·위치가 남아 있게 한다.
+  restoreOnboardingChoices();
+  restoreUserLocation();
+  restoreMyAnswers();
 
   // Kick off the session check in parallel with the splash animation so
   // it's already resolved by the time doTransition fires.
@@ -7551,6 +9283,10 @@ window.openLibraryPage = function () {
 
 // ── p.Qurated 페이지 ────────────────────────────────
 window.openQuratedPage = function () {
+  // 진입점을 다 껐어도 이 함수는 전역에 남아 있다. 여기서 한 번 더 막아야
+  // 딥링크나 남은 핸들러로 화면이 열리는 일이 없다.
+  if (!P_QURATED_ENABLED) return;
+
   const mc = getModalContainer();
   let selectedPlan = null;
 
@@ -7685,9 +9421,7 @@ window.openDiscoverFilterSheet = function () {
   const dist  = window._dfMaxDist;
 
   const roleOptions = [
-    { key: 'F', label: 'F 팸' },
-    { key: 'B', label: 'B 부치' },
-    { key: 'V', label: 'V 무성향' },
+    ...ROLE_CODES.map(c => ({ key: c, label: ROLE_LABELS[c] })),
     { key: 'none', label: '상관없음' },
   ];
 
@@ -7770,9 +9504,6 @@ window.openDiscoverFilterSheet = function () {
     } else {
       _sheetRoles.push(key);
     }
-    document.querySelectorAll('#df-role-chips .filter-chip').forEach(chip => {
-      chip.classList.toggle('selected', _sheetRoles.includes(chip.textContent.split(' ')[0] === 'F' ? 'F' : chip.textContent.split(' ')[0] === 'B' ? 'B' : chip.textContent.includes('무성향') ? 'V' : 'none'));
-    });
     // Re-render chips cleanly
     document.getElementById('df-role-chips').innerHTML = roleOptions.map(r =>
       `<div class="filter-chip${_sheetRoles.includes(r.key) ? ' selected' : ''}" onclick="window._dfToggleRole('${r.key}')">${r.label}</div>`
