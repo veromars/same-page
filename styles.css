@@ -5567,3 +5567,230 @@ p {
   .chapter-tab { transition: none; }
   .chapter-q-list.is-swapping { animation: none; }
 }
+
+/* ── 모임 참여 — 신청 → 승인 → 확정 ───────────────────────
+   신청과 확정은 다른 상태다. 화면에서 그 차이가 보이지 않으면
+   "나 참여되는 건가?"를 유저가 스스로 판단해야 한다. */
+.join-status-card {
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-bottom: 12px;
+}
+
+.join-status-card.is-pending {
+  background: #FFF6E3;
+  border: 1px solid #F0DCB0;
+}
+
+.join-status-card.is-confirmed {
+  background: #EDF7ED;
+  border: 1px solid #C7E3C7;
+}
+
+.join-status-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2D2A2B;
+}
+
+.join-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #E0A030;
+}
+
+.join-status-body {
+  margin-top: 5px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #6E696B;
+  word-break: keep-all;
+}
+
+.join-locked-note {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #948F91;
+}
+
+.join-nickname-tip {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(137, 96, 184, 0.08);
+  font-size: 13px;
+  line-height: 1.55;
+  color: #4A4547;
+  word-break: keep-all;
+}
+
+.join-nickname-tip b { color: #8960B8; }
+
+.join-count-note {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #948F91;
+}
+
+/* 확정 전에는 다른 참여자를 볼 수 없다. 빈칸 대신 이유를 세워둔다. */
+.attendee-locked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: #948F91;
+  font-size: 13px;
+  word-break: keep-all;
+}
+
+/* ── 호스트 — 신청자 목록 ─────────────────────────────── */
+.applicant-section {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+}
+
+.applicant-section-title {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.applicant-count {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #8960B8;
+  background: rgba(137, 96, 184, 0.12);
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.applicant-full-note {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #FFF6E3;
+  font-size: 12px;
+  color: #7A5C00;
+  word-break: keep-all;
+}
+
+.applicant-empty {
+  padding: 18px 0;
+  font-size: 13px;
+  color: #948F91;
+}
+
+.applicant-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.applicant-row:last-child { border-bottom: none; }
+
+.applicant-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background-color: #EDEAE5;
+  background-size: cover;
+  background-position: center top;
+}
+
+.applicant-meta { flex: 1; min-width: 0; }
+
+.applicant-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+.applicant-time {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #948F91;
+}
+
+.applicant-approve {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 10px;
+  background: #9B72CC;
+  color: #FFF;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.applicant-approve:disabled {
+  background: #D8D5D6;
+  cursor: default;
+}
+
+.applicant-approve:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.applicant-done {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5A9C5E;
+}
+
+/* 신청 직후 안내 — 카톡방 입장과 닉네임 변경이 승인의 전제다. */
+.apply-steps {
+  width: 100%;
+  margin: 12px 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apply-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: #4A4547;
+  word-break: keep-all;
+}
+
+.apply-step-no {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(137, 96, 184, 0.14);
+  color: #8960B8;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.apply-step b { color: #8960B8; }
