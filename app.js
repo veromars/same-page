@@ -1017,9 +1017,9 @@ const RELATIONSHIP_BADGE_LABELS = {
   married: '결혼했어요 💍',
 };
 
-// 닉네임은 한 달에 한 번만 바꿀 수 있다. 서로를 알아보는 이름이 자주 바뀌면
+// 닉네임은 3개월에 한 번만 바꿀 수 있다. 서로를 알아보는 이름이 자주 바뀌면
 // 같은 사람인지 확인할 방법이 없다.
-const NICKNAME_COOLDOWN_DAYS = 30;
+const NICKNAME_COOLDOWN_DAYS = 90;
 let userNicknameChangedAt = null; // epoch ms
 
 function isPartnered() {
@@ -1500,6 +1500,7 @@ window.selectRelationshipStatus = function (status, btn) {
   persistOnboardingChoices();
   // 진입점(수정 아이콘) 노출 여부가 달라지므로 편집 화면을 다시 그린다.
   if (document.getElementById('profile-edit-modal')) window.renderProfileEditBody();
+  if (document.querySelector('.settings-basics')) window.renderBasicsForm();
 }
 
 // 같은 스텝 안에 pill 그룹이 둘 이상 있으므로, 해제는 누른 pill이 속한
@@ -2735,7 +2736,7 @@ window.showPostOnboardingModal = function () {
       <div class="post-onboarding-card">
         <div class="post-onboarding-title">p.2를 시작하기 전에,</div>
         <div class="post-onboarding-sub">나를 먼저 소개해볼까요?</div>
-        <button class="post-onboarding-btn" onclick="startProfileSetup()">내 프로필 작성하기</button>
+        <button class="post-onboarding-btn" onclick="startProfileSetup()">내 프로필북 작성하기</button>
         <button class="post-onboarding-link" onclick="skipProfileSetup()">나중에 하기</button>
       </div>
     `;
@@ -3085,7 +3086,7 @@ window.switchTab = function (tabName) {
     contentArea.innerHTML = `
       <div class="scroll-y" style="height: calc(100vh - 84px); height: calc(100dvh - 84px);">
         <div class="tab-header-row" style="padding: 10px 24px 0;">
-          <h2>내 프로필</h2>
+          <h2>내 프로필북</h2>
           <div class="tab-header-icons">
             <button type="button" class="profile-edit-btn" onclick="window.openMyProfileEdit()">
               <i data-lucide="pencil" style="width:15px; height:15px;" aria-hidden="true"></i>
@@ -4046,9 +4047,42 @@ window.deleteMyPhoto = function (idx) {
   }
 };
 
+// '+'를 누르면 실제 사진 라이브러리가 열린다. input[type=file]을 화면에
+// 두지 않고 그때그때 만들어 쓴다 — 그리드가 다시 그려질 때마다 살아남을
+// 엘리먼트를 관리하지 않아도 된다.
 window.addMyPhoto = function () {
-  if ((window.myPhotos || []).length >= 6) return;
-  // Placeholder — real impl would open <input type="file">
+  const MAX = 6;
+  const remaining = MAX - (window.myPhotos || []).length;
+  if (remaining <= 0) { window.showToast(`사진은 최대 ${MAX}장까지 올릴 수 있어요`); return; }
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.multiple = true;
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.addEventListener('change', () => {
+    const files = [...(input.files || [])].slice(0, remaining);
+    let pending = files.length;
+    if (!pending) { input.remove(); return; }
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        window.myPhotos.push(e.target.result);
+        if (--pending === 0) {
+          window.refreshPhotoGrid();
+          input.remove();
+        }
+      };
+      reader.onerror = () => {
+        if (--pending === 0) { window.refreshPhotoGrid(); input.remove(); }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  input.click();
 };
 
 window.initPhotoGrid = function () {
@@ -4988,12 +5022,99 @@ window.notifyMeetupParticipants = notifyMeetupParticipants;
 // ── 설정 페이지 ────────────────────────────────────────
 // 예전에는 내 프로필 화면 하단에 인라인으로 붙어 있었다. 프로필은 남에게
 // 보여줄 내용이고 설정은 나만 쓰는 도구라, 같은 스크롤에 있을 이유가 없다.
+// 닉네임 · 생년월일 · 성향 · 연애 상태 · 찾는 것.
+// 프로필 '내용'이 아니라 계정의 뼈대라서 수정 화면이 아니라 설정에 둔다.
+window.closeSettingsPage = function () {
+  if (window.__basicsNameDirty) {
+    userNicknameChangedAt = Date.now();
+    window.__basicsNameDirty = false;
+    persistOnboardingChoices();
+  }
+  closeModal();
+  if (currentTab === 'profile') switchTab('profile');
+};
+
+function getBasicsFormHTML() {
+  const nickOk = window.canChangeNickname();
+  const birthText = `${userBirthDate.year}년 ${userBirthDate.month}월 ${userBirthDate.day}일`;
+  const seekingLabel = (SEEKING_INTENTS.find(o => o.key === userSeekingIntent) || {}).label || '';
+
+  return `
+    <label class="edit-field">
+      <span class="edit-field-label">닉네임</span>
+      <input type="text" class="input-field" id="edit-name" maxlength="20"
+        placeholder="닉네임" value="${escapeAttr(userName || '')}"
+        ${nickOk ? '' : 'disabled'}
+        oninput="window.updateBasicsName(this.value)" />
+      ${nickOk
+        ? '<span class="edit-field-hint">닉네임은 3개월에 한 번 바꿀 수 있어요</span>'
+        : `<span class="edit-field-hint is-locked">${escapeHTML(window.nicknameUnlockText())}</span>`}
+    </label>
+
+    <label class="edit-field">
+      <span class="edit-field-label">생년월일</span>
+      <!-- 온보딩 이후 영구 고정. 나이는 매칭의 기준값이라 나중에 못 바꾼다. -->
+      <div class="edit-field-readonly">${escapeHTML(birthText)}</div>
+      <span class="edit-field-hint">생년월일은 바꿀 수 없어요</span>
+    </label>
+
+    <h3 class="basics-heading">성향</h3>
+    <div class="role-pills">
+      ${ROLE_CODES.map(c => `
+        <div class="role-pill${userRole === c ? ' active' : ''}" onclick="selectRole('${c}', this)">${ROLE_LABELS[c]}</div>
+      `).join('')}
+    </div>
+
+    <h3 class="basics-heading">연애 상태</h3>
+    <div class="role-pills">
+      ${RELATIONSHIP_STATUSES.map(o => `
+        <div class="role-pill${userRelationshipStatus === o.key ? ' active' : ''}" onclick="selectRelationshipStatus('${o.key}', this)">${o.label}</div>
+      `).join('')}
+    </div>
+
+    <h3 class="basics-heading">p.2에서 찾는 것</h3>
+    ${isPartnered()
+      ? `<div class="edit-section-note">연애 중이거나 결혼하신 분께는 "친구/네트워크가 생겼으면 해요"로 표시돼요.</div>`
+      : `<div class="role-pills is-stacked">
+          ${SEEKING_INTENTS.map(o => `
+            <div class="role-pill${userSeekingIntent === o.key ? ' active' : ''}" onclick="window.selectSeekingFromBasics('${o.key}')">${o.label}</div>
+          `).join('')}
+        </div>`}
+  `;
+}
+window.getBasicsFormHTML = getBasicsFormHTML;
+
+// 설정 화면의 기본 사항 블록만 다시 그린다. 연애 상태를 바꾸면 아래 구성이 달라진다.
+window.renderBasicsForm = function () {
+  const host = document.querySelector('.settings-basics');
+  if (!host) return;
+  host.innerHTML = getBasicsFormHTML();
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+// 닉네임은 여기서 바뀐다. 쿨다운 시계는 화면을 떠날 때가 아니라
+// 값이 실제로 달라졌을 때 돌린다 — 설정에는 '완료' 버튼이 없다.
+window.updateBasicsName = function (value) {
+  const before = userName || '';
+  userName = value;
+  if ((value || '').trim() && value !== before) {
+    window.__basicsNameDirty = true;
+  }
+  persistOnboardingChoices();
+};
+
+window.selectSeekingFromBasics = function (key) {
+  userSeekingIntent = key;
+  persistOnboardingChoices();
+  window.renderBasicsForm();
+};
+
 window.openSettingsPage = function () {
   const mc = getModalContainer();
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 200; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
       <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
-        <button class="back-btn" aria-label="뒤로" onclick="closeModal()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
+        <button class="back-btn" aria-label="뒤로" onclick="window.closeSettingsPage()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
         <div style="font-size:16px; font-weight:600; color:var(--text-dark);">설정</div>
         <div style="width:32px;"></div>
       </div>
@@ -5010,6 +5131,9 @@ window.openSettingsPage = function () {
           <div style="font-size: 12px; color: var(--text-muted); margin-left: 4px; margin-bottom: 24px;">
             나만의 초대코드로 소중한 사람을 초대해보세요
           </div>
+
+          <div class="profile-section-label">기본 사항</div>
+          <div class="settings-basics">${getBasicsFormHTML()}</div>
 
           <div class="profile-section-label">위치</div>
           <div class="location-banner" id="location-banner">${getLocationBannerHTML()}</div>
@@ -5098,66 +5222,108 @@ function getProfileEditFormHTML() {
   const birthText = b && b.year ? `${b.year}년 ${b.month || 1}월 ${b.day || 1}일` : '—';
   const nickOk = window.canChangeNickname();
 
-  // 섹션 한 줄 = 라벨 + 현재 값 요약 + 연필. 항목마다 별도 화면으로 들어간다.
-  const row = (label, summary, handler) => `
-    <button type="button" class="edit-section-row" onclick="${handler}">
-      <span class="edit-section-label">${label}</span>
-      <span class="edit-section-summary">${summary || '아직 없어요'}</span>
-      <i data-lucide="pencil" class="edit-section-icon" aria-hidden="true"></i>
-    </button>
-  `;
-
-  const aboutFilled = ABOUT_ME_FIELDS.filter(f => (getAboutMeValue(f.key) || '').trim()).length;
-  const seekingLabel = (SEEKING_INTENTS.find(o => o.key === userSeekingIntent) || {}).label || '';
+  // 사진 그리드는 탭 위에 고정. 어느 섹션을 편집하든 내 얼굴은 늘 보인다.
+  // 아래는 관심사 / 한마디 / 나에 대해 / 나의 페이지 네 갈래의 책갈피 탭.
+  const active = PROFILE_EDIT_TABS.some(t => t.key === window.__profileEditTab)
+    ? window.__profileEditTab : PROFILE_EDIT_TABS[0].key;
 
   return `
     <div class="profile-edit-form">
-      <h3>기본 정보</h3>
-
-      <label class="edit-field">
-        <span class="edit-field-label">닉네임</span>
-        <input type="text" class="input-field" id="edit-name" maxlength="20"
-          placeholder="닉네임" value="${escapeAttr(userName || '')}"
-          ${nickOk ? '' : 'disabled'}
-          oninput="window.updateProfileField('name', this.value)" />
-        ${nickOk
-          ? '<span class="edit-field-hint">닉네임은 한 달에 한 번 바꿀 수 있어요</span>'
-          : `<span class="edit-field-hint is-locked">${escapeHTML(window.nicknameUnlockText())}</span>`}
-      </label>
-
-      <label class="edit-field">
-        <span class="edit-field-label">생년월일</span>
-        <!-- 온보딩 이후 영구 고정. 나이는 매칭의 기준값이라 나중에 못 바꾼다. -->
-        <div class="edit-field-readonly">${escapeHTML(birthText)}</div>
-      </label>
-
-      <h3>성향</h3>
-      <div class="role-pills">
-        ${ROLE_CODES.map(c => `
-          <div class="role-pill${userRole === c ? ' active' : ''}" onclick="selectRole('${c}', this)">${ROLE_LABELS[c]}</div>
-        `).join('')}
+      <div class="pe-tabs" role="tablist" aria-label="편집할 항목">
+        ${PROFILE_EDIT_TABS.map(t => {
+          const on = t.key === active;
+          return `<button type="button" role="tab" id="pe-tab-${t.key}"
+                    class="pe-tab${on ? ' is-active' : ''}"
+                    aria-selected="${on}" aria-controls="pe-panel"
+                    tabindex="${on ? '0' : '-1'}"
+                    onclick="window.selectProfileEditTab('${t.key}')">${t.label}</button>`;
+        }).join('')}
       </div>
-
-      <h3>연애 상태</h3>
-      <div class="role-pills">
-        ${RELATIONSHIP_STATUSES.map(o => `
-          <div class="role-pill${userRelationshipStatus === o.key ? ' active' : ''}" onclick="selectRelationshipStatus('${o.key}', this)">${o.label}</div>
-        `).join('')}
-      </div>
-
-      <h3 style="margin-top:32px;">더 채우기</h3>
-      <div class="edit-section-list">
-        ${isPartnered()
-          ? `<div class="edit-section-note">연애 중이거나 결혼하신 분께는 "친구/네트워크가 생겼으면 해요"로 표시돼요.</div>`
-          : row('p.2에서 찾는 것', escapeHTML(seekingLabel), 'window.openEditSeeking()')}
-        ${row('관심사', userTags.length ? escapeHTML(userTags.join(', ')) : '', 'window.openEditTags()')}
-        ${row('한마디', escapeHTML(userBio), 'window.openEditBioAbout()')}
-        ${row('나에 대해', aboutFilled ? `${aboutFilled}/${ABOUT_ME_FIELDS.length}개 작성` : '', 'window.openEditBioAbout()')}
-        ${row('나의 페이지', `${Object.keys(MY_ANSWERS).length}/${QUESTIONS.length}개 답변`, 'window.openEditChapters()')}
+      <div id="pe-panel" class="pe-panel" role="tabpanel" aria-labelledby="pe-tab-${active}">
+        ${renderProfileEditPanel(active)}
       </div>
     </div>
   `;
 }
+
+// 네 섹션 순서. 가벼운 것부터 무거운 것 순 — 관심사·한마디는 한 번에 끝나고
+// 나에 대해는 8칸, 나의 페이지는 27문항이다.
+const PROFILE_EDIT_TABS = [
+  { key: 'tags', label: '관심사' },
+  { key: 'bio', label: '한마디' },
+  { key: 'about', label: '나에 대해' },
+  { key: 'pages', label: '나의 페이지' },
+];
+window.__profileEditTab = window.__profileEditTab || 'tags';
+
+function renderProfileEditPanel(key) {
+  if (key === 'tags') {
+    return `
+      <div id="edit-tag-counter" class="interest-counter ${userTags.length >= 3 ? 'ready' : ''}">${userTags.length}/${MAX_TAGS}개 선택됨</div>
+      ${INTEREST_CATEGORIES.map(cat => `
+        <div class="tag-category">
+          <span class="tag-category-title">${cat.name}</span>
+          <div class="tags-container">
+            ${cat.tags.map(tag => `
+              <div class="tag-pill${userTags.includes(tag) ? ' selected' : ''}" onclick="window.toggleProfileTag(this, '${tag}')">${tag}</div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('')}
+    `;
+  }
+
+  if (key === 'bio') {
+    return `
+      <p class="sub-editor-note">프로필 상단에 한 줄로 걸리는 문장이에요.</p>
+      <label class="edit-field">
+        <span class="edit-field-label">한마디</span>
+        <input type="text" class="input-field" id="edit-bio" maxlength="40"
+          placeholder="${escapeAttr(DEFAULT_BIO)}" value="${escapeAttr(userBio)}"
+          oninput="window.updateProfileField('bio', this.value)" />
+      </label>
+    `;
+  }
+
+  if (key === 'about') {
+    return ABOUT_ME_FIELDS.map(f => `
+      <label class="edit-field">
+        <span class="edit-field-label">${f.label}</span>
+        <input type="text" class="input-field" id="edit-about-${f.key}" maxlength="40"
+          placeholder="${escapeAttr(f.placeholder)}" value="${escapeAttr(getAboutMeValue(f.key))}"
+          oninput="window.updateAboutMeField('${f.key}', this.value)" />
+      </label>
+    `).join('');
+  }
+
+  // 나의 페이지 — 챕터 탭(Ch1/2/3)이 이 안에 그대로 들어온다. 탭 속의 탭.
+  return renderChapterSection();
+}
+window.renderProfileEditPanel = renderProfileEditPanel;
+
+// 탭만 갈아끼운다. 사진 그리드와 탭 줄은 그대로 둔다.
+window.selectProfileEditTab = function (key) {
+  if (!PROFILE_EDIT_TABS.some(t => t.key === key)) return;
+  window.__profileEditTab = key;
+  const panel = document.getElementById('pe-panel');
+  if (!panel) return;
+  document.querySelectorAll('.pe-tab').forEach(el => {
+    const on = el.id === `pe-tab-${key}`;
+    el.classList.toggle('is-active', on);
+    el.setAttribute('aria-selected', String(on));
+    el.tabIndex = on ? 0 : -1;
+  });
+  panel.setAttribute('aria-labelledby', `pe-tab-${key}`);
+  panel.innerHTML = renderProfileEditPanel(key);
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  window.bindChapterTabKeys();
+  // 섹션을 바꿨는데 이전 섹션에서 내려둔 스크롤에 남아 있으면 엉뚱한 데서 시작한다.
+  const sc = document.getElementById('profile-edit-body');
+  if (sc) sc.scrollTop = 0;
+  panel.classList.remove('is-swapping');
+  void panel.offsetWidth;
+  panel.classList.add('is-swapping');
+};
 
 // 8항목이 각각 전역 변수라 키↔변수 매핑이 한 곳에 있어야 한다.
 function getAboutMeValue(key) {
@@ -5331,7 +5497,7 @@ window.selectChapterTab = function (chapNum) {
   const list = document.getElementById('chapter-q-list');
   if (!list) return;
 
-  document.querySelectorAll('#sub-editor .chapter-tab').forEach((el, i) => {
+  document.querySelectorAll('.chapter-tab').forEach((el, i) => {
     const on = (i + 1) === chapNum;
     el.classList.toggle('is-active', on);
     el.setAttribute('aria-selected', String(on));
@@ -5344,7 +5510,8 @@ window.selectChapterTab = function (chapNum) {
 
   // 챕터를 바꿨는데 이전 챕터에서 내려둔 스크롤에 남아 있으면 9문항 중
   // 엉뚱한 지점부터 보인다. 전환할 때마다 맨 위로 되돌린다.
-  const scroller = document.querySelector('#sub-editor .scroll-y');
+  const scroller = document.getElementById('profile-edit-body')
+    || document.querySelector('#sub-editor .scroll-y');
   if (scroller) scroller.scrollTop = 0;
 
   // 내용만 교체하면 전환이 뚝 끊긴다 — 짧은 페이드로 이어준다.
@@ -5353,14 +5520,16 @@ window.selectChapterTab = function (chapNum) {
   list.classList.add('is-swapping');
 };
 
-window.openEditChapters = function () {
+// 챕터 요약(=탭) + 선택한 챕터의 9문항. 이제 서브에디터가 아니라 프로필 수정
+// 화면의 '나의 페이지' 탭 안에 들어간다. 마크업은 한 벌만 둔다.
+function renderChapterSection() {
   const answered = ch => QUESTIONS.filter(q => q.chapter === ch && MY_ANSWERS[q.id]).length;
   const benefit = window.getWeeklyBookCount ? window.getWeeklyBookCount() : 3;
   const active = [1, 2, 3].includes(window.__chapterTab) ? window.__chapterTab : 1;
 
   // 진행 요약이 곧 탭이다. 진행률을 보는 자리와 챕터를 고르는 자리를
   // 따로 두면 같은 정보가 화면에 두 번 나온다.
-  const summary = `
+  return `
     <div class="chapter-summary">
       <div class="chapter-summary-top">
         📖 이번 주 열람 가능한 프로필북
@@ -5383,29 +5552,36 @@ window.openEditChapters = function () {
         }).join('')}
       </div>
     </div>
-  `;
-
-  const panel = `
     <div id="chapter-q-list" class="chapter-q-list" role="tabpanel" aria-labelledby="chapter-tab-${active}">
       ${window.renderChapterQuestionRows(active)}
     </div>
   `;
+}
+window.renderChapterSection = renderChapterSection;
 
-  openSubEditor('나의 페이지', summary + panel, () => {
-    // role="tab"을 붙였으면 좌우 방향키가 돌아야 한다.
-    const tabs = [...document.querySelectorAll('#sub-editor .chapter-tab')];
-    tabs.forEach((el, i) => {
-      el.addEventListener('keydown', e => {
-        const d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
-                : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
-        if (!d) return;
-        e.preventDefault();
-        const next = (i + d + tabs.length) % tabs.length;
-        window.selectChapterTab(next + 1);
-        tabs[next].focus();
-      });
+// role="tab"을 붙였으면 좌우 방향키가 돌아야 한다. 렌더 뒤에 한 번 건다.
+window.bindChapterTabKeys = function () {
+  const tabs = [...document.querySelectorAll('.chapter-tab')];
+  tabs.forEach((el, i) => {
+    if (el.__keysBound) return;
+    el.__keysBound = true;
+    el.addEventListener('keydown', e => {
+      const d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
+              : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      const next = (i + d + tabs.length) % tabs.length;
+      window.selectChapterTab(next + 1);
+      tabs[next].focus();
     });
   });
+};
+
+// 예전 진입점. 이제 '나의 페이지'는 프로필 수정 화면의 탭이라 그리로 보낸다.
+window.openEditChapters = function () {
+  window.__profileEditTab = 'pages';
+  if (!document.getElementById('profile-edit-modal')) window.openMyProfileEdit();
+  else window.renderProfileEditBody();
 };
 
 // 문항 하나를 연다. 답변 타입별 입력 UI는 openInputModal이 이미 갖고 있으므로
@@ -5413,6 +5589,7 @@ window.openEditChapters = function () {
 // compound 9문항과 multiple-choice 1문항의 구조가 날아간다.
 window.openChapterAnswer = function (qid) {
   window.__returnToChapterList = true;
+  window.__profileEditTab = 'pages';
   // openInputModal은 #modal-container를 통째로 갈아끼운다 — 그 안에 있던
   // 프로필 수정 모달이 사라지므로, 돌아올 때 다시 세워야 한다.
   const host = document.getElementById('sub-editor');
@@ -5430,9 +5607,9 @@ window.openChapterAnswer = function (qid) {
 // 문항 화면 → 수정 화면 → 문항 목록 순으로 다시 세운다.
 window.returnToChapterList = function () {
   window.__returnToChapterList = false;
+  window.__profileEditTab = 'pages';
   closeModal();
   window.openMyProfileEdit();
-  window.openEditChapters();
 };
 
 // 편집 화면. 예전에는 이쪽이 프로필 탭의 기본 화면이었고 완성본이 모달이었다.
@@ -5446,7 +5623,7 @@ window.openMyProfileEdit = function () {
     <div class="modal fade-in active" id="profile-edit-modal" style="z-index: 200; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
       <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
         <button class="back-btn" aria-label="뒤로" onclick="window.closeMyProfileEdit()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
-        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">프로필 수정</div>
+        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">내 프로필북 수정</div>
         <button type="button" class="profile-edit-done" onclick="window.closeMyProfileEdit()">완료</button>
       </div>
 
@@ -5470,6 +5647,21 @@ window.afterProfileEditRender = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
   initPhotoCarousels();
   initPhotoGrid();
+  window.bindChapterTabKeys();
+
+  // 상위 탭도 방향키로 돌아야 한다.
+  const tabs = [...document.querySelectorAll('.pe-tab')];
+  tabs.forEach((el, i) => {
+    el.addEventListener('keydown', e => {
+      const d = (e.key === 'ArrowRight' || e.key === 'ArrowDown') ? 1
+              : (e.key === 'ArrowLeft' || e.key === 'ArrowUp') ? -1 : 0;
+      if (!d) return;
+      e.preventDefault();
+      const next = (i + d + tabs.length) % tabs.length;
+      window.selectProfileEditTab(PROFILE_EDIT_TABS[next].key);
+      document.getElementById(`pe-tab-${PROFILE_EDIT_TABS[next].key}`)?.focus();
+    });
+  });
 };
 
 // 편집을 닫으면 기본 화면을 다시 그려 수정 내용이 곧바로 반영되게 한다.

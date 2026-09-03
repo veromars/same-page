@@ -5240,11 +5240,13 @@ p {
 }
 
 /* 생년월일처럼 영구 고정된 값. 입력처럼 보이지 않게 테두리를 뺀다. */
+/* 고칠 수 없는 값. 입력 필드와 같은 색으로 두면 눌러보고 나서야 안다 —
+   톤을 낮춰 읽기 전용이라는 걸 먼저 알린다. 밑줄도 점선으로. */
 .edit-field-readonly {
   padding: 14px 0 6px;
   font-size: 16px;
-  color: var(--text-dark);
-  border-bottom: 1px solid var(--border);
+  color: #948F91;
+  border-bottom: 1px dashed var(--border);
 }
 
 /* ── 섹션 행 (라벨 + 요약 + 연필) ────────────────────── */
@@ -5891,4 +5893,93 @@ p {
 .applicant-remove:focus-visible {
   outline: 2px solid #8960B8;
   outline-offset: 2px;
+}
+
+/* ── 내 프로필북 수정 — 책갈피 탭 ─────────────────────
+   챕터 탭과 같은 계열이되 한 단계 위다. 책 옆면에서 튀어나온 인덱스처럼
+   아래쪽 모서리를 죽여 지금 펼친 페이지와 이어 붙인다. */
+.pe-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 20px 0 0;
+  padding: 0 2px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pe-tabs::-webkit-scrollbar { display: none; }
+
+.pe-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  min-height: 40px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
+  color: #948F91;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.pe-tab.is-active {
+  background: var(--surface);
+  color: #8960B8;
+  /* 펼친 페이지와 이어 붙는다 — 아래 경계선을 지운다. */
+  box-shadow: 0 1px 0 0 var(--surface);
+}
+
+.pe-tab:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: -2px;
+}
+
+.pe-panel {
+  padding: 20px 16px 8px;
+  border: 1px solid var(--border);
+  border-radius: 0 12px 12px 12px;
+  background: var(--surface);
+}
+
+.pe-panel.is-swapping {
+  animation: chapter-q-swap 0.18s ease-out;
+}
+
+/* 탭 안에 들어온 챕터 블록은 카드 위에 카드가 겹치지 않게 배경을 뺀다. */
+.pe-panel .chapter-summary {
+  background: rgba(137, 96, 184, 0.06);
+}
+
+.settings-basics {
+  padding: 16px;
+  margin-bottom: 24px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.basics-heading {
+  margin: 24px 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6E696B;
+}
+
+.settings-basics .edit-field:first-child { margin-top: 0; }
+
+/* 찾는 것 세 줄은 가로로 세우면 글자가 잘린다. */
+.role-pills.is-stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pe-tab { transition: none; }
+  .pe-panel.is-swapping { animation: none; }
 }
