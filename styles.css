@@ -5849,3 +5849,46 @@ p {
   outline: 2px solid #8960B8;
   outline-offset: 2px;
 }
+
+/* ── 차단 · 참여자 제외 ──────────────────────────────── */
+.profile-block-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #948F91;
+  cursor: pointer;
+}
+
+.profile-block-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.applicant-remove {
+  appearance: none;
+  -webkit-appearance: none;
+  flex-shrink: 0;
+  min-height: 36px;
+  padding: 8px 14px;
+  border: 1px solid #E4D4D4;
+  border-radius: 10px;
+  background: transparent;
+  color: #9A5C5C;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.applicant-remove:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}

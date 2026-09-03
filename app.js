@@ -1122,6 +1122,9 @@ const P2_STORAGE_KEYS = {
   meetupJoins: 'p2_meetup_joins',
   meetupApplicants: 'p2_meetup_applicants',
   myMeetups: 'p2_my_meetups',
+  // 차단 — 내가 건 쪽과 상대가 건 쪽을 따로 둔다 (아래 주석 참고)
+  blockedUsers: 'p2_blocked_users',
+  blockedByUsers: 'p2_blocked_by_users',
 };
 window.P2_STORAGE_KEYS = P2_STORAGE_KEYS;
 
@@ -3163,13 +3166,14 @@ window.renderMeetupList = function () {
 
   let filtered = MOCK_MEETUPS.filter(m => {
     if (m.cancelled) return false; // 취소된 모임은 목록에서 빠진다
+    if (window.isMeetupBlocked(m)) return false; // 차단 관계가 걸린 모임은 존재 자체를 감춘다
     let locMatch = meetupFilterLocation === '전체' || m.fullAddress.includes(meetupFilterLocation);
     let catMatch = meetupFilterCategory === '전체' || m.type === meetupFilterCategory || m.secondaryType === meetupFilterCategory;
     return locMatch && catMatch;
   });
 
   if (window.showSavedMeetups) {
-    filtered = MOCK_MEETUPS.filter(m => m.isSaved && !m.cancelled);
+    filtered = MOCK_MEETUPS.filter(m => m.isSaved && !m.cancelled && !window.isMeetupBlocked(m));
   }
 
   const _sq = (window._meetupSearchQuery || '').trim().toLowerCase();
@@ -5023,7 +5027,7 @@ window.openSettingsPage = function () {
               <span>알림 설정</span>
               <i data-lucide="chevron-right"></i>
             </div>
-            <div class="settings-row">
+            <div class="settings-row" onclick="window.openBlockedList()">
               <span>차단 목록</span>
               <i data-lucide="chevron-right"></i>
             </div>
@@ -5504,7 +5508,9 @@ window.openProfileModal = function (profileId, fromChat = false) {
            <i data-lucide="${fromChat ? 'chevron-left' : 'x'}" style="width:28px;"></i>
          </button>
          <div style="font-size:16px; font-weight:600; color:var(--text-dark);">${p ? p.name : ''}</div>
-         <div style="width:32px;"></div>
+         <button type="button" class="profile-block-btn" aria-label="${window.isBlockRelated(profileId) ? '차단 해제' : '차단하기'}" onclick="window.handleToggleBlock(${profileId})">
+           <i data-lucide="${window.isBlockRelated(profileId) ? 'user-check' : 'user-x'}" style="width:22px;height:22px;"></i>
+         </button>
        </div>
        <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
          <div class="scroll-y" style="height:100%;">
@@ -5781,6 +5787,178 @@ function syncMeetupJoinsToMocks() {
 
 function getMeetup(id) { return MOCK_MEETUPS.find(x => String(x.id) === String(id)) || null; }
 
+// ── 차단 ────────────────────────────────────────────────
+//
+// 두 방향을 따로 저장한다. 내가 건 차단(blockedUsers)만으로는 "A가 나를
+// 차단했다"를 표현할 수 없는데, 스펙이 요구하는 건 대칭이다. 실제로는 서버가
+// 두 번째 목록을 내려줘야 하고, 지금은 목업이 그 자리를 대신한다.
+let blockedUsers = new Set();    // 내가 차단한 사람
+let blockedByUsers = new Set();  // 나를 차단한 사람 (서버가 알려줄 값)
+
+function persistBlocks() {
+  try {
+    window.localStorage.setItem(P2_STORAGE_KEYS.blockedUsers, JSON.stringify([...blockedUsers]));
+    window.localStorage.setItem(P2_STORAGE_KEYS.blockedByUsers, JSON.stringify([...blockedByUsers]));
+  } catch (e) { /* private mode / quota */ }
+}
+
+function restoreBlocks() {
+  const read = (k) => {
+    try { const v = JSON.parse(window.localStorage.getItem(k) || '[]'); return Array.isArray(v) ? v : []; }
+    catch (e) { return []; }
+  };
+  blockedUsers = new Set(read(P2_STORAGE_KEYS.blockedUsers).map(Number).filter(Number.isFinite));
+  blockedByUsers = new Set(read(P2_STORAGE_KEYS.blockedByUsers).map(Number).filter(Number.isFinite));
+}
+window.restoreBlocks = restoreBlocks;
+
+// 어느 방향이든 차단이면 차단 관계다.
+window.isBlockRelated = function (profileId) {
+  const id = Number(profileId);
+  return blockedUsers.has(id) || blockedByUsers.has(id);
+};
+window.getBlockedUsers = function () { return [...blockedUsers]; };
+
+// 차단은 즉시 반영된다. 다음 새로고침을 기다리지 않는다.
+function refreshAfterBlockChange() {
+  if (typeof currentTab !== 'undefined' && currentTab === 'meetups' && typeof renderMeetupList === 'function') renderMeetupList();
+  if (typeof currentTab !== 'undefined' && currentTab === 'discover' && typeof renderDiscoverTab === 'function') {
+    if (typeof window.resetBridgeDismissed === 'function') window.resetBridgeDismissed();
+    renderDiscoverTab();
+  }
+}
+
+window.blockUser = function (profileId) {
+  const id = Number(profileId);
+  if (!Number.isFinite(id)) return false;
+  blockedUsers.add(id);
+  persistBlocks();
+  refreshAfterBlockChange();
+  return true;
+};
+
+window.unblockUser = function (profileId) {
+  const id = Number(profileId);
+  blockedUsers.delete(id);
+  persistBlocks();
+  refreshAfterBlockChange();
+  return true;
+};
+
+// 목업 전용. 상대가 나를 차단한 상황을 만들어 대칭 동작을 확인한다.
+window.__setBlockedByUser = function (profileId, on = true) {
+  const id = Number(profileId);
+  if (on) blockedByUsers.add(id); else blockedByUsers.delete(id);
+  persistBlocks();
+  refreshAfterBlockChange();
+};
+
+// 이 모임에 걸린 사람들의 프로필 id. 목업은 참여자를 이미지 URL로, 호스트를
+// 이름으로 들고 있어서 그걸 프로필로 되짚는다. 백엔드가 붙으면 id가 바로 온다.
+function getMeetupPeopleIds(m) {
+  const ids = new Set();
+  if (!m) return ids;
+  const host = MOCK_PROFILES.find(x => x.name === m.hostName);
+  if (host) ids.add(host.id);
+  (m.participants || []).forEach(url => {
+    const prof = MOCK_PROFILES.find(x => x.image === url);
+    if (prof) ids.add(prof.id);
+  });
+  // 호스트가 제외한 사람은 더 이상 이 모임의 사람이 아니다.
+  (m.removedParticipants || []).forEach(id => ids.delete(Number(id)));
+  return ids;
+}
+window.getMeetupPeopleIds = getMeetupPeopleIds;
+
+// 호스트든 참여자든 한 명이라도 차단 관계면 그 모임은 보이지 않는다.
+// 이미 참여 중이던 모임도 예외가 아니다 — 앱 안에서 보이는 정보는 즉시 끊는다.
+// 다만 내가 연 모임은 남긴다. 여기서 숨기면 호스트가 자기 모임을 수정도
+// 취소도 할 수 없게 되고, 그건 차단이 지켜주려던 것과 무관한 손해다.
+window.isMeetupBlocked = function (m) {
+  if (!m || isMeetupHost(m)) return false;
+  for (const id of getMeetupPeopleIds(m)) {
+    if (window.isBlockRelated(id)) return true;
+  }
+  return false;
+};
+
+window.handleToggleBlock = function (profileId) {
+  const prof = MOCK_PROFILES.find(x => x.id === Number(profileId));
+  const name = prof ? prof.name : '이 사람';
+  if (blockedUsers.has(Number(profileId))) {
+    window.unblockUser(profileId);
+    window.showToast(`${name} 님 차단을 해제했어요`);
+    openProfileModal(Number(profileId));
+    return;
+  }
+  window.openConfirmSheet({
+    title: `${name} 님을 차단할까요?`,
+    body: '서로의 프로필과 모임이 앱에서 보이지 않게 돼요. 이미 참여 중인 모임도 함께 숨겨져요. 카톡방 멤버십은 그대로예요.',
+    confirmLabel: '차단하기',
+    onConfirm: () => {
+      window.blockUser(profileId);
+      window.closeModal();
+      window.showToast(`${name} 님을 차단했어요`);
+    },
+  });
+};
+
+window.openBlockedList = function () {
+  const ids = window.getBlockedUsers();
+  const rows = ids.map(id => MOCK_PROFILES.find(x => x.id === id)).filter(Boolean);
+  openSubEditor('차단 목록', rows.length === 0
+    ? `<p class="sub-editor-note">차단한 사람이 없어요.</p>`
+    : `<p class="sub-editor-note">차단한 사람의 프로필과 모임은 앱에서 보이지 않아요.</p>
+       ${rows.map(pr => `
+       <div class="applicant-row">
+         <div class="applicant-avatar" style="background-image:url('${pr.image}');"></div>
+         <div class="applicant-meta"><div class="applicant-name">${escapeHTML(pr.name || '')}</div></div>
+         <button type="button" class="applicant-approve" onclick="window.handleUnblockFromList(${pr.id})">차단 해제</button>
+       </div>`).join('')}`);
+};
+
+window.handleUnblockFromList = function (profileId) {
+  const prof = MOCK_PROFILES.find(x => x.id === Number(profileId));
+  window.unblockUser(profileId);
+  window.showToast(`${prof ? prof.name : ''} 님 차단을 해제했어요`);
+  window.openBlockedList();
+};
+
+// ── 호스트 — 참여자 제외 ─────────────────────────────────
+window.removeParticipant = function (meetupId, profileId) {
+  const m = getMeetup(meetupId);
+  if (!m || !isMeetupHost(m)) return { ok: false, reason: 'not_host' };
+  const prof = MOCK_PROFILES.find(x => x.id === Number(profileId));
+  if (!prof) return { ok: false, reason: 'not_found' };
+  const before = (m.participants || []).length;
+  m.participants = (m.participants || []).filter(url => url !== prof.image);
+  if (m.participants.length === before) return { ok: false, reason: 'not_participant' };
+  m.removedParticipants = [...new Set([...(m.removedParticipants || []), Number(profileId)])];
+  m.currentCap = Math.max(0, getConfirmedCount(m) - 1);
+  // 승인 기록도 되돌린다. 안 그러면 새로고침 때 다시 얹혀 되살아난다.
+  const list = meetupApplicants[String(meetupId)] || [];
+  const a = list.find(x => String(x.profileId) === String(profileId));
+  if (a) a.status = 'removed';
+  persistMeetupJoins();
+  persistMyMeetups();
+  return { ok: true, name: prof.name };
+};
+
+window.handleRemoveParticipant = function (meetupId, profileId) {
+  const prof = MOCK_PROFILES.find(x => x.id === Number(profileId));
+  window.openConfirmSheet({
+    title: `${prof ? prof.name : '이 참여자'} 님을 제외할까요?`,
+    body: '여기서 제외해도 카톡방 멤버는 자동으로 빠지지 않아요. 카톡방에서 직접 내보내주세요.',
+    confirmLabel: '제외하기',
+    onConfirm: () => {
+      const res = window.removeParticipant(meetupId, profileId);
+      if (!res.ok) { window.showToast('제외할 수 없어요'); return; }
+      openMeetupDetail(meetupId);
+      window.showToast(`${res.name} 님을 제외했어요`);
+    },
+  });
+};
+
 // ── 내가 만든 모임 임시 저장 ─────────────────────────────
 // 백엔드가 붙으면 서버가 들고 갈 자리다. 지금은 새로고침에 사라지지만
 // 않게 통째로 넣고 뺀다. 사진은 data URI라 용량을 먹으므로 저장에 실패하면
@@ -5986,6 +6164,12 @@ function formatApplyTime(ts) {
 
 window.openMeetupDetail = function (id) {
   const m = MOCK_MEETUPS.find(x => x.id === id);
+  // 목록에서 감춰도 딥링크·북마크로 열리면 소용없다. 진입 지점 전부에 같은 규칙.
+  if (m && window.isMeetupBlocked(m)) {
+    if (window.showToast) window.showToast('지금은 볼 수 없는 모임이에요');
+    window.closeModal();
+    return;
+  }
   const mc = getModalContainer();
   const capPercent = (m.currentCap / m.maxCap) * 100;
   const isGroup = m.hostType === '단체';
@@ -6028,6 +6212,24 @@ window.openMeetupDetail = function (id) {
         <i data-lucide="x-circle" style="width:15px;height:15px;" aria-hidden="true"></i> 모임 취소
       </button>`}
     </div>` : '';
+
+  // 호스트가 참여자를 덜어낼 수 있는 자리. 앱 명단과 카톡방 명단은 따로 논다는
+  // 사실을 여기서 미리 말해둔다 — 제외해놓고 카톡방에 남아 있으면 더 혼란스럽다.
+  const rosterSectionHTML = iAmHost ? (() => {
+    const people = (m.participants || []).map(url => MOCK_PROFILES.find(x => x.image === url)).filter(Boolean);
+    return `
+    <div class="applicant-section" id="roster-section">
+      <div class="applicant-section-title">참여자 관리<span class="applicant-count">${people.length}명</span></div>
+      <div class="applicant-full-note">여기서 제외해도 카톡방 멤버는 자동으로 빠지지 않아요. 카톡방에서 직접 내보내주세요.</div>
+      ${people.length === 0 ? `<div class="applicant-empty">아직 참여자가 없어요.</div>` : people.map(pr => `
+        <div class="applicant-row">
+          <div class="applicant-avatar" style="background-image:url('${pr.image}');"></div>
+          <div class="applicant-meta"><div class="applicant-name">${escapeHTML(pr.name || '')}</div></div>
+          <button type="button" class="applicant-remove" onclick="window.handleRemoveParticipant(${m.id}, ${pr.id})">제외</button>
+        </div>
+      `).join('')}
+    </div>`;
+  })() : '';
 
   const applicantsSectionHTML = (iAmHost && MEETUP_APPROVAL_ENABLED) ? (() => {
     const list = window.getMeetupApplicants(m.id);
@@ -6211,7 +6413,7 @@ window.openMeetupDetail = function (id) {
             </div>
             `}
           </div>
-          ${hostActionsHTML}${applicantsSectionHTML}
+          ${hostActionsHTML}${applicantsSectionHTML}${rosterSectionHTML}
           `}
 
           <!-- Rules Section -->
@@ -8204,6 +8406,7 @@ function getBridgeMeetups() {
   const eligible = MOCK_MEETUPS.filter(m =>
     m &&
     !m.cancelled &&                // 취소된 모임은 추천하지 않는다
+    !window.isMeetupBlocked(m) &&  // 차단 관계가 걸린 모임은 추천하지 않는다
     m.timestamp &&                 // 마감 시점을 알 수 있어야 임박순에 올린다
     isSocialMeetup(m) &&           // ① 카테고리 = 소셜
     !isMeetupFull(m) &&            // ③ 만석 아님
@@ -9180,6 +9383,7 @@ function startApp() {
   restoreOnboardingChoices();
   restoreUserLocation();
   restoreMyAnswers();
+  restoreBlocks();
   restoreMyMeetups();
   restoreMeetupJoins();
 
