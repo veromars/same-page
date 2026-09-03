@@ -1121,6 +1121,7 @@ const P2_STORAGE_KEYS = {
   // 모임 참여 — 내 신청 상태 · 호스트가 받은 신청자 목록
   meetupJoins: 'p2_meetup_joins',
   meetupApplicants: 'p2_meetup_applicants',
+  myMeetups: 'p2_my_meetups',
 };
 window.P2_STORAGE_KEYS = P2_STORAGE_KEYS;
 
@@ -3309,7 +3310,7 @@ window.renderMeetupList = function () {
               <div style="margin-top: 16px;">
                 <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); font-weight:600;">
                   <span>${m.currentCap}/${m.maxCap}명 ${isEndingSoon ? `<span class="meetup-ending-soon-badge">마감 임박</span>` : ''}</span>
-                  ${m.hasRSVPd ? `<span style="color:var(--primary); display:inline-flex; align-items:center;"><span style="display:inline-block; width:6px; height:6px; background:var(--primary); border-radius:50%; margin-right:6px;"></span>${window.getJoinStatus(m.id) === 'confirmed' ? '참여 확정' : '승인 대기 중'}</span>` : ''}
+                  ${m.hasRSVPd ? `<span style="color:var(--primary); display:inline-flex; align-items:center;"><span style="display:inline-block; width:6px; height:6px; background:var(--primary); border-radius:50%; margin-right:6px;"></span>${window.getJoinStatus(m.id) !== 'confirmed' ? '승인 대기 중' : (window.MEETUP_APPROVAL_ENABLED ? '참여 확정' : '참여 예정')}</span>` : ''}
                 </div>
                 <div class="progress-track">
                   <div class="progress-fill" style="width: ${capPercent}%;"></div>
@@ -3320,7 +3321,7 @@ window.renderMeetupList = function () {
                    ${(m.participants || []).slice(0, 5).map(url => `<div class="attendee-avatar" style="background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')}
                    ${m.currentCap > 5 ? `<div style="font-size: 12px; color: var(--text-muted); margin-left: 8px; line-height: 28px;">+${m.currentCap - 5}</div>` : ''}
                 </div>
-                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupFromList(${m.id})">${m.hasRSVPd ? (window.getJoinStatus(m.id) === 'confirmed' ? '참여 확정 ✓' : '승인 대기 중') : '더 보기 →'}</button>`}
+                ${isFull && !m.hasRSVPd ? `<button class="rsvp-btn" disabled>마감</button>` : `<button class="rsvp-btn ${m.hasRSVPd ? 'rsvpd' : ''}" onclick="event.stopPropagation(); openMeetupFromList(${m.id})">${m.hasRSVPd ? (window.getJoinStatus(m.id) !== 'confirmed' ? '승인 대기 중' : (window.MEETUP_APPROVAL_ENABLED ? '참여 확정 ✓' : '참여 완료 ✓')) : '더 보기 →'}</button>`}
               </div>
             </div>
           `;
@@ -4837,6 +4838,7 @@ window.submitCreateMeetup = function () {
     if (before.timestamp !== m.timestamp || before.date !== m.date) changed.push('일정');
     if (before.fullAddress !== m.fullAddress || before.shortLocation !== m.shortLocation) changed.push('장소');
     if (changed.length) notifyMeetupParticipants(m, `'${m.title}' 모임 정보가 변경됐어요. 확인해주세요`, '📝');
+    persistMyMeetups();
 
     window.closeModal();
     openMeetupDetail(m.id);
@@ -4859,6 +4861,7 @@ window.submitCreateMeetup = function () {
   }, fields);
 
   MOCK_MEETUPS.unshift(newMeetup);
+  persistMyMeetups();
 
   // 3. Close modal
   window.closeModal();
@@ -4902,6 +4905,7 @@ window.cancelMeetup = function (id) {
   if (m.cancelled) return { ok: false, reason: 'already' };
   m.cancelled = true;
   m.cancelledAt = Date.now();
+  persistMyMeetups();
   const n = notifyMeetupParticipants(m, `'${m.title}' 모임이 취소됐어요`, '🚫');
   return { ok: true, notified: n };
 };
@@ -5726,6 +5730,14 @@ function getNextMondayKSTStr() {
 // 규칙으로 덮으려면 "모임 시작 전까지 항상 열려있음"이 가장 단순하다. 시작이
 // 지나면 미승인 신청은 알아서 무의미해지므로 따로 만료 처리하지 않는다.
 
+// 호스트 승인 단계 on/off. 코드는 그대로 두고 이 값만 내린다.
+//   true  참여하기 → 신청(pending) → 호스트 승인 → 확정(confirmed)
+//   false 참여하기 → 즉시 확정. 신청·승인 개념이 화면에서 사라진다.
+// 주소 공개 체크박스의 "참여 확정"도 자연히 이 값을 따라간다 — 꺼져 있으면
+// 참여하기를 누른 순간이 곧 확정이라 별도 분기가 필요 없다.
+const MEETUP_APPROVAL_ENABLED = false;
+window.MEETUP_APPROVAL_ENABLED = MEETUP_APPROVAL_ENABLED;
+
 let meetupJoins = {};      // { [meetupId]: { status, appliedAt, confirmedAt, reminders } }
 let meetupApplicants = {}; // { [meetupId]: [ { profileId, name, appliedAt, status } ] }
 
@@ -5768,6 +5780,31 @@ function syncMeetupJoinsToMocks() {
 }
 
 function getMeetup(id) { return MOCK_MEETUPS.find(x => String(x.id) === String(id)) || null; }
+
+// ── 내가 만든 모임 임시 저장 ─────────────────────────────
+// 백엔드가 붙으면 서버가 들고 갈 자리다. 지금은 새로고침에 사라지지만
+// 않게 통째로 넣고 뺀다. 사진은 data URI라 용량을 먹으므로 저장에 실패하면
+// (quota) 조용히 포기한다 — 모임을 못 만드는 것보다는 낫다.
+function persistMyMeetups() {
+  try {
+    const mine = MOCK_MEETUPS.filter(m => m && m.createdByMe);
+    window.localStorage.setItem(P2_STORAGE_KEYS.myMeetups, JSON.stringify(mine));
+  } catch (e) { /* private mode / quota */ }
+}
+window.persistMyMeetups = persistMyMeetups;
+
+function restoreMyMeetups() {
+  let saved = null;
+  try { saved = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.myMeetups) || 'null'); }
+  catch (e) { saved = null; }
+  if (!Array.isArray(saved)) return;
+  // 뒤에서부터 unshift해야 저장된 순서(최신이 앞)가 그대로 선다.
+  saved.slice().reverse().forEach(m => {
+    if (!m || m.id == null || getMeetup(m.id)) return;
+    MOCK_MEETUPS.unshift(m);
+  });
+}
+window.restoreMyMeetups = restoreMyMeetups;
 
 // 모임 시작 시각. 없으면 null — 없는 모임(커뮤니티 등)은 시간 제약을 걸지 않는다.
 function getMeetupStartTs(m) {
@@ -5847,16 +5884,19 @@ window.applyToMeetup = function (id) {
   if (isMeetupFull(m)) return { ok: false, reason: 'full' };
 
   const now = Date.now();
+  // 승인이 꺼져 있으면 누른 즉시 확정이다. 정원도 이때 올라간다.
+  const instant = !MEETUP_APPROVAL_ENABLED;
   meetupJoins[String(id)] = {
-    status: 'pending',
+    status: instant ? 'confirmed' : 'pending',
     appliedAt: now,
-    confirmedAt: null,
+    confirmedAt: instant ? now : null,
     reminders: scheduleJoinReminders(m, now),
   };
-  // 목록 카드가 '신청 완료'로 보이게. 정원(currentCap)은 건드리지 않는다.
   m.hasRSVPd = true;
+  // 승인이 켜져 있으면 신청 단계에서는 정원(currentCap)을 건드리지 않는다.
+  if (instant) m.currentCap = getConfirmedCount(m) + 1;
   persistMeetupJoins();
-  return { ok: true };
+  return { ok: true, confirmed: instant };
 };
 
 // 확정자가 취소하면 자리가 다시 열린다.
@@ -5978,10 +6018,8 @@ window.openMeetupDetail = function (id) {
 
   // 호스트 시점에만 붙는 신청자 목록. 거절 버튼은 두지 않는다 — 승인하지 않으면
   // 모임이 시작되면서 자연히 무의미해지고, 거절 통보는 아무도 원하지 않는다.
-  const applicantsSectionHTML = iAmHost ? (() => {
-    const list = window.getMeetupApplicants(m.id);
-    const waiting = list.filter(a => a.status !== 'confirmed');
-    return `
+  // 수정·취소는 호스트라면 언제나 있어야 한다. 승인 플래그와 무관하다.
+  const hostActionsHTML = iAmHost ? `
     <div class="host-actions">
       <button type="button" class="host-action-btn" onclick="window.openCreateMeetupModal(${m.id})">
         <i data-lucide="pencil" style="width:15px;height:15px;" aria-hidden="true"></i> 모임 수정
@@ -5989,7 +6027,12 @@ window.openMeetupDetail = function (id) {
       ${m.cancelled ? '' : `<button type="button" class="host-action-btn is-danger" onclick="window.handleCancelMeetup(${m.id})">
         <i data-lucide="x-circle" style="width:15px;height:15px;" aria-hidden="true"></i> 모임 취소
       </button>`}
-    </div>
+    </div>` : '';
+
+  const applicantsSectionHTML = (iAmHost && MEETUP_APPROVAL_ENABLED) ? (() => {
+    const list = window.getMeetupApplicants(m.id);
+    const waiting = list.filter(a => a.status !== 'confirmed');
+    return `
     <div class="applicant-section" id="applicant-section">
       <div class="applicant-section-title">
         신청자 목록<span class="applicant-count">${waiting.length}명 대기</span>
@@ -6039,13 +6082,13 @@ window.openMeetupDetail = function (id) {
               </div>` : `
               <div class="join-status-card is-confirmed">
                 <div class="join-status-title">✅ 참여 확정</div>
-                <div class="join-status-body">호스트 승인이 끝났어요. 참여자 목록을 볼 수 있어요.</div>
+                <div class="join-status-body">${MEETUP_APPROVAL_ENABLED ? '호스트 승인이 끝났어요. 참여자 목록을 볼 수 있어요.' : '참여가 확정됐어요. 아래에서 장소와 참여자를 확인하세요.'}</div>
               </div>`}
               ${showFullAddress ? `
               <div class="address-reveal-card" style="margin-bottom:${m.kakaoLink ? '12px' : (showAgeRange ? '8px' : '24px')};">
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
-                ${addressGated ? `<div class="address-reveal-card-sub">참여 확정 후 공개되는 장소입니다</div>` : ''}
+                ${addressGated ? `<div class="address-reveal-card-sub">참여 ${MEETUP_APPROVAL_ENABLED ? '확정' : '신청'} 후 공개되는 장소입니다</div>` : ''}
               </div>` : `
               <div class="meetup-location-preview" style="margin-bottom:12px; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.shortLocation}<span class="join-locked-note">상세 주소는 참여 확정 후 공개돼요</span></div>`}
               ${m.kakaoLink ? `<div onclick="window.open('${m.kakaoLink}', '_blank')" style="margin-bottom:8px; background:#FEE500; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
@@ -6055,15 +6098,15 @@ window.openMeetupDetail = function (id) {
                   <div style="font-size:11px; color:#7A5C00; margin-top:2px;">카카오 오픈채팅</div>
                 </div>
               </div>
-              <div class="join-nickname-tip" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
+              ${MEETUP_APPROVAL_ENABLED ? `<div class="join-nickname-tip" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
                 오픈채팅방에서 닉네임을 <b>'${escapeHTML(userName || '내 닉네임')}'</b>으로 바꿔주세요. 호스트가 그 이름으로 확인하고 승인해요.
-              </div>` : ''}`
+              </div>` : ''}` : ''}`
     : showFullAddress && !isCommunity ? `
               <div class="address-reveal-card" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
               </div>`
-    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}${addressGated ? `<span class="join-locked-note">정확한 주소는 참여 확정 후 공개돼요</span>` : ''}</div>`
+    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}${addressGated ? `<span class="join-locked-note">정확한 주소는 참여 ${MEETUP_APPROVAL_ENABLED ? '확정' : '신청'} 후 공개돼요</span>` : ''}</div>`
     }
 
           ${showAgeRange ? `<div style="font-size:14px; color:#888; margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
@@ -6164,11 +6207,11 @@ window.openMeetupDetail = function (id) {
             ` : `
             <div class="attendee-locked" id="attendee-locked">
               <i data-lucide="lock" style="width:18px;height:18px;" aria-hidden="true"></i>
-              <span>${isPending ? '참여가 확정되면 다른 참여자를 볼 수 있어요' : '참여 확정 후 다른 참여자를 볼 수 있어요'}</span>
+              <span>${isPending ? '참여가 확정되면 다른 참여자를 볼 수 있어요' : (MEETUP_APPROVAL_ENABLED ? '참여 확정 후 다른 참여자를 볼 수 있어요' : '참여하면 다른 참여자를 볼 수 있어요')}</span>
             </div>
             `}
           </div>
-          ${iAmHost ? applicantsSectionHTML : ''}
+          ${hostActionsHTML}${applicantsSectionHTML}
           `}
 
           <!-- Rules Section -->
@@ -6201,7 +6244,7 @@ window.openMeetupDetail = function (id) {
             // 내가 연 모임에 내가 신청할 일은 없다.
             const label = m.cancelled ? '취소된 모임이에요'
               : iAmHost ? '내가 여는 모임'
-              : isConfirmed ? '참여 확정 ✓'
+              : isConfirmed ? (MEETUP_APPROVAL_ENABLED ? '참여 확정 ✓' : '참여 완료 ✓')
               : isPending ? '승인 대기 중'
               : m.disableRSVP ? '외부 사이트에서 신청'
               : meetupStarted ? '이미 시작된 모임이에요'
@@ -6255,18 +6298,20 @@ window.showApplySubmitted = function (meetupId) {
   if (!m) return;
   const mc = getModalContainer();
   const nick = escapeHTML(userName || '내 닉네임');
+  const approving = MEETUP_APPROVAL_ENABLED;
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
       <div style="height: 100vh; height: 100dvh; display: flex; flex-direction: column; align-items: center; padding: 0 24px; box-sizing: border-box;">
         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 12px;">
-          <div style="font-size: 48px; text-align: center;">📮</div>
-          <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;">신청이 접수됐어요</div>
+          <div style="font-size: 48px; text-align: center;">${approving ? '📮' : '🎉'}</div>
+          <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;">${approving ? '신청이 접수됐어요' : '참여 완료'}</div>
           <div style="font-size: 14px; color: #999; text-align: center;">${escapeHTML(m.title)}</div>
+          ${approving ? `
           <div class="apply-steps">
             <div class="apply-step"><span class="apply-step-no">1</span><span>아래 버튼으로 오픈채팅방에 들어가세요</span></div>
             <div class="apply-step"><span class="apply-step-no">2</span><span>채팅방 닉네임을 <b>'${nick}'</b>으로 바꿔주세요</span></div>
             <div class="apply-step"><span class="apply-step-no">3</span><span>호스트가 확인하고 승인하면 참여가 확정돼요</span></div>
-          </div>
+          </div>` : `<div style="height:12px;"></div>`}
           ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: #3A1D1D; font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
         </div>
         <div style="width: 100%; padding-bottom: 40px;">
@@ -9135,6 +9180,7 @@ function startApp() {
   restoreOnboardingChoices();
   restoreUserLocation();
   restoreMyAnswers();
+  restoreMyMeetups();
   restoreMeetupJoins();
 
   // Kick off the session check in parallel with the splash animation so
