@@ -5025,11 +5025,7 @@ window.notifyMeetupParticipants = notifyMeetupParticipants;
 // 닉네임 · 생년월일 · 성향 · 연애 상태 · 찾는 것.
 // 프로필 '내용'이 아니라 계정의 뼈대라서 수정 화면이 아니라 설정에 둔다.
 window.closeSettingsPage = function () {
-  if (window.__basicsNameDirty) {
-    userNicknameChangedAt = Date.now();
-    window.__basicsNameDirty = false;
-    persistOnboardingChoices();
-  }
+  // 저장하지 않은 닉네임 초안은 그냥 버린다. 확정은 '저장' 버튼에만 있다.
   closeModal();
   if (currentTab === 'profile') switchTab('profile');
 };
@@ -5040,16 +5036,22 @@ function getBasicsFormHTML() {
   const seekingLabel = (SEEKING_INTENTS.find(o => o.key === userSeekingIntent) || {}).label || '';
 
   return `
-    <label class="edit-field">
+    <div class="edit-field">
       <span class="edit-field-label">닉네임</span>
-      <input type="text" class="input-field" id="edit-name" maxlength="20"
-        placeholder="닉네임" value="${escapeAttr(userName || '')}"
-        ${nickOk ? '' : 'disabled'}
-        oninput="window.updateBasicsName(this.value)" />
+      <!-- 닉네임만 초안이다. 3개월 쿨다운이 걸리는 값이라 화면을 닫는 것만으로
+           확정되면 안 된다 — 스쳐 지나가다 오타를 남기면 세 달을 못 고친다. -->
+      <div class="nickname-row">
+        <input type="text" class="input-field" id="edit-name" maxlength="20"
+          placeholder="닉네임" value="${escapeAttr(userName || '')}"
+          ${nickOk ? '' : 'disabled'}
+          oninput="window.onNicknameInput(this.value)" />
+        ${nickOk ? `<button type="button" class="nickname-save" id="nickname-save" disabled
+          onclick="window.saveNickname()">저장</button>` : ''}
+      </div>
       ${nickOk
-        ? '<span class="edit-field-hint">닉네임은 3개월에 한 번 바꿀 수 있어요</span>'
+        ? '<span class="edit-field-hint">닉네임은 3개월에 한 번 바꿀 수 있어요. 저장을 눌러야 확정돼요.</span>'
         : `<span class="edit-field-hint is-locked">${escapeHTML(window.nicknameUnlockText())}</span>`}
-    </label>
+    </div>
 
     <label class="edit-field">
       <span class="edit-field-label">생년월일</span>
@@ -5092,15 +5094,28 @@ window.renderBasicsForm = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
 
-// 닉네임은 여기서 바뀐다. 쿨다운 시계는 화면을 떠날 때가 아니라
-// 값이 실제로 달라졌을 때 돌린다 — 설정에는 '완료' 버튼이 없다.
-window.updateBasicsName = function (value) {
-  const before = userName || '';
-  userName = value;
-  if ((value || '').trim() && value !== before) {
-    window.__basicsNameDirty = true;
-  }
+// 타자를 칠 때는 아무것도 확정하지 않는다. 저장 버튼만 켜고 끈다.
+window.onNicknameInput = function (value) {
+  const btn = document.getElementById('nickname-save');
+  if (!btn) return;
+  const next = (value || '').trim();
+  btn.disabled = !next || next === (userName || '').trim();
+};
+
+// 여기서만 닉네임이 바뀌고, 여기서만 쿨다운 시계가 돈다.
+window.saveNickname = function () {
+  const el = document.getElementById('edit-name');
+  if (!el) return;
+  const next = (el.value || '').trim();
+  if (!next) { window.showToast('닉네임을 입력해주세요'); return; }
+  if (next === (userName || '').trim()) return;
+  if (!window.canChangeNickname()) { window.showToast(window.nicknameUnlockText()); return; }
+
+  userName = next;
+  userNicknameChangedAt = Date.now();
   persistOnboardingChoices();
+  window.renderBasicsForm();
+  window.showToast('닉네임을 저장했어요');
 };
 
 window.selectSeekingFromBasics = function (key) {
