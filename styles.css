@@ -4451,7 +4451,10 @@ p {
 }
 
 /* ── 책 덮기 확인 ────────────────────────────────────── */
-.close-book-sheet {
+/* 확인 시트는 '책 덮기'만의 것이 아니게 됐다 — 모임 취소도 같은 무게의
+   되돌릴 수 없는 행동이라 같은 형태를 쓴다. */
+.close-book-sheet,
+.confirm-sheet {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -4465,7 +4468,8 @@ p {
   box-shadow: 0 -8px 32px rgba(46, 42, 38, 0.12);
 }
 
-.close-book-title {
+.close-book-title,
+.confirm-sheet-title {
   font-family: 'Noto Serif KR', serif;
   font-size: 18px;
   font-weight: 500;
@@ -4475,7 +4479,8 @@ p {
   margin: 8px 0 10px;
 }
 
-.close-book-body {
+.close-book-body,
+.confirm-sheet-body {
   font-size: 14px;
   line-height: 1.7;
   color: #6E696B;
@@ -4483,7 +4488,8 @@ p {
   margin-bottom: 24px;
 }
 
-.close-book-actions {
+.close-book-actions,
+.confirm-sheet-actions {
   display: flex;
   gap: 10px;
 }
@@ -5794,3 +5800,52 @@ p {
 }
 
 .apply-step b { color: #8960B8; }
+
+/* ── 모임 취소 · 호스트 액션 ─────────────────────────── */
+.meetup-cancelled-banner {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #F5EFEF;
+  border: 1px solid #E4D4D4;
+  color: #9A5C5C;
+  font-size: 14px;
+  font-weight: 600;
+  word-break: keep-all;
+}
+
+.host-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.host-action-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.host-action-btn.is-danger {
+  color: #9A5C5C;
+  border-color: #E4D4D4;
+}
+
+.host-action-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}

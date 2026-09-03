@@ -3161,13 +3161,14 @@ window.renderMeetupList = function () {
   if (!container) return;
 
   let filtered = MOCK_MEETUPS.filter(m => {
+    if (m.cancelled) return false; // 취소된 모임은 목록에서 빠진다
     let locMatch = meetupFilterLocation === '전체' || m.fullAddress.includes(meetupFilterLocation);
     let catMatch = meetupFilterCategory === '전체' || m.type === meetupFilterCategory || m.secondaryType === meetupFilterCategory;
     return locMatch && catMatch;
   });
 
   if (window.showSavedMeetups) {
-    filtered = MOCK_MEETUPS.filter(m => m.isSaved);
+    filtered = MOCK_MEETUPS.filter(m => m.isSaved && !m.cancelled);
   }
 
   const _sq = (window._meetupSearchQuery || '').trim().toLowerCase();
@@ -4113,9 +4114,12 @@ window.initPhotoGrid = function () {
 };
 
 // ── 모임 만들기 — 모달 · 캘린더 · 슬라이더 · 이미지 · 링크 · 제출 ────
-window.openCreateMeetupModal = function () {
+window.openCreateMeetupModal = function (editId) {
   const mc = getModalContainer();
-  window._meetupImages = [];
+  // 수정 모드. 폼은 만들기와 완전히 같고, 기존 값만 채워 연다.
+  const editing = editId != null ? MOCK_MEETUPS.find(x => String(x.id) === String(editId)) : null;
+  window._editingMeetupId = editing ? editing.id : null;
+  window._meetupImages = editing && Array.isArray(editing.images) ? [...editing.images] : [];
 
   const hourOpts = [];
   for (let i = 6; i <= 11; i++) hourOpts.push(`오전 ${i}시`);
@@ -4131,7 +4135,7 @@ window.openCreateMeetupModal = function () {
     <div class="modal fade-in active" style="z-index:200; background:var(--bg-color);">
       <div class="app-header">
         <button class="back-btn" onclick="closeModal()"><i data-lucide="x"></i></button>
-        <div style="font-size:16px; font-weight:600;">모임 만들기</div>
+        <div style="font-size:16px; font-weight:600;">${editing ? '모임 수정' : '모임 만들기'}</div>
         <div style="width:32px;"></div>
       </div>
       <div class="scroll-y" style="padding:24px 24px 60px;">
@@ -4290,7 +4294,7 @@ window.openCreateMeetupModal = function () {
         <div style="${LBL}">주의사항 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
         <textarea id="create-meetup-notice" style="${INP} height:100px; resize:none; margin-bottom:32px;" placeholder="예) 편한 운동화 지참&#10;예) 주류 포함 모임, 과도한 음주 자제&#10;예) 노쇼 시 다음 모임 참여 제한"></textarea>
 
-        <button class="btn-primary" style="margin-bottom:40px;" onclick="submitCreateMeetup()">모임 만들기</button>
+        <button class="btn-primary" style="margin-bottom:40px;" onclick="submitCreateMeetup()">${editing ? '저장하기' : '모임 만들기'}</button>
       </div>
     </div>
   `;
@@ -4298,7 +4302,8 @@ window.openCreateMeetupModal = function () {
   if (typeof lucide !== 'undefined') lucide.createIcons();
 
   setTimeout(() => {
-    const now = new Date();
+    const now = editing && editing.timestamp && Number.isFinite(new Date(editing.timestamp).getTime())
+      ? new Date(editing.timestamp) : new Date();
     window._selectedCalDate = null;
     window.renderMeetupCalendar(now.getFullYear(), now.getMonth() + 1);
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -4311,8 +4316,98 @@ window.openCreateMeetupModal = function () {
     const ageToWheel = document.querySelector('#create-meetup-age-to-picker .picker-wheel-container');
     if (ageFromWheel) { ageFromWheel.scrollTop = 3 * 40; window.handleWheelScroll(ageFromWheel); }
     if (ageToWheel) { ageToWheel.scrollTop = 6 * 40; window.handleWheelScroll(ageToWheel); }
+    if (editing) prefillCreateMeetupForm(editing, { hourOpts, minOpts, ageOpts });
   }, 30);
 };
+
+// 기존 값 채우기. 폼이 DOM 상태로 값을 들고 있어서(칩 selected, 휠 scrollTop)
+// 값 하나하나를 그 형태로 되돌려놔야 한다.
+function prefillCreateMeetupForm(m, opts) {
+  const { hourOpts, minOpts, ageOpts } = opts;
+  const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v == null ? '' : v; };
+  const wheelTo = (sel, idx) => {
+    const w = document.querySelector(sel);
+    if (!w || idx < 0) return;
+    w.scrollTop = idx * 40;
+    window.handleWheelScroll(w);
+  };
+
+  // 카테고리
+  document.querySelectorAll('#create-meetup-category .filter-chip').forEach(chip => {
+    const txt = chip.querySelector('.cat-text')?.innerText.trim();
+    chip.classList.remove('selected', 'primary-cat', 'secondary-cat');
+    const check = chip.querySelector('.secondary-check');
+    if (check) check.style.display = 'none';
+    if (txt === m.type) chip.classList.add('selected', 'primary-cat');
+    else if (m.secondaryType && txt === m.secondaryType) {
+      chip.classList.add('selected', 'secondary-cat');
+      if (check) check.style.display = 'block';
+    }
+  });
+  updateCreateMeetupFormByCategory();
+
+  setVal('create-meetup-title', m.title);
+
+  // 지역 · 상세 장소
+  const region = (m.shortLocation || '').trim();
+  const known = ['서울', '경기', '부산', '대구', '인천', '광주', '대전', '제주'];
+  const hit = known.find(r => region.startsWith(r) || (m.fullAddress || '').includes(r));
+  document.querySelectorAll('[onclick^="selectMeetupRegion"]').forEach(el => {
+    el.classList.toggle('selected', el.innerText.trim() === hit);
+  });
+  setVal('create-meetup-region', hit || '');
+  const detailOnly = hit ? region.replace(new RegExp('^' + hit + '\\s*'), '') : region;
+  setVal('create-meetup-location-detail', detailOnly);
+  const priv = document.getElementById('create-meetup-location-private');
+  if (priv) priv.checked = m.locationTiming === '참여 확정 후';
+
+  // 날짜 · 시간 — timestamp가 가장 믿을 만한 원본이다.
+  const d = m.timestamp ? new Date(m.timestamp) : null;
+  if (d && Number.isFinite(d.getTime())) {
+    window._selectedCalDate = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+    document.querySelectorAll('#create-meetup-calendar-grid .calendar-day').forEach(el => {
+      if (Number(el.textContent) === d.getDate()) el.classList.add('selected');
+    });
+    const h24 = d.getHours();
+    const label = h24 < 12 ? `오전 ${h24}시` : h24 === 12 ? '정오 12시' : `오후 ${h24 - 12}시`;
+    wheelTo('#create-meetup-time .picker-wheel-container', hourOpts.indexOf(label));
+    const mins = d.getMinutes() >= 30 ? '30분' : '00분';
+    const wheels = document.querySelectorAll('#create-meetup-time .picker-wheel-container');
+    if (wheels[1]) { wheels[1].scrollTop = minOpts.indexOf(mins) * 40; window.handleWheelScroll(wheels[1]); }
+  }
+
+  setVal('create-meetup-desc', m.desc);
+  setVal('create-meetup-notice', m.rules);
+  setVal('create-meetup-tags', (m.tags || []).map(t => String(t).replace(/^#/, '')).join(', '));
+  if (typeof window.updateTagPreview === 'function') window.updateTagPreview();
+
+  // 참여비
+  const feeMap = { '1/N': '1/N', '각자': '각자', '무료': '없음', '없음': '없음' };
+  const feeType = feeMap[m.fee] || (m.fee ? '기타' : '없음');
+  if (typeof window.selectFeeType === 'function') window.selectFeeType(feeType);
+  if (feeType === '기타') setVal('create-meetup-fee-input', m.fee);
+
+  // 정원 — 최소값은 모임 객체에 없다. 최대만 되돌린다.
+  setVal('create-meetup-cap-max', m.maxCap || '');
+
+  // 호스트 공개 여부
+  document.querySelectorAll('#create-meetup-host-public .filter-chip').forEach(el => {
+    el.classList.toggle('selected', el.innerText.trim() === (m.hostPublic ? '프로필 공개' : '익명으로 진행'));
+  });
+
+  // 연령대
+  const anyCb = document.getElementById('create-meetup-age-any');
+  const isAny = !m.ageRange || m.ageRange === '무관' || m.ageRange === '연령 무관';
+  if (anyCb) { anyCb.checked = isAny; if (typeof window.toggleAgeAny === 'function') window.toggleAgeAny(); }
+  if (!isAny) {
+    const [from, to] = String(m.ageRange).split('~').map(x => x.trim());
+    wheelTo('#create-meetup-age-from-picker .picker-wheel-container', ageOpts.indexOf(from));
+    wheelTo('#create-meetup-age-to-picker .picker-wheel-container', ageOpts.indexOf(to));
+  }
+
+  renderMeetupImagePreviews();
+}
+window.prefillCreateMeetupForm = prefillCreateMeetupForm;
 
 window._calState = { year: null, month: null };
 window._selectedCalDate = null;
@@ -4704,19 +4799,20 @@ window.submitCreateMeetup = function () {
   if (!inputRegion) { window.showToast('지역을 선택해주세요'); return; }
   if (!window._selectedCalDate) { window.showToast('날짜를 선택해주세요'); return; }
 
-  // 2. Create meetup object
-  const newMeetup = {
-    id: Date.now(),
+  // timestamp는 '모임 시작 시각'이다. 여기에 생성 시각을 넣으면 만들자마자
+  // 이미 시작된 모임이 되어 신청도 브릿지 노출도 막힌다.
+  const startISO = buildMeetupStartISO(window._selectedCalDate, selectedTime);
+
+  const fields = {
     type: selectedCategory,
     secondaryType: secondaryCategory,
     title: inputTitle,
     shortLocation: inputLocation,
     fullAddress: inputLocation,
     date: selectedDate + " " + selectedTime,
-    timestamp: new Date().toISOString(),
+    timestamp: startISO,
     desc: inputDescription,
     maxCap: selectedCapacity,
-    currentCap: selectedCategory.includes('행사') ? 0 : 1,
     fee: inputFee,
     tags: inputTags,
     rules: inputNotice,
@@ -4725,6 +4821,32 @@ window.submitCreateMeetup = function () {
     ageRange: ageRange || null,
     links: inputLinks.length > 0 ? inputLinks : null,
     images: (window._meetupImages || []).length > 0 ? [...window._meetupImages] : null,
+  };
+
+  // ── 수정 모드 ──────────────────────────────────────
+  const editingId = window._editingMeetupId;
+  if (editingId != null) {
+    const m = MOCK_MEETUPS.find(x => String(x.id) === String(editingId));
+    if (!m) { window.showToast('모임을 찾을 수 없어요'); return; }
+    // 날짜·시간·장소가 바뀌었는지는 덮어쓰기 전에 봐야 안다.
+    const before = { timestamp: m.timestamp, date: m.date, fullAddress: m.fullAddress, shortLocation: m.shortLocation };
+    Object.assign(m, fields);
+    window._editingMeetupId = null;
+
+    const changed = [];
+    if (before.timestamp !== m.timestamp || before.date !== m.date) changed.push('일정');
+    if (before.fullAddress !== m.fullAddress || before.shortLocation !== m.shortLocation) changed.push('장소');
+    if (changed.length) notifyMeetupParticipants(m, `'${m.title}' 모임 정보가 변경됐어요. 확인해주세요`, '📝');
+
+    window.closeModal();
+    openMeetupDetail(m.id);
+    window.showToast(changed.length ? `수정했어요 · 참여자에게 ${changed.join('·')} 변경을 알렸어요` : '수정했어요');
+    return;
+  }
+
+  const newMeetup = Object.assign({
+    id: Date.now(),
+    currentCap: selectedCategory.includes('행사') ? 0 : 1,
     isRecommended: false,
     isSaved: false,
     hasRSVPd: true,
@@ -4734,7 +4856,7 @@ window.submitCreateMeetup = function () {
     hostBio: "",
     styleTrait: "무관",
     participants: []
-  };
+  }, fields);
 
   MOCK_MEETUPS.unshift(newMeetup);
 
@@ -4742,7 +4864,9 @@ window.submitCreateMeetup = function () {
   window.closeModal();
 
   // 4. Refresh tab
-  if (document.querySelector('.tab.active').dataset.tab === 'meetups') {
+  // '.tab.active'는 이 화면에 없을 때가 있어 null.dataset으로 터졌다.
+  // 앱이 이미 들고 있는 currentTab을 쓴다.
+  if (currentTab === 'meetups') {
     window.renderMeetupList();
   } else {
     window.switchTab('meetups');
@@ -4751,6 +4875,107 @@ window.submitCreateMeetup = function () {
   // 5. Show toast
   window.showToast("모임이 생성됐어요 🎉");
 };
+
+// "2026-9-10" + "오후 7시 30분" → ISO. 날짜가 없으면 null(시간 제약 없는 항목).
+function buildMeetupStartISO(calDate, timeLabel) {
+  if (!calDate) return null;
+  const [y, mo, d] = String(calDate).split('-').map(Number);
+  if (![y, mo, d].every(Number.isFinite)) return null;
+  let hour = 19, min = 0;
+  const t = String(timeLabel || '').match(/(오전|오후|정오)\s*(\d+)시(?:\s*(\d+)분)?/);
+  if (t) {
+    const h = Number(t[2]);
+    hour = t[1] === '오전' ? h : t[1] === '정오' ? 12 : (h % 12) + 12;
+    min = Number(t[3] || 0);
+  }
+  return new Date(y, mo - 1, d, hour, min, 0).toISOString();
+}
+window.buildMeetupStartISO = buildMeetupStartISO;
+
+// ── 모임 취소 ────────────────────────────────────────
+// 삭제가 아니라 '취소됨' 표시다. 목록·브릿지에서는 빠지지만 호스트의 만든 모임
+// 목록에는 남는다 — 내가 뭘 취소했는지는 남아 있어야 한다.
+window.cancelMeetup = function (id) {
+  const m = MOCK_MEETUPS.find(x => String(x.id) === String(id));
+  if (!m) return { ok: false, reason: 'not_found' };
+  if (!isMeetupHost(m)) return { ok: false, reason: 'not_host' };
+  if (m.cancelled) return { ok: false, reason: 'already' };
+  m.cancelled = true;
+  m.cancelledAt = Date.now();
+  const n = notifyMeetupParticipants(m, `'${m.title}' 모임이 취소됐어요`, '🚫');
+  return { ok: true, notified: n };
+};
+
+// 되돌릴 수 없는 행동에는 시트를 세운다. 책 덮기와 같은 무게라 같은 형태를 쓴다.
+window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, onConfirm }) {
+  if (document.getElementById('confirm-sheet')) return;
+  const opener = document.activeElement;
+  const scrim = document.createElement('div');
+  scrim.className = 'sheet-scrim';
+  const sheet = document.createElement('div');
+  sheet.id = 'confirm-sheet';
+  sheet.className = 'confirm-sheet';
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-labelledby', 'confirm-sheet-title');
+  sheet.innerHTML = `
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <h2 class="confirm-sheet-title" id="confirm-sheet-title">${escapeHTML(title || '')}</h2>
+    <p class="confirm-sheet-body">${escapeHTML(body || '')}</p>
+    <div class="confirm-sheet-actions">
+      <button type="button" class="sheet-btn sheet-btn--ghost" id="confirm-sheet-cancel">${escapeHTML(cancelLabel || '그만두기')}</button>
+      <button type="button" class="sheet-btn sheet-btn--commit" id="confirm-sheet-ok">${escapeHTML(confirmLabel || '확인')}</button>
+    </div>
+  `;
+  const container = document.getElementById('app-container') || document.body;
+  container.appendChild(scrim);
+  container.appendChild(sheet);
+
+  function dismiss() {
+    document.removeEventListener('keydown', onKey, true);
+    sheet.remove(); scrim.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } }
+  document.addEventListener('keydown', onKey, true);
+  scrim.addEventListener('click', dismiss);
+  sheet.querySelector('#confirm-sheet-cancel').addEventListener('click', dismiss);
+  sheet.querySelector('#confirm-sheet-ok').addEventListener('click', () => { dismiss(); onConfirm && onConfirm(); });
+  requestAnimationFrame(() => sheet.querySelector('#confirm-sheet-cancel')?.focus());
+};
+
+window.handleCancelMeetup = function (id) {
+  const m = MOCK_MEETUPS.find(x => String(x.id) === String(id));
+  if (!m) return;
+  window.openConfirmSheet({
+    title: '모임을 취소할까요?',
+    body: '참여자 전원에게 취소 알림이 가고, 목록에서 더 이상 보이지 않아요. 되돌릴 수 없어요.',
+    confirmLabel: '모임 취소',
+    onConfirm: () => doCancelMeetup(id),
+  });
+};
+
+function doCancelMeetup(id) {
+  const res = window.cancelMeetup(id);
+  if (!res.ok) { window.showToast('취소할 수 없어요'); return; }
+  window.closeModal();
+  if (currentTab === 'meetups') window.renderMeetupList();
+  window.showToast(res.notified ? `모임을 취소하고 참여자 ${res.notified}명에게 알렸어요` : '모임을 취소했어요');
+}
+
+// 참여자 전원에게 알림. 목업에서 실제 수신자는 '나'뿐이고(내 신청 기록이 있을 때),
+// 호스트가 승인해둔 신청자 수는 화면에 보여줄 숫자로만 센다.
+function notifyMeetupParticipants(m, text, icon) {
+  let count = 0;
+  const mine = meetupJoins[String(m.id)];
+  if (mine && (mine.status === 'pending' || mine.status === 'confirmed')) {
+    DUMMY_NOTIFICATIONS.unshift({ icon: icon || '📣', text, time: '방금', unread: true });
+    count += 1;
+  }
+  count += (meetupApplicants[String(m.id)] || []).filter(a => a && a.status === 'confirmed').length;
+  return count;
+}
+window.notifyMeetupParticipants = notifyMeetupParticipants;
 
 // ── 설정 페이지 ────────────────────────────────────────
 // 예전에는 내 프로필 화면 하단에 인라인으로 붙어 있었다. 프로필은 남에게
@@ -5592,10 +5817,16 @@ window.flushDueJoinReminders = function (now = Date.now()) {
     if (!rec || !Array.isArray(rec.reminders)) return;
     const m = getMeetup(id);
     if (!m) return;
+    if (m.cancelled) return; // 취소된 모임 리마인드는 보내지 않는다
     rec.reminders.forEach(r => {
       if (r.sent || r.at > now) return;
       r.sent = true;
-      fired.push({ icon: '📅', text: `'${m.title}' 모임이 ${r.h}시간 뒤에 시작돼요`, time: '방금', unread: true });
+      // 같은 24시간 지점이라도 아직 승인 대기면 '승인 리마인드', 확정됐으면
+      // '참석 리마인드'다. 둘을 따로 예약하면 같은 시각에 두 개가 온다.
+      const attend = r.h === 24 && rec.status === 'confirmed';
+      fired.push(attend
+        ? { icon: '⏰', text: `내일 '${m.title}' 모임이 있어요`, time: '방금', unread: true }
+        : { icon: '📅', text: `'${m.title}' 모임이 ${r.h}시간 뒤에 시작돼요`, time: '방금', unread: true });
     });
   });
   if (fired.length) {
@@ -5609,6 +5840,7 @@ window.flushDueJoinReminders = function (now = Date.now()) {
 window.applyToMeetup = function (id) {
   const m = getMeetup(id);
   if (!m) return { ok: false, reason: 'not_found' };
+  if (m.cancelled) return { ok: false, reason: 'cancelled' };
   if (isMeetupHost(m)) return { ok: false, reason: 'host' };
   if (window.getJoinStatus(id) !== 'none') return { ok: false, reason: 'already' };
   if (hasMeetupStarted(m)) return { ok: false, reason: 'started' };
@@ -5728,6 +5960,9 @@ window.openMeetupDetail = function (id) {
   const meetupStarted = hasMeetupStarted(m);
   const isFullNow = isMeetupFull(m);
   const iAmHost = isMeetupHost(m);
+  // "정확한 주소는 참여 확정 후 공개" 체크박스. 꺼져 있으면 누구에게나 보인다.
+  const addressGated = m.locationTiming === '참여 확정 후';
+  const showFullAddress = !!m.fullAddress && (iAmHost || !addressGated || isConfirmed);
   const showHostThumb = !isCommunity && !!m.hostIsPublic && m.hostType !== '단체';
   const displayedCap = (showHostThumb ? 1 : 0) + (m.participants || []).length;
   const displayCapPercent = m.maxCap > 0 ? Math.round((displayedCap / m.maxCap) * 100) : 0;
@@ -5747,6 +5982,14 @@ window.openMeetupDetail = function (id) {
     const list = window.getMeetupApplicants(m.id);
     const waiting = list.filter(a => a.status !== 'confirmed');
     return `
+    <div class="host-actions">
+      <button type="button" class="host-action-btn" onclick="window.openCreateMeetupModal(${m.id})">
+        <i data-lucide="pencil" style="width:15px;height:15px;" aria-hidden="true"></i> 모임 수정
+      </button>
+      ${m.cancelled ? '' : `<button type="button" class="host-action-btn is-danger" onclick="window.handleCancelMeetup(${m.id})">
+        <i data-lucide="x-circle" style="width:15px;height:15px;" aria-hidden="true"></i> 모임 취소
+      </button>`}
+    </div>
     <div class="applicant-section" id="applicant-section">
       <div class="applicant-section-title">
         신청자 목록<span class="applicant-count">${waiting.length}명 대기</span>
@@ -5786,6 +6029,7 @@ window.openMeetupDetail = function (id) {
        <div class="scroll-y" style="padding: 10px 24px 140px;">
           <div style="color:var(--primary); font-size:14px; font-weight:700; margin-bottom:8px;">${(() => { const ds = getDetailDateString(m); return isCommunity ? m.type : (ds ? `${m.type} · ${ds}` : m.type); })()}</div>
           <h2 style="font-size: 26px; line-height: 1.3; margin-bottom: 8px; font-weight:800;">${m.title}</h2>
+          ${m.cancelled ? `<div class="meetup-cancelled-banner">이 모임은 취소됐어요</div>` : ''}
           
           ${isApplied ? `
               ${isPending ? `
@@ -5797,11 +6041,11 @@ window.openMeetupDetail = function (id) {
                 <div class="join-status-title">✅ 참여 확정</div>
                 <div class="join-status-body">호스트 승인이 끝났어요. 참여자 목록을 볼 수 있어요.</div>
               </div>`}
-              ${isConfirmed ? `
+              ${showFullAddress ? `
               <div class="address-reveal-card" style="margin-bottom:${m.kakaoLink ? '12px' : (showAgeRange ? '8px' : '24px')};">
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
-                <div class="address-reveal-card-sub">참여 확정 후 공개되는 장소입니다</div>
+                ${addressGated ? `<div class="address-reveal-card-sub">참여 확정 후 공개되는 장소입니다</div>` : ''}
               </div>` : `
               <div class="meetup-location-preview" style="margin-bottom:12px; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.shortLocation}<span class="join-locked-note">상세 주소는 참여 확정 후 공개돼요</span></div>`}
               ${m.kakaoLink ? `<div onclick="window.open('${m.kakaoLink}', '_blank')" style="margin-bottom:8px; background:#FEE500; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
@@ -5814,7 +6058,12 @@ window.openMeetupDetail = function (id) {
               <div class="join-nickname-tip" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
                 오픈채팅방에서 닉네임을 <b>'${escapeHTML(userName || '내 닉네임')}'</b>으로 바꿔주세요. 호스트가 그 이름으로 확인하고 승인해요.
               </div>` : ''}`
-    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}</div>`
+    : showFullAddress && !isCommunity ? `
+              <div class="address-reveal-card" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
+                <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
+                <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
+              </div>`
+    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}${addressGated ? `<span class="join-locked-note">정확한 주소는 참여 확정 후 공개돼요</span>` : ''}</div>`
     }
 
           ${showAgeRange ? `<div style="font-size:14px; color:#888; margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
@@ -5950,14 +6199,15 @@ window.openMeetupDetail = function (id) {
           ${(() => {
             // 정원이 찬 경우에만 막는다. 시작 전까지는 언제든 신청할 수 있다.
             // 내가 연 모임에 내가 신청할 일은 없다.
-            const label = iAmHost ? '내가 여는 모임'
+            const label = m.cancelled ? '취소된 모임이에요'
+              : iAmHost ? '내가 여는 모임'
               : isConfirmed ? '참여 확정 ✓'
               : isPending ? '승인 대기 중'
               : m.disableRSVP ? '외부 사이트에서 신청'
               : meetupStarted ? '이미 시작된 모임이에요'
               : isFullNow ? '정원이 찼어요'
               : '참여하기';
-            const dead = iAmHost || isApplied || m.disableRSVP || meetupStarted || isFullNow;
+            const dead = m.cancelled || iAmHost || isApplied || m.disableRSVP || meetupStarted || isFullNow;
             return `<button id="detail-rsvp-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: ${dead ? '#CCC' : '#9B72CC'}; color: white; font-size: 16px; font-weight: 600; border: none; cursor: ${dead ? 'default' : 'pointer'}; pointer-events: ${dead ? 'none' : 'auto'};" onclick="window.handleMeetupApply(${m.id})">${label}</button>`;
           })()}
        </div>
@@ -5976,7 +6226,8 @@ window.closeModal = function () {
 window.handleMeetupApply = function (meetupId) {
   const res = window.applyToMeetup(meetupId);
   if (!res.ok) {
-    const msg = res.reason === 'host' ? '내가 여는 모임이에요'
+    const msg = res.reason === 'cancelled' ? '취소된 모임이에요'
+      : res.reason === 'host' ? '내가 여는 모임이에요'
       : res.reason === 'full' ? '정원이 찼어요'
       : res.reason === 'started' ? '이미 시작된 모임이에요'
       : res.reason === 'already' ? '이미 신청한 모임이에요' : '신청할 수 없어요';
@@ -6960,9 +7211,9 @@ function renderMyMeetingsTab(tabName) {
             <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
           </div>
           <span style="
-            background:#E8F5E9; color:#4CAF50; border-radius:999px;
+            background:${m.cancelled ? '#F1EFEF' : '#E8F5E9'}; color:${m.cancelled ? '#8A8587' : '#4CAF50'}; border-radius:999px;
             padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px; flex-shrink:0;
-          ">주최 ✓</span>
+          ">${m.cancelled ? '취소됨' : '주최 ✓'}</span>
         </div>
       `).join('');
     }
@@ -7907,6 +8158,7 @@ function getBridgeMeetups() {
 
   const eligible = MOCK_MEETUPS.filter(m =>
     m &&
+    !m.cancelled &&                // 취소된 모임은 추천하지 않는다
     m.timestamp &&                 // 마감 시점을 알 수 있어야 임박순에 올린다
     isSocialMeetup(m) &&           // ① 카테고리 = 소셜
     !isMeetupFull(m) &&            // ③ 만석 아님
