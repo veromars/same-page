@@ -796,6 +796,7 @@ const MOCK_MEETUPS = [
       { nickname: "바다", date: "2026.03.01", text: "공간도 예쁘고 호스트분들도 친절하셔서 편하게 이야기했습니다." }
     ],
     isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 서울숲2길 32-14, 북라운지",
+    locationTiming: '참여 확정 후', // 소규모 라운지라 참여자에게만 상세 주소를 연다
     participants: [MOCK_PROFILES[12].image, MOCK_PROFILES[13].image, MOCK_PROFILES[14].image, MOCK_PROFILES[15].image, MOCK_PROFILES[16].image]
   },
   {
@@ -844,6 +845,7 @@ const MOCK_MEETUPS = [
     ageRange: "20대 후반 ~ 30대 초반",
     rules: "예약 후 방문하므로 노쇼는 절대 금지입니다.",
     isRecommended: true, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "성동구 (성수)", fullAddress: "서울 성동구 연무장길 11, 카페 모노",
+    locationTiming: '참여 확정 후', // 자리를 미리 잡아두는 소규모 브런치라 참여자에게만 상세 주소를 연다
     participants: [MOCK_PROFILES[18].image, MOCK_PROFILES[19].image, MOCK_PROFILES[20].image]
   },
   {
@@ -854,6 +856,7 @@ const MOCK_MEETUPS = [
     ageRange: "30대 초반 ~ 40대 초반",
     rules: "과도한 음주는 자제해주세요.",
     isRecommended: false, isSaved: false, hasRSVPd: false, kakaoLink: 'https://open.kakao.com/o/test', shortLocation: "중구 (대구)", fullAddress: "대구광역시 중구 국채보상로 643, B1\n그레이 (GREY)",
+    locationTiming: '참여 확정 후', // 퀴어 바 위치라 참여자에게만 상세 주소를 연다
     participants: [MOCK_PROFILES[0].image, MOCK_PROFILES[4].image, MOCK_PROFILES[8].image, MOCK_PROFILES[12].image]
   },
   {
