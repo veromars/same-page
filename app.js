@@ -1280,8 +1280,9 @@ window.myPhotos = [
   'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?w=600',
   'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600',
 ];
-window._photoGridEditMode = false;
-window._photoGridDragSrc = null;
+// 사진 그리드는 편집 화면 안에만 있다. 별도 '편집 모드'를 또 두면 꾹 누르기로
+// 진입해야 삭제 버튼이 나오는데, 이미 수정 화면에 들어와 있는 사람에게는 한 겹이
+// 더 얹힌 셈이다. 모드를 없애고 X는 늘 띄운다.
 let userStyle = '';
 let userIdeal = '';
 let userDrink = '';
@@ -4045,7 +4046,8 @@ window.refreshPhotoGrid = function () {
     const ph = photos[i];
     return ph
       ? `<div class="photo-slot filled" data-idx="${i}" style="background-image:url('${ph}');">
-           <div class="photo-delete-btn" onclick="event.stopPropagation();window.deleteMyPhoto(${i})">×</div>
+           <button type="button" class="photo-delete-btn" aria-label="${i + 1}번째 사진 삭제"
+             onclick="event.stopPropagation();window.deleteMyPhoto(${i})">×</button>
            ${i === 0 ? '<div class="photo-main-badge">대표</div>' : ''}
          </div>`
       : `<div class="photo-slot empty" onclick="window.addMyPhoto()">
@@ -4056,18 +4058,9 @@ window.refreshPhotoGrid = function () {
 };
 
 window.deleteMyPhoto = function (idx) {
+  // splice라 뒤 사진이 앞으로 당겨진다. 0번을 지우면 다음 사진이 곧 대표가 된다.
   window.myPhotos.splice(idx, 1);
-  const wasEdit = window._photoGridEditMode;
   window.refreshPhotoGrid();
-  window.initPhotoGrid();
-  if (wasEdit) {
-    const g = document.getElementById('my-photo-grid');
-    if (g) {
-      g.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = 'flex');
-      g.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.add('editing'));
-      window._photoGridEditMode = true;
-    }
-  }
 };
 
 // '+'를 누르면 실제 사진 라이브러리가 열린다. input[type=file]을 화면에
@@ -4108,71 +4101,61 @@ window.addMyPhoto = function () {
   input.click();
 };
 
+// 드래그로 순서 바꾸기. 1번 슬롯에 온 사진이 곧 대표가 된다 — 대표를 따로
+// 지정하는 조작을 두지 않고 순서 하나로 합쳤다.
+//
+// Pointer Events 하나로 마우스·터치를 같이 받는다. 리스너는 그리드에 걸어서
+// refreshPhotoGrid()가 안쪽을 통째로 갈아끼워도 살아남는다.
 window.initPhotoGrid = function () {
   const grid = document.getElementById('my-photo-grid');
-  if (!grid) return;
+  if (!grid || grid.__dragBound) return;
+  grid.__dragBound = true;
 
-  let lpTimer = null;
+  let src = null;
+  let moved = false;
 
-  const setEdit = (on) => {
-    window._photoGridEditMode = on;
-    grid.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = on ? 'flex' : 'none');
-    grid.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.toggle('editing', on));
-    if (!on) {
-      window._photoGridDragSrc = null;
-      grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging'));
-    }
+  const clearMarks = () => {
+    grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging', 'drop-target'));
   };
 
-  grid.addEventListener('touchstart', e => {
+  const slotAt = (x, y) => {
+    const el = document.elementFromPoint(x, y);
+    return el ? el.closest('.photo-slot.filled[data-idx]') : null;
+  };
+
+  grid.addEventListener('pointerdown', e => {
     if (e.target.closest('.photo-delete-btn')) return;
     const slot = e.target.closest('.photo-slot.filled');
-    if (!slot) { if (window._photoGridEditMode) setEdit(false); return; }
-    if (window._photoGridEditMode) {
-      window._photoGridDragSrc = parseInt(slot.dataset.idx);
-      slot.classList.add('dragging');
-      return;
-    }
-    const idx = parseInt(slot.dataset.idx);
-    lpTimer = setTimeout(() => {
-      lpTimer = null;
-      setEdit(true);
-      window._photoGridDragSrc = idx;
-      slot.classList.add('dragging');
-    }, 500);
-  }, { passive: true });
+    if (!slot) return;
+    src = Number(slot.dataset.idx);
+    moved = false;
+    slot.classList.add('dragging');
+    try { slot.setPointerCapture(e.pointerId); } catch (err) { /* 캡처 실패해도 진행 */ }
+  });
 
-  grid.addEventListener('touchmove', e => {
-    if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
-  }, { passive: true });
-
-  grid.addEventListener('touchend', e => {
-    if (lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
-    const src = window._photoGridDragSrc;
+  grid.addEventListener('pointermove', e => {
     if (src === null) return;
-    const t = e.changedTouches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
-    const tgt = el && el.closest('.photo-slot[data-idx]');
-    if (tgt) {
-      const ti = parseInt(tgt.dataset.idx);
-      if (ti !== src) {
-        const tmp = window.myPhotos[src];
-        window.myPhotos.splice(src, 1);
-        window.myPhotos.splice(ti, 0, tmp);
-        window._photoGridDragSrc = null;
-        window.refreshPhotoGrid();
-        window.initPhotoGrid();
-        const newGrid = document.getElementById('my-photo-grid');
-        if (newGrid && window._photoGridEditMode) {
-          newGrid.querySelectorAll('.photo-delete-btn').forEach(b => b.style.display = 'flex');
-          newGrid.querySelectorAll('.photo-slot.filled').forEach(s => s.classList.add('editing'));
-        }
-        return;
-      }
-    }
-    grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging'));
-    window._photoGridDragSrc = null;
-  }, { passive: true });
+    moved = true;
+    grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('drop-target'));
+    const tgt = slotAt(e.clientX, e.clientY);
+    if (tgt && Number(tgt.dataset.idx) !== src) tgt.classList.add('drop-target');
+  });
+
+  grid.addEventListener('pointerup', e => {
+    if (src === null) return;
+    const from = src;
+    src = null;
+    const tgt = moved ? slotAt(e.clientX, e.clientY) : null;
+    clearMarks();
+    if (!tgt) return;
+    const to = Number(tgt.dataset.idx);
+    if (to === from) return;
+    const [ph] = window.myPhotos.splice(from, 1);
+    window.myPhotos.splice(to, 0, ph);
+    window.refreshPhotoGrid();
+  });
+
+  grid.addEventListener('pointercancel', () => { src = null; clearMarks(); });
 };
 
 // ── 모임 만들기 — 모달 · 캘린더 · 슬라이더 · 이미지 · 링크 · 제출 ────

@@ -3829,16 +3829,21 @@ p {
   background-size: cover;
   background-position: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-  cursor: pointer;
-}
-
-.photo-slot.filled.editing {
-  outline: 2px solid #9B7FD4;
-  outline-offset: -2px;
+  cursor: grab;
+  /* 드래그로 순서를 바꾸므로 이 타일 위에서는 브라우저 제스처를 넘기지 않는다.
+     타일 6개뿐이고 바깥 여백·빈 슬롯에서는 평소대로 스크롤된다. */
+  touch-action: none;
 }
 
 .photo-slot.filled.dragging {
   opacity: 0.55;
+  cursor: grabbing;
+}
+
+/* 지금 놓으면 여기로 간다 */
+.photo-slot.filled.drop-target {
+  outline: 2px solid #9B7FD4;
+  outline-offset: -2px;
 }
 
 .photo-slot.empty {
@@ -3866,13 +3871,23 @@ p {
   border: none;
   font-size: 13px;
   font-weight: 700;
-  display: none;
+  /* 수정 화면 안에서만 그려지는 버튼이다. 꾹 눌러야 나타나면 있는 줄도 모른다. */
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
   pointer-events: all;
   line-height: 1;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 0;
+  font-family: inherit;
+}
+
+.photo-delete-btn:focus-visible {
+  outline: 2px solid #FFF;
+  outline-offset: 1px;
 }
 
 .photo-main-badge {
