@@ -4059,8 +4059,16 @@ window.refreshPhotoGrid = function () {
 
 window.deleteMyPhoto = function (idx) {
   // splice라 뒤 사진이 앞으로 당겨진다. 0번을 지우면 다음 사진이 곧 대표가 된다.
-  window.myPhotos.splice(idx, 1);
+  const [removed] = window.myPhotos.splice(idx, 1);
+  if (removed === undefined) return;
   window.refreshPhotoGrid();
+
+  // X가 늘 떠 있게 되면서 오탭으로 사진이 사라질 수 있다. 매번 묻지 않고
+  // 되돌릴 길만 잠깐 열어둔다.
+  window.showUndoToast('삭제했어요', '되돌리기', () => {
+    window.myPhotos.splice(Math.min(idx, window.myPhotos.length), 0, removed);
+    window.refreshPhotoGrid();
+  });
 };
 
 // '+'를 누르면 실제 사진 라이브러리가 열린다. input[type=file]을 화면에
@@ -4106,18 +4114,37 @@ window.addMyPhoto = function () {
 //
 // Pointer Events 하나로 마우스·터치를 같이 받는다. 리스너는 그리드에 걸어서
 // refreshPhotoGrid()가 안쪽을 통째로 갈아끼워도 살아남는다.
+// 드래그로 순서 바꾸기. 1번 슬롯에 온 사진이 곧 대표가 된다 — 대표를 따로
+// 지정하는 조작을 두지 않고 순서 하나로 합쳤다.
+//
+// Pointer Events 하나로 마우스·터치를 같이 받는다. 리스너는 그리드에 걸어서
+// refreshPhotoGrid()가 안쪽을 통째로 갈아끼워도 살아남는다.
 window.initPhotoGrid = function () {
   const grid = document.getElementById('my-photo-grid');
   if (!grid || grid.__dragBound) return;
   grid.__dragBound = true;
 
-  let src = null;
-  let moved = false;
+  let src = null;      // 집어 올린 슬롯 인덱스
+  let dragEl = null;   // 그 DOM 노드
+  let sx = 0, sy = 0;  // 집은 지점
+  let moved = false;   // 손떨림과 진짜 드래그를 가른다
+
+  const DRAG_THRESHOLD = 4;
+
+  const resetEl = () => {
+    if (!dragEl) return;
+    dragEl.style.transition = '';
+    dragEl.style.transform = '';
+    dragEl.style.zIndex = '';
+    dragEl = null;
+  };
 
   const clearMarks = () => {
     grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('dragging', 'drop-target'));
   };
 
+  // 끌고 있는 타일은 pointer-events가 꺼져 있어(.dragging) 손가락 아래의
+  // '밑에 깔린' 슬롯이 잡힌다. 안 그러면 자기 자신만 계속 걸린다.
   const slotAt = (x, y) => {
     const el = document.elementFromPoint(x, y);
     return el ? el.closest('.photo-slot.filled[data-idx]') : null;
@@ -4128,14 +4155,28 @@ window.initPhotoGrid = function () {
     const slot = e.target.closest('.photo-slot.filled');
     if (!slot) return;
     src = Number(slot.dataset.idx);
+    dragEl = slot;
+    sx = e.clientX; sy = e.clientY;
     moved = false;
-    slot.classList.add('dragging');
-    try { slot.setPointerCapture(e.pointerId); } catch (err) { /* 캡처 실패해도 진행 */ }
+    // 캡처는 그리드가 잡는다. 타일은 곧 pointer-events가 꺼지므로
+    // 거기에 캡처를 걸면 이동 중에 이벤트가 끊긴다.
+    try { grid.setPointerCapture(e.pointerId); } catch (err) { /* 캡처 실패해도 진행 */ }
   });
 
   grid.addEventListener('pointermove', e => {
-    if (src === null) return;
-    moved = true;
+    if (src === null || !dragEl) return;
+    const dx = e.clientX - sx;
+    const dy = e.clientY - sy;
+    if (!moved) {
+      if (Math.hypot(dx, dy) < DRAG_THRESHOLD) return; // 탭과 드래그를 가른다
+      moved = true;
+      dragEl.classList.add('dragging');
+      // 손가락을 1:1로 따라가야 한다. 트랜지션이 걸려 있으면 뒤처져 끌린다.
+      dragEl.style.transition = 'none';
+      dragEl.style.zIndex = '20';
+    }
+    dragEl.style.transform = `translate(${dx}px, ${dy}px) scale(1.05)`;
+
     grid.querySelectorAll('.photo-slot').forEach(s => s.classList.remove('drop-target'));
     const tgt = slotAt(e.clientX, e.clientY);
     if (tgt && Number(tgt.dataset.idx) !== src) tgt.classList.add('drop-target');
@@ -4146,7 +4187,15 @@ window.initPhotoGrid = function () {
     const from = src;
     src = null;
     const tgt = moved ? slotAt(e.clientX, e.clientY) : null;
+
+    // 놓은 자리가 없으면 제자리로 돌아간다. transition을 되살려 두고
+    // transform만 지우면 CSS가 알아서 미끄러뜨린다.
+    if (dragEl) dragEl.style.transition = '';
+    const el = dragEl;
+    dragEl = null;
+    if (el) { el.style.transform = ''; el.style.zIndex = ''; }
     clearMarks();
+
     if (!tgt) return;
     const to = Number(tgt.dataset.idx);
     if (to === from) return;
@@ -4155,7 +4204,7 @@ window.initPhotoGrid = function () {
     window.refreshPhotoGrid();
   });
 
-  grid.addEventListener('pointercancel', () => { src = null; clearMarks(); });
+  grid.addEventListener('pointercancel', () => { src = null; resetEl(); clearMarks(); });
 };
 
 // ── 모임 만들기 — 모달 · 캘린더 · 슬라이더 · 이미지 · 링크 · 제출 ────
@@ -5689,6 +5738,8 @@ window.afterProfileEditRender = function () {
 
 // 편집을 닫으면 기본 화면을 다시 그려 수정 내용이 곧바로 반영되게 한다.
 window.closeMyProfileEdit = function () {
+  // 그리드가 사라진 뒤 되돌리면 배열만 바뀌고 화면은 그대로다. 여기서 접는다.
+  window.dismissUndoToast();
   // 닉네임이 실제로 바뀐 경우에만 쿨다운 시계를 돌린다.
   const before = window.__nameAtEditOpen ?? '';
   if ((userName || '') !== before && (userName || '').trim()) {
@@ -10639,6 +10690,43 @@ window.showToast = function (msg) {
   setTimeout(() => {
     toast.style.opacity = '0';
   }, 2500);
+};
+
+// 누를 수 있는 토스트. 되돌릴 수 있는 삭제에는 확인 시트를 세우는 대신
+// 이걸 쓴다 — 매번 묻는 것보다 한 번 되돌릴 길을 주는 편이 덜 성가시다.
+const UNDO_TOAST_MS = 5000;
+
+window.showUndoToast = function (msg, actionLabel, onAction, ms = UNDO_TOAST_MS) {
+  // 앞선 토스트가 떠 있으면 그 되돌리기는 포기된다. 두 개가 겹치면 어느
+  // 삭제를 되돌리는 건지 알 수 없다.
+  window.dismissUndoToast();
+
+  const el = document.createElement('div');
+  el.id = 'undo-toast';
+  el.className = 'undo-toast';
+  el.setAttribute('role', 'status');
+  el.innerHTML = `
+    <span class="undo-toast-msg">${escapeHTML(msg)}</span>
+    <button type="button" class="undo-toast-btn">${escapeHTML(actionLabel)}</button>
+  `;
+  document.body.appendChild(el);
+  requestAnimationFrame(() => el.classList.add('is-in'));
+
+  el.querySelector('.undo-toast-btn').addEventListener('click', () => {
+    window.dismissUndoToast();
+    if (onAction) onAction();
+  });
+
+  window.__undoToastTimer = setTimeout(() => window.dismissUndoToast(), ms);
+};
+
+window.dismissUndoToast = function () {
+  clearTimeout(window.__undoToastTimer);
+  window.__undoToastTimer = null;
+  const el = document.getElementById('undo-toast');
+  if (!el) return;
+  el.classList.remove('is-in');
+  setTimeout(() => el.remove(), 220);
 };
 
 window.openMeetupShareSheet = function (meetupId) {
