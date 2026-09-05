@@ -6023,3 +6023,38 @@ p {
   outline: 2px solid #8960B8;
   outline-offset: 2px;
 }
+
+/* ── 참여 취소 · 참여자 썸네일 안내 ─────────────────── */
+.join-cancel-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 8px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #9A5C5C;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.join-cancel-btn:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+/* 자물쇠와 점선 박스를 걷어낸 자리. 썸네일은 보이니 한 줄이면 충분하다. */
+.attendee-hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #948F91;
+  word-break: keep-all;
+}
+
+.attendee-stack .attendee-avatar {
+  cursor: pointer;
+}
