@@ -32,22 +32,17 @@
       --paper:   #FAF9F6;
       --surface: #FFFFFF;
       --ink:     #2D2A2B;
-      --muted:   #858082;
-      --border:  #F0EBEF;
-      --purple-text: #8960B8;  /* 페이퍼 위 텍스트·아이콘 (AA 4.5:1) */
+      --muted:   #7c7779;
+      --border:  rgba(45, 42, 43, 0.10);
+      --purple-text: #7d55ad;  /* 페이퍼 위 텍스트·링크 (AA) */
       --purple-fill: #8D64BC;  /* 흰 글자를 얹는 채움 */
-      --purple-soft: #C89FDB;  /* 배경 면 전용 */
-      --lime:  #E2FF74;        /* 하이라이터 — 면으로만 */
-      --peach: #FFD5BD;
-
-      /* p.2 시그니처 그라데이션 (styles.css). 랜딩 전체에서 딱 한 번만 쓴다. */
-      --signature: linear-gradient(115deg, #E2FF74 0%, #C8B8D0 48%, #C89FDB 100%);
+      --purple-soft: #C89FDB;
 
       --sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --serif: "Noto Serif KR", serif;
 
       --maxw: 1080px;
-      --gap-section: clamp(72px, 12vw, 128px);
+      --gap-section: clamp(84px, 13vw, 148px);
     }
 
     * { box-sizing: border-box; }
@@ -61,33 +56,58 @@
       line-height: 1.7;
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
-      /* 한글이 단어 중간에서 줄바꿈되지 않도록 */
       word-break: keep-all;
       overflow-wrap: break-word;
     }
     img { max-width: 100%; display: block; }
     a { color: inherit; }
 
-    .wrap {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: 0 24px;
+    /* ── Ambient gradient field ────────────────────────── */
+    /* 스크롤에 따라 두 개의 큰 블롭이 색을 바꾼다. 4creative 처럼 배경이
+       섹션마다 물드는 느낌을, p.2 소프트 팔레트로 채도만 한 단계 올려서. */
+    #bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: var(--paper);
+      overflow: hidden;
+      pointer-events: none;
     }
+    #bg .blob {
+      position: absolute;
+      width: 92vmax;
+      height: 92vmax;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.58;
+      will-change: transform, background-color;
+      transition: background-color .9s linear;
+    }
+    #bg .b1 { top: -34vmax;  left: -22vmax;  background: #C89FDB; }
+    #bg .b2 { bottom: -34vmax; right: -22vmax; background: #B8A0C8; }
+
+    /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드 */
+    .nav-fade {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 132px;
+      z-index: 15;
+      pointer-events: none;
+      background: linear-gradient(var(--paper) 32%, rgba(250, 249, 246, 0.7) 60%, rgba(250, 249, 246, 0) 100%);
+    }
+
+    .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
 
     /* ── Nav ───────────────────────────────────────────── */
     .nav {
       position: sticky;
       top: 0;
       z-index: 20;
-      background: rgba(250, 249, 246, 0.82);
-      backdrop-filter: saturate(140%) blur(10px);
-      -webkit-backdrop-filter: saturate(140%) blur(10px);
-      border-bottom: 1px solid var(--border);
     }
     .nav-inner {
       max-width: var(--maxw);
       margin: 0 auto;
-      padding: 14px 24px;
+      padding: 16px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -120,29 +140,18 @@
     .btn:active { transform: translateY(1px); }
     .btn-primary { background: var(--purple-fill); color: #fff; }
     .btn-primary:hover { background: #7d55ad; }
-    .btn-ghost { background: transparent; border-color: var(--border); color: var(--ink); }
-    .btn-ghost:hover { border-color: var(--purple-soft); }
+    .btn-ghost {
+      background: rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-color: var(--border);
+      color: var(--ink);
+    }
+    .btn-ghost:hover { border-color: var(--purple-soft); background: rgba(255,255,255,0.75); }
     .nav .btn { padding: 10px 18px; font-size: 14px; }
 
     /* ── Hero ──────────────────────────────────────────── */
-    .hero {
-      position: relative;
-      overflow: hidden;
-      padding: clamp(64px, 13vw, 132px) 0 var(--gap-section);
-    }
-    /* 시그니처 그라데이션 — 히어로 뒤 은은한 워시 한 번 */
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: -30% -10% auto -10%;
-      height: 620px;
-      background: var(--signature);
-      opacity: 0.18;
-      filter: blur(80px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .hero .wrap { position: relative; z-index: 1; }
+    .hero { padding: clamp(56px, 12vw, 116px) 0 var(--gap-section); }
 
     .eyebrow {
       display: inline-flex;
@@ -152,10 +161,12 @@
       font-weight: 600;
       letter-spacing: 0.02em;
       color: var(--purple-text);
-      padding: 6px 12px;
+      padding: 6px 13px;
       border: 1px solid var(--border);
       border-radius: 999px;
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
     .eyebrow::before {
       content: "";
@@ -168,32 +179,20 @@
       font-family: var(--serif);
       font-weight: 300;
       font-size: clamp(2.1rem, 6.2vw, 3.6rem);
-      line-height: 1.35;
+      line-height: 1.38;
       letter-spacing: -0.01em;
       margin: 24px 0 0;
-      max-width: 18ch;
+      max-width: 20ch;
     }
-    h1 em {
-      font-style: normal;
-      color: var(--purple-text);
-    }
+    h1 em { font-style: normal; color: var(--purple-text); }
     .lede {
       margin: 22px 0 0;
       font-size: clamp(1rem, 2.3vw, 1.15rem);
-      color: #55514f;
+      color: #4f4b49;
       max-width: 34ch;
     }
-    .cta-row {
-      margin-top: 34px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-    }
-    .cta-note {
-      margin-top: 14px;
-      font-size: 13px;
-      color: var(--muted);
-    }
+    .cta-row { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .cta-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
 
     /* ── Section scaffold ──────────────────────────────── */
     section + section { margin-top: var(--gap-section); }
@@ -205,67 +204,44 @@
       letter-spacing: -0.01em;
       margin: 0 0 12px;
     }
-    .section-sub {
-      margin: 0 0 40px;
-      color: #55514f;
-      max-width: 46ch;
-    }
+    .section-sub { margin: 0 0 40px; color: #4f4b49; max-width: 46ch; }
 
     /* ── Cards ─────────────────────────────────────────── */
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .card {
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 26px 24px;
     }
-    .card h3 {
-      font-family: var(--serif);
-      font-weight: 500;
-      font-size: 1.15rem;
-      margin: 0 0 8px;
-    }
-    .card p { margin: 0; font-size: 14.5px; color: #55514f; }
+    .card h3 { font-family: var(--serif); font-weight: 500; font-size: 1.15rem; margin: 0 0 8px; }
+    .card p { margin: 0; font-size: 14.5px; color: #4f4b49; }
     .card .kicker {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      color: var(--purple-text);
-      text-transform: uppercase;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--purple-text); text-transform: uppercase;
     }
 
     /* ── "하지 않는 것" 리스트 ─────────────────────────── */
-    .nots {
-      border-top: 1px solid var(--border);
-    }
+    .nots { border-top: 1px solid var(--border); }
     .not {
-      display: grid;
-      grid-template-columns: 20px 1fr;
-      gap: 16px;
-      padding: 20px 4px;
-      border-bottom: 1px solid var(--border);
-      align-items: baseline;
+      display: grid; grid-template-columns: 20px 1fr; gap: 16px;
+      padding: 20px 4px; border-bottom: 1px solid var(--border); align-items: baseline;
     }
     .not svg { width: 18px; height: 18px; color: var(--purple-soft); }
     .not b { font-weight: 600; }
     .not span { color: var(--muted); }
 
     /* ── Steps ─────────────────────────────────────────── */
-    .steps {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      counter-reset: step;
-    }
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: step; }
     .step {
       padding: 22px 20px;
       border: 1px solid var(--border);
       border-radius: 14px;
-      background: var(--surface);
+      background: rgba(255, 255, 255, 0.62);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .step::before {
       counter-increment: step;
@@ -273,12 +249,10 @@
       font-family: var(--serif);
       font-size: 15px;
       color: var(--purple-text);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-flex; align-items: center; justify-content: center;
       width: 30px; height: 30px;
       border-radius: 50%;
-      background: rgba(200, 159, 219, 0.16);
+      background: rgba(200, 159, 219, 0.22);
       margin-bottom: 14px;
     }
     .step h4 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
@@ -286,70 +260,38 @@
 
     /* ── FAQ ───────────────────────────────────────────── */
     .faq { max-width: 720px; }
-    details {
-      border-bottom: 1px solid var(--border);
-      padding: 18px 0;
-    }
+    details { border-bottom: 1px solid var(--border); padding: 18px 0; }
     details summary {
-      list-style: none;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 16px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 16px;
+      list-style: none; cursor: pointer; font-weight: 600; font-size: 16px;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
     }
     details summary::-webkit-details-marker { display: none; }
     details summary::after {
-      content: "+";
-      font-weight: 400;
-      font-size: 20px;
-      color: var(--purple-text);
-      transition: transform .2s ease;
+      content: "+"; font-weight: 400; font-size: 20px; color: var(--purple-text);
     }
     details[open] summary::after { content: "\2013"; }
-    details p {
-      margin: 12px 0 0;
-      color: #55514f;
-      font-size: 14.5px;
-    }
+    details p { margin: 12px 0 0; color: #4f4b49; font-size: 14.5px; }
 
     /* ── Footer ────────────────────────────────────────── */
-    footer {
-      margin-top: var(--gap-section);
-      border-top: 1px solid var(--border);
-      padding: 40px 0 60px;
-    }
+    footer { margin-top: var(--gap-section); border-top: 1px solid var(--border); padding: 40px 0 60px; }
     .foot-inner {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px 40px;
-      justify-content: space-between;
-      align-items: flex-start;
-      font-size: 13px;
-      color: var(--muted);
+      display: flex; flex-wrap: wrap; gap: 20px 40px;
+      justify-content: space-between; align-items: flex-start;
+      font-size: 13px; color: var(--muted);
     }
     .foot-inner a { color: var(--muted); text-decoration: none; }
     .foot-inner a:hover { color: var(--ink); }
-    .foot-mark {
-      font-family: var(--serif);
-      font-size: 16px;
-      color: var(--ink);
-    }
+    .foot-mark { font-family: var(--serif); font-size: 16px; color: var(--ink); }
     .foot-mark span { color: var(--purple-text); }
 
     /* ── Motion ────────────────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(12px);
-      transition: opacity .6s ease, transform .6s ease;
-    }
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.in { opacity: 1; transform: none; }
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .btn { transition: none; }
+      #bg .blob { transition: none; }
     }
 
     /* ── Responsive ────────────────────────────────────── */
@@ -361,10 +303,14 @@
       .steps { grid-template-columns: 1fr; }
       .cta-row { flex-direction: column; align-items: stretch; }
       .cta-row .btn { width: 100%; }
+      #bg .blob { filter: blur(90px); opacity: 0.55; }
     }
   </style>
 </head>
 <body>
+
+  <div id="bg"><span class="blob b1"></span><span class="blob b2"></span></div>
+  <div class="nav-fade"></div>
 
   <nav class="nav">
     <div class="nav-inner">
@@ -373,7 +319,7 @@
     </div>
   </nav>
 
-  <header class="hero">
+  <header class="hero" data-c1="209,150,209" data-c2="238,187,197">
     <div class="wrap">
       <span class="eyebrow">비공개 베타</span>
       <h1>같은 페이지에 있다는 것, <em>가치관이 맞는 사람</em>을 만난다는 것.</h1>
@@ -391,7 +337,7 @@
 
   <main class="wrap">
 
-    <section class="reveal">
+    <section class="reveal" data-c1="187,147,231" data-c2="177,197,225">
       <h2 class="section-head">p.2는 앱이 아니라 책입니다.</h2>
       <p class="section-sub">
         사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
@@ -416,7 +362,7 @@
       </div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal" data-c1="150,158,212" data-c2="168,190,222">
       <h2 class="section-head">우리가 하지 않는 것들.</h2>
       <p class="section-sub">취향이 아니라 결정입니다. 각 항목은 실제로 만들지 않거나 덜어낸 것들이에요.</p>
       <div class="nots">
@@ -443,7 +389,7 @@
       </div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal" data-c1="216,152,196" data-c2="240,201,199">
       <h2 class="section-head">시작하는 방법.</h2>
       <p class="section-sub">느림이 결함이 아니라 약속입니다.</p>
       <div class="steps">
@@ -466,7 +412,7 @@
       </div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal" data-c1="168,132,208" data-c2="200,168,224">
       <h2 class="section-head">자주 묻는 것.</h2>
       <div class="faq">
         <details>
@@ -490,7 +436,7 @@
 
   </main>
 
-  <footer>
+  <footer data-c1="199,152,222" data-c2="192,162,206">
     <div class="wrap foot-inner">
       <div>
         <div class="foot-mark">p<span>.</span>2 &mdash; Same Page</div>
@@ -505,20 +451,77 @@
   </footer>
 
   <script>
-    // 스크롤 진입 시 1회 페이드업. 반복 애니메이션 없음.
     (function () {
-      var mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      /* ── 진입 페이드업 (1회) ── */
       var els = document.querySelectorAll('.reveal');
-      if (mq.matches || !('IntersectionObserver' in window)) {
+      if (reduce || !('IntersectionObserver' in window)) {
         els.forEach(function (el) { el.classList.add('in'); });
-        return;
+      } else {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -10% 0px' });
+        els.forEach(function (el) { io.observe(el); });
       }
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+
+      /* ── 스크롤에 따라 배경 그라데이션이 섹션 색으로 서서히 시프트 ── */
+      var b1 = document.querySelector('#bg .b1');
+      var b2 = document.querySelector('#bg .b2');
+      // 색 구간을 가진 섹션들 (문서 순서 = 스크롤 순서)
+      var zones = [].slice.call(document.querySelectorAll('[data-c1]')).map(function (el) {
+        return {
+          el: el,
+          c1: el.dataset.c1.split(',').map(Number),
+          c2: el.dataset.c2.split(',').map(Number)
+        };
+      });
+      function lerp(a, b, t) { return a + (b - a) * t; }
+      function mix(x, y, t) {
+        return [
+          Math.round(lerp(x[0], y[0], t)),
+          Math.round(lerp(x[1], y[1], t)),
+          Math.round(lerp(x[2], y[2], t))
+        ];
+      }
+      function rgb(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+
+      var ticking = false;
+      function apply() {
+        ticking = false;
+        // 뷰포트 높이와 무관하게: 각 섹션의 상단이 기준선(뷰포트 35%)을
+        // 지날 때 그 섹션 색으로 블렌드 시작, 다음 섹션 상단이 기준선에
+        // 닿으면 블렌드 완료.
+        var refLine = window.scrollY + window.innerHeight * 0.5;
+        var tops = zones.map(function (z) {
+          return window.scrollY + z.el.getBoundingClientRect().top;
         });
-      }, { rootMargin: '0px 0px -10% 0px' });
-      els.forEach(function (el) { io.observe(el); });
+        var i = 0;
+        for (var k = 0; k < tops.length; k++) {
+          if (tops[k] <= refLine) i = k; else break;
+        }
+        var next = Math.min(i + 1, zones.length - 1);
+        var span = tops[next] - tops[i];
+        var t = span > 0 ? Math.max(0, Math.min(1, (refLine - tops[i]) / span)) : 0;
+
+        b1.style.backgroundColor = rgb(mix(zones[i].c1, zones[next].c1, t));
+        b2.style.backgroundColor = rgb(mix(zones[i].c2, zones[next].c2, t));
+
+        // 아주 옅은 세로 드리프트 (컴포지터 친화적 transform)
+        if (!reduce) {
+          var p = window.scrollY * 0.04;
+          b1.style.transform = 'translate3d(0,' + (-p) + 'px,0)';
+          b2.style.transform = 'translate3d(0,' + (p * 0.6) + 'px,0)';
+        }
+      }
+      function onScroll() {
+        if (!ticking) { ticking = true; requestAnimationFrame(apply); }
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', apply);
+      apply();
     })();
   </script>
 
