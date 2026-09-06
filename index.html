@@ -267,11 +267,21 @@
     .marquee:hover .marquee-track { animation-play-state: paused; }
     .marquee-track span {
       padding: 0 22px;
-      font-size: 14px;
-      font-weight: 500;
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 15px;
+      font-weight: 400;
       letter-spacing: 0.01em;
+      white-space: nowrap;
     }
-    .marquee-track .lead { color: var(--purple-soft); font-weight: 600; }
+    .marquee-track span::after {
+      content: "\2726";           /* ✦ */
+      margin-left: 44px;
+      font-style: normal;
+      font-size: 10px;
+      vertical-align: 2px;
+      color: var(--purple-soft);
+    }
     @keyframes marquee { to { transform: translateX(-50%); } }
 
     /* ── 프리풋 CTA 블록 (Playful "Go ahead. Make an app.") ── */
@@ -383,8 +393,10 @@
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .btn { transition: none; }
-      .marquee { white-space: normal; }
-      .marquee-track { animation: none; flex-wrap: wrap; justify-content: center; }
+      .marquee-track { animation: none; }
+      .marquee-track span:nth-child(n+2) { display: none; }
+      .marquee-track span:first-child { display: block; width: 100%; text-align: center; }
+      .marquee-track span:first-child::after { display: none; }
     }
 
     /* ── Responsive ────────────────────────────────────── */
@@ -435,12 +447,12 @@
     </div>
   </header>
 
-  <!-- 잉크 색 띠 — p.2에서 만나는 것들 (Playful 마퀴 차용). 이음매 없는 루프를
-       위해 항목 리스트를 두 번 반복하고 트랙을 -50% 이동시킨다. -->
-  <section class="marquee" aria-label="p.2에서 만나는 것들">
+  <!-- 잉크 색 띠 — "p.2 — on the same page." 를 이탤릭으로 반복. 이음매 없는
+       루프를 위해 같은 목록을 두 번 넣고 트랙을 -50% 이동시킨다. -->
+  <section class="marquee" aria-label="p.2 — on the same page.">
     <div class="marquee-track">
-      <span class="lead">같은 페이지에서</span><span>가치관</span><span>유머 코드</span><span>라이프스타일</span><span>연애 가치관</span><span>소울푸드</span><span>힐링 스팟</span><span>플레이리스트</span><span>어린 시절</span><span>5년 뒤의 나</span><span>다툼을 푸는 법</span><span>함께하는 삶</span><span>지금 이 순간</span>
-      <span class="lead">같은 페이지에서</span><span>가치관</span><span>유머 코드</span><span>라이프스타일</span><span>연애 가치관</span><span>소울푸드</span><span>힐링 스팟</span><span>플레이리스트</span><span>어린 시절</span><span>5년 뒤의 나</span><span>다툼을 푸는 법</span><span>함께하는 삶</span><span>지금 이 순간</span>
+      <span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span>
+      <span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span>
     </div>
   </section>
 
