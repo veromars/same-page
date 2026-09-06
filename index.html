@@ -30,13 +30,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
-  <!-- 대기자 폼용 Supabase. 앱과 같은 env-config.js·supabase-client.js 를 쓴다
-       (둘 다 리포 루트, 랜딩도 루트라 상대경로 그대로). anon 키만 노출되고
-       waitlist 테이블은 RLS 로 insert 만 허용된다. -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-  <script src="env-config.js?v=20260906d"></script>
-  <script src="supabase-client.js?v=20260906d"></script>
-
   <style>
     :root {
       --paper:   #FAF9F6;
@@ -201,63 +194,6 @@
     .cta-row { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
     .cta-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
 
-    /* ── Waitlist (Playful 스타일 통합 알약) ─────────────── */
-    .waitlist {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      max-width: 460px;
-      margin-top: 16px;
-      padding: 6px 6px 6px 20px;
-      background: rgba(255, 255, 255, 0.72);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-    }
-    .waitlist input {
-      flex: 1;
-      min-width: 0;
-      border: 0;
-      outline: none;
-      background: transparent;
-      font: inherit;
-      font-size: 15px;
-      color: var(--ink);
-      padding: 11px 0;
-    }
-    .waitlist input::placeholder { color: var(--muted); }
-    .waitlist button {
-      flex: none;
-      border: 0;
-      cursor: pointer;
-      font: inherit;
-      font-weight: 600;
-      font-size: 14px;
-      color: #fff;
-      background: var(--purple-fill);
-      border-radius: 999px;
-      padding: 12px 22px;
-      transition: background-color .15s ease;
-    }
-    .waitlist button:hover { background: #7d55ad; }
-    .waitlist.done {
-      justify-content: center;
-      padding: 15px 20px;
-      color: var(--purple-text);
-      font-weight: 600;
-      font-size: 14.5px;
-      text-align: center;
-    }
-    .waitlist-err {
-      margin-top: 10px;
-      font-size: 13px;
-      color: #E05B5B;
-      line-height: 1.5;
-      max-width: 460px;
-    }
-    .cta-block .waitlist-err { margin-left: auto; margin-right: auto; }
-
     /* ── Marquee — 잉크 색 띠 ──────────────────────────── */
     .marquee {
       margin-bottom: var(--gap-section);
@@ -303,8 +239,8 @@
       letter-spacing: -0.01em;
       margin: 0;
     }
-    .cta-block p { margin: 16px auto 24px; color: #4f4b49; max-width: 40ch; }
-    .cta-block .waitlist { margin: 0 auto; }
+    .cta-block p { margin: 16px auto 26px; color: #4f4b49; max-width: 40ch; }
+    .cta-block .cta-row { justify-content: center; }
 
     /* ── Section scaffold ──────────────────────────────── */
     section + section { margin-top: var(--gap-section); }
@@ -416,7 +352,6 @@
       .steps { grid-template-columns: 1fr; }
       .cta-row { flex-direction: column; align-items: stretch; }
       .cta-row .btn { width: 100%; }
-      .waitlist { max-width: none; }
     }
   </style>
 </head>
@@ -442,12 +377,9 @@
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="/app">초대코드로 시작하기</a>
+        <a class="btn btn-ghost" href="mailto:hello@page2.social?subject=p.2%20초대%20문의">초대가 필요하신가요?</a>
       </div>
-      <p class="cta-note">아직 초대가 없으신가요? 대기자로 등록하면 자리가 열릴 때 알려드려요.</p>
-      <form class="waitlist" data-waitlist>
-        <input type="email" name="email" required autocomplete="email" placeholder="이메일 주소" aria-label="이메일 주소">
-        <button type="submit">대기자 등록</button>
-      </form>
+      <p class="cta-note">p.2는 초대를 받은 분만 가입할 수 있어요. 지인 또는 커뮤니티를 통해 들어옵니다.</p>
     </div>
   </header>
 
@@ -542,7 +474,7 @@
       <div class="faq">
         <details>
           <summary>초대코드는 어떻게 받나요?</summary>
-          <p>p.2는 지인 또는 커뮤니티(우바세·엘밴드 등)를 통해서만 들어올 수 있어요. 아직 연결된 곳이 없다면 대기자로 등록해 두시면 자리가 열릴 때 알려드립니다.</p>
+          <p>p.2는 지인 또는 커뮤니티(우바세·엘밴드 등)를 통해서만 들어올 수 있어요. 아직 연결된 곳이 없다면 <a href="mailto:hello@page2.social?subject=p.2%20초대%20문의" style="color:var(--purple-text)">hello@page2.social</a> 로 문의해 주세요.</p>
         </details>
         <details>
           <summary>유료인가요?</summary>
@@ -564,11 +496,11 @@
   <section class="cta-block reveal">
     <img src="assets/favicon.png" alt="p.2">
     <h2>같은 페이지에서 만나요.</h2>
-    <p>초대가 열릴 때 가장 먼저 알려드릴게요. 지인이나 커뮤니티를 통해서도 들어올 수 있어요.</p>
-    <form class="waitlist" data-waitlist>
-      <input type="email" name="email" required autocomplete="email" placeholder="이메일 주소" aria-label="이메일 주소">
-      <button type="submit">대기자 등록</button>
-    </form>
+    <p>초대코드가 있으면 지금 시작할 수 있어요. 아직 없다면 편하게 문의해 주세요.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="/app">초대코드로 시작하기</a>
+      <a class="btn btn-ghost" href="mailto:hello@page2.social?subject=p.2%20초대%20문의">초대가 필요하신가요?</a>
+    </div>
   </section>
 
   <footer>
@@ -601,51 +533,6 @@
         }, { rootMargin: '0px 0px -10% 0px' });
         els.forEach(function (el) { io.observe(el); });
       }
-
-      /* ── 대기자 등록 → Supabase waitlist 테이블 ──
-         RLS: anon 은 insert 만 가능(select 정책 없음)이라 이메일은 다시
-         읽히지 않는다. 중복(23505)은 성공으로 취급. SDK 로드/네트워크
-         실패 시 에러 문구 + hello@page2.social 안내로 폴백. */
-      document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
-        form.addEventListener('submit', function (e) {
-          e.preventDefault();
-          var input = form.querySelector('input[type="email"]');
-          var btn = form.querySelector('button');
-          var email = (input.value || '').trim().toLowerCase();
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.focus(); return; }
-
-          var prev = form.parentNode.querySelector('.waitlist-err');
-          if (prev) prev.remove();
-          btn.disabled = true;
-          btn.textContent = '등록 중…';
-
-          function fail() {
-            btn.disabled = false;
-            btn.textContent = '대기자 등록';
-            var box = document.createElement('p');
-            box.className = 'waitlist-err';
-            box.textContent = '등록에 실패했어요. 잠시 후 다시 시도하거나 hello@page2.social 로 문의해 주세요.';
-            form.parentNode.insertBefore(box, form.nextSibling);
-          }
-          function done(dup) {
-            form.classList.add('done');
-            form.textContent = dup
-              ? '이미 등록된 이메일이에요. 자리가 열리면 알려드릴게요 ♥'
-              : '등록됐어요. 자리가 열리면 이메일로 알려드릴게요 ♥';
-          }
-
-          if (!window.supabaseClient) { fail(); return; }
-          window.supabaseClient
-            .from('waitlist')
-            .insert({ email: email, source: 'landing' })
-            .then(function (res) {
-              if (!res.error) done(false);
-              else if (res.error.code === '23505') done(true);
-              else { console.error('[waitlist]', res.error); fail(); }
-            })
-            .catch(function (err) { console.error('[waitlist]', err); fail(); });
-        });
-      });
     })();
   </script>
 
