@@ -66,9 +66,10 @@
     a { color: inherit; }
 
     /* ── Ambient gradient field ────────────────────────── */
-    /* 스크롤에 따라 두 개의 큰 블롭이 색을 바꾼다. 색은 전부 p.2 디자인
-       시스템 값만 쓴다 — 보라 계열(--purple, --purple-soft, --primary-light)
-       + Blush(--secondary) + Peach. 파랑·초록 없음(그건 책등 전용 색). */
+    /* 스크롤하면 배경이 p.2 메인 3색을 순서대로 통과한다:
+       Lavender #C89FDB → Lime #E2FF74 → Peach #FFD5BD, 두 번 반복.
+       Lime 은 브랜드 규칙상 형광이 되기 쉬워서 살짝 눌러(#DCF08C) 쓰고
+       blob opacity 도 낮춰 뒀다. */
     #bg {
       position: fixed;
       inset: 0;
@@ -82,12 +83,12 @@
       width: 96vmax;
       height: 96vmax;
       border-radius: 50%;
-      filter: blur(90px);
-      opacity: 0.82;
+      filter: blur(95px);
+      opacity: 0.62;
       will-change: transform, background-color;
     }
     #bg .b1 { top: -36vmax;  left: -24vmax;  background: #C89FDB; }
-    #bg .b2 { bottom: -36vmax; right: -24vmax; background: #E0A6C7; }
+    #bg .b2 { bottom: -36vmax; right: -24vmax; background: #DCF08C; }
 
     /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드 */
     .nav-fade {
@@ -322,7 +323,7 @@
     </div>
   </nav>
 
-  <header class="hero" data-c1="200,159,219" data-c2="224,166,199">
+  <header class="hero" data-c1="200,159,219" data-c2="220,240,140">
     <div class="wrap">
       <span class="eyebrow">비공개 베타</span>
       <h1>같은 페이지에 있다는 것, <em>가치관이 맞는 사람</em>을 만난다는 것.</h1>
@@ -340,7 +341,7 @@
 
   <main class="wrap">
 
-    <section class="reveal" data-c1="155,114,204" data-c2="200,159,219">
+    <section class="reveal" data-c1="220,240,140" data-c2="255,213,189">
       <h2 class="section-head">p.2는 앱이 아니라 책입니다.</h2>
       <p class="section-sub">
         사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
@@ -365,7 +366,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="216,191,216" data-c2="201,168,224">
+    <section class="reveal" data-c1="255,213,189" data-c2="200,159,219">
       <h2 class="section-head">우리가 하지 않는 것들.</h2>
       <p class="section-sub">취향이 아니라 결정입니다. 각 항목은 실제로 만들지 않거나 덜어낸 것들이에요.</p>
       <div class="nots">
@@ -392,7 +393,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="224,166,199" data-c2="255,213,189">
+    <section class="reveal" data-c1="200,159,219" data-c2="220,240,140">
       <h2 class="section-head">시작하는 방법.</h2>
       <p class="section-sub">느림이 결함이 아니라 약속입니다.</p>
       <div class="steps">
@@ -415,7 +416,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="200,159,219" data-c2="216,191,216">
+    <section class="reveal" data-c1="220,240,140" data-c2="255,213,189">
       <h2 class="section-head">자주 묻는 것.</h2>
       <div class="faq">
         <details>
@@ -439,7 +440,7 @@
 
   </main>
 
-  <footer data-c1="155,114,204" data-c2="200,159,219">
+  <footer data-c1="255,213,189" data-c2="200,159,219">
     <div class="wrap foot-inner">
       <div>
         <div class="foot-mark">p<span>.</span>2 &mdash; Same Page</div>
