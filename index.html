@@ -68,10 +68,10 @@
     a { color: inherit; }
 
     /* ── Vertical gradient field ───────────────────────── */
-    /* 페이지 전체 높이에 걸린 세로 그라데이션. p.2 메인 3색이 위→아래로
-       한 번만 서서히 변한다: Lavender #C89FDB → Lime #E2FF74 → Peach
-       #FFD5BD → Lavender. 문서에 고정돼 있어 스크롤하면 자연스럽게 드러남.
-       Lime 은 브랜드 규칙상 큰 면적이면 형광이 되므로 알파를 낮춰 눌렀다. */
+    /* 페이지 전체 높이에 걸린 세로 그라데이션. 위→아래로 한 번만 서서히
+       변한다: Beige → Lime #E2FF74 → Peach #FFD5BD → Lavender #C89FDB.
+       문서에 고정돼 있어 스크롤하면 자연스럽게 드러남. Lime 은 브랜드
+       규칙상 큰 면적이면 형광이 되므로 알파를 낮춰 눌렀다. */
     #bg {
       position: absolute;
       inset: 0;
@@ -79,7 +79,7 @@
       pointer-events: none;
       background: linear-gradient(
         180deg,
-        rgba(200, 159, 219, 0.58) 0%,
+        rgba(226, 212, 189, 0.55) 0%,
         rgba(226, 255, 116, 0.40) 36%,
         rgba(255, 213, 189, 0.64) 68%,
         rgba(200, 159, 219, 0.58) 100%
