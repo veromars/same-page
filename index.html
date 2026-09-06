@@ -86,6 +86,120 @@
       );
     }
 
+    /* ══ v3 — 책이 하나의 오브젝트로 (findworkhappiness 스타일) ═════
+       탁한 라벤더 그라운드 위에 각지게 놓인 p.2 책 한 권 + 뒤로 큰
+       "같은 페이지" 활자 + "챕터 불러오는 중" 로딩 문구. 스크롤하면
+       책이 확대·정면화되며 표지가 걷히고 본문이 드러난다. */
+    #runway { height: 100vh; }
+
+    #cover {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      overflow: hidden;
+      background: #BEB2CB;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: opacity, filter;
+    }
+    #cover.gone { pointer-events: none; visibility: hidden; }
+
+    .cover-bigword {
+      position: absolute;
+      left: 0; right: 0;
+      top: 11%;
+      text-align: center;
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(3.4rem, 19vw, 9rem);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      color: rgba(250, 249, 246, 0.62);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .book3d {
+      position: relative;
+      z-index: 2;
+      width: min(56vw, 268px);
+      aspect-ratio: 1 / 1.36;
+      will-change: transform, filter;
+      filter: drop-shadow(0 24px 38px rgba(45, 42, 43, 0.28))
+              drop-shadow(0 6px 12px rgba(45, 42, 43, 0.16));
+    }
+    .book3d-float {
+      position: relative;
+      width: 100%; height: 100%;
+      transform: rotate(-2deg);
+      animation: bookfloat 7s ease-in-out infinite;
+    }
+    /* 오른쪽·아래로 살짝 삐져나온 크림색 = 책장(페이지) 두께 */
+    .book3d-float::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 2px 12px 12px 2px;
+      background: #F2EEE5;
+      transform: translate(7px, 8px);
+    }
+    @keyframes bookfloat {
+      0%, 100% { transform: rotate(-2deg) translateY(0); }
+      50%      { transform: rotate(-2deg) translateY(-12px); }
+    }
+
+    .b3 {
+      position: absolute; inset: 0;
+      z-index: 1;
+      border-radius: 3px 12px 12px 3px;
+      overflow: hidden;
+      background: linear-gradient(118deg, #E2FF74 0%, #C8B8D0 52%, #C89FDB 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28),
+                  0 0 0 1px rgba(45, 42, 43, 0.06);
+    }
+    .b3-spine {
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 12%;
+      background: #E2FF74;
+      box-shadow: inset -6px 0 10px -6px rgba(0, 0, 0, 0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .b3-spine .logo { writing-mode: vertical-lr; font-size: clamp(9px, 2.4vw, 12px); color: #C89FDB; }
+    .b3-spine .logo svg { transform: rotate(135deg); top: -0.05em; left: -0.2em; }
+    .b3-body {
+      position: absolute; left: 12%; right: 0; top: 0; bottom: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 13% 8%;
+    }
+    .b3-tag {
+      font-family: 'Poppins', 'Pretendard', sans-serif;
+      font-weight: 600; font-size: clamp(9px, 2.6vw, 12px);
+      letter-spacing: 0.05em; color: #E2FF74;
+    }
+    .b3-logo { flex: 1; display: flex; align-items: center; }
+    .b3-logo .logo { font-size: clamp(30px, 10vw, 46px); color: #E2FF74; }
+    .b3-studio {
+      font-family: 'Poppins', 'Pretendard', sans-serif;
+      font-weight: 600; font-size: clamp(8px, 2.1vw, 11px);
+      letter-spacing: 0.08em; line-height: 1.5; text-align: center;
+      color: #B36AE2;
+    }
+
+    .cover-hint {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+      text-align: center;
+      z-index: 3;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 12.5px; font-weight: 600;
+      letter-spacing: 0.03em;
+      color: rgba(45, 42, 43, 0.55);
+    }
+    .ch-dots { display: inline-block; margin-left: 1px; animation: dotpulse 1.4s ease-in-out infinite; }
+    @keyframes dotpulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
     /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드.
        상태바(노치·다이내믹 아일랜드) 영역까지 덮도록 safe-area 만큼 키운다. */
     .nav-fade {
@@ -418,6 +532,7 @@
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .btn { transition: none; }
+      .book3d-float, .ch-dots { animation: none; }
       .marquee-track { animation: none; }
       .marquee-track span:nth-child(n+2) { display: none; }
       .marquee-track span:first-child { display: block; width: 100%; text-align: center; }
@@ -437,6 +552,29 @@
   </style>
 </head>
 <body>
+
+  <!-- ══ v3 책 오브젝트 — 스크롤하면 확대·정면화되며 본문이 드러난다 ══ -->
+  <div id="cover">
+    <div class="cover-bigword">같은<br>페이지</div>
+    <div class="book3d">
+      <div class="book3d-float">
+        <div class="b3">
+          <div class="b3-spine">
+            <span class="logo">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
+          </div>
+          <div class="b3-body">
+            <div class="b3-tag">On the same page</div>
+            <div class="b3-logo">
+              <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
+            </div>
+            <div class="b3-studio">versa<br>studio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cover-hint">챕터 불러오는 중<span class="ch-dots">···</span></div>
+  </div>
+  <div id="runway"></div>
 
   <div id="bg"></div>
   <div class="nav-fade"></div>
@@ -607,6 +745,49 @@
           });
         }, { rootMargin: '0px 0px -10% 0px' });
         els.forEach(function (el) { io.observe(el); });
+      }
+
+      /* ── v3 책 오브젝트 → 확대·정면화 → 본문 ── */
+      var cover = document.getElementById('cover');
+      var runway = document.getElementById('runway');
+      var book = document.querySelector('.book3d');
+      var bookFloat = document.querySelector('.book3d-float');
+      var bigword = document.querySelector('.cover-bigword');
+      var hint = document.querySelector('.cover-hint');
+      if (cover && runway && book) {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        var ticking = false;
+        function paint() {
+          ticking = false;
+          var h = runway.offsetHeight || window.innerHeight;
+          var p = Math.min(1, Math.max(0, window.scrollY / h));
+          if (reduce) {
+            cover.style.opacity = (1 - p).toFixed(3);
+            cover.classList.toggle('gone', p >= 0.999);
+            return;
+          }
+          if (bookFloat) bookFloat.style.animationPlayState = p > 0.02 ? 'paused' : 'running';
+          var e = p * p;
+          var scale = 1 + e * 2.4;                    // 1 → 3.4
+          var st = 1 - Math.min(1, p / 0.72);         // 기울기 → 0 (정면화)
+          book.style.transform =
+            'perspective(1500px) rotate(' + (-2 * st).toFixed(2) + 'deg) rotateY(' +
+            (-6 * st).toFixed(2) + 'deg) scale(' + scale.toFixed(3) + ')';
+          book.style.filter = 'drop-shadow(0 ' + (34 * st + 8).toFixed(0) + 'px ' +
+            (46 * st + 10).toFixed(0) + 'px rgba(45,42,43,' + (0.32 * st + 0.05).toFixed(2) + '))';
+          bigword.style.opacity = Math.max(0, 1 - p / 0.42).toFixed(3);
+          if (hint) hint.style.opacity = Math.max(0, 1 - p / 0.28).toFixed(3);
+          var coverOp = p < 0.58 ? 1 : Math.max(0, 1 - (p - 0.58) / 0.42);
+          var blur = p < 0.6 ? 0 : (p - 0.6) / 0.4 * 6;
+          cover.style.opacity = coverOp.toFixed(3);
+          cover.style.filter = blur > 0.06 ? 'blur(' + blur.toFixed(1) + 'px)' : '';
+          cover.classList.toggle('gone', p >= 0.999);
+        }
+        function onScroll() { if (!ticking) { ticking = true; requestAnimationFrame(paint); } }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', paint);
+        window.addEventListener('load', function () { window.scrollTo(0, 0); paint(); });
+        paint();
       }
     })();
   </script>
