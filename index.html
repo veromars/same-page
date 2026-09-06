@@ -75,16 +75,15 @@
     }
     #bg .blob {
       position: absolute;
-      width: 92vmax;
-      height: 92vmax;
+      width: 96vmax;
+      height: 96vmax;
       border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.58;
+      filter: blur(100px);
+      opacity: 0.78;
       will-change: transform, background-color;
-      transition: background-color .9s linear;
     }
-    #bg .b1 { top: -34vmax;  left: -22vmax;  background: #C89FDB; }
-    #bg .b2 { bottom: -34vmax; right: -22vmax; background: #B8A0C8; }
+    #bg .b1 { top: -36vmax;  left: -24vmax;  background: #C89FDB; }
+    #bg .b2 { bottom: -36vmax; right: -24vmax; background: #B8A0C8; }
 
     /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드 */
     .nav-fade {
@@ -209,9 +208,9 @@
     /* ── Cards ─────────────────────────────────────────── */
     .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .card {
-      background: rgba(255, 255, 255, 0.62);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 26px 24px;
@@ -239,9 +238,9 @@
       padding: 22px 20px;
       border: 1px solid var(--border);
       border-radius: 14px;
-      background: rgba(255, 255, 255, 0.62);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
     }
     .step::before {
       counter-increment: step;
@@ -319,7 +318,7 @@
     </div>
   </nav>
 
-  <header class="hero" data-c1="209,150,209" data-c2="238,187,197">
+  <header class="hero" data-c1="226,148,192" data-c2="242,190,196">
     <div class="wrap">
       <span class="eyebrow">비공개 베타</span>
       <h1>같은 페이지에 있다는 것, <em>가치관이 맞는 사람</em>을 만난다는 것.</h1>
@@ -337,7 +336,7 @@
 
   <main class="wrap">
 
-    <section class="reveal" data-c1="187,147,231" data-c2="177,197,225">
+    <section class="reveal" data-c1="174,138,236" data-c2="182,200,230">
       <h2 class="section-head">p.2는 앱이 아니라 책입니다.</h2>
       <p class="section-sub">
         사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
@@ -362,7 +361,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="150,158,212" data-c2="168,190,222">
+    <section class="reveal" data-c1="132,156,230" data-c2="150,192,224">
       <h2 class="section-head">우리가 하지 않는 것들.</h2>
       <p class="section-sub">취향이 아니라 결정입니다. 각 항목은 실제로 만들지 않거나 덜어낸 것들이에요.</p>
       <div class="nots">
@@ -389,7 +388,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="216,152,196" data-c2="240,201,199">
+    <section class="reveal" data-c1="234,156,178" data-c2="244,198,192">
       <h2 class="section-head">시작하는 방법.</h2>
       <p class="section-sub">느림이 결함이 아니라 약속입니다.</p>
       <div class="steps">
@@ -412,7 +411,7 @@
       </div>
     </section>
 
-    <section class="reveal" data-c1="168,132,208" data-c2="200,168,224">
+    <section class="reveal" data-c1="182,122,214" data-c2="210,164,228">
       <h2 class="section-head">자주 묻는 것.</h2>
       <div class="faq">
         <details>
@@ -436,7 +435,7 @@
 
   </main>
 
-  <footer data-c1="199,152,222" data-c2="192,162,206">
+  <footer data-c1="205,152,224" data-c2="224,178,204">
     <div class="wrap foot-inner">
       <div>
         <div class="foot-mark">p<span>.</span>2 &mdash; Same Page</div>
@@ -488,15 +487,13 @@
       }
       function rgb(c) { return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
 
-      var ticking = false;
-      function apply() {
-        ticking = false;
-        // 뷰포트 높이와 무관하게: 각 섹션의 상단이 기준선(뷰포트 35%)을
-        // 지날 때 그 섹션 색으로 블렌드 시작, 다음 섹션 상단이 기준선에
-        // 닿으면 블렌드 완료.
-        var refLine = window.scrollY + window.innerHeight * 0.5;
+      // 목표 색 (스크롤 위치에서 즉시 계산) — 뷰포트 높이와 무관하게
+      // 각 섹션 상단이 기준선(뷰포트 중앙)을 지나면 그 섹션 색으로 블렌드.
+      function target() {
+        var y = window.scrollY;
+        var refLine = y + window.innerHeight * 0.5;
         var tops = zones.map(function (z) {
-          return window.scrollY + z.el.getBoundingClientRect().top;
+          return y + z.el.getBoundingClientRect().top;
         });
         var i = 0;
         for (var k = 0; k < tops.length; k++) {
@@ -505,23 +502,41 @@
         var next = Math.min(i + 1, zones.length - 1);
         var span = tops[next] - tops[i];
         var t = span > 0 ? Math.max(0, Math.min(1, (refLine - tops[i]) / span)) : 0;
+        return {
+          c1: mix(zones[i].c1, zones[next].c1, t),
+          c2: mix(zones[i].c2, zones[next].c2, t),
+          y: y
+        };
+      }
 
-        b1.style.backgroundColor = rgb(mix(zones[i].c1, zones[next].c1, t));
-        b2.style.backgroundColor = rgb(mix(zones[i].c2, zones[next].c2, t));
-
-        // 아주 옅은 세로 드리프트 (컴포지터 친화적 transform)
-        if (!reduce) {
-          var p = window.scrollY * 0.04;
-          b1.style.transform = 'translate3d(0,' + (-p) + 'px,0)';
-          b2.style.transform = 'translate3d(0,' + (p * 0.6) + 'px,0)';
+      // 현재 표시색을 목표색으로 매 프레임 부드럽게 따라가게 한다.
+      // scroll 이벤트에 의존하지 않는 상시 rAF 루프 → 어떤 환경에서도 갱신됨.
+      var cur1 = zones[0].c1.slice();
+      var cur2 = zones[0].c2.slice();
+      var lastY = -1, settled = false;
+      function frame() {
+        var g = target();
+        if (!(g.y === lastY && settled)) {
+          lastY = g.y;
+          var k = reduce ? 1 : 0.12;   // 목표색을 따라가는 속도 (0~1)
+          var moved = 0;
+          for (var j = 0; j < 3; j++) {
+            var d1 = g.c1[j] - cur1[j], d2 = g.c2[j] - cur2[j];
+            cur1[j] += d1 * k; cur2[j] += d2 * k;
+            moved += Math.abs(d1) + Math.abs(d2);
+          }
+          settled = moved < 1.5;
+          b1.style.backgroundColor = rgb([Math.round(cur1[0]), Math.round(cur1[1]), Math.round(cur1[2])]);
+          b2.style.backgroundColor = rgb([Math.round(cur2[0]), Math.round(cur2[1]), Math.round(cur2[2])]);
+          if (!reduce) {
+            var p = g.y * 0.05;
+            b1.style.transform = 'translate3d(0,' + (-p) + 'px,0)';
+            b2.style.transform = 'translate3d(0,' + (p * 0.6) + 'px,0)';
+          }
         }
+        requestAnimationFrame(frame);
       }
-      function onScroll() {
-        if (!ticking) { ticking = true; requestAnimationFrame(apply); }
-      }
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', apply);
-      apply();
+      frame();
     })();
   </script>
 
