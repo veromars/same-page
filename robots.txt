@@ -1,0 +1,4 @@
+# 비공개 베타 — 전체 색인 차단. 공개 시 이 파일과 각 페이지의
+# <meta name="robots"> 를 함께 완화한다.
+User-agent: *
+Disallow: /

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="UTF-8">
+  <!-- 앱은 이제 /app/ 아래에서 서빙된다. app.js·styles.css·images/ 등은
+       리포 루트에 그대로 있으므로, 상대경로가 /app/ 이 아니라 루트 기준으로
+       풀리도록 base 를 박아둔다. 이 한 줄이 없으면 이미지가 전부 404. -->
+  <base href="/">
+  <!-- 비공개 베타 — 검색 노출 차단. 공개 시 이 줄과 robots.txt 를 함께 푼다. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#FAF9F6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Same Page (p.2)</title>
+  <meta name="description" content="같은 페이지를 찾는 공간">
+
+  <!-- Open Graph — what a shared invite link looks like in KakaoTalk/iMessage -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Same Page (p.2)">
+  <meta property="og:locale" content="ko_KR">
+  <meta property="og:title" content="Same Page (p.2)">
+  <meta property="og:description" content="같은 페이지를 찾는 공간">
+  <meta property="og:image" content="https://page2.social/assets/logo-purple.png">
+  <meta property="og:image:alt" content="p.2 로고">
+  <meta property="og:url" content="https://page2.social/app">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/favicon.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Style+Script&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <!-- ?v= 는 캐시 무효화용. 로컬 파일(app.js·styles.css·env-config.js·
+       supabase-client.js)을 고칠 때마다 이 날짜를 네 군데 모두 올린다.
+       빌드 단계가 없어서 파일명이 그대로라, 이게 없으면 브라우저가 예전 사본을
+       계속 쓴다 (고친 게 반영 안 되는 것처럼 보임). -->
+  <script src="env-config.js?v=20260906b"></script>
+  <script src="supabase-client.js?v=20260906b"></script>
+
+  <link rel="stylesheet" href="styles.css?v=20260906b">
+</head>
+<body>
+  <div id="app-container">
+    <!-- Screens will be injected here by app.js -->
+  </div>
+
+  <script src="app.js?v=20260906b" charset="utf-8"></script>
+
+
+</body></html>
