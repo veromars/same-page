@@ -2246,7 +2246,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
   const buildCover = (ch, clr) => {
     const titles = { 1: '내가 생각하는 나', 2: '내가 생각하는 사랑', 3: '내가 생각하는 우리의 미래' };
     return `
-      <div class="nb-cover-page" style="padding: 48px 28px; background: transparent; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
+      <div class="nb-cover-page" style="padding: 28px 28px 48px; background: transparent; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
         <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 16px; color: #2C2C2A;">Chapter ${ch}</div>
         <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 20px; color: #2C2C2A;">${titles[ch]}</div>
         <div style="width: 32px; height: 1.5px; background: ${clr}; margin-top: 14px;"></div>

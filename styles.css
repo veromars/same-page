@@ -2941,7 +2941,9 @@ p {
 .book-page-header {
   display: flex;
   align-items: center;
-  padding: 20px 20px 8px;
+  /* 상태바(노치·다이내믹 아일랜드) 밑으로 깔리지 않게 safe-area 만큼 내린다.
+     이게 없으면 닫기(X)·이름 표시가 상태바에 가려 안 보이고 탭도 안 됨. */
+  padding: calc(20px + var(--safe-top)) 20px 8px;
   flex-shrink: 0;
 }
 
@@ -3070,7 +3072,7 @@ p {
 
 /* ── Answer page ─────────────────────────────────────────────── */
 .nb-answer-page {
-  padding-top: 4px;
+  padding-top: 22px;
 }
 
 #like-btn {
