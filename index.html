@@ -337,6 +337,10 @@
       margin: 0 0 12px;
     }
     .section-sub { margin: 0 0 40px; color: #4f4b49; max-width: 46ch; }
+    /* 서브 문장 없이 제목 바로 아래 콘텐츠가 올 때 간격 확보 */
+    .section-head + .steps,
+    .section-head + .cards,
+    .section-head + .faq { margin-top: 32px; }
 
     /* ── Cards ─────────────────────────────────────────── */
     .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
@@ -484,6 +488,13 @@
         사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
         표지만 보고 넘기지 않도록, 처음부터 그렇게 설계했어요.
       </p>
+    </section>
+
+    <section class="reveal">
+      <p class="section-sub">
+        나와 맞는 사람과 모임을 발견하고, 같은 속도와 온도로 소통하도록.
+        너무 가볍지만은 않은 연결이 되게 설계했어요.
+      </p>
       <div class="cards">
         <div class="card">
           <div class="kicker">프로필북</div>
@@ -514,7 +525,6 @@
 
     <section class="reveal">
       <h2 class="section-head">시작하는 방법.</h2>
-      <p class="section-sub">느림이 결함이 아니라 약속입니다.</p>
       <div class="steps">
         <div class="step">
           <h4>초대</h4>
