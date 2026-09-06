@@ -86,6 +86,94 @@
       );
     }
 
+    /* ══ v2 — 책 표지 → 펼침 ═══════════════════════════════
+       페이지를 한 권의 책으로. 첫 화면은 스플래시와 동일한 책 표지
+       (책등 + 커버 + p.2 로고). 스크롤하면 표지가 확대되며 흐려지고,
+       그 아래 페이퍼(본문)가 드러난다 = 책을 펼치는 감각. */
+    #runway { height: 100vh; }   /* 표지가 사라질 때까지의 스크롤 거리 */
+
+    #cover {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      overflow: hidden;
+      background: linear-gradient(105deg, #E2FF74 0%, #C8B8D0 52%, #C89FDB 100%);
+      transform-origin: 50% 44%;
+      will-change: transform, opacity, filter;
+    }
+    #cover.gone { pointer-events: none; visibility: hidden; }
+
+    .cover-spine {
+      position: absolute;
+      left: 0; top: 0;
+      width: 56px;
+      height: 100%;
+      background: #E2FF74;
+      box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: calc(46px + env(safe-area-inset-top, 0px)) 0 calc(28px + env(safe-area-inset-bottom, 0px));
+      z-index: 2;
+    }
+    .cover-spine > * { writing-mode: vertical-lr; color: #C89FDB; }
+    .cs-logo { font-size: 20px; }
+    /* 세로쓰기에서 전체가 90° 돌아가므로 하트는 45+90=135° 로 (스플래시 책등과 동일) */
+    .cs-logo svg { transform: rotate(135deg); top: -0.05em; left: -0.2em; }
+    .cs-line, .cs-studio {
+      font-family: 'Poppins', 'Pretendard', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+    .cs-line { font-size: 12px; }
+    .cs-studio { font-size: 11px; }
+
+    .cover-face {
+      position: absolute;
+      left: 56px; right: 0; top: 0; bottom: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .cf-top {
+      padding-top: calc(52px + env(safe-area-inset-top, 0px));
+      font-family: 'Poppins', 'Pretendard', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 0.05em;
+      color: #E2FF74;
+    }
+    .cf-logo { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .cf-logo .logo { font-size: clamp(58px, 17vw, 92px); color: #E2FF74; }
+    .cf-studio {
+      padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+      font-family: 'Poppins', 'Pretendard', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.08em;
+      line-height: 1.6;
+      text-align: center;
+      color: #B36AE2;
+    }
+
+    .cover-hint {
+      position: absolute;
+      left: 56px; right: 0;
+      bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      color: rgba(45, 42, 43, 0.5);
+    }
+    .ch-arrow { font-size: 14px; line-height: 1; animation: bob 1.6s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
+
     /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드.
        상태바(노치·다이내믹 아일랜드) 영역까지 덮도록 safe-area 만큼 키운다. */
     .nav-fade {
@@ -417,6 +505,7 @@
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .btn { transition: none; }
+      .ch-arrow { animation: none; }
       .marquee-track { animation: none; }
       .marquee-track span:nth-child(n+2) { display: none; }
       .marquee-track span:first-child { display: block; width: 100%; text-align: center; }
@@ -436,6 +525,24 @@
   </style>
 </head>
 <body>
+
+  <!-- ══ v2 책 표지 — 스크롤하면 확대·페이드되며 본문이 드러난다 ══ -->
+  <div id="cover">
+    <aside class="cover-spine">
+      <span class="logo cs-logo">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
+      <span class="cs-line">On the same page</span>
+      <span class="cs-studio">Versatile Studio</span>
+    </aside>
+    <div class="cover-face">
+      <div class="cf-top">On the same page</div>
+      <div class="cf-logo">
+        <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
+      </div>
+      <div class="cf-studio">Versatile<br>Studio</div>
+    </div>
+    <div class="cover-hint">스크롤해서 펼치기<span class="ch-arrow">&#8595;</span></div>
+  </div>
+  <div id="runway"></div>
 
   <div id="bg"></div>
   <div class="nav-fade"></div>
@@ -606,6 +713,43 @@
           });
         }, { rootMargin: '0px 0px -10% 0px' });
         els.forEach(function (el) { io.observe(el); });
+      }
+
+      /* ── v2 책 표지 → 펼침 ──
+         스크롤 진행도(0~1)에 따라 표지를 확대·페이드. transform·opacity·
+         filter 만 만지고, scroll 리스너는 rAF 로 스로틀. */
+      var cover = document.getElementById('cover');
+      var runway = document.getElementById('runway');
+      if (cover && runway) {
+        // 항상 표지부터 보이도록 새로고침 시 최상단으로
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+        var ticking = false;
+        function paint() {
+          ticking = false;
+          var h = runway.offsetHeight || window.innerHeight;
+          var p = Math.min(1, Math.max(0, window.scrollY / h));
+          if (reduce) {
+            cover.style.opacity = (1 - p).toFixed(3);
+            cover.classList.toggle('gone', p >= 0.999);
+            return;
+          }
+          var e = p * p;                              // 확대는 ease-in
+          var scale = 1 + e * 0.55;                   // 1 → 1.55
+          var opacity = p < 0.42 ? 1 : Math.max(0, 1 - (p - 0.42) / 0.5);
+          var blur = p < 0.45 ? 0 : (p - 0.45) / 0.5 * 6;
+          cover.style.transform = 'scale(' + scale.toFixed(4) + ')';
+          cover.style.opacity = opacity.toFixed(3);
+          cover.style.filter = blur > 0.06 ? 'blur(' + blur.toFixed(1) + 'px)' : '';
+          cover.classList.toggle('gone', p >= 0.999);
+        }
+        function onScroll() {
+          if (!ticking) { ticking = true; requestAnimationFrame(paint); }
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', paint);
+        window.addEventListener('load', function () { window.scrollTo(0, 0); paint(); });
+        paint();
       }
     })();
   </script>
