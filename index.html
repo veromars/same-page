@@ -151,7 +151,7 @@
     .nav .btn { padding: 10px 18px; font-size: 14px; }
 
     /* ── Hero ──────────────────────────────────────────── */
-    .hero { padding: clamp(56px, 12vw, 116px) 0 var(--gap-section); }
+    .hero { padding: clamp(56px, 12vw, 116px) 0 clamp(44px, 8vw, 76px); }
 
     .eyebrow {
       display: inline-flex;
@@ -191,8 +191,104 @@
       color: #4f4b49;
       max-width: 34ch;
     }
-    .cta-row { margin-top: 34px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .cta-row { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
     .cta-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
+
+    /* ── Waitlist (Playful 스타일 통합 알약) ─────────────── */
+    .waitlist {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      max-width: 460px;
+      margin-top: 16px;
+      padding: 6px 6px 6px 20px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+    }
+    .waitlist input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      outline: none;
+      background: transparent;
+      font: inherit;
+      font-size: 15px;
+      color: var(--ink);
+      padding: 11px 0;
+    }
+    .waitlist input::placeholder { color: var(--muted); }
+    .waitlist button {
+      flex: none;
+      border: 0;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 600;
+      font-size: 14px;
+      color: #fff;
+      background: var(--purple-fill);
+      border-radius: 999px;
+      padding: 12px 22px;
+      transition: background-color .15s ease;
+    }
+    .waitlist button:hover { background: #7d55ad; }
+    .waitlist.done {
+      justify-content: center;
+      padding: 15px 20px;
+      color: var(--purple-text);
+      font-weight: 600;
+      font-size: 14.5px;
+    }
+
+    /* ── Marquee — 잉크 색 띠 ──────────────────────────── */
+    .marquee {
+      margin-bottom: var(--gap-section);
+      padding: 16px 0;
+      background: var(--ink);
+      color: var(--paper);
+      overflow: hidden;
+      white-space: nowrap;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    }
+    .marquee-track {
+      display: inline-flex;
+      align-items: center;
+      animation: marquee 46s linear infinite;
+    }
+    .marquee:hover .marquee-track { animation-play-state: paused; }
+    .marquee-track span {
+      padding: 0 22px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+    }
+    .marquee-track .lead { color: var(--purple-soft); font-weight: 600; }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    /* ── 프리풋 CTA 블록 (Playful "Go ahead. Make an app.") ── */
+    .cta-block {
+      margin-top: var(--gap-section);
+      padding: 0 24px;
+      text-align: center;
+    }
+    .cta-block img {
+      width: 56px; height: 56px;
+      margin: 0 auto 20px;
+      border-radius: 14px;
+    }
+    .cta-block h2 {
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(1.7rem, 5vw, 2.4rem);
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+      margin: 0;
+    }
+    .cta-block p { margin: 16px auto 24px; color: #4f4b49; max-width: 40ch; }
+    .cta-block .waitlist { margin: 0 auto; }
 
     /* ── Section scaffold ──────────────────────────────── */
     section + section { margin-top: var(--gap-section); }
@@ -291,6 +387,8 @@
       html { scroll-behavior: auto; }
       .reveal { opacity: 1; transform: none; transition: none; }
       .btn { transition: none; }
+      .marquee { white-space: normal; }
+      .marquee-track { animation: none; flex-wrap: wrap; justify-content: center; }
     }
 
     /* ── Responsive ────────────────────────────────────── */
@@ -302,6 +400,7 @@
       .steps { grid-template-columns: 1fr; }
       .cta-row { flex-direction: column; align-items: stretch; }
       .cta-row .btn { width: 100%; }
+      .waitlist { max-width: none; }
     }
   </style>
 </head>
@@ -327,11 +426,23 @@
       </p>
       <div class="cta-row">
         <a class="btn btn-primary" href="/app">초대코드로 시작하기</a>
-        <a class="btn btn-ghost" href="mailto:hello@page2.social?subject=p.2%20초대%20신청">초대가 필요하신가요?</a>
       </div>
-      <p class="cta-note">p.2는 초대를 받은 분만 가입할 수 있어요. 지인 또는 커뮤니티를 통해 들어옵니다.</p>
+      <p class="cta-note">아직 초대가 없으신가요? 대기자로 등록하면 자리가 열릴 때 알려드려요.</p>
+      <form class="waitlist" data-waitlist>
+        <input type="email" name="email" required autocomplete="email" placeholder="이메일 주소" aria-label="이메일 주소">
+        <button type="submit">대기자 등록</button>
+      </form>
     </div>
   </header>
+
+  <!-- 잉크 색 띠 — p.2에서 만나는 것들 (Playful 마퀴 차용). 이음매 없는 루프를
+       위해 항목 리스트를 두 번 반복하고 트랙을 -50% 이동시킨다. -->
+  <section class="marquee" aria-label="p.2에서 만나는 것들">
+    <div class="marquee-track">
+      <span class="lead">같은 페이지에서</span><span>가치관</span><span>유머 코드</span><span>라이프스타일</span><span>연애 가치관</span><span>소울푸드</span><span>힐링 스팟</span><span>플레이리스트</span><span>어린 시절</span><span>5년 뒤의 나</span><span>다툼을 푸는 법</span><span>함께하는 삶</span><span>지금 이 순간</span>
+      <span class="lead">같은 페이지에서</span><span>가치관</span><span>유머 코드</span><span>라이프스타일</span><span>연애 가치관</span><span>소울푸드</span><span>힐링 스팟</span><span>플레이리스트</span><span>어린 시절</span><span>5년 뒤의 나</span><span>다툼을 푸는 법</span><span>함께하는 삶</span><span>지금 이 순간</span>
+    </div>
+  </section>
 
   <main class="wrap">
 
@@ -415,7 +526,7 @@
       <div class="faq">
         <details>
           <summary>초대코드는 어떻게 받나요?</summary>
-          <p>p.2는 지인 또는 커뮤니티(우바세·엘밴드 등)를 통해서만 들어올 수 있어요. 초대가 필요하시면 위의 &lsquo;초대가 필요하신가요?&rsquo;로 문의해 주세요.</p>
+          <p>p.2는 지인 또는 커뮤니티(우바세·엘밴드 등)를 통해서만 들어올 수 있어요. 아직 연결된 곳이 없다면 대기자로 등록해 두시면 자리가 열릴 때 알려드립니다.</p>
         </details>
         <details>
           <summary>유료인가요?</summary>
@@ -433,6 +544,16 @@
     </section>
 
   </main>
+
+  <section class="cta-block reveal">
+    <img src="assets/favicon.png" alt="p.2">
+    <h2>같은 페이지에서 만나요.</h2>
+    <p>초대가 열릴 때 가장 먼저 알려드릴게요. 지인이나 커뮤니티를 통해서도 들어올 수 있어요.</p>
+    <form class="waitlist" data-waitlist>
+      <input type="email" name="email" required autocomplete="email" placeholder="이메일 주소" aria-label="이메일 주소">
+      <button type="submit">대기자 등록</button>
+    </form>
+  </section>
 
   <footer>
     <div class="wrap foot-inner">
@@ -464,6 +585,27 @@
         }, { rootMargin: '0px 0px -10% 0px' });
         els.forEach(function (el) { io.observe(el); });
       }
+
+      /* ── 대기자 등록 ──
+         TODO: 지금은 메일 클라이언트를 열어 hello@page2.social 로 보내는
+         방식. 실제 수집은 Supabase waitlist 테이블 insert 또는 폼 서비스로
+         교체할 것. */
+      document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var input = form.querySelector('input[type="email"]');
+          var email = (input.value || '').trim();
+          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            input.focus();
+            return;
+          }
+          window.location.href =
+            'mailto:hello@page2.social?subject=' + encodeURIComponent('p.2 대기자 등록') +
+            '&body=' + encodeURIComponent('대기자로 등록하고 싶어요.\n이메일: ' + email);
+          form.classList.add('done');
+          form.innerHTML = '등록 메일이 열립니다. 그대로 보내주시면 완료돼요. 고맙습니다 ♥';
+        });
+      });
     })();
   </script>
 
