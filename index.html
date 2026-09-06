@@ -30,6 +30,13 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
+  <!-- 대기자 폼용 Supabase. 앱과 같은 env-config.js·supabase-client.js 를 쓴다
+       (둘 다 리포 루트, 랜딩도 루트라 상대경로 그대로). anon 키만 노출되고
+       waitlist 테이블은 RLS 로 insert 만 허용된다. -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="env-config.js?v=20260906d"></script>
+  <script src="supabase-client.js?v=20260906d"></script>
+
   <style>
     :root {
       --paper:   #FAF9F6;
@@ -240,7 +247,16 @@
       color: var(--purple-text);
       font-weight: 600;
       font-size: 14.5px;
+      text-align: center;
     }
+    .waitlist-err {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #E05B5B;
+      line-height: 1.5;
+      max-width: 460px;
+    }
+    .cta-block .waitlist-err { margin-left: auto; margin-right: auto; }
 
     /* ── Marquee — 잉크 색 띠 ──────────────────────────── */
     .marquee {
@@ -586,24 +602,48 @@
         els.forEach(function (el) { io.observe(el); });
       }
 
-      /* ── 대기자 등록 ──
-         TODO: 지금은 메일 클라이언트를 열어 hello@page2.social 로 보내는
-         방식. 실제 수집은 Supabase waitlist 테이블 insert 또는 폼 서비스로
-         교체할 것. */
+      /* ── 대기자 등록 → Supabase waitlist 테이블 ──
+         RLS: anon 은 insert 만 가능(select 정책 없음)이라 이메일은 다시
+         읽히지 않는다. 중복(23505)은 성공으로 취급. SDK 로드/네트워크
+         실패 시 에러 문구 + hello@page2.social 안내로 폴백. */
       document.querySelectorAll('form[data-waitlist]').forEach(function (form) {
         form.addEventListener('submit', function (e) {
           e.preventDefault();
           var input = form.querySelector('input[type="email"]');
-          var email = (input.value || '').trim();
-          if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            input.focus();
-            return;
+          var btn = form.querySelector('button');
+          var email = (input.value || '').trim().toLowerCase();
+          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { input.focus(); return; }
+
+          var prev = form.parentNode.querySelector('.waitlist-err');
+          if (prev) prev.remove();
+          btn.disabled = true;
+          btn.textContent = '등록 중…';
+
+          function fail() {
+            btn.disabled = false;
+            btn.textContent = '대기자 등록';
+            var box = document.createElement('p');
+            box.className = 'waitlist-err';
+            box.textContent = '등록에 실패했어요. 잠시 후 다시 시도하거나 hello@page2.social 로 문의해 주세요.';
+            form.parentNode.insertBefore(box, form.nextSibling);
           }
-          window.location.href =
-            'mailto:hello@page2.social?subject=' + encodeURIComponent('p.2 대기자 등록') +
-            '&body=' + encodeURIComponent('대기자로 등록하고 싶어요.\n이메일: ' + email);
-          form.classList.add('done');
-          form.innerHTML = '등록 메일이 열립니다. 그대로 보내주시면 완료돼요. 고맙습니다 ♥';
+          function done(dup) {
+            form.classList.add('done');
+            form.textContent = dup
+              ? '이미 등록된 이메일이에요. 자리가 열리면 알려드릴게요 ♥'
+              : '등록됐어요. 자리가 열리면 이메일로 알려드릴게요 ♥';
+          }
+
+          if (!window.supabaseClient) { fail(); return; }
+          window.supabaseClient
+            .from('waitlist')
+            .insert({ email: email, source: 'landing' })
+            .then(function (res) {
+              if (!res.error) done(false);
+              else if (res.error.code === '23505') done(true);
+              else { console.error('[waitlist]', res.error); fail(); }
+            })
+            .catch(function (err) { console.error('[waitlist]', err); fail(); });
         });
       });
     })();
