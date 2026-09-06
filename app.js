@@ -204,7 +204,9 @@ const MOCK_PROFILES = [
     photos: [
       "https://images.unsplash.com/photo-1566139884643-d6c62cc13b49?w=400",
       "https://images.unsplash.com/photo-1455793220612-0e9af5a1b7f3?w=600",
-      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600"
+      "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600",
+      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600",
+      "https://images.unsplash.com/photo-1418065460487-3e41a6c84dc5?w=600"
     ],
     photoPrivate: false,
     intent: "친구가 생겼으면 해요 👋",
@@ -1128,6 +1130,10 @@ const P2_STORAGE_KEYS = {
   // 차단 — 내가 건 쪽과 상대가 건 쪽을 따로 둔다 (아래 주석 참고)
   blockedUsers: 'p2_blocked_users',
   blockedByUsers: 'p2_blocked_by_users',
+  // 모임 후 p.M 팔로업 — 발송 이력 · 프로필북 읽기 신청 · 참여 취소 사유
+  pmFollowups: 'p2_pm_followups',
+  pmReadRequests: 'p2_pm_read_requests',
+  cancelReasons: 'p2_cancel_reasons',
 };
 window.P2_STORAGE_KEYS = P2_STORAGE_KEYS;
 
@@ -3001,10 +3007,18 @@ window.switchTab = function (tabName) {
       });
     }
   } else if (tabName === 'messages') {
+    window.flushDuePMFollowups();
+    window.flushDuePMReadRequests();
+    const _dbg = `<span style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
+      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="triggerPostMeetingCheckin()">체크인</span>
+      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugForcePMFollowup()">팔로업강제</span>
+      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugAdvancePMReadRequests()">24h경과</span>
+      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugBlockFirstPendingTarget()">상대차단</span>
+    </span>`;
     contentArea.innerHTML = `
       <div class="message-list" style="padding-top: 10px; display: flex; flex-direction: column; height: 100%;">
         <div class="tab-header-pad-x">
-          ${getTabHeaderHTML('메시지', '', `<span style="font-size: 12px; color: #9B72CC; text-decoration: underline; cursor: pointer; font-weight: 600;" onclick="triggerPostMeetingCheckin()">p.M 체크인 테스트</span>`)}
+          ${getTabHeaderHTML('메시지', '', _dbg)}
         </div>
         
         <!-- Section 1: Matched Profiles -->
@@ -3115,14 +3129,16 @@ window.switchTab = function (tabName) {
   } else if (tabName === 'notifications') {
     // 예약해둔 48h·24h 리마인드 중 시점이 지난 것을 목록에 올린다.
     window.flushDueJoinReminders();
+    window.flushDuePMFollowups();
+    window.flushDuePMReadRequests();
     contentArea.innerHTML = `
         <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); height: calc(100dvh - 80px); background: var(--bg-color);">
         ${getTabHeaderHTML('알림', '', '')}
         <div class="notif-list">
           ${DUMMY_NOTIFICATIONS.length === 0
         ? '<div class="notif-empty">아직 알림이 없어요</div>'
-        : DUMMY_NOTIFICATIONS.map(n => `
-              <div class="notif-item${n.unread ? ' unread' : ''}">
+        : DUMMY_NOTIFICATIONS.map((n, i) => `
+              <div class="notif-item${n.unread ? ' unread' : ''}"${n.action ? ` onclick="window.handleNotifAction(${i})" style="cursor:pointer;"` : ''}>
                 <span class="notif-icon">${n.icon}</span>
                 <div class="notif-body">
                   <div class="notif-text">${n.text}</div>
@@ -5005,7 +5021,7 @@ window.cancelMeetup = function (id) {
 };
 
 // 되돌릴 수 없는 행동에는 시트를 세운다. 책 덮기와 같은 무게라 같은 형태를 쓴다.
-window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, onConfirm }) {
+window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, onConfirm, bodyExtraHTML, collectValue, afterRender }) {
   if (document.getElementById('confirm-sheet')) return;
   const opener = document.activeElement;
   const scrim = document.createElement('div');
@@ -5020,6 +5036,7 @@ window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, on
     <div class="sheet-grabber" aria-hidden="true"></div>
     <h2 class="confirm-sheet-title" id="confirm-sheet-title">${escapeHTML(title || '')}</h2>
     <p class="confirm-sheet-body">${escapeHTML(body || '')}</p>
+    ${bodyExtraHTML || ''}
     <div class="confirm-sheet-actions">
       <button type="button" class="sheet-btn sheet-btn--ghost" id="confirm-sheet-cancel">${escapeHTML(cancelLabel || '그만두기')}</button>
       <button type="button" class="sheet-btn sheet-btn--commit" id="confirm-sheet-ok">${escapeHTML(confirmLabel || '확인')}</button>
@@ -5038,7 +5055,12 @@ window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, on
   document.addEventListener('keydown', onKey, true);
   scrim.addEventListener('click', dismiss);
   sheet.querySelector('#confirm-sheet-cancel').addEventListener('click', dismiss);
-  sheet.querySelector('#confirm-sheet-ok').addEventListener('click', () => { dismiss(); onConfirm && onConfirm(); });
+  sheet.querySelector('#confirm-sheet-ok').addEventListener('click', () => {
+    const v = collectValue ? collectValue(sheet) : undefined;
+    dismiss();
+    onConfirm && onConfirm(v);
+  });
+  if (afterRender) afterRender(sheet);
   requestAnimationFrame(() => sheet.querySelector('#confirm-sheet-cancel')?.focus());
 };
 
@@ -5760,12 +5782,14 @@ window.handleCardClick = function (profileId, qId = null) {
   }
 };
 
-window.openProfileModal = function (profileId, fromChat = false) {
+window.openProfileModal = function (profileId, fromChat = false, opts = null) {
   console.log('openProfileModal executing for ID:', profileId);
   const p = MOCK_PROFILES.find(x => x.id === profileId);
   const mc = getModalContainer();
 
   const alreadyPaged = pagedSet?.has('p' + profileId) ?? false;
+  // p.M 팔로업으로 열린 프로필북의 ♥는 발견 큐를 거치지 않는 전용 핸들러를 쓴다.
+  const fabHandler = (opts && opts.source === 'pm') ? '_handlePMLikeTap' : '_handleProfFabTap';
 
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
@@ -5789,7 +5813,7 @@ window.openProfileModal = function (profileId, fromChat = false) {
          책 덮기 취소
        </button>
        ` : `
-       <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 좋아요를 보낸 프로필북' : '마음 보내기'}" onclick="window._handleProfFabTap(${profileId})">
+       <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 좋아요를 보낸 프로필북' : '마음 보내기'}" onclick="window.${fabHandler}(${profileId})">
          <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:24px; height:24px; color:#fff;"></i>
        </button>
        `}
@@ -6030,6 +6054,140 @@ function restoreMeetupJoins() {
   syncMeetupJoinsToMocks();
 }
 window.restoreMeetupJoins = restoreMeetupJoins;
+
+// ── 모임 후 p.M 팔로업 ──────────────────────────────────
+// 모임 시작 시각이 지나면 p.M이 참여자·호스트에게 "관심 가는 사람을 골라주세요"
+// 팔로업을 보낸다. 고른 사람마다 '프로필북 읽기 신청'이 생기고 24시간 뒤 열린다.
+// 그 사이 상대가 나를 차단하면 신청은 조용히 무효화되고 영구히 열리지 않는다.
+let pmFollowups = {};     // { [meetupId]: { triggeredAt, done, selections:[profileId] } }
+let pmReadRequests = [];  // [ { id, meetupId, profileId, createdAt, unlockAt, status } ]
+                          //   status: 'pending' | 'unlocked' | 'void'
+const PM_READ_DELAY_MS = 24 * 60 * 60 * 1000;
+
+function persistPMState() {
+  try {
+    window.localStorage.setItem(P2_STORAGE_KEYS.pmFollowups, JSON.stringify(pmFollowups));
+    window.localStorage.setItem(P2_STORAGE_KEYS.pmReadRequests, JSON.stringify(pmReadRequests));
+  } catch (e) { /* private mode / quota */ }
+}
+window.persistPMState = persistPMState;
+
+function restorePMState() {
+  try {
+    const f = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.pmFollowups) || 'null');
+    pmFollowups = (f && typeof f === 'object' && !Array.isArray(f)) ? f : {};
+  } catch (e) { pmFollowups = {}; }
+  try {
+    const r = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.pmReadRequests) || 'null');
+    pmReadRequests = Array.isArray(r) ? r : [];
+  } catch (e) { pmReadRequests = []; }
+}
+window.restorePMState = restorePMState;
+
+// 모임 시작 시각이 지난, 내가 확정 참여했거나 내가 연 모임에 대해 팔로업을 만든다.
+// 로드당 한 번만 (pmFollowups[id] 존재 여부로 가드). flushDueJoinReminders 패턴.
+window.flushDuePMFollowups = function (now = Date.now()) {
+  const fired = [];
+  const targetIds = new Set();
+  Object.entries(meetupJoins).forEach(([id, rec]) => {
+    if (rec && rec.status === 'confirmed') targetIds.add(String(id));
+  });
+  MOCK_MEETUPS.forEach(m => { if (m && isMeetupHost(m)) targetIds.add(String(m.id)); });
+
+  targetIds.forEach(id => {
+    const m = getMeetup(id);
+    if (!m || m.cancelled) return;
+    if (pmFollowups[id]) return;
+    const started = window.__pmDebugSkipStartCheck || hasMeetupStarted(m, now);
+    if (!started) return;
+    pmFollowups[id] = { triggeredAt: now, done: false, selections: [] };
+    fired.push({
+      icon: '💬',
+      text: `'${m.title}' 만남은 어땠어요? 함께한 분들 중 더 알고 싶은 사람을 골라주세요`,
+      time: '방금', unread: true,
+      action: { type: 'pmFollowup', meetupId: String(id) },
+    });
+  });
+  if (fired.length) { persistPMState(); DUMMY_NOTIFICATIONS.unshift(...fired); }
+  return fired;
+};
+
+// pending 읽기 신청을 훑어 차단이면 무효화(조용히), 24시간 지났으면 열어준다.
+window.flushDuePMReadRequests = function (now = Date.now()) {
+  let changed = false;
+  pmReadRequests.forEach(r => {
+    if (!r || r.status !== 'pending') return;
+    if (window.isBlockRelated(r.profileId)) {
+      r.status = 'void'; changed = true; // 조용히 — 신청자에게 아무 알림도 없다
+      return;
+    }
+    if (now >= r.unlockAt) {
+      r.status = 'unlocked'; changed = true;
+      const p = MOCK_PROFILES.find(x => x.id === Number(r.profileId));
+      DUMMY_NOTIFICATIONS.unshift({
+        icon: '📖',
+        text: `${p ? p.name : '그분'}님의 프로필북을 이제 볼 수 있어요`,
+        time: '방금', unread: true,
+        action: { type: 'openBook', profileId: Number(r.profileId), meetupId: String(r.meetupId) },
+      });
+    }
+  });
+  if (changed) persistPMState();
+};
+
+// 이 모임의 이 참여자에 대해 읽기 신청이 열렸는가 (레벨3 진입 조건).
+window.isProfileBookUnlockedViaPM = function (meetupId, profileId) {
+  if (window.isBlockRelated(profileId)) return false;
+  return pmReadRequests.some(r => r
+    && String(r.meetupId) === String(meetupId)
+    && Number(r.profileId) === Number(profileId)
+    && r.status === 'unlocked');
+};
+
+// 알림 항목의 action 처리. action 없는 기존 알림은 클릭 핸들러가 안 붙는다.
+window.handleNotifAction = function (idx) {
+  const n = DUMMY_NOTIFICATIONS[idx];
+  if (!n || !n.action) return;
+  n.unread = false;
+  const a = n.action;
+  if (a.type === 'pmFollowup') {
+    window.openPMFollowup(a.meetupId);
+  } else if (a.type === 'openBook') {
+    window.openProfileModal(Number(a.profileId), false, { source: 'pm', meetupId: a.meetupId });
+  }
+};
+
+// ── 디버그 단축 (프로토타입 전용) ──────────────────────
+window.__debugForcePMFollowup = function () {
+  const hasConfirmed = Object.values(meetupJoins).some(r => r && r.status === 'confirmed');
+  const hasHosted = MOCK_MEETUPS.some(m => m && isMeetupHost(m));
+  if (!hasConfirmed && !hasHosted) { window.showToast('참여 확정했거나 내가 연 모임이 없어요'); return; }
+  window.__pmDebugSkipStartCheck = true;
+  const fired = window.flushDuePMFollowups();
+  window.__pmDebugSkipStartCheck = false;
+  window.showToast(fired.length ? `팔로업 ${fired.length}건을 만들었어요` : '이미 팔로업이 있어요');
+  if (currentTab === 'messages') switchTab('messages');
+};
+
+window.__debugAdvancePMReadRequests = function () {
+  const t = Date.now() - 1000;
+  let n = 0;
+  pmReadRequests.forEach(r => { if (r && r.status === 'pending') { r.unlockAt = t; n++; } });
+  persistPMState();
+  window.flushDuePMReadRequests();
+  window.showToast(n ? `읽기 신청 ${n}건의 24시간을 건너뛰었어요` : '대기 중인 읽기 신청이 없어요');
+  if (currentTab === 'messages') switchTab('messages');
+};
+
+window.__debugBlockFirstPendingTarget = function () {
+  const r = pmReadRequests.find(x => x && x.status === 'pending');
+  if (!r) { window.showToast('대기 중인 읽기 신청이 없어요'); return; }
+  window.__setBlockedByUser(Number(r.profileId), true);
+  window.flushDuePMReadRequests();
+  const p = MOCK_PROFILES.find(x => x.id === Number(r.profileId));
+  window.showToast(`${p ? p.name : '상대'}님이 나를 차단한 상황을 만들었어요`);
+  if (currentTab === 'messages') switchTab('messages');
+};
 
 // MOCK_MEETUPS는 새로고침마다 리터럴 그대로 되살아난다. 저장해둔 신청·승인
 // 결과를 한 번 얹어주지 않으면 목록 라벨이 '더 보기'로 돌아가고, 승인으로 늘려둔
@@ -6343,17 +6501,109 @@ window.applyToMeetup = function (id) {
   return { ok: true, confirmed: instant };
 };
 
-// 썸네일은 늘 보이지만 프로필로 들어가는 건 참여자만. 호스트는 자기 모임이니 통과.
+// 썸네일을 누르면 3단계로 갈린다.
+//   레벨1 — 참여 전: 표지·배너(정적) + 텍스트 정보만
+//   레벨2 — 참여 후(또는 호스트): 레벨1 + '나에 대해' 텍스트
+//   레벨3 — 모임 후 p.M 읽기 신청이 열림: 전체 프로필북(사진 확대·챕터 답변·좋아요)
 window.openMeetupAttendee = function (meetupId, profileId) {
   const m = getMeetup(meetupId);
   if (!m) return;
-  if (!isMeetupHost(m) && window.getJoinStatus(meetupId) !== 'confirmed') {
-    window.showToast('참여하면 프로필을 볼 수 있어요');
+  const pid = Number(profileId);
+  if (window.isBlockRelated(pid)) { window.showToast('지금은 볼 수 없어요'); return; }
+  if (window.blockedByProfileGate()) return;
+  if (window.isProfileBookUnlockedViaPM(meetupId, pid)) {
+    openProfileModal(pid, false, { source: 'pm', meetupId });
     return;
   }
-  if (window.blockedByProfileGate()) return;
-  openProfileModal(Number(profileId));
+  const joined = isMeetupHost(m) || window.getJoinStatus(meetupId) === 'confirmed';
+  window.openMeetupParticipantPreview(meetupId, pid, joined ? 2 : 1);
 };
+
+// 레벨1/2 미리보기. openProfileModal이 아닌 별도 화면 — 라이트박스도, 답변 그리드도,
+// ♥ FAB도 없다. openLimitedProfile(그룹 채팅용)의 본문 마크업을 본떴다.
+window.openMeetupParticipantPreview = function (meetupId, profileId, level) {
+  const p = MOCK_PROFILES.find(x => x.id === Number(profileId));
+  if (!p) return;
+  const mc = getModalContainer();
+  window.__profLightboxPhotos = []; // 방어 — 이 화면에는 라이트박스가 없다
+
+  const phs = p.photos || (p.image ? [p.image] : []);
+  const cover = phs[0] || p.image;
+  const banner = phs[1] || phs[0] || p.image;
+  const age = getAge(p.birthYear);
+  const region = getProfileRegion(p) || '--';
+
+  const aboutHTML = level >= 2 ? (() => {
+    const rows = window.renderBasicInfoRows(p, false, false);
+    return rows
+      ? `<div class="profile-section-title" style="margin-top:40px;">나에 대해</div>
+         <div class="info-card">${rows}</div>`
+      : '';
+  })() : '';
+
+  const noteHTML = level >= 2
+    ? `<div style="margin-top:32px; background:#F8F4FF; border-radius:16px; padding:20px; text-align:center;">
+         <div style="font-size:15px; font-weight:600; color:#9B72CC;">💜 더 알아보려면 매칭이 필요해요</div>
+         <div style="font-size:13px; color:#AAA; margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
+       </div>`
+    : `<div style="margin-top:32px; font-size:13px; color:var(--text-muted); text-align:center; line-height:1.6;">
+         참여하면 '나에 대해'까지 볼 수 있어요
+       </div>`;
+
+  mc.innerHTML = `
+    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+        <button class="back-btn" aria-label="뒤로" onclick="openMeetupDetail(${JSON.stringify(meetupId)})">
+          <i data-lucide="chevron-left" style="width:28px;"></i>
+        </button>
+        <div style="font-size:16px; font-weight:600; color:var(--text-dark);">${escapeHTML(p.name || '')}</div>
+        <div style="width:32px;"></div>
+      </div>
+      <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+        <div class="scroll-y" style="height:100%;">
+          <div style="padding-bottom:80px;">
+            <div class="prof-header">
+              <div class="prof-header-banner is-static" style="background-image:url('${banner}');"></div>
+              <div class="prof-header-avatar is-static" style="background-image:url('${cover}');"></div>
+            </div>
+            <div style="padding:24px;">
+              <div class="card-name" style="font-size:22px; display:flex; align-items:center; gap:8px; font-weight:600; color:var(--text-dark); flex-wrap:wrap;">
+                ${escapeHTML(p.name || '')}
+                <span style="font-size:16px; font-weight:400; color:var(--text-muted);">${age}세 · ${escapeHTML(region)}</span>
+                ${getRoleBadgeHTML(p.role)}
+              </div>
+              <div class="card-tags" style="margin-top:16px;">
+                ${(p.tags || []).map(t => `<div class="card-tag">${escapeHTML(t)}</div>`).join('')}
+              </div>
+              <div class="profile-badge" style="margin-top:24px; display:inline-block;">
+                ${escapeHTML(p.intent || '연애를 기대해요 ❤️')}
+              </div>
+              <div style="font-size:15px; margin-top:20px; line-height:1.6; color:var(--text-dark); white-space:pre-line;">
+                ${escapeHTML(p.bio || '')}
+              </div>
+              ${aboutHTML}
+              ${noteHTML}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+const CANCEL_JOIN_REASONS = ['일정이 안 맞아요', '다른 일이 생겼어요', '마음이 바뀌었어요', '직접 입력'];
+
+// 취소 사유는 지금 활용처가 없다 — 데이터로만 쌓아둔다 (추후 분석용).
+function recordCancelReason(meetupId, reason, text) {
+  let arr = [];
+  try { arr = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.cancelReasons) || '[]'); }
+  catch (e) { arr = []; }
+  if (!Array.isArray(arr)) arr = [];
+  arr.push({ meetupId: String(meetupId), reason: reason || null, text: text || null, at: Date.now() });
+  try { window.localStorage.setItem(P2_STORAGE_KEYS.cancelReasons, JSON.stringify(arr)); }
+  catch (e) { /* private mode / quota */ }
+}
 
 window.handleCancelJoin = function (meetupId) {
   window.openConfirmSheet({
@@ -6361,8 +6611,34 @@ window.handleCancelJoin = function (meetupId) {
     body: '취소하면 그 자리에 다른 분이 참여할 수 없어요.',
     cancelLabel: '계속 참여하기',
     confirmLabel: '참여 취소하기',
-    onConfirm: () => {
+    bodyExtraHTML: `
+      <div class="cancel-reason-chips" style="display:flex; flex-wrap:wrap; gap:8px; margin:4px 0 20px;">
+        ${CANCEL_JOIN_REASONS.map(r => `<button type="button" class="filter-chip" data-reason="${escapeAttr(r)}">${escapeHTML(r)}</button>`).join('')}
+        <input type="text" class="input-field cancel-reason-text" placeholder="이유 (선택)" maxlength="60"
+               style="display:none; width:100%; margin-top:4px;" />
+      </div>`,
+    afterRender: (sheet) => {
+      const chips = [...sheet.querySelectorAll('.cancel-reason-chips .filter-chip')];
+      const textInput = sheet.querySelector('.cancel-reason-text');
+      chips.forEach(chip => chip.addEventListener('click', () => {
+        const wasOn = chip.classList.contains('selected');
+        chips.forEach(c => c.classList.remove('selected'));
+        if (!wasOn) chip.classList.add('selected');
+        const custom = chip.classList.contains('selected') && chip.dataset.reason === '직접 입력';
+        if (textInput) {
+          textInput.style.display = custom ? 'block' : 'none';
+          if (custom) textInput.focus(); else textInput.value = '';
+        }
+      }));
+    },
+    collectValue: (sheet) => {
+      const chip = sheet.querySelector('.cancel-reason-chips .filter-chip.selected');
+      const text = sheet.querySelector('.cancel-reason-text');
+      return { reason: chip ? chip.dataset.reason : null, text: text ? text.value.trim() : null };
+    },
+    onConfirm: ({ reason, text } = {}) => {
       if (!window.cancelMeetupJoin(meetupId)) { window.showToast('취소할 수 없어요'); return; }
+      recordCancelReason(meetupId, reason, text);
       openMeetupDetail(meetupId);
       if (currentTab === 'meetups' && typeof renderMeetupList === 'function') renderMeetupList();
       window.showToast('참여를 취소했어요');
@@ -6703,7 +6979,7 @@ window.openMeetupDetail = function (id) {
                  return `<div class="attendee-avatar" ${pp ? `onclick="window.openMeetupAttendee(${m.id}, ${pp.id})"` : ''} style="width:40px; height:40px; margin-left:0; border: none; background-image:url('${url}');background-size:cover;background-position:center top;"></div>`;
                }).join('')}
             </div>
-            ${(isConfirmed || iAmHost) ? '' : `<div class="attendee-hint">참여하면 프로필을 볼 수 있어요</div>`}
+            ${(isConfirmed || iAmHost) ? '' : `<div class="attendee-hint">썸네일을 누르면 참여 전에도 소개를 볼 수 있어요</div>`}
           </div>
           ${hostActionsHTML}${applicantsSectionHTML}${rosterSectionHTML}
           `}
@@ -7298,6 +7574,158 @@ window.triggerPostMeetingCheckin = function () {
 
   window.renderPMCheckinUI = renderPMModal;
   renderPMModal();
+};
+
+// ── 모임 후 p.M 팔로업 — 관심 가는 사람 고르기 ──────────
+window.openPMFollowup = function (meetupId) {
+  const m = getMeetup(meetupId);
+  if (!m) return;
+  const fu = pmFollowups[String(meetupId)] || { done: false, selections: [] };
+
+  let amc = document.getElementById('answer-modal-container');
+  if (!amc) {
+    amc = document.createElement('div');
+    amc.id = 'answer-modal-container';
+    amc.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:3000; pointer-events:auto;';
+    document.body.appendChild(amc);
+  }
+  amc.style.display = 'block';
+
+  // 나를 제외한 그 모임의 전원 (호스트 + 참여자), 차단 관계는 뺀다.
+  const people = [...getMeetupPeopleIds(m)]
+    .map(id => MOCK_PROFILES.find(p => p.id === Number(id)))
+    .filter(p => p && !window.isBlockRelated(p.id));
+
+  window._pmFollowupSel = new Set();
+
+  const shell = (bodyHTML) => `
+    <div class="match-intro-modal fade-in" style="background: var(--bg-color);">
+      <div class="modal-fixed-close" style="top:24px; left:24px; z-index:3001;" onclick="closeAnswerCard()">
+        <i data-lucide="x" style="color:#333;"></i>
+      </div>
+      <div style="padding: 80px 24px 8px; font-weight:700; font-size:18px; color:#C89FDB;">p.M</div>
+      <div style="padding: 0 24px 4px; font-size:12px; color:var(--text-muted);">${escapeHTML(m.title)}</div>
+      <div class="match-intro-pm" style="flex:1; min-height:0; overflow-y:auto; background:transparent; box-shadow:none; padding:16px 0 24px;">
+        <div class="pm-message-row fade-in">
+          <div class="pm-avatar">p.M</div>
+          <div style="display:flex; flex-direction:column; width:100%;">
+            ${bodyHTML}
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const renderPicker = () => {
+    const rows = people.length === 0
+      ? `<div style="font-size:13px; color:var(--text-muted); padding:12px 0;">함께한 분이 없어요.</div>`
+      : people.map(p => `
+        <button type="button" class="pm-followup-row" data-pid="${p.id}"
+          onclick="window._pmFollowupToggle(${p.id}, this)"
+          style="display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#FFF; border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
+          <span style="width:36px; height:36px; border-radius:50%; flex-shrink:0; background-image:url('${p.image}'); background-size:cover; background-position:center top; background-color:#EDE0FF;"></span>
+          <span style="flex:1; min-width:0;">
+            <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${escapeHTML(p.name || '')}</span>
+            <span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${getAge(p.birthYear)}세</span>
+          </span>
+          <span class="pm-followup-check" style="width:22px; height:22px; border-radius:50%; border:2px solid #C89FDB; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:#FFF; background:transparent;"></span>
+        </button>`).join('');
+    amc.innerHTML = shell(`
+      <div class="pm-bubble">어제 만남은 어땠어요? 함께한 분들 중 더 알고 싶은 사람이 있다면 골라주세요. 여러 명 골라도 되고, 지금 안 골라도 돼요 ☺️</div>
+      <div style="margin-top:20px; width:100%;">${rows}</div>
+      <div style="margin-top:12px; width:100%;">
+        <button class="pm-choice-btn" id="pm-followup-confirm" onclick="window._pmFollowupConfirm('${String(meetupId)}')">이 사람들 알아가기</button>
+        <button class="pm-choice-btn" style="background:var(--bg-color); border:none; color:var(--text-muted);" onclick="closeAnswerCard()">다음에 할게요</button>
+      </div>
+    `);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+    window._pmFollowupSyncConfirm();
+  };
+
+  const renderStatusList = () => {
+    const mine = pmReadRequests
+      .filter(r => r && String(r.meetupId) === String(meetupId) && r.status !== 'void');
+    const now = Date.now();
+    const rows = mine.length === 0
+      ? `<div style="font-size:13px; color:var(--text-muted); padding:12px 0;">아직 아무도 고르지 않았어요.</div>`
+      : mine.map(r => {
+          const p = MOCK_PROFILES.find(x => x.id === Number(r.profileId));
+          const name = escapeHTML(p ? p.name : '그분');
+          if (r.status === 'unlocked') {
+            return `<button type="button" onclick="closeAnswerCard(); window.openProfileModal(${Number(r.profileId)}, false, { source:'pm', meetupId:'${String(meetupId)}' })"
+              style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#FFF; border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
+              <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${name}</span>
+              <span style="font-size:13px; color:#9B72CC; font-weight:600;">지금 볼 수 있어요 →</span>
+            </button>`;
+          }
+          const hoursLeft = Math.max(0, Math.ceil((r.unlockAt - now) / 3600000));
+          return `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#F6F4F0; border-radius:14px; padding:12px; margin-bottom:8px;">
+            <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${name}</span>
+            <span style="font-size:12px; color:var(--text-muted);">약 ${hoursLeft}시간 뒤 공개</span>
+          </div>`;
+        }).join('');
+    amc.innerHTML = shell(`
+      <div class="pm-bubble">고른 분들의 프로필북 상태예요. 24시간이 지나면 자동으로 열려요 ☺️</div>
+      <div style="margin-top:20px; width:100%;">${rows}</div>
+      <div style="margin-top:12px; width:100%;">
+        <button class="pm-choice-btn" style="background:var(--bg-color); border:none; color:var(--text-muted);" onclick="closeAnswerCard()">닫기</button>
+      </div>
+    `);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+
+  window._pmFollowupToggle = (pid, el) => {
+    const s = window._pmFollowupSel;
+    if (s.has(pid)) { s.delete(pid); } else { s.add(pid); }
+    const on = s.has(pid);
+    const check = el.querySelector('.pm-followup-check');
+    if (check) {
+      check.style.background = on ? '#9B72CC' : 'transparent';
+      check.textContent = on ? '✓' : '';
+    }
+    el.style.borderColor = on ? '#9B72CC' : 'var(--border)';
+    window._pmFollowupSyncConfirm();
+  };
+
+  window._pmFollowupSyncConfirm = () => {
+    const btn = document.getElementById('pm-followup-confirm');
+    if (!btn) return;
+    const n = window._pmFollowupSel ? window._pmFollowupSel.size : 0;
+    btn.textContent = n > 0 ? `이 ${n}명 알아가기` : '이 사람들 알아가기';
+    btn.disabled = n === 0;
+    btn.style.opacity = n === 0 ? '0.45' : '1';
+  };
+
+  window._pmFollowupConfirm = (mid) => {
+    const sel = [...(window._pmFollowupSel || [])];
+    if (!sel.length) return;
+    const now = Date.now();
+    if (!pmFollowups[String(mid)]) pmFollowups[String(mid)] = { triggeredAt: now, done: false, selections: [] };
+    pmFollowups[String(mid)].selections = sel;
+    pmFollowups[String(mid)].done = true;
+    sel.forEach(pid => {
+      const dup = pmReadRequests.some(r => r && String(r.meetupId) === String(mid) && Number(r.profileId) === Number(pid));
+      if (dup) return;
+      pmReadRequests.push({
+        id: 'rr' + now + '_' + pid,
+        meetupId: String(mid),
+        profileId: Number(pid),
+        createdAt: now,
+        unlockAt: now + PM_READ_DELAY_MS,
+        status: 'pending',
+      });
+    });
+    persistPMState();
+    amc.innerHTML = shell(`
+      <div class="pm-bubble">좋아요. 24시간 안에 상대가 나를 차단하지 않으면 프로필북이 열려요. 준비되면 알림으로 알려드릴게요 ☺️</div>
+      <div style="margin-top:24px; width:100%;">
+        <button class="pm-choice-btn" style="background:var(--bg-color); border:none; color:var(--text-muted);" onclick="closeAnswerCard()">닫기</button>
+      </div>
+    `);
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  };
+
+  if (fu.done) renderStatusList();
+  else renderPicker();
 };
 
 
@@ -8160,6 +8588,38 @@ window.pageProfile = function (cardId) {
   const mutual = !window.__hasMockedMutualMatch;
   if (mutual) window.__hasMockedMutualMatch = true;
   return mutual;
+};
+
+// p.M 팔로업으로 열린 프로필북의 ♥. 발견 큐에 없는 사람이라
+// _handleProfFabTap의 큐 조회 경로를 못 쓴다. pageProfile은 item이 없어도
+// pagedSet 추가 + 상호매칭 판정은 그대로 해준다.
+window._handlePMLikeTap = function (pid) {
+  const cardId = 'p' + pid;
+  if (pagedSet?.has(cardId)) { showToast('이미 Page했어요 ♥'); return; }
+  if (window.__actionLocked) return;
+  window.__actionLocked = true;
+  setTimeout(() => { window.__actionLocked = false; }, 1000);
+
+  const fab = document.getElementById('prof-page-fab');
+  const fabSvg = document.getElementById('prof-fab-icon');
+  if (fabSvg) {
+    const path = fabSvg.querySelector('path');
+    if (path) { path.setAttribute('fill', '#fff'); path.setAttribute('stroke', 'none'); }
+  }
+  if (fab) {
+    fab.classList.add('pulsing');
+    fab.addEventListener('animationend', () => fab.classList.remove('pulsing'), { once: true });
+  }
+  showToast('Page her ♥');
+
+  const mutual = window.pageProfile(cardId);
+  const p = MOCK_PROFILES.find(x => x.id === Number(pid));
+  if (mutual && p) {
+    if (!MATCHED_PROFILES.find(m => m.id === p.id)) {
+      MATCHED_PROFILES.unshift({ id: p.id, name: p.name, image: p.image, isNew: true });
+    }
+    setTimeout(() => showMutualMatchOverlay(p), 1700);
+  }
 };
 
 // 발견 카드의 하트. 상세로 들어가지 않고 표지에서 바로 마음을 보낸다.
@@ -9682,6 +10142,9 @@ function startApp() {
   restoreBlocks();
   restoreMyMeetups();
   restoreMeetupJoins();
+  restorePMState();
+  window.flushDuePMFollowups();
+  window.flushDuePMReadRequests();
 
   // Kick off the session check in parallel with the splash animation so
   // it's already resolved by the time doTransition fires.
