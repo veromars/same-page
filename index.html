@@ -117,7 +117,12 @@
       padding: calc(46px + env(safe-area-inset-top, 0px)) 0 calc(28px + env(safe-area-inset-bottom, 0px));
       z-index: 2;
     }
-    .cover-spine > * { writing-mode: vertical-lr; color: #C89FDB; }
+    .cover-spine > * { writing-mode: vertical-lr; }
+    /* 책등 텍스트·로고 색 = 스플래시 책등과 동일 (#C89FDB). .logo 의
+       기본 색(--purple-text)을 이기려면 특이도를 한 단계 올린다. */
+    .cover-spine .cs-logo,
+    .cover-spine .cs-line,
+    .cover-spine .cs-studio { color: #C89FDB; }
     .cs-logo { font-size: 20px; }
     /* 세로쓰기에서 전체가 90° 돌아가므로 하트는 45+90=135° 로 (스플래시 책등과 동일) */
     .cs-logo svg { transform: rotate(135deg); top: -0.05em; left: -0.2em; }
@@ -531,14 +536,14 @@
     <aside class="cover-spine">
       <span class="logo cs-logo">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
       <span class="cs-line">On the same page</span>
-      <span class="cs-studio">Versatile Studio</span>
+      <span class="cs-studio">versa studio</span>
     </aside>
     <div class="cover-face">
       <div class="cf-top">On the same page</div>
       <div class="cf-logo">
         <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
       </div>
-      <div class="cf-studio">Versatile<br>Studio</div>
+      <div class="cf-studio">versa<br>studio</div>
     </div>
     <div class="cover-hint">스크롤해서 펼치기<span class="ch-arrow">&#8595;</span></div>
   </div>
@@ -693,7 +698,7 @@
       <div>
         <div><a href="/app">앱 열기</a></div>
         <div><a href="mailto:hello@page2.social">문의</a></div>
-        <div style="margin-top:10px">© 2026 Versa Studio</div>
+        <div style="margin-top:10px">© 2026 versa studio</div>
       </div>
     </div>
   </footer>
