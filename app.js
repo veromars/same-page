@@ -5203,6 +5203,13 @@ window.selectSeekingFromBasics = function (key) {
   window.renderBasicsForm();
 };
 
+// 설정 리스트의 '기본 사항' 행 → 서브 에디터로 연다. 닉네임·생년월일·성향·
+// 연애 상태·찾는 것. .settings-basics 컨테이너를 그대로 써서 renderBasicsForm이
+// 찾아 다시 그릴 수 있게 한다.
+window.openBasicsEditor = function () {
+  openSubEditor('기본 사항', `<div class="settings-basics">${getBasicsFormHTML()}</div>`);
+};
+
 window.openSettingsPage = function () {
   const mc = getModalContainer();
   mc.innerHTML = `
@@ -5226,9 +5233,6 @@ window.openSettingsPage = function () {
             나만의 초대코드로 소중한 사람을 초대해보세요
           </div>
 
-          <div class="profile-section-label">기본 사항</div>
-          <div class="settings-basics">${getBasicsFormHTML()}</div>
-
           <div class="profile-section-label">위치</div>
           <div class="location-banner" id="location-banner">${getLocationBannerHTML()}</div>
           ${window.hasUserLocation() ? `
@@ -5241,6 +5245,10 @@ window.openSettingsPage = function () {
 
           <div class="profile-section-label">설정</div>
           <div class="settings-card">
+            <div class="settings-row" onclick="window.openBasicsEditor()">
+              <span>기본 사항</span>
+              <i data-lucide="chevron-right"></i>
+            </div>
             <div class="settings-row">
               <span>알림 설정</span>
               <i data-lucide="chevron-right"></i>
