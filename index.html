@@ -27,7 +27,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500&family=Poppins:wght@700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
   <style>
@@ -86,14 +86,15 @@
       );
     }
 
-    /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드 */
+    /* 상단 — 콘텐츠가 내비 밑으로 스크롤될 때 페이퍼로 부드럽게 페이드.
+       상태바(노치·다이내믹 아일랜드) 영역까지 덮도록 safe-area 만큼 키운다. */
     .nav-fade {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: 132px;
+      height: calc(120px + env(safe-area-inset-top, 0px));
       z-index: 15;
       pointer-events: none;
-      background: linear-gradient(var(--paper) 32%, rgba(250, 249, 246, 0.7) 60%, rgba(250, 249, 246, 0) 100%);
+      background: linear-gradient(var(--paper) 40%, rgba(250, 249, 246, 0.72) 66%, rgba(250, 249, 246, 0) 100%);
     }
 
     .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
@@ -103,23 +104,43 @@
       position: sticky;
       top: 0;
       z-index: 20;
+      /* 상태바와 겹치지 않도록 그만큼 아래로 밀어준다 */
+      padding-top: env(safe-area-inset-top, 0px);
     }
     .nav-inner {
       max-width: var(--maxw);
       margin: 0 auto;
-      padding: 16px 24px;
+      padding: 14px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .wordmark {
-      font-family: var(--serif);
-      font-weight: 500;
-      font-size: 20px;
-      letter-spacing: 0.01em;
+
+    /* ── p.2 로고 마크 — 스플래시 타이틀과 동일한 구성 ──────
+       'p' + 하트(45° 기울임) + '2', Poppins 900. 하트 크기·위치는
+       스플래시(60px 기준 16px 하트)의 비율을 em 으로 옮긴 값. 색은
+       currentColor 라 쓰는 곳의 color 를 따른다. */
+    .logo {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 900;
+      line-height: 1;
+      display: inline-flex;
+      align-items: baseline;
+      white-space: nowrap;
+      letter-spacing: normal;
       text-decoration: none;
+      color: var(--purple-text);
     }
-    .wordmark span { color: var(--purple-text); }
+    .logo svg {
+      flex: none;
+      width: 0.2667em;
+      height: 0.2667em;
+      position: relative;
+      top: 0.067em;
+      left: -0.05em;
+      margin: 0 0.02em;
+      transform: rotate(45deg);
+    }
 
     .btn {
       display: inline-flex;
@@ -290,10 +311,9 @@
       padding: 0 24px;
       text-align: center;
     }
-    .cta-block img {
-      width: 56px; height: 56px;
-      margin: 0 auto 20px;
-      border-radius: 14px;
+    .cta-block .logo {
+      font-size: 46px;
+      margin-bottom: 22px;
     }
     .cta-block h2 {
       font-family: var(--serif);
@@ -383,8 +403,8 @@
     }
     .foot-inner a { color: var(--muted); text-decoration: none; }
     .foot-inner a:hover { color: var(--ink); }
-    .foot-mark { font-family: var(--serif); font-size: 16px; color: var(--ink); }
-    .foot-mark span { color: var(--purple-text); }
+    .foot-mark { display: flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-size: 16px; color: var(--ink); }
+    .foot-mark .logo { font-size: 17px; }
 
     /* ── Motion ────────────────────────────────────────── */
     .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
@@ -418,7 +438,7 @@
 
   <nav class="nav">
     <div class="nav-inner">
-      <a class="wordmark" href="/">p<span>.</span>2</a>
+      <a class="logo" href="/" aria-label="p.2" style="font-size:20px">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</a>
       <a class="btn btn-primary" href="/app">앱 열기</a>
     </div>
   </nav>
@@ -540,7 +560,7 @@
   </main>
 
   <section class="cta-block reveal">
-    <img src="assets/favicon.png" alt="p.2">
+    <span class="logo" aria-label="p.2" style="color:var(--purple-text)">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
     <h2>당신의 첫 페이지를 시작하세요.</h2>
     <div class="cta-row">
       <a class="btn btn-primary" href="/app">p.2 살펴보기</a>
@@ -550,7 +570,7 @@
   <footer>
     <div class="wrap foot-inner">
       <div>
-        <div class="foot-mark">p<span>.</span>2 &mdash; Same Page</div>
+        <div class="foot-mark"><span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span> <span>&mdash; Same Page</span></div>
         <div style="margin-top:6px">같은 페이지를 찾는 공간</div>
       </div>
       <div>
