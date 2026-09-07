@@ -127,7 +127,6 @@
 
     main { padding: 0 20px; }
     .page + .page { margin-top: var(--gap-page); }
-    .cta-block.page { margin-top: var(--gap-page); }
 
     /* ══ v3 — 책이 하나의 오브젝트로 (findworkhappiness 스타일) ═════
        탁한 라벤더 그라운드 위에 각지게 놓인 p.2 책 한 권 + 뒤로 큰
@@ -479,8 +478,23 @@
     }
     @keyframes marquee { to { transform: translateX(-50%); } }
 
-    /* ── 프리풋 CTA (마지막에서 두 번째 종이) ──────────── */
+    /* ── 프리풋 CTA (마지막 종이) ──────────────────────────
+       상단은 히어로처럼 라벤더 바닥 → 크림색 종이로 그라데이션 (여백 넉넉).
+       하단·옆의 종이 겹침 가장자리·그림자는 다른 페이지처럼 그대로. */
     .cta-block { text-align: center; }
+    .cta-block.page {
+      margin-top: clamp(60px, 12vw, 104px);
+      padding-top: clamp(96px, 21vw, 172px);
+      border-radius: 0 0 2px 2px;
+      background-color: transparent;
+      background-image:
+        linear-gradient(180deg,
+          var(--ground) 0,
+          var(--sheet) clamp(118px, 24vw, 200px)),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.35'/%3E%3C/svg%3E");
+      background-repeat: no-repeat, repeat;
+      background-size: 100% 100%, 90px 90px;
+    }
     .cta-block .logo { font-size: 44px; margin-bottom: 20px; }
     .cta-block h2 {
       font-family: var(--serif);
