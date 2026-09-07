@@ -1134,6 +1134,9 @@ const P2_STORAGE_KEYS = {
   pmFollowups: 'p2_pm_followups',
   pmReadRequests: 'p2_pm_read_requests',
   cancelReasons: 'p2_cancel_reasons',
+  // 프로필북 하트 — 받은 하트 인박스 · 지난 하트 24h 일회성 언락(구독 아님)
+  bookHearts: 'p2_book_hearts',
+  archiveUnlock: 'p2_archive_unlock',
 };
 window.P2_STORAGE_KEYS = P2_STORAGE_KEYS;
 
@@ -2916,9 +2919,11 @@ window.switchTab = function (tabName) {
       // 갈리는 지점이 여기다 — 그쪽은 아무 흔적도 남기지 않으므로 8주 쿨다운
       // 뒤 자연히 다시 후보에 든다.
       loadClosedBooks();
+      // 이미 하트를 주고받은 상대(양방향·모든 status)는 실시간 채널에서 처리된 관계다 —
+      // 발견 주간 배달에 중복으로 올리지 않는다.
       const allProfiles = MOCK_PROFILES
         .map(profile => ({ id: 'p' + profile.id, type: 'profile', profile }))
-        .filter(item => !closedBooks.has(item.id));
+        .filter(item => !closedBooks.has(item.id) && !hasBookHeartWith(item.profile.id));
       dailyProfiles = seededShuffle(allProfiles, weekTs).slice(0, getWeeklyBookCount());
       browseQueue = [...dailyProfiles];
 
@@ -3009,29 +3014,28 @@ window.switchTab = function (tabName) {
   } else if (tabName === 'messages') {
     window.flushDuePMFollowups();
     window.flushDuePMReadRequests();
-    const _dbg = `<span style="display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;">
-      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="triggerPostMeetingCheckin()">체크인</span>
-      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugForcePMFollowup()">팔로업강제</span>
-      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugAdvancePMReadRequests()">24h경과</span>
-      <span style="font-size:11px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="window.__debugBlockFirstPendingTarget()">상대차단</span>
+    const _dbgItem = (fn, label) => `<span style="font-size:10px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="${fn}">${label}</span>`;
+    const _dbg = `<span style="display:flex; gap:7px 8px; flex-wrap:wrap; justify-content:flex-end; max-width:200px;">
+      ${_dbgItem('triggerPostMeetingCheckin()', '체크인')}
+      ${_dbgItem('window.__debugForcePMFollowup()', '팔로업')}
+      ${_dbgItem('window.__debugAdvancePMReadRequests()', 'p.M24h')}
+      ${_dbgItem('window.__debugBlockFirstPendingTarget()', '상대차단')}
+      ${_dbgItem('window.__debugAgeBookHearts()', '하트30일')}
+      ${_dbgItem('window.__debugResetArchive()', '아카잠금')}
     </span>`;
-    contentArea.innerHTML = `
-      <div class="message-list" style="padding-top: 10px; display: flex; flex-direction: column; height: 100%;">
-        <div class="tab-header-pad-x">
-          ${getTabHeaderHTML('메시지', '', _dbg)}
-        </div>
-        
-        <!-- Section 1: Matched Profiles -->
+    const _freshHearts = receivedBookHearts()
+      .filter(h => h.status === 'unread' && !isBookHeartClosed(h) && !isBookHeartArchived(h));
+    const _freshHeartsHTML = _freshHearts.length === 0 ? '' : `
         <div style="display: flex; justify-content: space-between; align-items: baseline; padding-right: 24px;">
-          <div class="matches-section-title" style="margin-bottom: 0;">새로운 매치</div>
-          <div onclick="openAllMatchesGrid()" style="font-size: 13px; color: #9B72CC; font-weight: 600; cursor: pointer;">전체 보기 →</div>
+          <div class="matches-section-title" style="margin-bottom: 0;">새로운 하트</div>
+          <div onclick="openReceivedHeartsList()" style="font-size: 13px; color: #9B72CC; font-weight: 600; cursor: pointer;">전체 보기 →</div>
         </div>
         <div class="matches-scroll-container" style="margin-top: 12px;">
-          ${MATCHED_PROFILES.map(match => {
-      const p = MOCK_PROFILES.find(pr => pr.id === match.id) || MOCK_PROFILES[0];
+          ${_freshHearts.map(h => {
+      const p = MOCK_PROFILES.find(pr => pr.id === h.senderId) || MOCK_PROFILES[0];
       const spineColor = getMatchSpineColor(p.id);
       return `
-            <div class="match-thumbnail-wrap" onclick="openMatchIntroModal(${match.id})">
+            <div class="match-thumbnail-wrap" onclick="openBookHeartDetail('${h.id}')">
               <div class="match-thumbnail saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.18); border-radius:4px; border-left:3px solid ${spineColor};">
                 <div class="book-bg-photo" style="background-image: url('${p.image}'); filter: blur(1.5px); transform: scale(1.08);"></div>
                 <div class="book-overlay"></div>
@@ -3044,11 +3048,18 @@ window.switchTab = function (tabName) {
               <div class="match-thumbnail-heart">
                 <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               </div>
-              ${match.isNew ? `<div class="match-new-dot"></div>` : ''}
+              <div class="match-new-dot"></div>
             </div>
           `;
     }).join('')}
+        </div>`;
+    contentArea.innerHTML = `
+      <div class="message-list" style="padding-top: 10px; display: flex; flex-direction: column; height: 100%;">
+        <div class="tab-header-pad-x">
+          ${getTabHeaderHTML('메시지', '', _dbg)}
         </div>
+
+        ${_freshHeartsHTML}
 
         <!-- Section 2: Conversation List -->
         <div class="matches-section-title" style="margin-top: 0;">대화 중</div>
@@ -5796,8 +5807,6 @@ window.openProfileModal = function (profileId, fromChat = false, opts = null) {
   const mc = getModalContainer();
 
   const alreadyPaged = pagedSet?.has('p' + profileId) ?? false;
-  // p.M 팔로업으로 열린 프로필북의 ♥는 발견 큐를 거치지 않는 전용 핸들러를 쓴다.
-  const fabHandler = (opts && opts.source === 'pm') ? '_handlePMLikeTap' : '_handleProfFabTap';
 
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
@@ -5821,57 +5830,18 @@ window.openProfileModal = function (profileId, fromChat = false, opts = null) {
          책 덮기 취소
        </button>
        ` : `
-       <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 좋아요를 보낸 프로필북' : '마음 보내기'}" onclick="window.${fabHandler}(${profileId})">
-         <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:24px; height:24px; color:#fff;"></i>
+       <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 하트를 보낸 프로필북' : '하트와 한마디 보내기'}"
+               ${alreadyPaged ? 'data-sent="1"' : ''} onclick="window.openHeartComposeSheet(${profileId})">
+         <span class="prof-fab-hearticon" aria-hidden="true">
+           <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:22px; height:22px; color:#fff;"></i>
+           <i data-lucide="message-circle" class="prof-fab-bubble" aria-hidden="true"></i>
+         </span>
        </button>
        `}
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
   initPhotoCarousels();
-
-  window._handleProfFabTap = function (pid) {
-    const fab = document.getElementById('prof-page-fab');
-    const fabSvg = document.getElementById('prof-fab-icon');
-    const cardId = 'p' + pid;
-
-    if (pagedSet?.has(cardId)) {
-      showToast('이미 Page했어요 ♥');
-      return;
-    }
-    if (window.__actionLocked) return;
-    window.__actionLocked = true;
-    setTimeout(() => { window.__actionLocked = false; }, 1000);
-
-    // Fill heart
-    if (fabSvg) {
-      const path = fabSvg.querySelector('path');
-      if (path) { path.setAttribute('fill', '#fff'); path.setAttribute('stroke', 'none'); }
-    }
-
-    // Pulse animation
-    if (fab) {
-      fab.classList.add('pulsing');
-      fab.addEventListener('animationend', () => fab.classList.remove('pulsing'), { once: true });
-    }
-
-    // Toast
-    showToast('Page her ♥');
-
-    // 발견 카드의 하트와 같은 경로. 다시보기에서 들어와도 저장·매칭이 동작한다.
-    const profile = (browseQueue.find(x => x.id === cardId)
-      || dailyProfiles.find(x => x.id === cardId)
-      || (window.weeklyViewedProfiles || []).find(x => x.id === cardId) || {}).profile;
-    const isMutualMatch = window.pageProfile(cardId);
-    // 다시보기 리스트에서 들어온 경우 그 리스트의 상태 표시가 바로 바뀌어야 한다.
-    if (currentTab === 'discover') renderDiscoverTab();
-    if (isMutualMatch && profile) {
-      if (!MATCHED_PROFILES.find(m => m.id === profile.id)) {
-        MATCHED_PROFILES.unshift({ id: profile.id, name: profile.name, image: profile.image, isNew: true });
-      }
-      setTimeout(() => showMutualMatchOverlay(profile), 1700);
-    }
-  };
 
   // 책 덮기 취소 — 무반응으로 되돌리고, 그 자리에서 바로 좋아요가 가능해진다.
   window._handleReopenTap = function (pid) {
@@ -7189,6 +7159,161 @@ window.openProfileForChat = function (profileId, chatId) {
 // 매칭 소개 플로우, 모임 후 팔로업, 그룹/1:1 채팅
 // ══════════════════════════════════════════════════════════════
 
+// ── 받은 하트 상세 · 회신 · 책 덮기 ──────────────────────
+window.openBookHeartDetail = function (heartId) {
+  const h = bookHearts.find(x => x.id === heartId);
+  if (!h) return;
+  const p = MOCK_PROFILES.find(x => x.id === h.senderId);
+  if (!p) return;
+
+  if (h.status === 'unread') { h.status = 'read'; persistBookHearts(); }
+
+  let amc = document.getElementById('answer-modal-container');
+  if (!amc) {
+    amc = document.createElement('div');
+    amc.id = 'answer-modal-container';
+    amc.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; z-index:3000; pointer-events:auto;';
+    document.body.appendChild(amc);
+  }
+  amc.style.display = 'block';
+
+  const closed = isBookHeartClosed(h);
+  const age = getAge(p.birthYear);
+  const dist = formatDistanceLabel(p);
+  const msgBlock = h.message
+    ? `<div class="pm-message-row" style="margin:16px 24px 0;">
+         <div class="pm-avatar">${escapeHTML((p.name || '?').slice(0, 1))}</div>
+         <div class="pm-bubble">${escapeHTML(h.message)}</div>
+       </div>`
+    : `<div style="margin:16px 24px 0; font-size:13px; color:var(--text-muted);">한마디 없이 하트를 보냈어요.</div>`;
+
+  const footer = closed
+    ? `<button type="button" class="sheet-btn sheet-btn--ghost" style="flex:1;" onclick="reopenBookHeart('${h.id}')">되돌리기</button>`
+    : `<button type="button" class="sheet-btn sheet-btn--commit" style="flex:1;" onclick="closeBookHeart('${h.id}')">책 덮기</button>
+       <button type="button" class="sheet-btn sheet-btn--ghost" style="flex:1;" onclick="replyWithHeart('${h.id}')">하트 보내기</button>`;
+
+  amc.innerHTML = `
+    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+      <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+        <button class="back-btn" aria-label="닫기" onclick="closeAnswerCard(); switchTab('messages')">
+          <i data-lucide="x" style="width:28px;"></i>
+        </button>
+        <div style="display:flex; flex-direction:column; align-items:center;">
+          <div style="font-size:15px; font-weight:600; color:var(--text-dark);">${escapeHTML(p.name)}</div>
+          <div style="font-size:12px; color:var(--text-muted);">${age}세 · ${escapeHTML(dist)}</div>
+        </div>
+        <button type="button" style="background:none; border:none; padding:0; cursor:pointer;" onclick="closeAnswerCard(); openProfileFromModal(${p.id}, 'messages')" aria-label="프로필 보기">
+          <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p.image}'); background-size:cover; background-position:center; background-color:#EDE0FF;"></div>
+        </button>
+      </div>
+      <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+        <div class="scroll-y" style="height:100%; padding-bottom:96px;">
+          ${msgBlock}
+          ${getProfileDetailedHTML(p, false)}
+        </div>
+      </div>
+      <div style="position:absolute; left:0; right:0; bottom:0; display:flex; gap:10px; padding:14px 20px calc(14px + env(safe-area-inset-bottom)); background:var(--bg-color); border-top:1px solid var(--border);">
+        ${footer}
+      </div>
+    </div>
+  `;
+  if (typeof lucide !== 'undefined') lucide.createIcons();
+  initPhotoCarousels();
+};
+
+window.replyWithHeart = function (heartId) {
+  const h = bookHearts.find(x => x.id === heartId);
+  if (!h) return;
+  const p = MOCK_PROFILES.find(pr => pr.id === h.senderId);
+  if (!p) return;
+
+  h.status = 'matched';
+  persistBookHearts();
+
+  const newChatId = MOCK_CHATS.length + 1;
+  MOCK_CHATS.unshift({
+    id: newChatId, name: p.name, image: p.image,
+    source: '받은 하트', score: '새로운 하트', preview: '하트를 보냈어요 ♥',
+    time: '방금 전', isNew: true, isUnread: false,
+    messages: [
+      ...(h.message ? [{ text: h.message, type: 'received' }] : []),
+      { text: '하트를 보냈어요 ♥', type: 'sent' },
+    ],
+  });
+
+  closeAnswerCard();
+  switchTab('messages');
+  setTimeout(() => openChat(newChatId), 100);
+};
+
+window.closeBookHeart = function (heartId) {
+  const h = bookHearts.find(x => x.id === heartId);
+  if (!h) return;
+  const p = MOCK_PROFILES.find(pr => pr.id === h.senderId);
+  window.openConfirmSheet({
+    title: `${p ? p.name : '이 하트'} 님의 책을 덮을까요?`,
+    body: '덮은 하트는 받은 하트에서 흐리게 표시돼요. 언제든 되돌릴 수 있어요.',
+    cancelLabel: '그만두기',
+    confirmLabel: '책 덮기',
+    onConfirm: () => {
+      closedBooks.add('p' + h.senderId);
+      saveClosedBooks();
+      persistBookHearts();
+      window.showToast('책을 덮었어요. 받은 하트에서 되돌릴 수 있어요.');
+      closeAnswerCard();
+      switchTab('messages');
+    },
+  });
+};
+
+window.reopenBookHeart = function (heartId) {
+  const h = bookHearts.find(x => x.id === heartId);
+  if (!h) return;
+  closedBooks.delete('p' + h.senderId);
+  saveClosedBooks();
+  h.status = 'read';
+  persistBookHearts();
+  window.showToast('하트를 다시 열었어요.');
+  closeAnswerCard();
+  window.openReceivedHeartsList();
+};
+
+// ── 지난 하트 24시간 일회성 언락 시트 ────────────────────
+window.openArchiveUnlockSheet = function () {
+  const archived = receivedBookHearts().filter(h => isBookHeartArchived(h));
+  const existingBackdrop = document.getElementById('archive-unlock-backdrop');
+  const existingSheet = document.getElementById('archive-unlock-sheet');
+  if (existingBackdrop) existingBackdrop.remove();
+  if (existingSheet) existingSheet.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.id = 'archive-unlock-backdrop';
+  backdrop.style.cssText = 'position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,0.35);';
+  const close = () => { backdrop.remove(); document.getElementById('archive-unlock-sheet')?.remove(); };
+  backdrop.onclick = close;
+
+  const sheet = document.createElement('div');
+  sheet.id = 'archive-unlock-sheet';
+  sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:#FFF;border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
+  sheet.innerHTML = `
+    <div style="width:36px;height:4px;background:#E8E8E8;border-radius:4px;margin:0 auto 22px;"></div>
+    <div style="font-size:18px;font-weight:700;color:#2C2C2A;margin-bottom:8px;">지난 하트 다시 열기</div>
+    <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">1개월이 지난 하트 ${archived.length}개를 24시간 동안 다시 보고 답장할 수 있어요.</div>
+    <div style="font-size:12px;color:#AAA;text-align:center;margin-bottom:16px;">₩2,900 · 1회 (24시간)</div>
+    <button id="archive-unlock-go" style="width:100%;padding:15px;background:#9B72CC;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">24시간 열기</button>
+    <button id="archive-unlock-later" style="width:100%;padding:12px;background:transparent;color:#AAA;border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
+  `;
+  document.body.appendChild(backdrop);
+  document.body.appendChild(sheet);
+  sheet.querySelector('#archive-unlock-go').addEventListener('click', () => {
+    unlockArchive24h();
+    close();
+    window.showToast('지난 하트를 24시간 동안 열었어요.');
+    window.openReceivedHeartsList();
+  });
+  sheet.querySelector('#archive-unlock-later').addEventListener('click', close);
+};
+
 window.openMatchIntroModal = function (profileId, isQurated = false, from = 'messages') {
   const match = MATCHED_PROFILES.find(m => m.id === profileId);
   if (!match) return;
@@ -8343,55 +8468,6 @@ window.detailSwipeLeft = function () {
   renderDiscoverTab();
 };
 
-window.detailSwipeRight = function () {
-  const card = browseQueue[0];
-  if (!card || window.__actionLocked) return;
-
-  // Lock actions briefly to prevent duplicates
-  window.__actionLocked = true;
-  setTimeout(() => { window.__actionLocked = false; }, 1000);
-
-  // Check mutual match condition (mocking: first time always true)
-  const isMutualMatch = !window.__hasMockedMutualMatch;
-  if (isMutualMatch) {
-    window.__hasMockedMutualMatch = true;
-  }
-
-  // Page her 누른 카드
-  pagedSet.add(card.id);
-
-  const alreadySaved = savedBooks.some(b => b.id === card.id);
-  if (!alreadySaved) {
-    savedBooks.push(card);
-  }
-
-  if (!window.weeklyViewedProfiles) window.weeklyViewedProfiles = [];
-  if (!window.weeklyViewedProfiles.some(v => v.id === card.id)) {
-    window.weeklyViewedProfiles.push(card);
-    localStorage.setItem('sp_viewed_this_week', JSON.stringify(window.weeklyViewedProfiles));
-  }
-
-  browseQueue.shift(); // remove from queue
-
-  if (isMutualMatch) {
-    // Add to MATCHED_PROFILES
-    const numId = parseInt(card.id.replace('p', ''));
-    if (!MATCHED_PROFILES.find(m => m.id === numId)) {
-      MATCHED_PROFILES.unshift({ id: numId, name: card.profile.name, image: card.profile.image, isNew: true });
-    }
-    // Show mutual match overlay
-    showMutualMatchOverlay(card.profile);
-  } else {
-    const overlay = document.getElementById('paged-heart-overlay');
-    if (overlay) overlay.classList.add('active');
-
-    setTimeout(() => {
-      if (overlay) overlay.classList.remove('active');
-      closeModal();
-      renderDiscoverTab();
-    }, 600);
-  }
-};
 
 window.showMutualMatchOverlay = function (p) {
   if (!document.getElementById('float-keyframes')) {
@@ -8524,6 +8600,96 @@ window.isBookClosed = function (cardId) {
   return closedBooks.has(cardId);
 };
 
+// ── 프로필북 하트 ─────────────────────────────────────
+// 받은 프로필북 하트의 인박스. 발신자 닉네임과 선택적 한마디가 함께 온다.
+// status: unread(점) → read(열람) → matched(회신, 대화 생성). 'closed'는 여기 저장하지
+// 않고 기존 closedBooks('p'+senderId)에서 파생한다 — 스펙 §1.2 "closedBooks 구조 그대로".
+const MY_USER_ID = 'me';
+let bookHearts = [];
+let _bookHeartSeq = 0;
+const ARCHIVE_MS = 30 * 24 * 60 * 60 * 1000;
+
+// 시드. 발신자 id는 MATCHED_PROFILES 시드 [4,5,6,7]와 겹치지 않게 고른다.
+// bh_5·bh_6은 1개월 초과 → 아카이브 데모용.
+function buildBookHeartsSeed(n) {
+  const H = 3600 * 1000, D = 24 * H;
+  return [
+    { id: 'bh_1', senderId: 9,  receiverId: MY_USER_ID, message: '프로필북 잘 읽었어요. 재즈 좋아하시는 것 같아 반가웠어요.', sentAt: n - 2 * H,  status: 'unread' },
+    { id: 'bh_2', senderId: 12, receiverId: MY_USER_ID, message: null,                                                      sentAt: n - 26 * H, status: 'unread' },
+    { id: 'bh_3', senderId: 14, receiverId: MY_USER_ID, message: '같이 러닝하실 분 찾고 있었어요 :)',                        sentAt: n - 3 * D,  status: 'read' },
+    { id: 'bh_4', senderId: 19, receiverId: MY_USER_ID, message: '조용한 취향이 잘 맞을 것 같아요.',                         sentAt: n - 6 * D,  status: 'read' },
+    { id: 'bh_5', senderId: 21, receiverId: MY_USER_ID, message: '디저트 투어 같이 다녀요.',                                 sentAt: n - 40 * D, status: 'read' },
+    { id: 'bh_6', senderId: 23, receiverId: MY_USER_ID, message: null,                                                      sentAt: n - 72 * D, status: 'unread' },
+  ];
+}
+
+function persistBookHearts() {
+  try { window.localStorage.setItem(P2_STORAGE_KEYS.bookHearts, JSON.stringify(bookHearts)); }
+  catch (e) { /* private mode / quota */ }
+}
+window.persistBookHearts = persistBookHearts;
+
+function restoreBookHearts() {
+  let stored = null;
+  try { stored = JSON.parse(window.localStorage.getItem(P2_STORAGE_KEYS.bookHearts) || 'null'); }
+  catch (e) { stored = null; }
+  if (Array.isArray(stored)) {
+    bookHearts = stored;
+  } else {
+    bookHearts = buildBookHeartsSeed(Date.now());
+    persistBookHearts();
+  }
+  _bookHeartSeq = bookHearts.reduce((m, h) => Math.max(m, parseInt(String(h.id).replace('bh_', '')) || 0), 0);
+}
+window.restoreBookHearts = restoreBookHearts;
+
+function addBookHeart({ senderId, receiverId, message = null, status = 'unread', sentAt = Date.now() }) {
+  const rec = { id: 'bh_' + (++_bookHeartSeq), senderId, receiverId, message, sentAt, status };
+  bookHearts.push(rec);
+  persistBookHearts();
+  return rec;
+}
+window.addBookHeart = addBookHeart;
+
+// 받은 하트 인박스 — 최신순, matched 제외.
+function receivedBookHearts() {
+  return bookHearts
+    .filter(h => h && h.receiverId === MY_USER_ID && h.status !== 'matched')
+    .sort((a, b) => b.sentAt - a.sentAt);
+}
+function isBookHeartClosed(h) { return closedBooks.has('p' + h.senderId); }
+function isBookHeartArchived(h) { return (Date.now() - h.sentAt) > ARCHIVE_MS; }
+
+// 이 프로필과 어느 방향으로든 하트가 오간 적 있는가 (발견 배달 풀 제외용).
+function hasBookHeartWith(profileNumId) {
+  return bookHearts.some(h => h && (h.senderId === profileNumId || h.receiverId === profileNumId));
+}
+window.hasBookHeartWith = hasBookHeartWith;
+
+// 지난 하트 24시간 일회성 언락 (구독 아님).
+function isArchiveUnlocked() {
+  let exp = 0;
+  try { exp = parseInt(window.localStorage.getItem(P2_STORAGE_KEYS.archiveUnlock) || '0', 10); } catch (e) { exp = 0; }
+  return Number.isFinite(exp) && Date.now() < exp;
+}
+function unlockArchive24h() {
+  try { window.localStorage.setItem(P2_STORAGE_KEYS.archiveUnlock, String(Date.now() + 24 * 3600 * 1000)); }
+  catch (e) { /* private mode / quota */ }
+}
+
+// 검증용 디버그
+window.__debugAgeBookHearts = function () {
+  bookHearts.forEach(h => { h.sentAt -= 31 * 24 * 3600 * 1000; });
+  persistBookHearts();
+  window.showToast('모든 하트를 31일 전으로 옮겼어요');
+  if (currentTab === 'messages') switchTab('messages');
+};
+window.__debugResetArchive = function () {
+  try { window.localStorage.removeItem(P2_STORAGE_KEYS.archiveUnlock); } catch (e) {}
+  window.showToast('아카이브 잠금을 복원했어요');
+  if (currentTab === 'messages') switchTab('messages');
+};
+
 // 책 덮기 — 영구 제외. 8주 뒤 재등장하는 무반응과 달리 되돌아오지 않는다.
 window.closeBook = function (cardId) {
   if (!cardId || closedBooks.has(cardId)) return;
@@ -8598,62 +8764,102 @@ window.pageProfile = function (cardId) {
   return mutual;
 };
 
-// p.M 팔로업으로 열린 프로필북의 ♥. 발견 큐에 없는 사람이라
-// _handleProfFabTap의 큐 조회 경로를 못 쓴다. pageProfile은 item이 없어도
-// pagedSet 추가 + 상호매칭 판정은 그대로 해준다.
-window._handlePMLikeTap = function (pid) {
-  const cardId = 'p' + pid;
-  if (pagedSet?.has(cardId)) { showToast('이미 Page했어요 ♥'); return; }
+// ── 프로필북 하트 발신 ─────────────────────────────────
+// 표지가 아니라 프로필 상세에서만, '하트 쪽지' 버튼 → 한마디 시트 → '하트 보내기'.
+window.openHeartComposeSheet = function (profileId) {
+  const pid = Number(profileId);
+  const p = MOCK_PROFILES.find(x => x.id === pid);
+  if (!p) return;
+  const already = bookHearts.some(h => h.senderId === MY_USER_ID && h.receiverId === pid)
+    || (pagedSet && pagedSet.has('p' + pid));
+  if (already) { showToast('이미 하트를 보냈어요 ♥'); return; }
+  if (document.getElementById('heart-compose-sheet')) return;
+
+  const opener = document.activeElement;
+  const scrim = document.createElement('div');
+  scrim.className = 'sheet-scrim';
+  scrim.id = 'heart-compose-scrim';
+  const sheet = document.createElement('div');
+  sheet.id = 'heart-compose-sheet';
+  sheet.className = 'close-book-sheet';
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-labelledby', 'heart-compose-title');
+  sheet.innerHTML = `
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <h2 class="close-book-title" id="heart-compose-title">${escapeHTML(p.name)} 님에게 마음을 전할까요?</h2>
+    <p class="close-book-body">하트와 함께 한마디를 남길 수 있어요. 비워둬도 괜찮아요.</p>
+    <textarea id="heart-compose-msg" class="heart-compose-textarea" rows="3" maxlength="140"
+      placeholder="한마디 (선택)"></textarea>
+    <div class="close-book-actions">
+      <button type="button" class="sheet-btn sheet-btn--ghost" id="heart-compose-cancel">그만두기</button>
+      <button type="button" class="sheet-btn sheet-btn--commit" id="heart-compose-send">하트 보내기</button>
+    </div>
+  `;
+  const container = document.getElementById('app-container') || document.body;
+  container.appendChild(scrim);
+  container.appendChild(sheet);
+
+  function dismiss() {
+    document.removeEventListener('keydown', onKey, true);
+    sheet.remove(); scrim.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } }
+  document.addEventListener('keydown', onKey, true);
+  scrim.addEventListener('click', dismiss);
+  sheet.querySelector('#heart-compose-cancel').addEventListener('click', dismiss);
+  sheet.querySelector('#heart-compose-send').addEventListener('click', () => {
+    const msg = (sheet.querySelector('#heart-compose-msg').value || '').trim();
+    window.__pendingHeartMessage = msg || null;
+    dismiss();
+    window._sendBookHeart(pid);
+  });
+  requestAnimationFrame(() => sheet.querySelector('#heart-compose-msg')?.focus());
+};
+
+// 실제 발신. pageProfile로 pagedSet·상호매칭 판정을 재사용하고, 저장되는
+// bookHeart 레코드를 하나 남긴다(발견 배달 풀 제외 + 상대 인박스 표시용).
+window._sendBookHeart = function (pid) {
   if (window.__actionLocked) return;
   window.__actionLocked = true;
   setTimeout(() => { window.__actionLocked = false; }, 1000);
 
-  const fab = document.getElementById('prof-page-fab');
+  const cardId = 'p' + pid;
+  const p = MOCK_PROFILES.find(x => x.id === Number(pid));
+  const mutual = window.pageProfile(cardId);
+
+  if (!bookHearts.some(h => h.senderId === MY_USER_ID && h.receiverId === Number(pid))) {
+    addBookHeart({
+      senderId: MY_USER_ID, receiverId: Number(pid),
+      message: window.__pendingHeartMessage || null,
+      status: mutual ? 'matched' : 'unread',
+      sentAt: Date.now(),
+    });
+  }
+  window.__pendingHeartMessage = null;
+
   const fabSvg = document.getElementById('prof-fab-icon');
   if (fabSvg) {
     const path = fabSvg.querySelector('path');
     if (path) { path.setAttribute('fill', '#fff'); path.setAttribute('stroke', 'none'); }
   }
+  const fab = document.getElementById('prof-page-fab');
   if (fab) {
+    fab.setAttribute('data-sent', '1');
     fab.classList.add('pulsing');
     fab.addEventListener('animationend', () => fab.classList.remove('pulsing'), { once: true });
   }
-  showToast('Page her ♥');
+  showToast('하트를 보냈어요 ♥');
+  if (currentTab === 'discover') renderDiscoverTab();
 
-  const mutual = window.pageProfile(cardId);
-  const p = MOCK_PROFILES.find(x => x.id === Number(pid));
+  // 내가 먼저 보냈는데 상호매칭이면 기존 매칭 오버레이 경로를 그대로 탄다.
   if (mutual && p) {
     if (!MATCHED_PROFILES.find(m => m.id === p.id)) {
       MATCHED_PROFILES.unshift({ id: p.id, name: p.name, image: p.image, isNew: true });
     }
-    setTimeout(() => showMutualMatchOverlay(p), 1700);
+    setTimeout(() => showMutualMatchOverlay(p), 900);
   }
-};
-
-// 발견 카드의 하트. 상세로 들어가지 않고 표지에서 바로 마음을 보낸다.
-window.pageFromCard = function (cardId) {
-  if (window.__actionLocked) return;
-  if (pagedSet.has(cardId)) { showToast('이미 Page했어요 ♥'); return; }
-  window.__actionLocked = true;
-  setTimeout(() => { window.__actionLocked = false; }, 1000);
-
-  const item = browseQueue.find(x => x.id === cardId);
-  const profile = item ? item.profile : null;
-  const mutual = window.pageProfile(cardId);
-
-  const overlay = document.getElementById('paged-heart-overlay');
-  if (overlay) overlay.classList.add('active');
-
-  setTimeout(() => {
-    if (overlay) overlay.classList.remove('active');
-    renderDiscoverTab();
-    if (mutual && profile) {
-      if (!MATCHED_PROFILES.find(m => m.id === profile.id)) {
-        MATCHED_PROFILES.unshift({ id: profile.id, name: profile.name, image: profile.image, isNew: true });
-      }
-      showMutualMatchOverlay(profile);
-    }
-  }, 600);
 };
 
 // ── 최초 진입 안내 ─────────────────────────────────────────
@@ -9550,23 +9756,9 @@ window.renderDiscoverTab = function () {
       `;
   }
 
-  const frontItem = stackItems[0];
-  const likeTarget = frontItem && frontItem.type !== 'bridge' ? frontItem : null;
-
+  // 표지 단계에서는 하트를 보낼 수 없다 — 프로필북을 열어야 마음을 전할 수 있다.
+  // 발신은 프로필 상세의 '하트 쪽지' 버튼으로만 (openHeartComposeSheet).
   html += `
-        </div>
-
-        ${likeTarget ? `
-          <button type="button" class="discover-like-fab" id="discover-like-fab"
-            aria-label="${likeTarget.profile.name}에게 마음 보내기"
-            onclick="window.pageFromCard('${likeTarget.id}')">
-            <i data-lucide="heart" class="discover-like-icon" aria-hidden="true"></i>
-          </button>
-        ` : ''}
-
-        <div class="paged-heart-overlay" id="paged-heart-overlay">
-          <i data-lucide="heart" fill="#9B72CC" style="color:#9B72CC; width:48px; height:48px;"></i>
-          <span class="paged-heart-text">Paged ♥</span>
         </div>
         ${getTabWatermarkHTML()}
       </div>
@@ -9589,60 +9781,91 @@ window.renderDiscoverTab = function () {
   }
 };
 
-window.openAllMatchesGrid = function () {
+window.openReceivedHeartsList = function () {
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
 
-  let gridHTML = '';
-  if (MATCHED_PROFILES.length === 0) {
-    gridHTML = `
-      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; height:60vh;">
-        <p style="font-size:15px; color:#2C2C2A; font-weight:600; margin-bottom:8px;">아직 매칭된 프로필북이 없어요</p>
+  const all = receivedBookHearts();
+  const active = all.filter(h => !isBookHeartArchived(h));
+  const archived = all.filter(h => isBookHeartArchived(h));
+
+  const rowHTML = (h) => {
+    const p = MOCK_PROFILES.find(pr => pr.id === h.senderId);
+    if (!p) return '';
+    const closed = isBookHeartClosed(h);
+    const line = (h.message || '').trim() || '한마디 없음';
+    const dot = (!closed && h.status === 'unread')
+      ? '<span class="rh-dot" aria-hidden="true"></span>' : '';
+    const stateLabel = closed ? '덮은 하트, 눌러서 되돌릴 수 있어요'
+      : h.status === 'unread' ? '안 읽음' : '';
+    return `<div class="revisit-row${closed ? ' is-closed' : ''}" role="button" tabindex="0"
+        aria-label="${escapeHTML(p.name)}${stateLabel ? ', ' + stateLabel : ''}"
+        onclick="openBookHeartDetail('${h.id}')">
+      <div class="revisit-avatar" style="background-image:url('${p.image}');"></div>
+      <div class="revisit-text">
+        <div class="revisit-name">${escapeHTML(p.name)}</div>
+        <div class="revisit-line">${escapeHTML(line)}</div>
       </div>
-    `;
+      ${dot}
+      <i data-lucide="chevron-right" class="revisit-chevron" aria-hidden="true"></i>
+    </div>`;
+  };
+
+  let listHTML;
+  if (all.length === 0) {
+    listHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; height:50vh;">
+      <p style="font-size:15px; color:#2C2C2A; font-weight:600; margin-bottom:8px;">아직 받은 하트가 없어요</p>
+      <p style="font-size:13px; color:#8E8E8A;">프로필북을 정성껏 채우면 하트가 도착해요</p>
+    </div>`;
   } else {
-    gridHTML = `
-      <div style="display:grid; grid-template-columns:repeat(2,1fr); column-gap:12px; row-gap:16px; padding:0 20px 40px;">
-        ${MATCHED_PROFILES.map((match, idx) => {
-      const p = MOCK_PROFILES.find(pr => pr.id === match.id);
-      const _spineColor = getMatchSpineColor(match.id);
-      const distanceLabel = formatDistanceLabel(p);
-      const age = p ? getAge(p.birthYear) : '';
-      const _answers = match.answers || [];
-      const _randomAnswer = _answers.length ? _answers[Math.floor(Math.random() * _answers.length)] : '';
-      return `
-            <div onclick="openMatchIntroModal(${match.id}, false, 'grid')" class="saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 6px 16px rgba(0,0,0,0.2); border-left:3px solid ${_spineColor};">
-              <div class="book-bg-photo" style="background-image:url('${p ? p.image : match.image}'); filter:blur(1.5px); transform:scale(1.08);"></div>
-              <div class="book-overlay"></div>
-              <div style="position:absolute; top:0; left:0; width:100%; height:40%; background:linear-gradient(to bottom, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
-              <div style="position:absolute; bottom:0; left:0; width:100%; height:35%; background:linear-gradient(to top, rgba(0,0,0,0.4), transparent); z-index:3;"></div>
-              <div style="position:absolute; top:0; left:0; width:100%; display:flex; justify-content:space-between; padding:10px 8px; box-sizing:border-box; z-index:4;">
-                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">No.${age}</span>
-                <span style="font-size:10px; color:#fff; font-family:'Jost',sans-serif; font-weight:300;">${distanceLabel}</span>
-              </div>
-              <div class="thumbnail-card-content">
-                <div class="thumbnail-nickname" style="top:30%; transform:translateY(-50%);">${p ? p.name : match.name}</div>
-              </div>
-              ${_randomAnswer ? `<div style="position:absolute; bottom:14px; left:0; width:100%; padding:0 8px; box-sizing:border-box; z-index:4; text-align:center;"><div style="font-size:10px; color:rgba(255,255,255,0.75); font-style:italic; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">"${_randomAnswer}"</div></div>` : ''}
+    const unlocked = isArchiveUnlocked();
+    let archiveHTML = '';
+    if (archived.length > 0) {
+      if (unlocked) {
+        let exp = 0;
+        try { exp = parseInt(localStorage.getItem(P2_STORAGE_KEYS.archiveUnlock) || '0', 10); } catch (e) {}
+        const hoursLeft = Math.max(0, Math.ceil((exp - Date.now()) / 3600000));
+        archiveHTML = `
+          <div style="display:flex; align-items:baseline; justify-content:space-between; margin:28px 4px 12px;">
+            <h3 class="revisit-title" style="margin:0;">지난 하트</h3>
+            <span style="font-size:11px; color:var(--text-muted);">${hoursLeft}시간 남음</span>
+          </div>
+          ${archived.map(rowHTML).join('')}`;
+      } else {
+        archiveHTML = `
+          <div class="rh-archive-row" role="button" tabindex="0" onclick="openArchiveUnlockSheet()"
+               style="display:flex; align-items:center; gap:12px; padding:14px 12px; margin-top:20px; border:1px dashed var(--border); border-radius:14px; background:transparent; cursor:pointer;">
+            <span style="font-size:18px;" aria-hidden="true">🔒</span>
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:14px; font-weight:600; color:var(--text-dark);">지난 하트 ${archived.length}개</div>
+              <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">1개월이 지난 하트예요</div>
             </div>
-          `;
-    }).join('')}
-      </div>
-    `;
+            <i data-lucide="chevron-right" class="revisit-chevron" aria-hidden="true"></i>
+          </div>`;
+      }
+    }
+    listHTML = `
+      <div class="revisit-list" style="margin-top:8px;">
+        ${active.length ? active.map(rowHTML).join('')
+          : `<p style="font-size:13px; color:var(--text-muted); padding:16px 4px;">받은 하트가 모두 지난 하트로 넘어갔어요.</p>`}
+        ${archiveHTML}
+      </div>`;
   }
 
   contentArea.innerHTML = `
     <div class="app-header" style="background:var(--bg-color);">
       <button class="back-btn" onclick="switchTab('messages')"><i data-lucide="chevron-left" style="width:28px;"></i></button>
-      <div style="flex:1; text-align:center; font-size:16px; font-weight:700;">매칭된 프로필북</div>
+      <div style="flex:1; text-align:center; font-size:16px; font-weight:700;">받은 하트</div>
       <div style="width:48px;"></div>
     </div>
-    <div class="scroll-y" style="height:calc(100vh - 140px); height:calc(100dvh - 140px - var(--safe-top)); padding-top:20px;">
-      ${gridHTML}
+    <div class="scroll-y" style="height:calc(100vh - 140px); height:calc(100dvh - 140px - var(--safe-top)); padding:20px 20px 40px;">
+      ${listHTML}
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
 };
+// 잔여 호출 대비 별칭
+window.openAllMatchesGrid = window.openReceivedHeartsList;
 
 window.renderSavedBox = function () {
   const contentArea = document.getElementById('main-content');
@@ -10153,6 +10376,8 @@ function startApp() {
   restorePMState();
   window.flushDuePMFollowups();
   window.flushDuePMReadRequests();
+  loadClosedBooks();      // 메시지탭에서도 '덮은 하트' 판정이 필요 — 발견탭 진입 전에 로드
+  restoreBookHearts();
 
   // Kick off the session check in parallel with the splash animation so
   // it's already resolved by the time doTransition fires.
@@ -10745,10 +10970,6 @@ window.openLibraryPage = function () {
   const reviewProfiles = [6, 7, 8, 9, 10]
     .map(id => MOCK_PROFILES.find(p => p.id === id)).filter(Boolean);
 
-  // 받은 ♥: people who liked the user — first is unblurred teaser
-  const likedProfiles = [12, 11, 13, 4]
-    .map(id => MOCK_PROFILES.find(p => p.id === id)).filter(Boolean);
-
   function reviewCardHTML(p) {
     const sc = getSpineColor(p.id);
     const age = getAge(p.birthYear);
@@ -10776,68 +10997,14 @@ window.openLibraryPage = function () {
       </div>`;
   }
 
-  function likedCardHTML(p, isTeaser) {
-    const sc = getSpineColor(p.id);
-    const age = getAge(p.birthYear);
-    if (isTeaser) {
-      return `
-        <div class="saved-book-cover" onclick="handleCardClick(${p.id})"
-             style="border-radius:12px; box-shadow:-2px 0 4px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.15);">
-          <div class="book-spine" style="background:linear-gradient(to right,${sc}CC,${sc}66); width:8px;"></div>
-          <div class="book-bg-photo" style="background-image:url('${p.image}'); filter:none; transform:none;"></div>
-          <div class="book-overlay"></div>
-          <div style="position:absolute;top:0;left:0;width:100%;height:45%;background:linear-gradient(to bottom,rgba(0,0,0,0.3),transparent);z-index:3;"></div>
-          <div style="position:absolute;bottom:0;left:0;width:100%;height:55%;background:linear-gradient(to top,rgba(0,0,0,0.6),transparent);z-index:3;"></div>
-          <div style="position:absolute;top:8px;left:12px;z-index:6;background:rgba(226,255,116,0.88);border-radius:20px;padding:3px 9px;">
-            <span style="font-size:9px;color:#2C2C2A;font-weight:700;">p.2+ 미리보기</span>
-          </div>
-          <div style="position:absolute;top:8px;right:10px;z-index:6;font-size:14px;color:#ff6b9d;">♥</div>
-          <div style="position:absolute;bottom:12px;left:0;width:100%;padding:0 10px 0 14px;box-sizing:border-box;z-index:4;">
-            <div style="font-size:15px;font-weight:700;color:#fff;">${p.name}</div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px;">${age}세 · 서울</div>
-          </div>
-        </div>`;
+  function renderReviewContent() {
+    if (!reviewProfiles.length) {
+      return `<div style="display:flex;align-items:center;justify-content:center;height:50vh;color:var(--text-muted);font-size:14px;">아직 지나간 프로필북이 없어요</div>`;
     }
     return `
-      <div class="saved-book-cover" onclick="window._openPlus2Prompt()"
-           style="border-radius:12px; box-shadow:-2px 0 4px rgba(0,0,0,0.1), 0 4px 14px rgba(0,0,0,0.15); cursor:pointer;">
-        <div class="book-spine" style="background:linear-gradient(to right,${sc}CC,${sc}66); width:8px;"></div>
-        <div class="book-bg-photo" style="background-image:url('${p.image}'); filter:blur(8px); transform:scale(1.15);"></div>
-        <div style="position:absolute;inset:0;background:rgba(0,0,0,0.2);z-index:2;"></div>
-        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:5;">
-          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.22);border-radius:14px;padding:14px 18px;text-align:center;backdrop-filter:blur(6px);">
-            <div style="font-size:18px;margin-bottom:4px;">🔒</div>
-            <div style="font-size:11px;font-weight:700;color:#E2FF74;margin-bottom:3px;">p.2+</div>
-            <div style="font-size:10px;color:rgba(255,255,255,0.75);">구독 시 확인 가능</div>
-          </div>
-        </div>
-      </div>`;
+      <div style="font-size:12px;color:var(--text-muted);padding:10px 20px 8px;">지난주 프로필북 · 되살리기는 p.2+ 필요</div>
+      <div class="lib-grid">${reviewProfiles.map(p => reviewCardHTML(p)).join('')}</div>`;
   }
-
-  function renderTabContent(tab) {
-    if (tab === 'review') {
-      if (!reviewProfiles.length) {
-        return `<div style="display:flex;align-items:center;justify-content:center;height:50vh;color:var(--text-muted);font-size:14px;">아직 지나간 프로필북이 없어요</div>`;
-      }
-      return `
-        <div style="font-size:12px;color:var(--text-muted);padding:10px 20px 8px;">지난주 프로필북 · 되살리기는 p.2+ 필요</div>
-        <div class="lib-grid">${reviewProfiles.map(p => reviewCardHTML(p)).join('')}</div>`;
-    } else {
-      if (!likedProfiles.length) {
-        return `<div style="display:flex;align-items:center;justify-content:center;height:50vh;color:var(--text-muted);font-size:14px;">아직 받은 ♥가 없어요</div>`;
-      }
-      return `
-        <div style="font-size:12px;color:var(--text-muted);padding:10px 20px 8px;">나를 Page한 사람 · p.2+ 구독으로 모두 확인</div>
-        <div class="lib-grid">${likedProfiles.map((p, i) => likedCardHTML(p, i === 0)).join('')}</div>`;
-    }
-  }
-
-  window._switchLibTab = function (tab) {
-    document.getElementById('lib-tab-review').classList.toggle('active', tab === 'review');
-    document.getElementById('lib-tab-liked').classList.toggle('active', tab === 'liked');
-    document.getElementById('lib-content').innerHTML = renderTabContent(tab);
-    if (typeof lucide !== 'undefined') lucide.createIcons();
-  };
 
   window._openPlus2Prompt = function () {
     const existingBackdrop = document.getElementById('lib-plus2-backdrop');
@@ -10856,10 +11023,10 @@ window.openLibraryPage = function () {
     sheet.innerHTML = `
       <div style="width:36px;height:4px;background:#E8E8E8;border-radius:4px;margin:0 auto 22px;"></div>
       <div style="font-size:18px;font-weight:700;color:#2C2C2A;margin-bottom:8px;">되살리기는 p.2+ 기능이에요</div>
-      <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">지나간 프로필북을 다시 Page할 수 있어요.<br>나를 Page한 사람도 모두 확인할 수 있어요.</div>
+      <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">지나간 프로필북을 다시 Page할 수 있어요.</div>
       <div style="background:#F5EFFE;border-radius:12px;padding:16px;margin-bottom:18px;">
         <div style="font-size:11px;font-weight:700;color:#9B72CC;margin-bottom:8px;letter-spacing:0.06em;">P.2+ 혜택</div>
-        <div style="font-size:13px;color:#555;line-height:2;">나를 Page한 사람 모두 보기<br>지나간 프로필북 되살리기<br>광고 제거</div>
+        <div style="font-size:13px;color:#555;line-height:2;">지나간 프로필북 되살리기<br>광고 제거</div>
       </div>
       <div style="font-size:12px;color:#AAA;text-align:center;margin-bottom:16px;">₩5,900 / 주 &nbsp;·&nbsp; ₩17,900 / 월 &nbsp;·&nbsp; ₩39,900 / 3개월</div>
       <button onclick="document.getElementById('lib-plus2-sheet')?.remove(); document.getElementById('lib-plus2-backdrop')?.remove();"
@@ -10879,11 +11046,10 @@ window.openLibraryPage = function () {
         <span style="width:28px;"></span>
       </div>
       <div class="lib-tab-bar">
-        <div id="lib-tab-liked" class="lib-tab active" onclick="window._switchLibTab('liked')">받은 ♥</div>
-        <div id="lib-tab-review" class="lib-tab" onclick="window._switchLibTab('review')">다시보기</div>
+        <div class="lib-tab active">다시보기</div>
       </div>
       <div id="lib-content" class="scroll-y" style="height:calc(100vh - 118px); height:calc(100dvh - 118px); padding-top:0;">
-        ${renderTabContent('liked')}
+        ${renderReviewContent()}
       </div>
     </div>
   `;

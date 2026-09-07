@@ -3959,6 +3959,62 @@ p {
   animation: fabPulse 0.35s ease-out forwards;
 }
 
+/* 하트 + 말풍선 — 표지가 아니라 프로필북을 다 읽고, 한마디와 함께 마음을 전한다. */
+.prof-fab-hearticon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.prof-fab-bubble {
+  position: absolute;
+  right: -7px;
+  bottom: -6px;
+  width: 14px;
+  height: 14px;
+  color: #fff;
+  background: #9B72CC;
+  border-radius: 50%;
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+.prof-fab[data-sent="1"] {
+  background: #C6ABDE;
+  box-shadow: 0 4px 16px rgba(155, 114, 204, 0.25);
+}
+
+/* 하트 한마디 시트 */
+.heart-compose-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 4px 0 16px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #FAFAFA;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-dark);
+  resize: none;
+}
+
+.heart-compose-textarea:focus {
+  outline: none;
+  border-color: #C89FDB;
+}
+
+/* 받은 하트 리스트의 안읽음 점 */
+.rh-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #C89FDB;
+}
+
 /* Library Screen */
 .lib-tab-bar {
   display: flex;
