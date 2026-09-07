@@ -558,6 +558,19 @@
     .foot-mark { display: flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-size: 15px; color: var(--ink); }
     .foot-mark .logo { font-size: 16px; }
 
+    /* ── 하이라이터 — p.2 메인 3색을 주요 문구에만 포인트로 ──
+       app.js applyHighlights 와 같은 방식: 글줄 아래 56% 만 색면을 깐다.
+       "과하지 않게" 알파를 낮춤. 페이지당 최대 한 곳. */
+    .hl {
+      padding: 0 0.14em;
+      border-radius: 1px;
+      -webkit-box-decoration-break: clone;
+      box-decoration-break: clone;
+    }
+    .hl-lime  { background: linear-gradient(transparent 56%, rgba(226, 255, 116, 0.55) 56%); }
+    .hl-lav   { background: linear-gradient(transparent 56%, rgba(200, 159, 219, 0.34) 56%); }
+    .hl-peach { background: linear-gradient(transparent 56%, rgba(255, 213, 189, 0.62) 56%); }
+
     /* ── Motion ────────────────────────────────────────── */
     .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
     .reveal.in { opacity: 1; transform: none; }
@@ -657,7 +670,7 @@
     <section class="reveal page">
       <h2 class="section-head">p.2는 앱이 아니라 책입니다.</h2>
       <p class="section-sub">
-        사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
+        사용자는 <span class="hl hl-lime">독자이자 저자</span>이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
         표지만 보고 넘기지 않도록, 처음부터 그렇게 설계했어요.
       </p>
       <div class="page-no">&middot; 1 &middot;</div>
@@ -672,7 +685,7 @@
         <div class="card">
           <div class="kicker">프로필북</div>
           <h3>글, 혹은 사진으로 원하는 만큼</h3>
-          <p>원하는 방식으로 드러내고 싶은 만큼. 깊이는 요구가 아니라 선택지입니다.</p>
+          <p>원하는 방식으로 드러내고 싶은 만큼. 깊이는 요구가 아니라 <span class="hl hl-lav">선택지</span>입니다.</p>
         </div>
         <div class="card">
           <div class="kicker">발견</div>
@@ -694,7 +707,7 @@
     </section>
 
     <section class="reveal page trust">
-      <p>p.2는 초대코드가 있어야 가입할 수 있습니다. 지인이나 커뮤니티를 통한 초대가, 이 공간에 있어야 할 사람을 가려주는 장치입니다.</p>
+      <p>p.2는 초대코드가 있어야 가입할 수 있습니다. 지인이나 커뮤니티를 통한 초대가, 이 공간에 있어야 할 사람을 <span class="hl hl-peach">가려주는</span> 장치입니다.</p>
       <div class="page-no">&middot; 3 &middot;</div>
     </section>
 
@@ -749,7 +762,7 @@
 
   <section class="cta-block reveal page">
     <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
-    <h2>당신의 첫 페이지를 시작하세요.</h2>
+    <h2>당신의 <span class="hl hl-lime">첫 페이지</span>를 시작하세요.</h2>
     <div class="cta-row">
       <a class="btn btn-primary" href="/app">p.2 살펴보기</a>
     </div>
