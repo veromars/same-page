@@ -161,6 +161,22 @@
       pointer-events: none;
       z-index: 1;
     }
+    /* 책 아래 — "같은 페이지" 와 짝이 되는 영문 표기 */
+    .cover-subword {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: 16%;
+      text-align: center;
+      font-family: var(--serif);
+      font-weight: 300;
+      font-style: italic;
+      font-size: clamp(2.1rem, 12vw, 5.4rem);
+      line-height: 1;
+      letter-spacing: -0.005em;
+      color: rgba(250, 249, 246, 0.5);
+      pointer-events: none;
+      z-index: 1;
+    }
 
     .book3d {
       position: relative;
@@ -649,6 +665,7 @@
         </div>
       </div>
     </div>
+    <div class="cover-subword">page 2</div>
     <div class="cover-hint">챕터 불러오는 중<span class="ch-dots">···</span></div>
   </div>
   <div id="runway"></div>
@@ -836,6 +853,7 @@
       var book = document.querySelector('.book3d');
       var bookFloat = document.querySelector('.book3d-float');
       var bigword = document.querySelector('.cover-bigword');
+      var subword = document.querySelector('.cover-subword');
       var hint = document.querySelector('.cover-hint');
       if (cover && runway && book) {
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -859,6 +877,7 @@
           book.style.filter = 'drop-shadow(0 ' + (34 * st + 8).toFixed(0) + 'px ' +
             (46 * st + 10).toFixed(0) + 'px rgba(45,42,43,' + (0.32 * st + 0.05).toFixed(2) + '))';
           bigword.style.opacity = Math.max(0, 1 - p / 0.42).toFixed(3);
+          if (subword) subword.style.opacity = Math.max(0, 1 - p / 0.42).toFixed(3);
           if (hint) hint.style.opacity = Math.max(0, 1 - p / 0.28).toFixed(3);
           var coverOp = p < 0.58 ? 1 : Math.max(0, 1 - (p - 0.58) / 0.42);
           var blur = p < 0.6 ? 0 : (p - 0.6) / 0.4 * 6;
