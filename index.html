@@ -326,28 +326,24 @@
     .btn-ghost:hover { border-color: var(--ink); background: rgba(45, 42, 43, 0.04); }
     .nav .btn { padding: 10px 18px; font-size: 14px; }
 
-    /* ── Hero — 바닥에서 종이로 이음매 없이 이어지는 첫 장 ──
-       카드가 아니라, 라벤더 바닥이 위·아래에서 크림색으로 녹아드는
-       풀블리드 구간. 첫 문구가 나오는 부분이 바닥과 자연스럽게 연결됨.
-       (아래 다른 페이지들은 그대로 '책상 위 종이' 카드) */
+    /* ── Hero — 첫 종이. 상단은 라벤더 바닥 → 크림색으로 이음매
+       없이(여백 넉넉), 하단·옆은 다른 페이지처럼 종이 겹침 가장자리.
+       표지가 걷히며 바닥이 그대로 종이가 되는 것처럼 연결됨. */
     .hero.page {
-      max-width: none;
       margin-top: 0;
-      padding: clamp(124px, 25vw, 200px) 20px clamp(60px, 12vw, 96px);
-      border-radius: 0;
-      box-shadow: none;
+      padding-top: clamp(128px, 26vw, 210px);
+      padding-bottom: clamp(48px, 9vw, 72px);
+      border-radius: 0 0 2px 2px;
       background-color: transparent;
       background-image:
         linear-gradient(180deg,
           var(--ground) 0,
-          var(--sheet) clamp(116px, 22vw, 186px),
-          var(--sheet) calc(100% - 92px),
-          var(--ground) 100%),
+          var(--sheet) clamp(120px, 24vw, 200px)),
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.35'/%3E%3C/svg%3E");
       background-repeat: no-repeat, repeat;
       background-size: 100% 100%, 90px 90px;
     }
-    .hero .wrap { max-width: 600px; margin: 0 auto; padding: 0; }
+    .hero .wrap { max-width: none; margin: 0; padding: 0; }
 
     .eyebrow {
       display: inline-block;
