@@ -41,11 +41,19 @@
       --purple-fill: #8D64BC;  /* 흰 글자를 얹는 채움 */
       --purple-soft: #C89FDB;
 
+      /* v3 아날로그 — 탁한 라벤더 바닥 위에 크림색 종이 */
+      --ground:  #BFB4C8;
+      --sheet:   #F7F2E6;   /* 종이 앞면 */
+      --sheet-2: #EFE8D8;   /* 뒤에 겹친 종이 */
+      --sheet-3: #E7DFCC;
+      --ink-40:  rgba(45, 42, 43, 0.4);
+      --ink-55:  rgba(45, 42, 43, 0.55);
+
       --sans: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
       --serif: "Noto Serif KR", serif;
 
       --maxw: 1080px;
-      --gap-section: clamp(84px, 13vw, 148px);
+      --gap-page: clamp(44px, 9vw, 80px);   /* 종이 사이 간격 */
     }
 
     * { box-sizing: border-box; }
@@ -54,7 +62,7 @@
       margin: 0;
       position: relative;
       min-height: 100vh;
-      background: var(--paper);
+      background: var(--ground);
       color: var(--ink);
       font-family: var(--sans);
       font-size: 16px;
@@ -67,24 +75,59 @@
     img { max-width: 100%; display: block; }
     a { color: inherit; }
 
-    /* ── Vertical gradient field ───────────────────────── */
-    /* 페이지 전체 높이에 걸린 세로 그라데이션. 위→아래로 한 번만 서서히
-       변한다: Beige → Lime #E2FF74 → Peach #FFD5BD → Lavender #C89FDB.
-       문서에 고정돼 있어 스크롤하면 자연스럽게 드러남. Lime 은 브랜드
-       규칙상 큰 면적이면 형광이 되므로 알파를 낮춰 눌렀다. */
+    /* ── 바닥(책상) + 아주 옅은 그레인 ─────────────────── */
     #bg {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: -1;
       pointer-events: none;
-      background: linear-gradient(
-        180deg,
-        rgba(226, 212, 189, 0.55) 0%,
-        rgba(226, 255, 116, 0.40) 36%,
-        rgba(255, 213, 189, 0.64) 68%,
-        rgba(200, 159, 219, 0.58) 100%
-      );
+      background: var(--ground);
     }
+    #bg::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      opacity: 0.05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 140px 140px;
+    }
+
+    /* ══ 종이 페이지 ══════════════════════════════════════
+       각 섹션이 바닥 위에 놓인 크림색 종이 한 장. 뒤로 겹친
+       종이 두 장 + 따뜻한 그림자 + 미세 섬유 질감. */
+    .page {
+      position: relative;
+      isolation: isolate;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: clamp(38px, 8vw, 58px) clamp(26px, 6vw, 46px) clamp(56px, 9vw, 76px);
+      background-color: var(--sheet);
+      background-image:
+        radial-gradient(130% 90% at 50% -10%, rgba(255, 255, 255, 0.55), transparent 55%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.35'/%3E%3C/svg%3E");
+      border-radius: 2px;
+      /* 뒤로 겹친 종이 두 장(하드엣지 그림자) + 부드러운 드롭섀도우 */
+      box-shadow:
+        7px 8px 0 -1px var(--sheet-2),
+        14px 16px 0 -2px var(--sheet-3),
+        0 26px 46px -16px rgba(45, 42, 43, 0.32),
+        0 6px 14px rgba(45, 42, 43, 0.08);
+    }
+    /* 페이지 번호 */
+    .page > .page-no {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: clamp(18px, 3.5vw, 26px);
+      text-align: center;
+      font-family: var(--serif);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      color: var(--ink-40);
+    }
+
+    main { padding: 0 20px; }
+    .page + .page { margin-top: var(--gap-page); }
+    .cta-block.page { margin-top: var(--gap-page); }
 
     /* ══ v3 — 책이 하나의 오브젝트로 (findworkhappiness 스타일) ═════
        탁한 라벤더 그라운드 위에 각지게 놓인 p.2 책 한 권 + 뒤로 큰
@@ -97,7 +140,7 @@
       inset: 0;
       z-index: 90;
       overflow: hidden;
-      background: #BEB2CB;
+      background: var(--ground);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -205,10 +248,10 @@
     .nav-fade {
       position: fixed;
       top: 0; left: 0; right: 0;
-      height: calc(120px + env(safe-area-inset-top, 0px));
+      height: calc(108px + env(safe-area-inset-top, 0px));
       z-index: 15;
       pointer-events: none;
-      background: linear-gradient(var(--paper) 40%, rgba(250, 249, 246, 0.72) 66%, rgba(250, 249, 246, 0) 100%);
+      background: linear-gradient(var(--ground) 44%, rgba(191, 180, 200, 0.7) 68%, rgba(191, 180, 200, 0) 100%);
     }
 
     .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
@@ -267,7 +310,7 @@
       font-weight: 600;
       line-height: 1;
       padding: 13px 22px;
-      border-radius: 12px;
+      border-radius: 4px;
       border: 1px solid transparent;
       text-decoration: none;
       cursor: pointer;
@@ -275,55 +318,50 @@
     }
     .btn:active { transform: translateY(1px); }
     .btn-primary { background: var(--purple-fill); color: #fff; }
-    .btn-primary:hover { background: #7d55ad; }
+    .btn-primary:hover { background: #7350a6; }
     .btn-ghost {
-      background: rgba(255, 255, 255, 0.55);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border-color: var(--border);
+      background: transparent;
+      border-color: rgba(45, 42, 43, 0.28);
       color: var(--ink);
     }
-    .btn-ghost:hover { border-color: var(--purple-soft); background: rgba(255,255,255,0.75); }
+    .btn-ghost:hover { border-color: var(--ink); background: rgba(45, 42, 43, 0.04); }
     .nav .btn { padding: 10px 18px; font-size: 14px; }
 
-    /* ── Hero ──────────────────────────────────────────── */
-    .hero { padding: clamp(56px, 12vw, 116px) 0 clamp(44px, 8vw, 76px); }
+    /* ── Hero (첫 종이) ────────────────────────────────── */
+    .hero { margin-top: clamp(88px, 16vw, 132px); }
+    .hero .wrap { max-width: none; margin: 0; padding: 0; }
 
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-      color: var(--purple-text);
-    }
-    .eyebrow::before {
-      content: "";
-      flex: none;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--purple-soft);
+      display: inline-block;
+      font-family: var(--serif);
+      font-size: 12.5px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--ink-55);
+      border-bottom: 1.5px solid var(--ink);
+      padding-bottom: 3px;
     }
 
     h1 {
       font-family: var(--serif);
       font-weight: 300;
-      font-size: clamp(2.1rem, 6.2vw, 3.6rem);
-      line-height: 1.38;
+      font-size: clamp(1.9rem, 5.6vw, 2.9rem);
+      line-height: 1.42;
       letter-spacing: -0.01em;
-      margin: 24px 0 0;
-      max-width: 20ch;
+      text-wrap: balance;
+      margin: 20px 0 0;
+      max-width: 18ch;
     }
     h1 em { font-style: normal; color: var(--purple-text); }
     .lede {
-      margin: 22px 0 0;
-      font-size: clamp(1rem, 2.3vw, 1.15rem);
-      color: #4f4b49;
+      margin: 20px 0 0;
+      font-size: clamp(1rem, 2.3vw, 1.12rem);
+      color: #46423f;
+      line-height: 1.8;
       max-width: 34ch;
     }
-    .cta-row { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
-    .cta-note { margin-top: 14px; font-size: 13px; color: var(--muted); }
+    .cta-row { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 12px; }
+    .cta-note { margin-top: 14px; font-size: 13px; color: var(--ink-55); }
 
     /* ── 초대 문의 디스클로저 ──────────────────────────── */
     .disclosure { margin-top: 18px; max-width: 460px; }
@@ -342,54 +380,56 @@
     .disclosure[open] > summary::after { transform: rotate(180deg); }
     .disclosure-body {
       margin-top: 14px;
-      padding: 18px 20px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.6);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      padding: 16px 18px;
+      border: 1px solid rgba(45, 42, 43, 0.16);
+      border-radius: 3px;
+      background: rgba(45, 42, 43, 0.03);
     }
-    .disclosure-body p { margin: 0 0 14px; font-size: 14px; color: #4f4b49; }
+    .disclosure-body p { margin: 0 0 14px; font-size: 14px; color: #46423f; }
     .disclosure-body .social-row { display: flex; flex-wrap: wrap; gap: 10px; }
     .disclosure-body .btn { font-size: 13px; padding: 10px 16px; }
 
-    /* ── 신뢰 문단 ─────────────────────────────────────── */
+    /* ── 신뢰 문단 — 페이지 안의 인용 ─────────────────── */
     .trust p {
-      max-width: 620px;
-      margin: 0 auto;
-      padding-left: 20px;
-      border-left: 3px solid var(--purple-soft);
-      font-size: clamp(1rem, 2.4vw, 1.14rem);
+      margin: 0;
+      font-family: var(--serif);
+      font-weight: 300;
+      font-size: clamp(1.15rem, 3vw, 1.5rem);
       line-height: 1.75;
-      color: #3f3b3a;
+      letter-spacing: -0.01em;
+      color: #33302f;
+      text-indent: -0.4em;
     }
+    .trust p::before { content: "\201C"; color: var(--ink-40); }
+    .trust p::after  { content: "\201D"; color: var(--ink-40); }
 
-    /* ── 매니페스토 ────────────────────────────────────── */
+    /* ── 매니페스토 (마지막 종이) ─────────────────────── */
     .manifesto {
       text-align: center;
       font-family: var(--serif);
       font-weight: 300;
-      font-size: clamp(1.3rem, 3.6vw, 1.9rem);
-      line-height: 1.7;
-      letter-spacing: -0.01em;
-      max-width: 22ch;
+      font-size: clamp(1.35rem, 3.8vw, 2rem);
+      line-height: 1.65;
+      letter-spacing: -0.015em;
+      text-wrap: balance;
+      max-width: 20ch;
       margin: 0 auto;
       color: var(--ink);
     }
     .manifesto .sig {
       display: block;
-      margin-top: 18px;
-      font-size: 0.62em;
+      margin-top: 20px;
+      font-size: 0.58em;
       font-style: italic;
-      color: var(--purple-text);
+      color: var(--ink-55);
     }
 
-    /* ── Marquee — 잉크 색 띠 ──────────────────────────── */
+    /* ── Marquee — 잉크 색 띠 (챕터 구분) ──────────────── */
     .marquee {
-      margin-bottom: var(--gap-section);
-      padding: 16px 0;
+      margin: var(--gap-page) 0;
+      padding: 15px 0;
       background: var(--ink);
-      color: var(--paper);
+      color: var(--sheet);
       overflow: hidden;
       white-space: nowrap;
       -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
@@ -420,110 +460,103 @@
     }
     @keyframes marquee { to { transform: translateX(-50%); } }
 
-    /* ── 프리풋 CTA 블록 (Playful "Go ahead. Make an app.") ── */
-    .cta-block {
-      margin-top: var(--gap-section);
-      padding: 0 24px;
-      text-align: center;
-    }
-    .cta-block .logo {
-      font-size: 46px;
-      margin-bottom: 22px;
-    }
+    /* ── 프리풋 CTA (마지막에서 두 번째 종이) ──────────── */
+    .cta-block { text-align: center; }
+    .cta-block .logo { font-size: 44px; margin-bottom: 20px; }
     .cta-block h2 {
       font-family: var(--serif);
       font-weight: 300;
-      font-size: clamp(1.7rem, 5vw, 2.4rem);
-      line-height: 1.4;
+      font-size: clamp(1.6rem, 4.6vw, 2.2rem);
+      line-height: 1.42;
       letter-spacing: -0.01em;
-      margin: 0;
+      text-wrap: balance;
+      margin: 0 0 26px;
     }
-    .cta-block p { margin: 16px auto 26px; color: #4f4b49; max-width: 40ch; }
-    .cta-block .cta-row { justify-content: center; }
+    .cta-block .cta-row { justify-content: center; margin-top: 0; }
 
     /* ── Section scaffold ──────────────────────────────── */
-    section + section { margin-top: var(--gap-section); }
     .section-head {
       font-family: var(--serif);
       font-weight: 400;
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      line-height: 1.4;
-      letter-spacing: -0.01em;
-      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 4vw, 1.95rem);
+      line-height: 1.42;
+      letter-spacing: -0.015em;
+      text-wrap: balance;
+      margin: 0 0 14px;
     }
-    .section-sub { margin: 0 0 40px; color: #4f4b49; max-width: 46ch; }
-    /* 서브 문장 없이 제목 바로 아래 콘텐츠가 올 때 간격 확보 */
+    /* 손으로 그은 밑줄 */
+    .section-head::after {
+      content: "";
+      display: block;
+      width: 58px; height: 8px;
+      margin-top: 14px;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 8'%3E%3Cpath d='M1 5.2C11 2.4 22 6.8 33 4.2 44 1.6 54 3 59 5' stroke='%232D2A2B' stroke-width='2.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat;
+    }
+    .section-sub { margin: 0 0 34px; color: #46423f; max-width: 44ch; line-height: 1.8; }
     .section-head + .steps,
     .section-head + .cards,
-    .section-head + .faq { margin-top: 32px; }
+    .section-head + .faq { margin-top: 30px; }
 
-    /* ── Cards ─────────────────────────────────────────── */
-    .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-    .card {
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 26px 24px;
-    }
-    .card h3 { font-family: var(--serif); font-weight: 500; font-size: 1.15rem; margin: 0 0 8px; }
-    .card p { margin: 0; font-size: 14.5px; color: #4f4b49; }
+    /* ── Cards — 종이 위 항목 (더 이상 유리 카드 아님) ─── */
+    .cards { display: grid; grid-template-columns: 1fr; gap: 0; }
+    .card { padding: 22px 0; border-top: 1px solid rgba(45, 42, 43, 0.14); }
+    .card:first-child { border-top: 0; padding-top: 4px; }
+    .card h3 { font-family: var(--serif); font-weight: 500; font-size: 1.12rem; margin: 4px 0 7px; }
+    .card p { margin: 0; font-size: 14.5px; color: #46423f; line-height: 1.75; }
     .card .kicker {
-      font-size: 12px; font-weight: 600; letter-spacing: 0.04em;
-      color: var(--purple-text); text-transform: uppercase;
+      font-family: var(--serif);
+      font-size: 12px; font-weight: 500; letter-spacing: 0.1em;
+      color: var(--ink-40); text-transform: uppercase;
     }
 
-    /* ── Steps ─────────────────────────────────────────── */
-    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; counter-reset: step; }
+    /* ── Steps — 번호 매긴 목록 ────────────────────────── */
+    .steps { display: grid; grid-template-columns: 1fr; gap: 0; counter-reset: step; }
     .step {
-      padding: 22px 20px;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.5);
-      backdrop-filter: blur(6px);
-      -webkit-backdrop-filter: blur(6px);
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 4px 16px;
+      padding: 18px 0;
+      border-top: 1px solid rgba(45, 42, 43, 0.14);
     }
+    .step:first-child { border-top: 0; padding-top: 4px; }
     .step::before {
       counter-increment: step;
       content: counter(step);
+      grid-row: 1 / span 2;
       font-family: var(--serif);
-      font-size: 15px;
-      color: var(--purple-text);
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 30px; height: 30px;
-      border-radius: 50%;
-      background: rgba(200, 159, 219, 0.22);
-      margin-bottom: 14px;
+      font-size: 20px;
+      font-weight: 400;
+      color: var(--ink-40);
+      line-height: 1;
+      padding-top: 2px;
     }
-    .step h4 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
-    .step p { margin: 0; font-size: 13.5px; color: var(--muted); }
+    .step h4 { margin: 0; font-size: 15px; font-weight: 600; }
+    .step p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-55); line-height: 1.65; }
 
     /* ── FAQ ───────────────────────────────────────────── */
-    .faq { max-width: 720px; }
-    details { border-bottom: 1px solid var(--border); padding: 18px 0; }
+    details { border-top: 1px solid rgba(45, 42, 43, 0.14); padding: 16px 0; }
+    details:first-child { border-top: 0; }
     details summary {
-      list-style: none; cursor: pointer; font-weight: 600; font-size: 16px;
+      list-style: none; cursor: pointer; font-weight: 600; font-size: 15.5px;
       display: flex; justify-content: space-between; align-items: center; gap: 16px;
     }
     details summary::-webkit-details-marker { display: none; }
-    details summary::after {
-      content: "+"; font-weight: 400; font-size: 20px; color: var(--purple-text);
-    }
+    details summary::after { content: "+"; font-weight: 400; font-size: 19px; color: var(--ink-40); }
     details[open] summary::after { content: "\2013"; }
-    details p { margin: 12px 0 0; color: #4f4b49; font-size: 14.5px; }
+    details p { margin: 11px 0 0; color: #46423f; font-size: 14px; line-height: 1.75; }
 
-    /* ── Footer ────────────────────────────────────────── */
-    footer { margin-top: var(--gap-section); border-top: 1px solid var(--border); padding: 40px 0 60px; }
+    /* ── Footer — 바닥 위 작은 안내 ────────────────────── */
+    footer { margin-top: var(--gap-page); padding: 28px 20px calc(40px + env(safe-area-inset-bottom, 0px)); }
     .foot-inner {
-      display: flex; flex-wrap: wrap; gap: 20px 40px;
+      max-width: 600px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 16px 40px;
       justify-content: space-between; align-items: flex-start;
-      font-size: 13px; color: var(--muted);
+      font-size: 12.5px; color: rgba(45, 42, 43, 0.6);
     }
-    .foot-inner a { color: var(--muted); text-decoration: none; }
+    .foot-inner a { color: rgba(45, 42, 43, 0.6); text-decoration: none; }
     .foot-inner a:hover { color: var(--ink); }
-    .foot-mark { display: flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-size: 16px; color: var(--ink); }
-    .foot-mark .logo { font-size: 17px; }
+    .foot-mark { display: flex; align-items: baseline; gap: 8px; font-family: var(--serif); font-size: 15px; color: var(--ink); }
+    .foot-mark .logo { font-size: 16px; }
 
     /* ── Motion ────────────────────────────────────────── */
     .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
@@ -586,7 +619,7 @@
     </div>
   </nav>
 
-  <header class="hero">
+  <header class="hero page">
     <div class="wrap">
       <span class="eyebrow">레즈비언 여성을 위한 소셜 디스커버리 앱</span>
       <h1>같은 페이지에 있다는 것, <em>취향과 가치관이 맞는 사람</em>을 만난다는 것.</h1>
@@ -619,17 +652,18 @@
     </div>
   </section>
 
-  <main class="wrap">
+  <main>
 
-    <section class="reveal">
+    <section class="reveal page">
       <h2 class="section-head">p.2는 앱이 아니라 책입니다.</h2>
       <p class="section-sub">
         사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다.
         표지만 보고 넘기지 않도록, 처음부터 그렇게 설계했어요.
       </p>
+      <div class="page-no">&middot; 1 &middot;</div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal page">
       <p class="section-sub">
         나와 맞는 사람과 모임을 발견하고, 같은 속도와 온도로 소통하도록.
         너무 가볍지만은 않은 연결이 되게 설계했어요.
@@ -656,13 +690,15 @@
           <p>소모임과 행사를 탐색하고 참여합니다. 앱 안의 연결이 앱 밖의 만남으로 이어지도록.</p>
         </div>
       </div>
+      <div class="page-no">&middot; 2 &middot;</div>
     </section>
 
-    <section class="reveal trust">
+    <section class="reveal page trust">
       <p>p.2는 초대코드가 있어야 가입할 수 있습니다. 지인이나 커뮤니티를 통한 초대가, 이 공간에 있어야 할 사람을 가려주는 장치입니다.</p>
+      <div class="page-no">&middot; 3 &middot;</div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal page">
       <h2 class="section-head">시작하는 방법.</h2>
       <div class="steps">
         <div class="step">
@@ -682,9 +718,10 @@
           <p>마음 가는 모임에 나가서, 다양한 인연과 연결되어 보세요.</p>
         </div>
       </div>
+      <div class="page-no">&middot; 4 &middot;</div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal page">
       <h2 class="section-head">자주 묻는 것.</h2>
       <div class="faq">
         <details>
@@ -696,19 +733,21 @@
           <p>지금은 웹에서 클로즈드 베타로 먼저 열고 있어요. 정식 iOS · Android 앱은 준비 중이며, 출시되면 이 페이지에서 바로 안내합니다.</p>
         </details>
       </div>
+      <div class="page-no">&middot; 5 &middot;</div>
     </section>
 
-    <section class="reveal">
+    <section class="reveal page">
       <p class="manifesto">
         같은 페이지에 있다는 것, 취향과 가치관이 맞는 사람을 만난다는 것.
         함께 페이지를 넘겨갈 사람을 만나는 것.
         <span class="sig">p.2 — on the same page.</span>
       </p>
+      <div class="page-no">&middot; 6 &middot;</div>
     </section>
 
   </main>
 
-  <section class="cta-block reveal">
+  <section class="cta-block reveal page">
     <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
     <h2>당신의 첫 페이지를 시작하세요.</h2>
     <div class="cta-row">
