@@ -4718,7 +4718,9 @@ p {
   position: absolute;
   inset: 0;
   background: rgba(45, 42, 43, 0.4);
-  z-index: 599;
+  /* 시트(z-index:8001)를 띄운 화면 위를 덮는다 — 프로필 모달 z1000,
+     답변 모달 z3000 보다 위, 시트보다 아래. */
+  z-index: 8000;
 }
 
 .sheet-grabber {
