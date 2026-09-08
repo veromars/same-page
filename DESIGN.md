@@ -57,7 +57,7 @@ p.2에는 아직 문서화된 컴포넌트 키트가 없다. impeccable을 리�
 
 ### 3.1 이행 상태
 
-- `tokens.css` — 완료. 라이트 전체 + `[data-theme="dark"]` 세트. `@media (prefers-color-scheme)` 블록은 앱 다크 정식 출시까지 주석 처리.
+- `tokens.css` — 완료. 라이트 전체 + `[data-theme="dark"]` 세트 + `@media (prefers-color-scheme: dark)` **활성** (2026-09 다크 출시).
 - 랜딩 `index.html` — 시맨틱 토큰 + 다크 완료. 인라인 미러(자립용), 값은 `tokens.css` 와 일치.
 - 앱 `app/index.html` — `tokens.css` 배선 + FOUC 가드 완료. 다크 토글 UI 미출시.
 - 앱 `styles.css` — **생 hex 마이그레이션 완료** (449 → 15). `:root` 는 app.js 용 별칭 4개(`--bg-color`/`--text-dark`/`--text-muted`/`--primary`)만. 남은 15개는 미디어 레이어(사진 위 흰 글자, `.book-card` 폴백 `#333`, 라이트박스 `#181617`) — 테마 무관.
@@ -67,7 +67,8 @@ p.2에는 아직 문서화된 컴포넌트 키트가 없다. impeccable을 리�
 - `app.js` — **색 리터럴 마이그레이션 완료** (raw hex 380 → 10). 인라인 `style=` 문자열의 hex를 `var(--토큰)`으로 치환 (CSS 클래스 이관은 범위가 커서 다음 기회에). 남은 10개: 책등 6색(`SPINE_COLORS` — 유저 ID 해시, 유지), 카카오 `#FEE500` ×2, 책등 폴백 그라데이션 `#DDD`, SVG 하트 `fill="#fff"`. `color: white` ~15개는 사진/미디어 위라 유지.
   - 챕터 색(`--chap-1/2/3` + `-bg`) 신설. `chapColors` 객체 3개 → 토큰. 챕터 커버 그라데이션은 `CHAP → transparent` 로 (중간 pale·흰색 stop 제거 — 다크 자동 적응).
   - SVG `fill="var(--토큰)"` / `setAttribute('fill', 'var(...)')` 는 현행 브라우저에서 정상 resolve 확인.
-- **다크 활성화 남음:** `tokens.css` `@media (prefers-color-scheme)` 주석 해제 + 앱 설정에 라이트/다크/시스템 토글. 그 시점에 전 화면 시각 QA (현재는 인증 게이트로 화면별 확인 미완).
+- **다크 활성화 완료** (2026-09): `@media` 활성 + 설정 › 색상 모드 3-way 세그먼트(시스템/라이트/다크). FOUC 가드, `matchMedia` 리스너, `meta[theme-color]` 갱신. 색상 모드 API: `window.getColorMode()` / `setColorMode(m)` / `applyColorMode()`. localStorage 키 `p2-theme` (없음 = 시스템).
+  - **전 화면 시각 QA 는 아직** — 앱 인증 게이트라 화면별 확인을 못 함. 설정 화면은 computed-style 로 검증. 실기기/실계정 다크 워크스루 필요.
 
 ### 3.1a 상태색 (확정 — `tokens.css`)
 

@@ -1,5 +1,50 @@
 console.log('app loaded');
 
+// ── 색상 모드 (시스템 / 라이트 / 다크) ──────────────────────────
+// FOUC 가드(app/index.html)가 첫 페인트 전에 data-theme 을 이미 세팅한다.
+// 여기서는 meta[theme-color] 갱신과 설정 세그먼트 동기화만 맡는다.
+window.THEME_KEY = 'p2-theme';
+window.getColorMode = function () {
+  try {
+    var v = localStorage.getItem(window.THEME_KEY);
+    return (v === 'light' || v === 'dark') ? v : 'system';
+  } catch (e) { return 'system'; }
+};
+window.applyColorMode = function () {
+  var root = document.documentElement;
+  var mode = window.getColorMode();
+  if (mode === 'light' || mode === 'dark') root.setAttribute('data-theme', mode);
+  else root.removeAttribute('data-theme');
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) {
+    var bg = getComputedStyle(root).getPropertyValue('--paper').trim();
+    if (bg) meta.setAttribute('content', bg);
+  }
+  window.syncThemeSeg();
+};
+window.setColorMode = function (mode) {
+  try {
+    if (mode === 'system') localStorage.removeItem(window.THEME_KEY);
+    else localStorage.setItem(window.THEME_KEY, mode);
+  } catch (e) {}
+  window.applyColorMode();
+};
+window.syncThemeSeg = function () {
+  var seg = document.getElementById('theme-seg');
+  if (!seg) return;
+  var m = window.getColorMode();
+  seg.querySelectorAll('button').forEach(function (b) {
+    b.setAttribute('aria-pressed', String(b.dataset.mode === m));
+  });
+};
+try {
+  var _themeMq = window.matchMedia('(prefers-color-scheme: dark)');
+  var _onSchemeChange = function () { if (window.getColorMode() === 'system') window.applyColorMode(); };
+  if (_themeMq.addEventListener) _themeMq.addEventListener('change', _onSchemeChange);
+  else if (_themeMq.addListener) _themeMq.addListener(_onSchemeChange);
+} catch (e) {}
+document.addEventListener('DOMContentLoaded', function () { window.applyColorMode(); });
+
 // Dev flag: set true to skip onboarding and jump straight to the app
 
 // ══════════════════════════════════════════════════════════════
@@ -5263,6 +5308,14 @@ window.openSettingsPage = function () {
 
           <div class="profile-section-label">설정</div>
           <div class="settings-card">
+            <div class="settings-row no-chevron">
+              <span>색상 모드</span>
+              <div class="theme-seg" id="theme-seg" role="group" aria-label="색상 모드">
+                <button type="button" data-mode="system" onclick="window.setColorMode('system')">시스템</button>
+                <button type="button" data-mode="light" onclick="window.setColorMode('light')">라이트</button>
+                <button type="button" data-mode="dark" onclick="window.setColorMode('dark')">다크</button>
+              </div>
+            </div>
             <div class="settings-row" onclick="window.openBasicsEditor()">
               <span>기본 사항</span>
               <i data-lucide="chevron-right"></i>
@@ -5298,6 +5351,7 @@ window.openSettingsPage = function () {
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
+  window.syncThemeSeg();
 };
 
 // ── 내 프로필 편집 · 프로필 모달 ────────────────────────
