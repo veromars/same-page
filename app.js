@@ -5818,13 +5818,19 @@ window.openProfileModal = function (profileId, fromChat = false, opts = null) {
            <i data-lucide="${fromChat ? 'chevron-left' : 'x'}" style="width:28px;"></i>
          </button>
          <div style="font-size:16px; font-weight:600; color:var(--text-dark);">${p ? p.name : ''}</div>
-         <button type="button" class="profile-block-btn" aria-label="${window.isBlockRelated(profileId) ? '차단 해제' : '차단하기'}" onclick="window.handleToggleBlock(${profileId})">
-           <i data-lucide="${window.isBlockRelated(profileId) ? 'user-check' : 'user-x'}" style="width:22px;height:22px;"></i>
-         </button>
+         <div style="width:32px;"></div>
        </div>
        <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
          <div class="scroll-y" style="height:100%;">
            ${getProfileDetailedHTML(p, false)}
+           <div class="prof-tail">
+             ${(!fromChat && !alreadyPaged && !window.isBookClosed('p' + profileId)) ? `
+             <div class="prof-tail-actions">
+               <button type="button" class="prof-tail-closebook" onclick="window.closeBookFromProfile(${profileId})">책 덮기</button>
+               <p class="prof-tail-note">덮은 책은 이번 주 다시보기에서 되돌릴 수 있어요.</p>
+             </div>` : ''}
+             <div class="safety-link-wrap">${window.safetyLinkHTML(profileId, 'modal')}</div>
+           </div>
          </div>
        </div>
        ${window.isBookClosed('p' + profileId) ? `
@@ -6304,6 +6310,120 @@ window.handleToggleBlock = function (profileId) {
       window.blockUser(profileId);
       window.closeModal();
       window.showToast(`${name} 님을 차단했어요`);
+    },
+  });
+};
+
+// ── 안전 — 차단 · 신고 ─────────────────────────────────
+// 프로필·대화 화면에서 눈에 보이는 거절은 '책 덮기'(부드럽고 되돌릴 수 있음)다.
+// 차단과 신고는 주 액션 아래 작은 링크 하나로만 노출하고, 누르면 이 시트에서
+// 갈라진다. 늘 같은 자리 · 낮은 노출도 — 발견탭 프로필북, 받은 하트 공통.
+window.safetyLinkHTML = function (profileId, context) {
+  return `<button type="button" class="safety-link" onclick="window.openSafetySheet(${Number(profileId)}, '${context || 'modal'}')">차단하거나 신고하기</button>`;
+};
+
+// 차단/신고 완료 후, 그 사람을 보고 있던 화면을 정리한다.
+function dismissAfterSafety(context) {
+  if (context === 'heart') {
+    if (typeof window.closeAnswerCard === 'function') window.closeAnswerCard();
+    if (typeof window.switchTab === 'function') window.switchTab('messages');
+    return;
+  }
+  if (context === 'inline') return; // 채팅/매칭에서 연 프로필 — 뒤로 버튼으로 빠진다
+  if (typeof window.closeModal === 'function') window.closeModal();
+}
+
+window.openSafetySheet = function (profileId, context) {
+  if (document.getElementById('safety-sheet')) return;
+  const id = Number(profileId);
+  const prof = MOCK_PROFILES.find(x => x.id === id);
+  const name = prof ? prof.name : '이 사람';
+  const blocked = window.isBlockRelated(id);
+  const opener = document.activeElement;
+
+  const scrim = document.createElement('div');
+  scrim.className = 'sheet-scrim';
+  const sheet = document.createElement('div');
+  sheet.id = 'safety-sheet';
+  sheet.className = 'confirm-sheet safety-sheet';
+  sheet.setAttribute('role', 'dialog');
+  sheet.setAttribute('aria-modal', 'true');
+  sheet.setAttribute('aria-label', `${name} 님 차단 또는 신고`);
+  sheet.tabIndex = -1;
+  sheet.innerHTML = `
+    <div class="sheet-grabber" aria-hidden="true"></div>
+    <p class="safety-sheet-lead">불편한 점이 있었나요? 어떤 선택도 상대는 알 수 없어요.</p>
+    <div class="safety-sheet-list">
+      <button type="button" class="safety-sheet-row" id="safety-block">${blocked ? '차단 해제' : '차단하기'}</button>
+      <button type="button" class="safety-sheet-row" id="safety-report">신고하기</button>
+    </div>
+    <button type="button" class="safety-sheet-cancel" id="safety-cancel">그만두기</button>
+  `;
+  const container = document.getElementById('app-container') || document.body;
+  container.appendChild(scrim);
+  container.appendChild(sheet);
+
+  function dismiss() {
+    document.removeEventListener('keydown', onKey, true);
+    sheet.remove(); scrim.remove();
+    if (opener && document.contains(opener) && typeof opener.focus === 'function') opener.focus();
+  }
+  function onKey(e) { if (e.key === 'Escape') { e.preventDefault(); dismiss(); } }
+  document.addEventListener('keydown', onKey, true);
+  scrim.addEventListener('click', dismiss);
+  sheet.querySelector('#safety-cancel').addEventListener('click', dismiss);
+
+  sheet.querySelector('#safety-block').addEventListener('click', () => {
+    dismiss();
+    if (blocked) {
+      window.unblockUser(id);
+      window.showToast(`${name} 님 차단을 해제했어요`);
+      return;
+    }
+    window.openConfirmSheet({
+      title: `${name} 님을 차단할까요?`,
+      body: '서로의 프로필과 모임이 앱에서 보이지 않게 돼요. 이미 참여 중인 모임도 함께 숨겨져요. 카톡방 멤버십은 그대로예요.',
+      cancelLabel: '그만두기',
+      confirmLabel: '차단하기',
+      onConfirm: () => {
+        window.blockUser(id);
+        window.showToast(`${name} 님을 차단했어요`);
+        dismissAfterSafety(context);
+      },
+    });
+  });
+
+  sheet.querySelector('#safety-report').addEventListener('click', () => {
+    dismiss();
+    window.openConfirmSheet({
+      title: `${name} 님을 신고할까요?`,
+      body: '신고는 운영팀만 확인해요. 상대는 알 수 없고, 검토 후 필요한 조치를 해요. 신고하면 함께 차단돼요.',
+      cancelLabel: '그만두기',
+      confirmLabel: '신고하기',
+      onConfirm: () => {
+        window.blockUser(id);
+        window.showToast('신고가 접수됐어요. 검토 후 조치할게요.');
+        dismissAfterSafety(context);
+      },
+    });
+  });
+
+  requestAnimationFrame(() => sheet.focus());
+};
+
+// 발견탭 프로필북 상세에서 '책 덮기' — 표지 카드의 그것과 같은 동작.
+window.closeBookFromProfile = function (profileId) {
+  const id = Number(profileId);
+  const prof = MOCK_PROFILES.find(x => x.id === id);
+  const name = prof ? prof.name : '이 프로필북';
+  window.openConfirmSheet({
+    title: `${name} 님의 책을 덮을까요?`,
+    body: '덮은 책은 다시 배달되지 않아요. 이번 주 다시보기에서는 되돌릴 수 있어요.',
+    cancelLabel: '그만두기',
+    confirmLabel: '책 덮기',
+    onConfirm: () => {
+      if (typeof window.closeModal === 'function') window.closeModal();
+      window.closeBook('p' + id);
     },
   });
 };
@@ -7133,7 +7253,12 @@ window.openProfileFromModal = function (profileId, backTarget) {
         <div style="font-size:15px; font-weight:600;">${p.name}</div>
         <div style="width:32px;"></div>
       </div>
-      <div class="scroll-y" style="flex:1;">${getProfileDetailedHTML(p, false)}</div>
+      <div class="scroll-y" style="flex:1;">
+        ${getProfileDetailedHTML(p, false)}
+        <div class="prof-tail">
+          <div class="safety-link-wrap">${window.safetyLinkHTML(p.id, 'inline')}</div>
+        </div>
+      </div>
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -7151,7 +7276,12 @@ window.openProfileForChat = function (profileId, chatId) {
         <div style="font-size:15px; font-weight:600;">${p.name}</div>
         <div style="width:32px;"></div>
       </div>
-      <div class="scroll-y" style="flex:1;">${getProfileDetailedHTML(p, false)}</div>
+      <div class="scroll-y" style="flex:1;">
+        ${getProfileDetailedHTML(p, false)}
+        <div class="prof-tail">
+          <div class="safety-link-wrap">${window.safetyLinkHTML(p.id, 'inline')}</div>
+        </div>
+      </div>
     </div>
   `;
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -7210,13 +7340,16 @@ window.openBookHeartDetail = function (heartId) {
         </button>
       </div>
       <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
-        <div class="scroll-y" style="height:100%; padding-bottom:96px;">
+        <div class="scroll-y" style="height:100%; padding-bottom:${closed ? 96 : 140}px;">
           ${msgBlock}
           ${getProfileDetailedHTML(p, false)}
         </div>
       </div>
-      <div style="position:absolute; left:0; right:0; bottom:0; display:flex; gap:10px; padding:14px 20px calc(14px + env(safe-area-inset-bottom)); background:var(--bg-color); border-top:1px solid var(--border);">
-        ${footer}
+      <div style="position:absolute; left:0; right:0; bottom:0; padding:14px 20px calc(12px + env(safe-area-inset-bottom)); background:var(--bg-color); border-top:1px solid var(--border);">
+        <div style="display:flex; gap:10px;">
+          ${footer}
+        </div>
+        ${closed ? '' : `<div class="safety-link-wrap safety-link-wrap--tight">${window.safetyLinkHTML(p.id, 'heart')}</div>`}
       </div>
     </div>
   `;

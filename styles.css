@@ -4555,7 +4555,9 @@ p {
   border-radius: 14px 14px 0 0;
   padding: 12px 24px calc(28px + env(safe-area-inset-bottom, 0px));
   box-sizing: border-box;
-  z-index: 600;
+  /* 확인 시트는 자기를 띄운 화면(프로필 모달 z1000, 답변 모달 z3000 등)
+     위에 떠야 한다. 토스트(z100000)보다는 아래. */
+  z-index: 8001;
   animation: sheetUp 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   box-shadow: 0 -8px 32px rgba(46, 42, 38, 0.12);
 }
@@ -4753,6 +4755,151 @@ p {
   border: 1.5px solid var(--text-dark);
   background: transparent;
   color: var(--text-dark);
+}
+
+
+/* ── 프로필·대화 화면의 거절 계단 ──────────────────────────
+   눈에 보이는 거절은 '책 덮기'(부드럽고 되돌릴 수 있음)다.
+   '차단·신고'는 그 아래 채도 없는 작은 링크 하나로만 — 늘 같은 자리에
+   있지만 실수로 누를 무게는 아니게. 발견탭 프로필북·받은 하트 등 공통. */
+/* getProfileDetailedHTML 은 말미에 120px 여백을 달고 끝난다(플로팅 FAB 자리).
+   그 아래 붙는 거절 계단은 그 여백을 일부 되찾아 큰 빈틈을 없앤다. */
+.prof-tail {
+  margin-top: -84px;
+}
+
+.prof-tail-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 24px 0;
+}
+
+.prof-tail-closebook {
+  appearance: none;
+  -webkit-appearance: none;
+  min-width: 160px;
+  min-height: 44px;
+  padding: 11px 24px;
+  border: 1.5px solid var(--text-dark);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.prof-tail-closebook:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
+}
+
+.prof-tail-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-align: center;
+  word-break: keep-all;
+  max-width: 240px;
+  margin: 0;
+}
+
+.safety-link-wrap {
+  text-align: center;
+  /* 발견탭 모달에서는 우하단 하트 FAB(≈80px+safe) 위로 올라오게 넉넉히 */
+  padding: 12px 0 calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+/* 하단 액션바 안에 얹힐 때는 자체 여백만 */
+.safety-link-wrap--tight {
+  padding: 10px 0 0;
+}
+
+.safety-link {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: none;
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+}
+
+.safety-link:hover,
+.safety-link:focus-visible {
+  color: var(--text-dark);
+}
+
+.safety-link:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* 차단 / 신고 갈림 시트 — .confirm-sheet 프리미티브 위에 얹는다 */
+.safety-sheet .safety-sheet-lead {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6E696B;
+  word-break: keep-all;
+  margin: 4px 0 16px;
+}
+
+.safety-sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.safety-sheet-row {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  border: 1.5px solid var(--text-dark);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--text-dark);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.safety-sheet-row:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 2px;
+}
+
+.safety-sheet-cancel {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 14px;
+  background: #8D64BC;
+  color: #FFF;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.safety-sheet-cancel:focus-visible {
+  outline: 2px solid #8960B8;
+  outline-offset: 3px;
 }
 
 
