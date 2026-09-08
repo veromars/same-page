@@ -1,0 +1,211 @@
+/* ══════════════════════════════════════════════════════════════════
+   p.2 디자인 토큰 — 라이트 / 다크 단일 소스
+   ------------------------------------------------------------------
+   색은 전부 여기서만 정의한다. 페이지 CSS(styles.css)·컴포넌트·JS 에
+   생 hex/rgba 를 타이핑하지 않는다 (DESIGN.md §3 "Token Or Nothing").
+
+   다크는 값만 다시 선언한다. 알파 파생 토큰(--ink-40 등)은 var(--ink-rgb)
+   를 참조하므로 --ink-rgb 하나만 바꾸면 같이 따라온다.
+   전환은 즉시 — DESIGN.md §5 "One Animation".
+
+   라벤더: 2026-09-08 결정. hue 304 고정, 명도로 역할 분리.
+     --accent-text  #8960B8  페이퍼 위 글자·아이콘·링크 (본문 AA 4.5)
+     --accent-fill  #8D64BC  흰 글자를 얹는 채움 (버튼·FAB)
+     --accent-strong#9B72CC  큰 텍스트·보더·강조 면 (현행값 유지)
+     --accent-soft  #C89FDB  배경 면 전용 (위에 Ink 만)
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── 표면 ── */
+  --paper:        #FAF9F6;                     /* 앱 기본 그라운드 */
+  --paper-rgb:    250, 249, 246;
+  --surface:      #FFFFFF;                     /* 카드·시트 (마이그레이션 시 off-white 검토) */
+  --ground:       #BFB4C8;                     /* 랜딩 — 책이 놓인 바닥 */
+  --ground-rgb:   191, 180, 200;
+  --sheet:        #F7F2E6;                     /* 랜딩 — 종이 앞면 */
+  --sheet-2:      #EFE8D8;
+  --sheet-3:      #E7DFCC;
+  --sheet-edge:   #F2EEE5;
+  --sheet-sheen:  rgba(255, 255, 255, 0.55);
+  --border:       #F0EBEF;                     /* 기존 실선 보더 */
+
+  /* ── 잉크 ── */
+  --ink:          #2D2A2B;
+  --ink-rgb:      45, 42, 43;
+  --ink-soft:     #46423f;
+  --ink-softer:   #33302f;
+  --muted:        #858082;                     /* 캡션·메타 (3.7:1 — 비필수 텍스트) */
+  --muted-deep:   #6E696B;                     /* 읽어야 하는 보조 텍스트 (5.1:1 AA) */
+  --ink-40:       rgba(var(--ink-rgb), 0.40);
+  --ink-55:       rgba(var(--ink-rgb), 0.55);
+  --ink-60:       rgba(var(--ink-rgb), 0.60);
+  --hairline:     rgba(var(--ink-rgb), 0.14);
+  --hairline-strong: rgba(var(--ink-rgb), 0.28);
+  --wash:         rgba(var(--ink-rgb), 0.03);
+  --wash-2:       rgba(var(--ink-rgb), 0.05);
+
+  /* ── 라벤더 ── */
+  --accent-text:       #8960B8;
+  --accent-fill:       #8D64BC;
+  --accent-fill-hover: #7350A6;
+  --accent-strong:     #9B72CC;
+  --accent-soft:       #C89FDB;
+  --accent-soft-15:    rgba(200, 159, 219, 0.15);   /* 구 --primary-transparent */
+  --on-accent:         #fff;                        /* --accent-fill 위 글자 */
+  --on-bright:         #2D2A2B;                     /* Lime/Peach 등 밝은 면 위 글자 — 테마 불변 */
+  --disabled-fill:     #D3D1C7;                     /* 비활성 버튼 채움 */
+
+  /* ── 보조 악센트 (DESIGN.md §3.3) ── */
+  --blush:  #E0A6C7;                            /* 구 --secondary */
+  --lime:   #E2FF74;                            /* 하이라이터 — 면으로만 */
+  --peach:  #FFD5BD;
+  --hl-lime:  rgba(226, 255, 116, 0.55);
+  --hl-lav:   rgba(200, 159, 219, 0.34);
+  --hl-peach: rgba(255, 213, 189, 0.62);
+
+  --accent-wash:   #F4F0F9;                     /* 아주 옅은 라벤더 면 (프로모 카드 등) */
+  --overlay-pill:  rgba(255, 255, 255, 0.92);   /* 카드 위 프로스티드 알약 배경 */
+  --shadow-accent: 0 8px 24px rgba(141, 100, 188, 0.35);  /* 라벤더 소프트 글로우 */
+  --accent-bright:    #C89FDB;                     /* 두 테마 모두 밝게 읽히는 라벤더 — 활성 탭 아이콘, 안읽음 점 */
+
+  /* ── 상태색 (제안 — 마이그레이션 시 확정. 현행 #4CAF50/#E05B5B 는 본문 AA 실패) ── */
+  --success: #2F7D34;
+  --danger:  #C0453F;
+  --on-status: #fff;
+
+  /* ── 랜딩 전용 ── */
+  --on-ground:      rgba(250, 249, 246, 0.62);
+  --on-ground-dim:  rgba(250, 249, 246, 0.50);
+  --cover-hint:     rgba(var(--ink-rgb), 0.42);
+  --band-bg:        #2D2A2B;
+  --band-fg:        #F7F2E6;
+  --book-lime:      #E2FF74;
+  --book-mid:       #C8B8D0;
+  --book-lilac:     #C89FDB;
+  --book-studio:    #B36AE2;
+  --book-shadow-rgb: 45, 42, 43;
+  --shadow-page: 0 26px 46px -16px rgba(var(--ink-rgb), 0.32),
+                 0 6px 14px rgba(var(--ink-rgb), 0.08);
+
+  /* ── 타이포 ── */
+  --sans:  "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --serif: "Noto Serif KR", serif;
+}
+
+/* ══ 다크 — 명시 선택 ══════════════════════════════════════════════ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper:        #1B1920;
+  --paper-rgb:    27, 25, 32;
+  --surface:      #232029;
+  --ground:       #1B1920;
+  --ground-rgb:   27, 25, 32;
+  --sheet:        #272430;
+  --sheet-2:      #211F2A;
+  --sheet-3:      #1C1A23;
+  --sheet-edge:   #2E2B38;
+  --sheet-sheen:  rgba(255, 255, 255, 0.045);
+  --border:       rgba(236, 230, 234, 0.14);
+
+  --ink:          #ECE6EA;
+  --ink-rgb:      236, 230, 234;
+  --ink-soft:     #C5BFC7;
+  --ink-softer:   #D6D0D8;
+  --muted:        #9A9498;
+  --muted-deep:   #A29BA1;
+  --ink-40:       rgba(var(--ink-rgb), 0.45);
+  --ink-55:       rgba(var(--ink-rgb), 0.62);
+  --ink-60:       rgba(var(--ink-rgb), 0.66);
+  --hairline-strong: rgba(var(--ink-rgb), 0.26);
+  --wash:         rgba(var(--ink-rgb), 0.045);
+  --wash-2:       rgba(var(--ink-rgb), 0.07);
+
+  --accent-text:       #C9A8E0;
+  --accent-fill:       #8D64BC;
+  --accent-fill-hover: #9A77CC;
+  --accent-strong:     #B892D6;
+  --accent-soft:       #483D5A;
+  --accent-soft-15:    rgba(200, 159, 219, 0.14);
+  --on-bright:         #2D2A2B;
+  --disabled-fill:     #35323C;
+  --accent-wash:       #2A2632;
+  --overlay-pill:      rgba(38, 36, 48, 0.92);
+  --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
+  --accent-bright:        #C9A8E0;
+
+  --success: #86CE91;
+  --danger:  #F09B9B;
+
+  --on-ground:      rgba(236, 230, 234, 0.55);
+  --on-ground-dim:  rgba(236, 230, 234, 0.40);
+  --band-bg:        #100F14;
+  --band-fg:        #C5BFC7;
+  --book-shadow-rgb: 0, 0, 0;
+  --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
+                 0 0 0 1px rgba(var(--ink-rgb), 0.05);
+}
+
+/* ══ 다크 — OS 설정 자동 추종 ══════════════════════════════════════
+   다크 정식 출시 전까지 비활성. 앱 화면 대부분이 아직 생 hex 라
+   지금 켜면 반쪽만 어두워진다. styles.css·app.js 마이그레이션이
+   끝나면 이 블록의 주석을 해제한다. (그전까지 다크는 localStorage
+   'p2-theme' = 'dark' 명시 선택으로만 — 개발/테스트용) */
+/*
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --paper:        #1B1920;
+    --paper-rgb:    27, 25, 32;
+    --surface:      #232029;
+    --ground:       #1B1920;
+    --ground-rgb:   27, 25, 32;
+    --sheet:        #272430;
+    --sheet-2:      #211F2A;
+    --sheet-3:      #1C1A23;
+    --sheet-edge:   #2E2B38;
+    --sheet-sheen:  rgba(255, 255, 255, 0.045);
+    --border:       rgba(236, 230, 234, 0.14);
+
+    --ink:          #ECE6EA;
+    --ink-rgb:      236, 230, 234;
+    --ink-soft:     #C5BFC7;
+    --ink-softer:   #D6D0D8;
+    --muted:        #9A9498;
+    --muted-deep:   #A29BA1;
+    --ink-40:       rgba(var(--ink-rgb), 0.45);
+    --ink-55:       rgba(var(--ink-rgb), 0.62);
+    --ink-60:       rgba(var(--ink-rgb), 0.66);
+    --hairline-strong: rgba(var(--ink-rgb), 0.26);
+    --wash:         rgba(var(--ink-rgb), 0.045);
+    --wash-2:       rgba(var(--ink-rgb), 0.07);
+
+    --accent-text:       #C9A8E0;
+    --accent-fill:       #8D64BC;
+    --accent-fill-hover: #9A77CC;
+    --accent-strong:     #B892D6;
+    --accent-soft:       #483D5A;
+    --accent-soft-15:    rgba(200, 159, 219, 0.14);
+    --on-bright:         #2D2A2B;
+    --disabled-fill:     #35323C;
+    --accent-wash:       #2A2632;
+    --overlay-pill:      rgba(38, 36, 48, 0.92);
+    --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
+    --accent-bright:        #C9A8E0;
+
+    --success: #86CE91;
+    --danger:  #F09B9B;
+
+    --on-ground:      rgba(236, 230, 234, 0.55);
+    --on-ground-dim:  rgba(236, 230, 234, 0.40);
+    --band-bg:        #100F14;
+    --band-fg:        #C5BFC7;
+    --book-shadow-rgb: 0, 0, 0;
+    --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
+                   0 0 0 1px rgba(var(--ink-rgb), 0.05);
+  }
+}
+*/

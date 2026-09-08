@@ -1,20 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Jost:wght@300&family=Noto+Serif+KR:wght@300;400;500&family=Poppins:wght@300;400;700&display=swap');
 
+/* 색 토큰은 tokens.css 로 이동했다. 이 :root 는 (1) 기존 이름을 새
+   시맨틱 토큰으로 잇는 별칭, (2) 아직 마이그레이션 안 된 값, (3) 색이
+   아닌 항목(--glass, --safe-top)만 남긴다.
+   화면 단위로 var(--primary) → var(--accent-*) 로 옮기고, 끝나면
+   아래 별칭 블록을 지운다. (DESIGN.md §3) */
 :root {
-  --primary: #BCA0CE;
-  /* soft lilac */
-  --primary-light: #D8BFD8;
-  --primary-transparent: rgba(188, 160, 206, 0.15);
-  --secondary: #E0A6C7;
-  /* minimal warm blush */
-  --bg-color: #FAF9F6;
-  /* warm cream/sand */
-  --surface: #FFFFFF;
-  --text-dark: #2D2A2B;
-  --text-muted: #858082;
-  --border: #F0EBEF;
+  /* 별칭 — 값·용도 1:1, 라이트에서 시각 변화 없음. 다크 대응은 tokens.css 가 함 */
+  --bg-color: var(--paper);
+  --text-dark: var(--ink);
+  --text-muted: var(--muted);
+  /* --surface, --border 는 tokens.css 가 직접 제공 (여기서 재선언하지 않는다) */
+
+  /* 미마이그레이션 — 화면별로 교체. 다크에서는 아직 안 따라온다 */
+  --primary: #BCA0CE;              /* → 대부분 var(--accent-soft) / 일부 var(--accent-strong) */
+  --primary-light: #D8BFD8;        /* → var(--accent-soft) */
+  --primary-transparent: var(--accent-soft-15);
+  --secondary: var(--blush);
+  --pass-lilac: #C9A8E0;           /* → 상황에 따라 var(--accent-text) (다크) */
+
+  /* 색 아님 — 유지 */
   --glass: rgba(255, 255, 255, 0.8);
-  --pass-lilac: #C9A8E0;
   --safe-top: env(safe-area-inset-top, 0px);
 }
 
@@ -75,7 +81,7 @@ body {
     max-width: 375px;
     max-height: 812px;
     border-radius: 40px;
-    border: 8px solid #FFFFFF;
+    border: 8px solid var(--surface);
   }
 }
 
@@ -183,8 +189,9 @@ p {
 
 /* Buttons */
 .btn-primary {
-  background-color: var(--primary);
-  color: #FFF;
+  /* 흰 글자를 얹으므로 --accent-strong(#9B72CC, 3.70:1)이 아니라 --accent-fill (4.50:1) */
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   border-radius: 100px;
   padding: 16px;
@@ -205,7 +212,7 @@ p {
 }
 
 .btn-primary.disabled {
-  background: #D3D1C7;
+  background: var(--disabled-fill);
   box-shadow: none;
   cursor: default;
 }
@@ -230,7 +237,7 @@ p {
 
 .input-field:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--accent-text);
 }
 
 /* Terminal failure screen — see showFatalError() in app.js. Sits above every
@@ -244,7 +251,7 @@ p {
   justify-content: center;
   padding: 32px;
   box-sizing: border-box;
-  background: var(--bg-color, #FAF9F6);
+  background: var(--paper);
 }
 
 .fatal-error-card {
@@ -272,8 +279,8 @@ p {
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  background: #E2FF74;
-  color: #2D2A2B;
+  background: var(--lime);
+  color: var(--on-bright);
   cursor: pointer;
 }
 
@@ -314,7 +321,7 @@ p {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
   font-size: 28px;
-  color: #9B72CC;
+  color: var(--accent-strong);
   display: inline-flex;
   align-items: baseline;
   line-height: 1;
@@ -324,7 +331,7 @@ p {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
   font-size: 13px;
-  color: #9B72CC;
+  color: var(--accent-strong);
   opacity: 0.18;
   display: flex;
   align-items: baseline;
@@ -378,8 +385,8 @@ p {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #FFFFFF;
-  border-top: 1px solid #F0F0F0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
   border-radius: 20px 20px 0 0;
   z-index: 150;
   /* Ensure nav is above modals */
@@ -409,19 +416,19 @@ p {
 .nav-icon {
   width: 24px;
   height: 24px;
-  color: #B0B0AC;
+  color: var(--ink-40);
   stroke-width: 1.75;
   transition: color 0.3s, stroke-width 0.3s;
 }
 
 .nav-item.active .nav-icon {
-  color: #C89FDB;
+  color: var(--accent-bright);
   stroke-width: 2.25;
 }
 
 /* ── Splash Screen — Book Cover ────────────────────────── */
 #splash {
-  background: linear-gradient(to right, #E2FF74 0%, #C8B8D0 50%, #C89FDB 100%);
+  background: linear-gradient(to right, var(--book-lime) 0%, var(--book-mid) 50%, var(--book-lilac) 100%);
   overflow: hidden;
   position: relative;
   z-index: 100;
@@ -472,7 +479,7 @@ p {
   top: 0;
   width: 56px;
   height: 100%;
-  background: #E2FF74;
+  background: var(--book-lime);
   box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
@@ -488,7 +495,7 @@ p {
 .splash-spine-tagline,
 .splash-spine-studio {
   writing-mode: vertical-lr;
-  color: #C89FDB;
+  color: var(--book-lilac);
 }
 
 .splash-spine-logo {
@@ -533,7 +540,7 @@ p {
   padding-top: calc(48px + var(--safe-top));
   font-size: 15px;
   font-weight: 700;
-  color: #E2FF74;
+  color: var(--book-lime);
   letter-spacing: 0.05em;
   font-family: 'Poppins', 'Pretendard', sans-serif;
   opacity: 0;
@@ -552,7 +559,7 @@ p {
   font-family: 'Poppins', sans-serif;
   font-weight: 900;
   font-size: 60px;
-  color: #E2FF74;
+  color: var(--book-lime);
   display: flex;
   align-items: baseline;
   justify-content: center;
@@ -565,7 +572,7 @@ p {
   padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px));
   font-size: 14px;
   font-weight: 700;
-  color: #B36AE2;
+  color: var(--book-studio);
   letter-spacing: 0.08em;
   line-height: 1.6;
   text-align: center;
@@ -584,12 +591,12 @@ p {
   height: 100px;
   border-radius: 50%;
   background: var(--surface);
-  border: 2px dashed var(--primary);
+  border: 2px dashed var(--accent-soft);
   display: flex;
   justify-content: center;
   align-items: center;
   margin: 0 auto 32px;
-  color: var(--primary);
+  color: var(--accent-text);
   cursor: pointer;
 }
 
@@ -661,14 +668,14 @@ p {
 
 .tag-pill.selected {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
   border-color: var(--primary);
 }
 
 .tag-pill.disabled {
-  background: #F8F8F8;
+  background: var(--wash);
   color: #BBB;
-  border-color: #EEE;
+  border-color: var(--border);
   cursor: default;
 }
 
@@ -760,7 +767,7 @@ p {
   top: 50%;
   width: 24px;
   height: 24px;
-  background: #FFF;
+  background: var(--surface);
   border: 2px solid var(--primary);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -835,7 +842,7 @@ p {
   left: 10px;
   font-size: 10px;
   font-weight: 600;
-  color: #aaa;
+  color: var(--muted);
   z-index: 2;
 }
 
@@ -847,7 +854,7 @@ p {
 .teaser-q-text {
   font-size: 13px;
   font-weight: 500;
-  color: #555;
+  color: var(--ink-soft);
   line-height: 1.4;
   z-index: 2;
   display: -webkit-box;
@@ -865,12 +872,12 @@ p {
 
 /* Notebook Paper Style — kept minimal: just white bg for grid cards */
 .notebook-paper {
-  background: #FFF !important;
+  background: var(--surface) !important;
 }
 
 /* Polaroid Style */
 .polaroid-frame {
-  background: #FFF;
+  background: var(--surface);
   padding: 8px 8px 32px 8px;
   box-shadow: 2px 3px 12px rgba(0, 0, 0, 0.12);
   transform: rotate(-2deg);
@@ -938,7 +945,7 @@ p {
   top: 50%;
   width: 28px;
   height: 28px;
-  background: #FFF;
+  background: var(--surface);
   border: 2px solid var(--primary);
   border-radius: 50%;
   transform: translate(-50%, -50%);
@@ -971,13 +978,13 @@ p {
   font-weight: 600;
   color: var(--primary);
   cursor: pointer;
-  background: #FFF;
+  background: var(--surface);
   transition: all 0.2s;
 }
 
 .role-pill-multi.active {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
 }
 
 /* Bottom Sheet CTA */
@@ -1007,7 +1014,7 @@ p {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: #FFF;
+  background: var(--surface);
   border-radius: 24px 24px 0 0;
   padding: 32px 24px 48px;
   transform: translateY(100%);
@@ -1090,7 +1097,7 @@ p {
 .private-badge {
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(8px);
-  color: #FFF;
+  color: var(--on-accent);
   padding: 4px 10px;
   border-radius: 100px;
   font-size: 11px;
@@ -1138,12 +1145,12 @@ p {
 }
 
 .card-tag {
-  background: white;
+  background: var(--surface);
   border: 1px solid #E0D8F0;
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 12px;
-  color: #5F5E5A;
+  color: var(--ink-soft);
 }
 
 /* Answer Card specific */
@@ -1287,7 +1294,7 @@ p {
   left: 0;
   width: 100%;
   padding: 16px 24px;
-  background: white;
+  background: var(--surface);
   display: flex;
   gap: 12px;
   z-index: 120;
@@ -1297,9 +1304,9 @@ p {
   flex: 1;
   height: 52px;
   border-radius: 26px;
-  background: #FFF;
+  background: var(--surface);
   border: 1.5px solid #E0D8D0;
-  color: #888;
+  color: var(--muted-deep);
   font-family: 'Poppins', sans-serif;
   font-weight: 300;
   font-size: 14px;
@@ -1313,8 +1320,8 @@ p {
   flex: 1;
   height: 52px;
   border-radius: 26px;
-  background: #9B72CC;
-  color: white;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: 'Poppins', sans-serif;
   font-weight: 400;
   font-size: 14px;
@@ -1344,7 +1351,7 @@ p {
   position: absolute;
   top: 16px;
   right: 16px;
-  color: #9B72CC;
+  color: var(--accent-text);
   opacity: 0.85;
   font-size: 24px;
   z-index: 105;
@@ -1405,7 +1412,7 @@ p {
 
 .unanswered {
   border: 1px dashed #D3D1C7;
-  background: #FFF;
+  background: var(--surface);
   align-items: center;
   justify-content: center;
   text-align: center;
@@ -1477,7 +1484,7 @@ p {
   justify-content: center;
   cursor: pointer;
   z-index: 9;
-  color: #9B72CC;
+  color: var(--accent-text);
 }
 
 .meetup-share-btn:active {
@@ -1598,7 +1605,7 @@ p {
   border-radius: 50%;
   border: 2px solid var(--surface);
   margin-left: -8px;
-  background: #E0E0E0;
+  background: var(--wash-2);
   background-size: cover;
   background-position: center;
 }
@@ -1621,12 +1628,12 @@ p {
 
 .rsvp-btn.rsvpd {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
   border-color: var(--primary);
 }
 
 .rsvp-btn:disabled {
-  border-color: #E0E0E0;
+  border-color: var(--hairline);
   color: #A0A0A0;
   background: #F5F5F5;
   cursor: not-allowed;
@@ -1658,8 +1665,8 @@ p {
   justify-content: center;
   height: 32px;
   padding: 0 14px;
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 500;
@@ -1670,7 +1677,7 @@ p {
 
 .filter-chip.selected {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
   border: 1px solid var(--primary);
 }
 
@@ -1712,7 +1719,7 @@ p {
   top: 0;
   right: 0;
   background: #C9A8E0;
-  color: #FFF;
+  color: var(--on-accent);
   padding: 4px 10px;
   border-radius: 0 20px 0 12px;
   font-size: 11px;
@@ -1739,7 +1746,7 @@ p {
   display: inline-flex;
   align-items: center;
   background: #FF8A80;
-  color: #FFF;
+  color: var(--on-accent);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 11px;
@@ -1772,7 +1779,7 @@ p {
   height: 52px;
   border-radius: 50%;
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1940,7 +1947,7 @@ p {
 .chat-bubble.sent {
   align-self: flex-end;
   background: var(--primary);
-  color: white;
+  color: var(--on-accent);
   border-radius: 16px 0 16px 16px;
 }
 
@@ -2043,8 +2050,8 @@ p {
 }
 
 .calendar-wrapper {
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   padding: 16px;
   margin-bottom: 24px;
@@ -2091,7 +2098,7 @@ p {
 
 .calendar-day.selected {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(188, 160, 206, 0.4);
 }
@@ -2103,8 +2110,8 @@ p {
 .picker-wrapper {
   position: relative;
   height: 120px;
-  background: #FFF;
-  border: 1px solid #E0E0E0;
+  background: var(--surface);
+  border: 1px solid var(--hairline);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 24px;
@@ -2163,7 +2170,7 @@ p {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
-  border-bottom: 0.5px solid #F0F0F0;
+  border-bottom: 0.5px solid var(--border);
 }
 
 .info-row:last-child {
@@ -2184,7 +2191,7 @@ p {
 }
 
 .info-card {
-  background: #FFF;
+  background: var(--surface);
   border-radius: 16px;
   padding: 16px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -2279,7 +2286,7 @@ p {
 }
 
 .chapter-viewer-lock-icon {
-  color: #9B72CC;
+  color: var(--accent-text);
   opacity: 0.85;
 }
 
@@ -2306,8 +2313,8 @@ p {
   font-family: inherit;
   font-size: 13px;
   font-weight: 700;
-  background: #E2FF74;
-  color: #2D2A2B;
+  background: var(--lime);
+  color: var(--on-bright);
   cursor: pointer;
 }
 
@@ -2321,7 +2328,7 @@ p {
 
 .ans-card-q-text {
   font-size: 12px;
-  color: #888;
+  color: var(--muted-deep);
   margin-top: 4px;
   overflow: hidden;
   white-space: nowrap;
@@ -2537,17 +2544,18 @@ p {
 .btn-nope {
   width: 56px;
   height: 56px;
-  background: #FFF;
-  color: #8E8E8A;
-  border: 1px solid #DDD;
+  background: var(--surface);
+  color: var(--muted);
+  border: 1px solid var(--border);
 }
 
 .btn-like {
   width: 64px;
   height: 64px;
-  background: #9B72CC;
-  color: #FFF;
-  box-shadow: 0 8px 24px rgba(155, 114, 204, 0.4);
+  /* 흰 글자를 얹으므로 --accent-strong(3.70:1)이 아니라 --accent-fill */
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  box-shadow: var(--shadow-accent);
 }
 
 .btn-undo {
@@ -2557,7 +2565,7 @@ p {
 .action-label {
   font-size: 10px;
   font-weight: 600;
-  color: #8E8E8A;
+  color: var(--muted);
 }
 
 /* Overlay */
@@ -2567,7 +2575,7 @@ p {
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 100;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--overlay-pill);
   padding: 20px 30px;
   border-radius: 100px;
   display: flex;
@@ -2588,16 +2596,16 @@ p {
 .paged-heart-text {
   font-size: 15px;
   font-weight: 700;
-  color: #9B72CC;
+  color: var(--accent-text);
 }
 
 .p-qurated-promo-card {
   margin-top: 24px;
   padding: 16px;
-  background: #F4F0F9;
+  background: var(--accent-wash);
   border-radius: 12px;
   text-align: left;
-  border-left: 3px solid #9B72CC;
+  border-left: 3px solid var(--accent-strong);
   width: 100%;
 }
 
@@ -2675,8 +2683,8 @@ p {
   padding: 0 7px;
   border: none;
   border-radius: 999px;
-  background-color: #8D64BC;
-  color: #FFF;
+  background-color: var(--accent-fill);
+  color: var(--on-accent);
   font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
@@ -2696,12 +2704,12 @@ p {
 .role-tooltip {
   position: absolute;
   z-index: 1000;
-  background: white;
-  border: 0.5px solid #C9A8E0;
+  background: var(--surface);
+  border: 0.5px solid var(--accent-soft);
   border-radius: 8px;
   padding: 6px 12px;
   font-size: 12px;
-  color: #888;
+  color: var(--muted);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   pointer-events: none;
   white-space: nowrap;
@@ -2717,7 +2725,7 @@ p {
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #C9A8E0;
+  border-top: 6px solid var(--accent-soft);
 }
 
 @keyframes fadeInTooltip {
@@ -2788,7 +2796,7 @@ p {
 
 .choice-label {
   font-size: 14px;
-  color: #555;
+  color: var(--ink-soft);
   font-weight: 500;
   margin-bottom: 12px;
   display: block;
@@ -2804,10 +2812,10 @@ p {
   display: block;
   width: 100%;
   padding: 12px 16px;
-  border: 1.5px solid #C89FDB;
+  border: 1.5px solid var(--accent-soft);
   border-radius: 99px;
-  background: white;
-  color: #9B72CC;
+  background: var(--surface);
+  color: var(--accent-text);
   font-size: 14px;
   font-family: 'Pretendard', sans-serif;
   text-align: left;
@@ -2818,9 +2826,9 @@ p {
 }
 
 .choice-btn.selected {
-  background: #C89FDB;
-  color: white;
-  border-color: #C89FDB !important;
+  background: var(--accent-fill);
+  color: var(--on-accent);
+  border-color: var(--accent-fill) !important;
 }
 
 /* Answer Card Thumbnail Typography Fixes */
@@ -2852,7 +2860,7 @@ p {
 .telecom-btn {
   width: 100%;
   height: 52px;
-  background: #FFF;
+  background: var(--surface);
   border: 1.5px solid var(--pass-lilac);
   border-radius: 12px;
   color: var(--text-dark);
@@ -2896,8 +2904,8 @@ p {
   height: 52px;
   border: 1.5px solid #C9A8E0;
   border-radius: 12px;
-  background: #FFF;
-  color: #2C2C2A;
+  background: var(--surface);
+  color: var(--ink);
   font-size: 16px;
   font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
   text-align: center;
@@ -2910,7 +2918,7 @@ p {
 
 .date-selects select:focus {
   outline: none;
-  border-color: #9B72CC;
+  border-color: var(--accent-text);
   box-shadow: 0 0 0 3px rgba(155, 114, 204, 0.12);
 }
 
@@ -2964,7 +2972,7 @@ p {
 .book-page-chapter {
   font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
   font-size: 11px;
-  color: #bbb;
+  color: var(--ink-40);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: 12px;
@@ -2974,7 +2982,7 @@ p {
   font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #888;
+  color: var(--muted-deep);
   line-height: 1.6;
   margin-bottom: 32px;
 }
@@ -2983,7 +2991,7 @@ p {
   font-family: 'Noto Serif KR', Georgia, serif;
   font-size: 17px;
   font-weight: 400;
-  color: #2C2C2A;
+  color: var(--ink);
   line-height: 2.0;
   white-space: pre-wrap;
   word-break: keep-all;
@@ -3023,7 +3031,7 @@ p {
 
 .role-pill.active {
   background: var(--primary);
-  color: #FFF;
+  color: var(--on-accent);
 }
 
 .tooltip-container {
@@ -3059,7 +3067,7 @@ p {
   font-family: 'Noto Serif KR', serif;
   font-weight: 400;
   font-size: 20px;
-  color: #2C2C2A;
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
@@ -3067,7 +3075,7 @@ p {
   font-family: 'Noto Serif KR', Georgia, serif;
   font-weight: 400;
   font-size: 20px;
-  color: #2C2C2A;
+  color: var(--ink);
   margin-bottom: 0;
 }
 
@@ -3101,7 +3109,7 @@ p {
 
 #heart-path {
   fill: none;
-  stroke: #ccc;
+  stroke: var(--hairline);
   stroke-width: 1.5;
   transition: fill 0.2s ease, stroke 0.2s ease;
 }
@@ -3117,7 +3125,7 @@ p {
   bottom: 8px;
   right: 8px;
   font-size: 10px;
-  color: #888;
+  color: var(--muted-deep);
   line-height: 1;
   z-index: 10;
   pointer-events: none;
@@ -3130,7 +3138,7 @@ p {
 .notif-empty {
   padding: 80px 20px;
   font-size: 14px;
-  color: #bbb;
+  color: var(--ink-40);
   text-align: center;
 }
 
@@ -3164,17 +3172,17 @@ p {
 
 .notif-text {
   font-size: 14px;
-  color: #2C2C2A;
+  color: var(--ink);
   line-height: 1.5;
 }
 
 .notif-text strong {
-  color: #9B72CC;
+  color: var(--accent-text);
 }
 
 .notif-time {
   font-size: 12px;
-  color: #bbb;
+  color: var(--ink-40);
   margin-top: 4px;
 }
 
@@ -3197,7 +3205,7 @@ p {
 
 .post-onboarding-card {
   width: 85%;
-  background: #FFF;
+  background: var(--surface);
   border-radius: 20px;
   padding: 32px 24px;
   text-align: center;
@@ -3215,7 +3223,7 @@ p {
 .post-onboarding-title {
   font-size: 20px;
   font-weight: 700;
-  color: #2C2C2A;
+  color: var(--ink);
   margin-bottom: 8px;
 }
 
@@ -3226,8 +3234,8 @@ p {
 }
 
 .post-onboarding-btn {
-  background: #9B72CC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   border-radius: 12px;
   padding: 14px;
@@ -3243,7 +3251,7 @@ p {
 
 .post-onboarding-link {
   font-size: 14px;
-  color: #aaa;
+  color: var(--muted);
   text-decoration: underline;
   cursor: pointer;
   background: none;
@@ -3255,8 +3263,8 @@ p {
 
 /* Profile Setup Flow */
 .btn-setup-primary {
-  background-color: #E2FF74;
-  color: #2D2A2B;
+  background-color: var(--lime);
+  color: var(--on-bright);
   border: none;
   border-radius: 100px;
   padding: 18px;
@@ -3285,7 +3293,7 @@ p {
 
 .profile-setup-progress-fill {
   height: 100%;
-  background-color: #E2FF74;
+  background-color: var(--lime);
   border-radius: 2px;
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -3295,7 +3303,7 @@ p {
   height: 160px;
   border-radius: 50%;
   border: 2px dashed #D1D1D1;
-  background: #F8F8F8;
+  background: var(--wash);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -3307,15 +3315,15 @@ p {
 .setup-photo-label {
   margin-top: 12px;
   font-size: 14px;
-  color: #aaa;
+  color: var(--muted);
   font-weight: 500;
 }
 
 .setup-textarea {
   width: 100%;
   height: 140px;
-  background: #F8F8F8;
-  border: 1px solid #EDEDED;
+  background: var(--wash);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
   font-size: 16px;
@@ -3327,13 +3335,13 @@ p {
 
 .setup-textarea::placeholder,
 .setup-input::placeholder {
-  color: #ccc;
+  color: var(--ink-40);
 }
 
 .setup-input {
   width: 100%;
-  background: #F8F8F8;
-  border: 1px solid #EDEDED;
+  background: var(--wash);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 20px;
   font-size: 16px;
@@ -3344,14 +3352,14 @@ p {
 
 .setup-hint {
   font-size: 13px;
-  color: #aaa;
+  color: var(--muted);
   margin-top: 10px;
   line-height: 1.4;
 }
 
 /* Profile Info Section */
 .info-card {
-  background: white;
+  background: var(--surface);
   border-radius: 16px;
   padding: 16px 20px;
   margin-top: 12px;
@@ -3363,18 +3371,18 @@ p {
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 0.5px solid #F0F0F0;
+  border-bottom: 0.5px solid var(--border);
 }
 
 .info-label {
   font-size: 13px;
-  color: #aaa;
+  color: var(--muted);
   flex-shrink: 0;
 }
 
 .info-val {
   font-size: 13px;
-  color: #2C2C2A;
+  color: var(--ink);
   text-align: right;
   padding-left: 16px;
 }
@@ -3391,14 +3399,14 @@ p {
 }
 
 .qurated-card {
-  background: #FFF;
+  background: var(--surface);
   border-radius: 16px;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-  border-left: 4px solid #9B72CC;
+  border-left: 4px solid var(--accent-strong);
   margin-bottom: 32px;
 }
 
@@ -3409,7 +3417,7 @@ p {
 .qurated-card-title {
   font-size: 17px;
   font-weight: 700;
-  color: #2C2C2A;
+  color: var(--ink);
   margin-bottom: 4px;
 }
 
@@ -3422,7 +3430,7 @@ p {
 
 .qurated-apply-btn {
   background: #F4F0F9;
-  color: #9B72CC;
+  color: var(--accent-text);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -3432,7 +3440,7 @@ p {
 }
 
 .invite-card {
-  background: #FFF;
+  background: var(--surface);
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -3446,7 +3454,7 @@ p {
 .invite-card-title {
   font-size: 17px;
   font-weight: 700;
-  color: #2C2C2A;
+  color: var(--ink);
   margin-bottom: 4px;
 }
 
@@ -3465,20 +3473,20 @@ p {
 .invite-dot {
   aspect-ratio: 1;
   border-radius: 50%;
-  background: #F0F0F0;
+  background: var(--wash-2);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .invite-dot.active {
-  background: #9B72CC;
+  background: var(--accent-strong);
 }
 
 .invite-share-btn {
   width: 100%;
   background: #F7F4F0;
-  color: #2C2C2A;
+  color: var(--ink);
   border: 1px solid #ECEAE4;
   padding: 14px;
   border-radius: 12px;
@@ -3488,7 +3496,7 @@ p {
 }
 
 .settings-card {
-  background: #FFF;
+  background: var(--surface);
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
@@ -3502,7 +3510,7 @@ p {
   padding: 18px 20px;
   border-bottom: 1px solid #F7F4F0;
   font-size: 15px;
-  color: #2C2C2A;
+  color: var(--ink);
   cursor: pointer;
 }
 
@@ -3547,7 +3555,7 @@ p {
 .matches-section-title {
   font-size: 14px;
   font-weight: 700;
-  color: #333;
+  color: var(--ink);
   margin: 16px 24px 8px;
 }
 
@@ -3605,7 +3613,7 @@ p {
 .match-thumbnail-heart svg {
   width: 12px;
   height: 12px;
-  fill: #9B72CC;
+  fill: var(--accent-text);
 }
 
 .match-new-dot {
@@ -3614,7 +3622,7 @@ p {
   right: -2px;
   width: 10px;
   height: 10px;
-  background: #C89FDB;
+  background: var(--accent-bright);
   border-radius: 50%;
   border: 2px solid var(--bg-color);
 }
@@ -3628,13 +3636,13 @@ p {
 }
 
 .msg-badge-new {
-  background: #E2FF74;
-  color: #2D2A2B;
+  background: var(--lime);
+  color: var(--on-bright);
 }
 
 .msg-badge-unread {
-  background: #C89FDB;
-  color: #FFF;
+  background: var(--accent-bright);
+  color: var(--on-accent);
 }
 
 .msg-avatar {
@@ -3652,7 +3660,7 @@ p {
   left: 0;
   width: 100%;
   height: 100%;
-  background: #FAFAFA;
+  background: var(--surface);
   z-index: 3000;
   display: flex;
   flex-direction: column;
@@ -3691,7 +3699,7 @@ p {
 .match-intro-heart {
   position: absolute;
   font-size: 48px;
-  color: #C89FDB;
+  color: var(--accent-text);
   animation: pulseHeart 2s infinite;
 }
 
@@ -3703,7 +3711,7 @@ p {
 
 .match-intro-pm {
   padding: 24px;
-  background: #FFF;
+  background: var(--surface);
   border-top-left-radius: 24px;
   border-top-right-radius: 24px;
   box-shadow: 0 -4px 16px rgba(0,0,0,0.05);
@@ -3724,11 +3732,11 @@ p {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: #C89FDB;
+  background: var(--accent-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #FFF;
+  color: var(--on-accent);
   font-weight: 700;
   font-size: 10px;
   flex-shrink: 0;
@@ -3741,7 +3749,7 @@ p {
   border-top-left-radius: 4px;
   font-size: 14px;
   line-height: 1.5;
-  color: #333;
+  color: var(--ink);
 }
 
 .match-intro-input-wrap {
@@ -3751,25 +3759,25 @@ p {
 
 .match-intro-input {
   flex: 1;
-  border: 1px solid #EEE;
+  border: 1px solid var(--border);
   border-radius: 24px;
   padding: 12px 16px;
   font-size: 14px;
-  background: #FAFAFA;
+  background: var(--wash);
   font-family: 'Pretendard', sans-serif;
   outline: none;
 }
 
 .match-intro-input:focus {
-  border-color: #C89FDB;
+  border-color: var(--accent-text);
 }
 
 .match-intro-send {
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #9B72CC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border: none;
   display: flex;
   align-items: center;
@@ -3787,9 +3795,9 @@ p {
   text-align: center;
   padding: 14px 16px;
   margin-bottom: 8px;
-  background: #FFF;
-  border: 1px solid #C89FDB;
-  color: #C89FDB;
+  background: var(--surface);
+  border: 1px solid var(--accent-soft);
+  color: var(--accent-text);
   border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -3798,8 +3806,8 @@ p {
   font-family: 'Pretendard', sans-serif;
 }
 .pm-choice-btn:active {
-  background: #C89FDB;
-  color: #FFF;
+  background: var(--accent-soft);
+  color: var(--on-accent);
 }
 
 /* Regular Match Option Buttons */
@@ -3809,9 +3817,9 @@ p {
   margin: 6px auto;
   padding: 14px 20px;
   border-radius: 16px;
-  border: 1.5px solid #C89FDB;
-  background: white;
-  color: #9B72CC;
+  border: 1.5px solid var(--accent-soft);
+  background: var(--surface);
+  color: var(--accent-text);
   font-size: 15px;
   font-family: 'Pretendard', sans-serif;
   font-weight: 500;
@@ -3945,7 +3953,7 @@ p {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: #9B72CC;
+  background: var(--accent-fill);
   border: none;
   cursor: pointer;
   display: flex;
@@ -3985,8 +3993,8 @@ p {
   bottom: -6px;
   width: 14px;
   height: 14px;
-  color: #fff;
-  background: #9B72CC;
+  color: var(--on-accent);
+  background: var(--accent-fill);
   border-radius: 50%;
   padding: 1px;
   box-sizing: border-box;
@@ -4005,7 +4013,7 @@ p {
   padding: 12px 14px;
   border: 1px solid var(--border);
   border-radius: 12px;
-  background: #FAFAFA;
+  background: var(--wash);
   font-family: inherit;
   font-size: 14px;
   line-height: 1.6;
@@ -4015,7 +4023,7 @@ p {
 
 .heart-compose-textarea:focus {
   outline: none;
-  border-color: #C89FDB;
+  border-color: var(--accent-text);
 }
 
 /* 받은 하트 리스트의 안읽음 점 */
@@ -4024,7 +4032,7 @@ p {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #C89FDB;
+  background: var(--accent-bright);
 }
 
 /* Library Screen */
@@ -4076,21 +4084,21 @@ p {
 .invite-count-text {
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--ink);
 }
 .invite-count-text span {
-  color: #9B72CC;
+  color: var(--accent-text);
 }
 .invite-progress-bg {
   width: 100%;
   height: 4px;
-  background: #EEE;
+  background: var(--wash-2);
   border-radius: 2px;
   overflow: hidden;
 }
 .invite-progress-fill {
   height: 100%;
-  background: #9B72CC;
+  background: var(--accent-strong);
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -4170,7 +4178,7 @@ p {
   justify-content: space-between;
 }
 .invite-inner-card {
-  background: white;
+  background: var(--surface);
   border-radius: 12px;
   padding: 20px 20px 16px;
   width: 100%;
@@ -4198,7 +4206,7 @@ p {
 }
 .invite-timer {
   font-size: 12px;
-  color: #999;
+  color: var(--muted);
   margin-top: 4px;
 }
 .invite-actions {
@@ -4222,7 +4230,7 @@ p {
 }
 .invite-btn-share {
   background: #4A3060;
-  color: white;
+  color: var(--on-accent);
   border-radius: 100px;
   font-size: 13px;
   padding: 10px;
@@ -4237,7 +4245,7 @@ p {
   background: #9B7FD4;
 }
 .state-unused .envelope-flap { background: #8A6FC4; }
-.state-unused .invite-circle { background: white; }
+.state-unused .invite-circle { background: var(--surface); }
 .invite-number {
   color: rgba(255,255,255,0.9);
   font-size: 13px;
@@ -4246,7 +4254,7 @@ p {
 .use-invite-btn {
   background: rgba(255,255,255,0.2);
   border: none;
-  color: white;
+  color: var(--on-accent);
   border-radius: 100px;
   padding: 8px 16px;
   font-size: 13px;
@@ -4262,7 +4270,7 @@ p {
 /* Notice */
 .invite-notice-text {
   font-size: 12px;
-  color: #999;
+  color: var(--muted);
   line-height: 1.6;
 }
 
@@ -4279,11 +4287,11 @@ p {
   align-items: center;
   gap: 12px;
   font-size: 14px;
-  color: #333;
+  color: var(--ink);
   font-weight: 500;
 }
 .qurated-plan-card {
-  background: white;
+  background: var(--surface);
   border: 1.5px solid #E0D0F0;
   border-radius: 16px;
   padding: 20px;
@@ -4296,8 +4304,8 @@ p {
   background: #F8F0FC;
 }
 .qurated-plan-card.premium {
-  border-color: #9B72CC;
-  background: white;
+  border-color: var(--accent-text);
+  background: var(--surface);
 }
 .qurated-plan-card.premium.selected {
   background: rgba(155, 114, 204, 0.05);
@@ -4306,8 +4314,8 @@ p {
   position: absolute;
   top: -12px;
   right: 16px;
-  background: #9B72CC;
-  color: white;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-size: 11px;
   font-weight: 700;
   padding: 4px 12px;
@@ -4336,7 +4344,7 @@ p {
 
 /* Meetup search bar */
 #meetup-search-input:focus {
-  border-color: #9B72CC;
+  border-color: var(--accent-text);
   box-shadow: 0 0 0 3px rgba(155, 114, 204, 0.12);
 }
 
@@ -4397,14 +4405,14 @@ p {
 
 .bridge-people-more {
   font-size: 12px;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-left: 8px;
   line-height: 28px;
 }
 
 .bridge-people-label {
   font-size: 13px;
-  color: #6E696B;
+  color: var(--muted-deep);
 }
 
 .bridge-title {
@@ -4425,7 +4433,7 @@ p {
 
 .bridge-meta {
   font-size: 13px;
-  color: #6E696B;
+  color: var(--muted-deep);
   /* 남는 높이를 흡수해 CTA를 카드 바닥에 붙인다. */
   margin-bottom: auto;
 }
@@ -4439,8 +4447,8 @@ p {
   padding: 13px 20px;
   border: none;
   /* 흰 글자를 얹으므로 #9B72CC(3.70:1)가 아니라 한 단 어두운 채움을 쓴다. */
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   border-radius: 14px;
   font-family: inherit;
   font-size: 15px;
@@ -4461,7 +4469,7 @@ p {
   width: 10px;
   z-index: 5;
   border-radius: 6px 0 0 6px;
-  background: linear-gradient(to right, #C89FDB, #B98FD0);
+  background: linear-gradient(to right, var(--accent-soft), var(--accent-strong));
 }
 
 .bridge-card .book-spine-soft::after {
@@ -4493,7 +4501,9 @@ p {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  /* DESIGN.md: Lavender 채움 위에는 Ink 하트. 흰 하트는 2.23:1로 통과 못 한다. */
+  /* DESIGN.md: Lavender 채움 위에는 Ink 하트. 흰 하트는 2.23:1로 통과 못 한다.
+     TODO(다크): --accent-soft 가 다크에서 어두워지므로 이 조합은 다크 컴포넌트
+     패스에서 재검토 (DESIGN.md §5: 흰 하트 원하면 채움을 --accent-fill 로). */
   background: #C89FDB;
   color: #2D2A2B;
   display: flex;
@@ -4552,7 +4562,7 @@ p {
 .confirm-sheet-body {
   font-size: 14px;
   line-height: 1.7;
-  color: #6E696B;
+  color: var(--muted-deep);
   word-break: keep-all;
   margin-bottom: 24px;
 }
@@ -4626,11 +4636,11 @@ p {
   text-align: center;
   font-size: 13px;
   line-height: 1.9;
-  color: #6E696B;
+  color: var(--muted-deep);
 }
 
 .reactions-intro-mark--heart {
-  color: #8960B8;
+  color: var(--accent-text);
   font-size: 15px;
 }
 
@@ -4642,8 +4652,8 @@ p {
   border: none;
   border-radius: 14px;
   /* 흰 글자를 얹으므로 한 단 어두운 채움 (4.50:1) */
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -4657,7 +4667,7 @@ p {
 .confirm-sheet .sheet-btn:focus-visible,
 .reactions-intro-btn:focus-visible,
 .bridge-cta:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
   border-radius: 14px;
 }
@@ -4716,8 +4726,8 @@ p {
 /* 물러나는 쪽이 기본값이다. 되돌릴 수 없는 행동을 기본 버튼으로 두지 않는다. */
 .sheet-btn--ghost {
   border: none;
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
 }
 
 /* 되돌릴 수 없는 쪽. 이 제품에서 거절은 죄가 아니라 빨강으로 겁주지 않고,
@@ -4764,7 +4774,7 @@ p {
 }
 
 .prof-tail-closebook:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
 }
 
@@ -4811,7 +4821,7 @@ p {
 }
 
 .safety-link:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -4820,7 +4830,7 @@ p {
 .safety-sheet .safety-sheet-lead {
   font-size: 13px;
   line-height: 1.6;
-  color: #6E696B;
+  color: var(--muted-deep);
   word-break: keep-all;
   margin: 4px 0 16px;
 }
@@ -4848,7 +4858,7 @@ p {
 }
 
 .safety-sheet-row:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -4860,8 +4870,8 @@ p {
   margin-top: 10px;
   border: none;
   border-radius: 14px;
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -4869,7 +4879,7 @@ p {
 }
 
 .safety-sheet-cancel:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
 }
 
@@ -4908,7 +4918,7 @@ p {
 }
 
 .revisit-row:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -4926,7 +4936,7 @@ p {
 
 .revisit-row.is-closed .revisit-name,
 .revisit-row.is-closed .revisit-line {
-  color: #8B8689;
+  color: var(--muted);
 }
 
 .revisit-avatar {
@@ -4954,7 +4964,7 @@ p {
 .revisit-line {
   font-size: 12px;
   line-height: 1.6;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-top: 2px;
   display: -webkit-box;
   -webkit-line-clamp: 1;
@@ -4970,12 +4980,12 @@ p {
 
 .revisit-mark--paged {
   /* 페이퍼 위 4.52:1 */
-  color: #8960B8;
+  color: var(--accent-text);
   font-size: 16px;
 }
 
 .revisit-mark--closed {
-  color: #6E696B;
+  color: var(--muted-deep);
   border: 1px solid var(--border);
   border-radius: 999px;
   padding: 4px 8px;
@@ -4985,7 +4995,7 @@ p {
 .revisit-chevron {
   width: 16px;
   height: 16px;
-  color: #A9A4A6;
+  color: var(--ink-40);
   flex-shrink: 0;
 }
 
@@ -5017,7 +5027,7 @@ p {
 }
 
 .prof-reopen-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
 }
 
@@ -5028,7 +5038,7 @@ p {
 .location-note {
   font-size: 13px;
   line-height: 1.7;
-  color: #6E696B;
+  color: var(--muted-deep);
   word-break: keep-all;
   margin: 0 0 14px;
 }
@@ -5045,10 +5055,10 @@ p {
   gap: 8px;
   min-height: 44px;
   padding: 11px 18px;
-  border: 1.5px solid #8960B8;
+  border: 1.5px solid var(--accent-text);
   border-radius: 14px;
   background: transparent;
-  color: #8960B8;
+  color: var(--accent-text);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -5068,7 +5078,7 @@ p {
 
 .location-btn:focus-visible,
 .location-banner-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
 }
 
@@ -5083,14 +5093,14 @@ p {
 .location-icon {
   width: 18px;
   height: 18px;
-  color: #8960B8;
+  color: var(--accent-text);
   flex-shrink: 0;
 }
 
 .location-text {
   font-size: 15px;
   font-weight: 600;
-  color: #2D2A2B;
+  color: var(--ink);
 }
 
 /* ── 미설정 유도 배너 ────────────────────────────────── */
@@ -5111,7 +5121,7 @@ p {
 .location-banner-icon {
   width: 20px;
   height: 20px;
-  color: #8960B8;
+  color: var(--accent-text);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -5125,14 +5135,14 @@ p {
   font-size: 14px;
   font-weight: 600;
   line-height: 1.6;
-  color: #2D2A2B;
+  color: var(--ink);
   word-break: keep-all;
 }
 
 .location-banner-sub {
   font-size: 12px;
   line-height: 1.6;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-top: 4px;
   word-break: keep-all;
 }
@@ -5147,8 +5157,8 @@ p {
   border: none;
   border-radius: 14px;
   /* 흰 글자를 얹으므로 4.50:1 채움 */
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -5214,7 +5224,7 @@ p {
   padding: 4px 10px;
   border-radius: 999px;
   background: rgba(45, 42, 43, 0.55);
-  color: #FFF;
+  color: var(--on-accent);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.02em;
@@ -5241,7 +5251,7 @@ p {
 
 .prof-header-banner:focus-visible,
 .prof-header-avatar:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 3px;
 }
 
@@ -5278,7 +5288,7 @@ p {
   align-items: center;
   justify-content: center;
   background: rgba(28, 24, 26, 0.42);
-  color: #FFF;
+  color: var(--on-accent);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
@@ -5363,7 +5373,7 @@ p {
 }
 
 .photo-lightbox-dot.active {
-  background: #FFF;
+  background: var(--surface);
 }
 
 
@@ -5373,7 +5383,7 @@ p {
   -webkit-appearance: none;
   background: none;
   border: none;
-  color: #8960B8;
+  color: var(--accent-text);
   min-width: 44px;
   min-height: 44px;
   padding: 4px;
@@ -5390,7 +5400,7 @@ p {
 }
 
 .profile-settings-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -5407,7 +5417,7 @@ p {
   border: 1px solid var(--border);
   border-radius: 14px;
   background: transparent;
-  color: #8960B8;
+  color: var(--accent-text);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -5421,7 +5431,7 @@ p {
 
 .profile-edit-btn:focus-visible,
 .profile-edit-done:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
   border-radius: 14px;
 }
@@ -5434,7 +5444,7 @@ p {
   border: none;
   min-height: 44px;
   padding: 0 4px;
-  color: #8960B8;
+  color: var(--accent-text);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -5480,7 +5490,7 @@ p {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-bottom: 6px;
 }
 
@@ -5492,17 +5502,17 @@ p {
   display: block;
   font-size: 12px;
   line-height: 1.6;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-top: 6px;
 }
 
 .edit-field-hint.is-locked {
-  color: #8960B8;
+  color: var(--accent-text);
 }
 
 .edit-field .input-field:disabled {
   background: #F3F0F1;
-  color: #8B8689;
+  color: var(--muted);
   cursor: default;
 }
 
@@ -5512,7 +5522,7 @@ p {
 .edit-field-readonly {
   padding: 14px 0 6px;
   font-size: 16px;
-  color: #948F91;
+  color: var(--ink-40);
   border-bottom: 1px dashed var(--border);
 }
 
@@ -5546,7 +5556,7 @@ p {
 }
 
 .edit-section-row:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -5561,7 +5571,7 @@ p {
   flex: 1;
   min-width: 0;
   font-size: 13px;
-  color: #6E696B;
+  color: var(--muted-deep);
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5572,7 +5582,7 @@ p {
   flex-shrink: 0;
   width: 16px;
   height: 16px;
-  color: #8960B8;
+  color: var(--accent-text);
 }
 
 .edit-section-note {
@@ -5581,7 +5591,7 @@ p {
   border-radius: 14px;
   font-size: 13px;
   line-height: 1.7;
-  color: #6E696B;
+  color: var(--muted-deep);
   word-break: keep-all;
 }
 
@@ -5599,7 +5609,7 @@ p {
 .sub-editor-note {
   font-size: 13px;
   line-height: 1.7;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-bottom: 16px;
 }
 
@@ -5633,8 +5643,8 @@ p {
   margin-top: 20px;
   border: none;
   border-radius: 14px;
-  background: #8D64BC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -5652,7 +5662,7 @@ p {
 
 .chapter-summary-top {
   font-size: 13px;
-  color: #6E696B;
+  color: var(--muted-deep);
   margin-bottom: 8px;
 }
 
@@ -5688,7 +5698,7 @@ p {
 }
 
 .chapter-q-row:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -5696,7 +5706,7 @@ p {
   flex-shrink: 0;
   font-size: 12px;
   font-weight: 600;
-  color: #8960B8;
+  color: var(--accent-text);
   line-height: 1.6;
 }
 
@@ -5718,7 +5728,7 @@ p {
   display: block;
   font-size: 12px;
   line-height: 1.6;
-  color: #8B8689;
+  color: var(--muted);
   margin-top: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5729,7 +5739,7 @@ p {
   flex-shrink: 0;
   width: 15px;
   height: 15px;
-  color: #8960B8;
+  color: var(--accent-text);
   margin-top: 2px;
 }
 
@@ -5783,7 +5793,7 @@ p {
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 600;
-  color: #6E696B;
+  color: var(--muted-deep);
   white-space: nowrap;
 }
 
@@ -5813,15 +5823,15 @@ p {
 }
 
 .chapter-tab.is-active {
-  background: #FFFFFF;
+  background: var(--surface);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
 }
 
-.chapter-tab.is-active .chapter-label { color: #8960B8; }
+.chapter-tab.is-active .chapter-label { color: var(--accent-text); }
 .chapter-tab.is-active .chapter-pct { color: var(--text-dark); }
 
 .chapter-tab:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -5868,7 +5878,7 @@ p {
   gap: 7px;
   font-size: 14px;
   font-weight: 700;
-  color: #2D2A2B;
+  color: var(--ink);
 }
 
 .join-status-dot {
@@ -5882,7 +5892,7 @@ p {
   margin-top: 5px;
   font-size: 13px;
   line-height: 1.5;
-  color: #6E696B;
+  color: var(--muted-deep);
   word-break: keep-all;
 }
 
@@ -5890,7 +5900,7 @@ p {
   display: block;
   margin-top: 4px;
   font-size: 12px;
-  color: #948F91;
+  color: var(--ink-40);
 }
 
 .join-nickname-tip {
@@ -5899,17 +5909,17 @@ p {
   background: rgba(137, 96, 184, 0.08);
   font-size: 13px;
   line-height: 1.55;
-  color: #4A4547;
+  color: var(--ink-soft);
   word-break: keep-all;
 }
 
-.join-nickname-tip b { color: #8960B8; }
+.join-nickname-tip b { color: var(--accent-text); }
 
 .join-count-note {
   margin-left: 6px;
   font-size: 12px;
   font-weight: 500;
-  color: #948F91;
+  color: var(--ink-40);
 }
 
 /* 확정 전에는 다른 참여자를 볼 수 없다. 빈칸 대신 이유를 세워둔다. */
@@ -5920,7 +5930,7 @@ p {
   padding: 16px;
   border: 1px dashed var(--border);
   border-radius: 12px;
-  color: #948F91;
+  color: var(--ink-40);
   font-size: 13px;
   word-break: keep-all;
 }
@@ -5946,7 +5956,7 @@ p {
   margin-left: 8px;
   font-size: 12px;
   font-weight: 500;
-  color: #8960B8;
+  color: var(--accent-text);
   background: rgba(137, 96, 184, 0.12);
   padding: 3px 9px;
   border-radius: 999px;
@@ -5965,7 +5975,7 @@ p {
 .applicant-empty {
   padding: 18px 0;
   font-size: 13px;
-  color: #948F91;
+  color: var(--ink-40);
 }
 
 .applicant-row {
@@ -5999,7 +6009,7 @@ p {
 .applicant-time {
   margin-top: 2px;
   font-size: 12px;
-  color: #948F91;
+  color: var(--ink-40);
 }
 
 .applicant-approve {
@@ -6010,8 +6020,8 @@ p {
   padding: 8px 16px;
   border: none;
   border-radius: 10px;
-  background: #9B72CC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -6024,7 +6034,7 @@ p {
 }
 
 .applicant-approve:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6050,7 +6060,7 @@ p {
   gap: 10px;
   font-size: 13px;
   line-height: 1.5;
-  color: #4A4547;
+  color: var(--ink-soft);
   word-break: keep-all;
 }
 
@@ -6060,7 +6070,7 @@ p {
   height: 20px;
   border-radius: 50%;
   background: rgba(137, 96, 184, 0.14);
-  color: #8960B8;
+  color: var(--accent-text);
   font-size: 11px;
   font-weight: 700;
   display: flex;
@@ -6068,7 +6078,7 @@ p {
   justify-content: center;
 }
 
-.apply-step b { color: #8960B8; }
+.apply-step b { color: var(--accent-text); }
 
 /* ── 모임 취소 · 호스트 액션 ─────────────────────────── */
 .meetup-cancelled-banner {
@@ -6115,7 +6125,7 @@ p {
 }
 
 .host-action-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6132,12 +6142,12 @@ p {
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #948F91;
+  color: var(--ink-40);
   cursor: pointer;
 }
 
 .profile-block-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6158,7 +6168,7 @@ p {
 }
 
 .applicant-remove:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6186,7 +6196,7 @@ p {
   border-bottom: none;
   border-radius: 12px 12px 0 0;
   background: transparent;
-  color: #948F91;
+  color: var(--ink-40);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -6197,13 +6207,13 @@ p {
 
 .pe-tab.is-active {
   background: var(--surface);
-  color: #8960B8;
+  color: var(--accent-text);
   /* 펼친 페이지와 이어 붙는다 — 아래 경계선을 지운다. */
   box-shadow: 0 1px 0 0 var(--surface);
 }
 
 .pe-tab:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: -2px;
 }
 
@@ -6235,7 +6245,7 @@ p {
   margin: 24px 0 10px;
   font-size: 14px;
   font-weight: 600;
-  color: #6E696B;
+  color: var(--muted-deep);
 }
 
 .settings-basics .edit-field:first-child { margin-top: 0; }
@@ -6272,8 +6282,8 @@ p {
   padding: 12px 16px;
   border: none;
   border-radius: 10px;
-  background: #9B72CC;
-  color: #FFF;
+  background: var(--accent-fill);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
@@ -6282,12 +6292,12 @@ p {
 
 .nickname-save:disabled {
   background: #E4E1E2;
-  color: #A9A4A6;
+  color: var(--ink-40);
   cursor: default;
 }
 
 .nickname-save:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6310,7 +6320,7 @@ p {
 }
 
 .join-cancel-btn:focus-visible {
-  outline: 2px solid #8960B8;
+  outline: 2px solid var(--accent-text);
   outline-offset: 2px;
 }
 
@@ -6318,7 +6328,7 @@ p {
 .attendee-hint {
   margin-top: 12px;
   font-size: 12px;
-  color: #948F91;
+  color: var(--ink-40);
   word-break: keep-all;
 }
 
@@ -6363,7 +6373,7 @@ p {
   border: none;
   border-radius: 18px;
   background: rgba(255, 255, 255, 0.16);
-  color: #E2FF74;
+  color: var(--lime);
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -6371,7 +6381,7 @@ p {
 }
 
 .undo-toast-btn:focus-visible {
-  outline: 2px solid #E2FF74;
+  outline: 2px solid var(--lime);
   outline-offset: 2px;
 }
 
