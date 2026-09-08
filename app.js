@@ -3023,14 +3023,14 @@ window.switchTab = function (tabName) {
       ${_dbgItem('window.__debugAgeBookHearts()', '하트30일')}
       ${_dbgItem('window.__debugResetArchive()', '아카잠금')}
     </span>`;
-    // 받은 하트 스트립 — 대화가 시작된 상대(matched)·덮은 하트·지난 하트는 뺀다.
-    // 다 열람해도 섹션과 '전체 보기'는 남는다: 좋아요를 준 사람은 사라지지 않는다.
+    // '새로운 하트' 스트립 — 최근에 받은 하트를 보여준다. 대화가 시작된
+    // 상대(matched)·덮은 하트·지난 하트는 뺀다. 다 열람해도 섹션과
+    // '전체 보기'는 남는다(전체 보기 화면 제목은 '받은 하트').
     const _freshHearts = receivedBookHearts()
       .filter(h => !isBookHeartClosed(h) && !isBookHeartArchived(h));
-    const _hasUnreadHeart = _freshHearts.some(h => h.status === 'unread');
     const _freshHeartsHTML = _freshHearts.length === 0 ? '' : `
         <div style="display: flex; justify-content: space-between; align-items: baseline; padding-right: 24px;">
-          <div class="matches-section-title" style="margin-bottom: 0;">받은 하트</div>
+          <div class="matches-section-title" style="margin-bottom: 0;">새로운 하트</div>
           <div onclick="openReceivedHeartsList()" style="font-size: 13px; color: #9B72CC; font-weight: 600; cursor: pointer;">전체 보기 →</div>
         </div>
         <div class="matches-scroll-container" style="margin-top: 12px;">
