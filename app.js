@@ -1322,7 +1322,7 @@ Object.assign(MY_ANSWERS, {
 
 // ── ♥ 페이지 상태 · 카드 인터랙션 ──────────────────────
 window.likedPages = window.likedPages || {};
-const chapterColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
+const chapterColors = { 1: 'var(--chap-1)', 2: 'var(--chap-2)', 3: 'var(--chap-3)' };
 
 window.discoverFilterType = '전체';
 window.showLikedCollection = false;
@@ -1463,7 +1463,7 @@ function getProgressBarHTML(step) {
 }
 
 function getTabWatermarkHTML() {
-  return `<div class="tab-watermark">p<svg viewBox="0 0 24 24" width="9" height="9" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:1px;left:-1px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#9B72CC"/></svg>2</div>`;
+  return `<div class="tab-watermark">p<svg viewBox="0 0 24 24" width="9" height="9" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:1px;left:-1px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="var(--accent-strong)"/></svg>2</div>`;
 }
 
 // Single source of truth for the title/subtitle/icons row on every
@@ -1571,8 +1571,8 @@ function renderScreen(screenId) {
                spellcheck="false" oninput="window.clearInviteCodeError()"
                onpaste="window.handleInviteCodePaste(event)" />
 
-        <div id="invite-code-error" style="display:none; margin-top:12px; font-size:13px; color:#E05B5B; line-height:1.5;"></div>
-        <div id="invite-code-success" style="display:none; margin-top:12px; text-align:center; font-size:14px; font-weight:600; color:#9B72CC; line-height:1.5;"></div>
+        <div id="invite-code-error" style="display:none; margin-top:12px; font-size:13px; color:var(--danger); line-height:1.5;"></div>
+        <div id="invite-code-success" style="display:none; margin-top:12px; text-align:center; font-size:14px; font-weight:600; color:var(--accent-text); line-height:1.5;"></div>
 
         <div style="margin-top:24px; text-align:center; color:var(--text-muted); font-size:13px; line-height:1.6;">
           받은 메시지를 그대로 붙여넣어도<br/>코드만 알아서 입력돼요 💜
@@ -1723,7 +1723,7 @@ function renderScreen(screenId) {
       <div class="content-padding scroll-y">
         <h1 style="margin-top: 20px;">프로필 사진</h1>
         <div class="setup-photo-circle" onclick="alert('사진 선택 기능은 다음 단계에서 구현됩니다.')">
-          <i data-lucide="camera" style="width:40px; color:#aaa;"></i>
+          <i data-lucide="camera" style="width:40px; color:var(--ink-40);"></i>
           <div class="setup-photo-label">프로필 사진을 추가해주세요</div>
         </div>
       </div>
@@ -1776,7 +1776,7 @@ function renderScreen(screenId) {
       <div class="content-padding" style="display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; height:60%;">
         <div style="font-size:32px; margin-bottom:16px;">😊</div>
         <h1 style="margin-bottom:12px;">조금 더 나를 소개해볼까요?</h1>
-        <p style="color:#858082; line-height:1.6; margin-bottom:40px;">
+        <p style="color:var(--muted); line-height:1.6; margin-bottom:40px;">
           다음 항목들은 선택이에요.<br/>
           입력하면 프로필이 더 풍성해져요.
         </p>
@@ -2250,8 +2250,8 @@ window.openAnswerRevealModal = function (profileId, qId) {
     const titles = { 1: '내가 생각하는 나', 2: '내가 생각하는 사랑', 3: '내가 생각하는 우리의 미래' };
     return `
       <div class="nb-cover-page" style="padding: 28px 28px 48px; background: transparent; display: flex; flex-direction: column; align-items: flex-start; text-align: left;">
-        <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 16px; color: #2C2C2A;">Chapter ${ch}</div>
-        <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 20px; color: #2C2C2A;">${titles[ch]}</div>
+        <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 16px; color: var(--ink);">Chapter ${ch}</div>
+        <div style="font-family: 'Noto Serif KR', serif; font-weight: 400; font-size: 20px; color: var(--ink);">${titles[ch]}</div>
         <div style="width: 32px; height: 1.5px; background: ${clr}; margin-top: 14px;"></div>
       </div>
     `;
@@ -2268,7 +2268,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
         <div class="book-page-answer">${applyHighlights(formatAnswerText(ans.text, q))}</div>
         ${ans.polaroid ? `
           <div style="display:flex;justify-content:center;margin-top:32px;">
-            <div style="background:#FFF;padding:8px 8px 28px 8px;box-shadow:2px 4px 14px rgba(0,0,0,0.11);transform:rotate(-1.5deg);width:160px;">
+            <div style="background:var(--surface);padding:8px 8px 28px 8px;box-shadow:2px 4px 14px rgba(0,0,0,0.11);transform:rotate(-1.5deg);width:160px;">
               <img src="${ans.polaroid}" style="width:100%;height:144px;object-fit:cover;display:block;"/>
             </div>
           </div>` : ''}
@@ -2287,7 +2287,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
     const isAnswer = pg.type === 'answer';
 
     const chapterNum = isCover ? pg.chapter : QUESTIONS.find(q => q.id === pg.qId).chapter;
-    const chapColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
+    const chapColors = { 1: 'var(--chap-1)', 2: 'var(--chap-2)', 3: 'var(--chap-3)' };
     const decorColor = chapColors[chapterNum];
 
     const pidStr = (profileId === 'myProfile' || profileId === 1) ? 'myProfile' : profileId;
@@ -2301,19 +2301,19 @@ window.openAnswerRevealModal = function (profileId, qId) {
     const answerPages = pages.filter(p => p.type === 'answer');
     const answerIdx = isAnswer ? answerPages.findIndex(ap => ap.qId === pg.qId) : -1;
     const indicatorHTML = isAnswer
-      ? `<div style="position:absolute;bottom:24px;right:24px;font-size:11px;color:#ccc;letter-spacing:0.06em;z-index:10;pointer-events:none;">${answerIdx + 1} / ${answerPages.length}</div>`
+      ? `<div style="position:absolute;bottom:24px;right:24px;font-size:11px;color:var(--ink-40);letter-spacing:0.06em;z-index:10;pointer-events:none;">${answerIdx + 1} / ${answerPages.length}</div>`
       : '';
 
     const gradients = {
       cover: {
-        1: 'linear-gradient(to right, #E8FF90 0%, #f5ffd6 25%, #ffffff 55%)',
-        2: 'linear-gradient(to right, #FFD5BD 0%, #ffede0 25%, #ffffff 55%)',
-        3: 'linear-gradient(to right, #D3B2E2 0%, #ecdff5 25%, #ffffff 55%)'
+        1: 'linear-gradient(to right, var(--chap-1) 0%, transparent 55%)',
+        2: 'linear-gradient(to right, var(--chap-2) 0%, transparent 55%)',
+        3: 'linear-gradient(to right, var(--chap-3) 0%, transparent 55%)'
       },
       answer: {
-        1: 'linear-gradient(to right, #E8FF90 0%, #f8ffe0 8%, #ffffff 25%)',
-        2: 'linear-gradient(to right, #FFD5BD 0%, #fff3ea 8%, #ffffff 25%)',
-        3: 'linear-gradient(to right, #D3B2E2 0%, #f5eefa 8%, #ffffff 25%)'
+        1: 'linear-gradient(to right, var(--chap-1) 0%, transparent 25%)',
+        2: 'linear-gradient(to right, var(--chap-2) 0%, transparent 25%)',
+        3: 'linear-gradient(to right, var(--chap-3) 0%, transparent 25%)'
       }
     };
     const bgGradient = isCover ? gradients.cover[chapterNum] : gradients.answer[chapterNum];
@@ -2324,7 +2324,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
           <path id="heart-${pageId}"
             d="M16 28S2 20 2 11a7 7 0 0 1 14 0 7 7 0 0 1 14 0c0 9-14 17-14 17z"
             fill="${isLiked ? decorColor : 'none'}"
-            stroke="${isLiked ? 'none' : '#ccc'}"
+            stroke="${isLiked ? 'none' : 'var(--ink-40)'}"
             stroke-width="2"/>
         </svg>
       </button>
@@ -2334,11 +2334,11 @@ window.openAnswerRevealModal = function (profileId, qId) {
       <div id="nb-modal" class="book-page-modal" style="background: ${bgGradient}; touch-action: pan-y;">
         <!-- Header -->
         <div class="book-page-header">
-          <button class="answer-card-close" style="background:none;border:none;cursor:pointer;padding:4px;color:#bbb;display:flex;align-items:center;z-index:9999;pointer-events:auto;">
+          <button class="answer-card-close" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--ink-40);display:flex;align-items:center;z-index:9999;pointer-events:auto;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
           <div style="flex:1;"></div>
-          ${!isCover ? `<div style="font-size:13px;color:#aaa;font-weight:400;letter-spacing:0.02em;font-family: 'Noto Serif KR', serif;">${p.name}'s</div>` : ''}
+          ${!isCover ? `<div style="font-size:13px;color:var(--ink-40);font-weight:400;letter-spacing:0.02em;font-family: 'Noto Serif KR', serif;">${p.name}'s</div>` : ''}
         </div>
 
         <!-- Page content -->
@@ -2451,8 +2451,8 @@ window.showProfileDetail = function (profileId) {
 
 window.updateHeartOnly = function (pageId, liked, chapterNum) {
   const path = document.getElementById('heart-' + pageId);
-  const chapColors = { 1: '#E8FF90', 2: '#FFD5BD', 3: '#D3B2E2' };
-  const color = chapColors[chapterNum] || '#9B72CC';
+  const chapColors = { 1: 'var(--chap-1)', 2: 'var(--chap-2)', 3: 'var(--chap-3)' };
+  const color = chapColors[chapterNum] || 'var(--accent-strong)';
 
   if (path) {
     if (liked) {
@@ -2460,7 +2460,7 @@ window.updateHeartOnly = function (pageId, liked, chapterNum) {
       path.setAttribute('stroke', 'none');
     } else {
       path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', '#ccc');
+      path.setAttribute('stroke', 'var(--ink-40)');
     }
   }
 
@@ -2511,7 +2511,7 @@ document.addEventListener('touchstart', function (e) {
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 64px;
-      color: #9B72CC;
+      color: var(--accent-text);
       opacity: 0.85;
       z-index: 5;
       pointer-events: none;
@@ -2780,7 +2780,7 @@ window.showLockedProfileModal = function () {
   modal.innerHTML = `
       <div class="post-onboarding-card">
         <div class="post-onboarding-title">프로필북을 먼저 작성해주세요</div>
-        <button class="post-onboarding-btn" style="background:#E2FF74; color:#2D2A2B;" onclick="dismissLockedModal(); navigateTo('profile-setup-1');">프로필북 작성하기</button>
+        <button class="post-onboarding-btn" style="background:var(--lime); color:var(--ink);" onclick="dismissLockedModal(); navigateTo('profile-setup-1');">프로필북 작성하기</button>
       </div>
     `;
   modal.addEventListener('click', (e) => {
@@ -2954,16 +2954,16 @@ window.switchTab = function (tabName) {
     contentArea.innerHTML = `
         <div class="content-padding scroll-y" style="padding-top: 10px; height: calc(100vh - 80px); height: calc(100dvh - 80px); background: var(--bg-color);">
         ${getTabHeaderHTML('모임', '', `
-          <button id="meetup-search-toggle" onclick="window._toggleMeetupSearch()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+          <button id="meetup-search-toggle" onclick="window._toggleMeetupSearch()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: var(--accent-text); display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="search" style="width: 22px; height: 22px;"></i>
           </button>
-          <button id="meetup-collection-toggle" class="folder-heart-btn" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+          <button id="meetup-collection-toggle" class="folder-heart-btn" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: var(--accent-text); display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
             <i data-lucide="archive" id="meetup-collection-toggle-icon" style="width: 24px; height: 24px;"></i>
           </button>
         `)}
         <div id="meetup-search-bar" style="display:${window._meetupSearchOpen ? 'block' : 'none'}; margin-bottom:12px;">
           <input id="meetup-search-input" type="text" value="${window._meetupSearchQuery}" placeholder="모임 검색..." oninput="window._onMeetupSearch(this.value)"
-            style="width:100%; box-sizing:border-box; padding:10px 16px; border:1.5px solid #E0D8F0; border-radius:24px; font-size:14px; font-family:inherit; outline:none; background:#fff; color:#2C2C2A;">
+            style="width:100%; box-sizing:border-box; padding:10px 16px; border:1.5px solid var(--accent-soft); border-radius:24px; font-size:14px; font-family:inherit; outline:none; background:var(--surface); color:var(--ink);">
         </div>
         <p class="tab-header-subtitle">같은 페이지의 사람들과 함께해요.</p>
         <div class="filter-section">
@@ -2981,7 +2981,7 @@ window.switchTab = function (tabName) {
         <div id="meetups-list-container"></div>
         ${getTabWatermarkHTML()}
       </div>
-      <div class="fab-add" onclick="openCreateMeetupModal()"><i data-lucide="plus" style="width:24px; height:24px; color:#FFF;"></i></div>
+      <div class="fab-add" onclick="openCreateMeetupModal()"><i data-lucide="plus" style="width:24px; height:24px; color:var(--on-accent);"></i></div>
     `;
     renderMeetupList();
 
@@ -3007,14 +3007,14 @@ window.switchTab = function (tabName) {
       _savedToggleBtn.addEventListener('click', () => {
         window.showSavedMeetups = !window.showSavedMeetups;
         const icon = document.getElementById('meetup-collection-toggle-icon');
-        if (icon) icon.style.color = window.showSavedMeetups ? '#9B72CC' : '';
+        if (icon) icon.style.color = window.showSavedMeetups ? 'var(--accent-text)' : '';
         renderMeetupList();
       });
     }
   } else if (tabName === 'messages') {
     window.flushDuePMFollowups();
     window.flushDuePMReadRequests();
-    const _dbgItem = (fn, label) => `<span style="font-size:10px; color:#9B72CC; text-decoration:underline; cursor:pointer; font-weight:600;" onclick="${fn}">${label}</span>`;
+    const _dbgItem = (fn, label) => `<span style="font-size:10px; color:var(--accent-text); text-decoration:underline; cursor:pointer; font-weight:600;" onclick="${fn}">${label}</span>`;
     const _dbg = `<span style="display:flex; gap:7px 8px; flex-wrap:wrap; justify-content:flex-end; max-width:200px;">
       ${_dbgItem('triggerPostMeetingCheckin()', '체크인')}
       ${_dbgItem('window.__debugForcePMFollowup()', '팔로업')}
@@ -3031,7 +3031,7 @@ window.switchTab = function (tabName) {
     const _freshHeartsHTML = _freshHearts.length === 0 ? '' : `
         <div style="display: flex; justify-content: space-between; align-items: baseline; padding-right: 24px;">
           <div class="matches-section-title" style="margin-bottom: 0;">새로운 하트</div>
-          <div onclick="openReceivedHeartsList()" style="font-size: 13px; color: #9B72CC; font-weight: 600; cursor: pointer;">전체 보기 →</div>
+          <div onclick="openReceivedHeartsList()" style="font-size: 13px; color: var(--accent-text); font-weight: 600; cursor: pointer;">전체 보기 →</div>
         </div>
         <div class="matches-scroll-container" style="margin-top: 12px;">
           ${_freshHearts.map(h => {
@@ -3077,7 +3077,7 @@ window.switchTab = function (tabName) {
         if (_mi && _mi.type) { for (const [k,v] of Object.entries(_em)) { if (_mi.type.includes(k)) { _icon=v; break; } } }
         return `
               <div class="message-item" onclick="openChat('${chat.id}')">
-                <div class="msg-avatar" style="background:#EDE0FF; display:flex; align-items:center; justify-content:center; font-size:22px; background-image:none;">${_icon}</div>
+                <div class="msg-avatar" style="background:var(--accent-wash); display:flex; align-items:center; justify-content:center; font-size:22px; background-image:none;">${_icon}</div>
                 <div class="msg-info">
                   <div class="msg-header-row">
                     <span class="msg-name" style="display:flex; align-items:center; gap:6px;">
@@ -3086,7 +3086,7 @@ window.switchTab = function (tabName) {
                     </span>
                     <span class="msg-time">${chat.time}</span>
                   </div>
-                  <div class="msg-preview" style="${chat.unread ? 'font-weight:700; color:#333;' : ''}">${chat.preview}</div>
+                  <div class="msg-preview" style="${chat.unread ? 'font-weight:700; color:var(--ink);' : ''}">${chat.preview}</div>
                 </div>
               </div>
             `;
@@ -3105,7 +3105,7 @@ window.switchTab = function (tabName) {
                     </span>
                     <span class="msg-time">${chat.time}</span>
                   </div>
-                  <div class="msg-preview" style="${chat.isUnread ? 'font-weight:700; color:#333;' : ''}">${chat.preview}</div>
+                  <div class="msg-preview" style="${chat.isUnread ? 'font-weight:700; color:var(--ink);' : ''}">${chat.preview}</div>
                 </div>
               </div>
             `;
@@ -3289,16 +3289,16 @@ window.renderMeetupList = function () {
       const hostAvatarHtml = organizers.slice(0, 3).map(url => `<div class="attendee-avatar" style="background-image:url('${url}'); background-size:cover; background-position:center top;"></div>`).join('');
       const communityTags = (m.tags || []).map(t => t.startsWith('#') ? t : '#' + t).join('  ');
       const ageDisplay = m.ageRange
-        ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>${m.ageRange}</div>`
-        : `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;flex-shrink:0;"></i>연령 무관</div>`;
+        ? `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:var(--muted);flex-shrink:0;"></i>${m.ageRange}</div>`
+        : `<div style="font-size:13px; color:var(--text-muted); margin-bottom:6px; display:flex; align-items:center; gap:4px;"><i data-lucide="users" style="width:14px;height:14px;stroke:var(--muted);flex-shrink:0;"></i>연령 무관</div>`;
       return `
             <div class="meetup-item fade-in" onclick="openMeetupFromList(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
-                <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: #9B72CC; background: none;">
+                <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: var(--accent-text); background: none;">
                   <i data-lucide="share" style="width: 24px; height: 24px;"></i>
                 </div>
-                <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: #9B72CC; background: none;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="#9B72CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? '#9B72CC' : 'none'}"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+                <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: var(--accent-text); background: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="var(--accent-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? 'var(--accent-strong)' : 'none'}"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
                 </div>
               </div>
               <div class="meetup-header">
@@ -3310,7 +3310,7 @@ window.renderMeetupList = function () {
               <div>
                 <div class="meetup-title">${m.title}</div>
                 ${ageDisplay}
-                ${communityTags ? `<div style="font-size:12px; color:#9B7FD4; margin-top:4px; line-height:1.8;">${communityTags}</div>` : ''}
+                ${communityTags ? `<div style="font-size:12px; color:var(--accent-text); margin-top:4px; line-height:1.8;">${communityTags}</div>` : ''}
               </div>
               <div class="meetup-footer" style="margin-top:16px;">
                 <div class="attendee-stack">${hostAvatarHtml}</div>
@@ -3326,11 +3326,11 @@ window.renderMeetupList = function () {
     return `
             <div class="meetup-item fade-in ${(!window.isMeetupHost(m) && window.getJoinStatus(m.id) !== 'none') ? 'meetup-item-rsvpd' : ''}" onclick="openMeetupFromList(${m.id})">
               <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 8px; align-items: center; z-index: 3;">
-                <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: #9B72CC; background: none;">
+                <div class="meetup-share-btn" onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="position: static; color: var(--accent-text); background: none;">
                   <i data-lucide="share" style="width: 24px; height: 24px;"></i>
                 </div>
-                <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: #9B72CC; background: none;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="#9B72CC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? '#9B72CC' : 'none'}">
+                <div class="meetup-bookmark-btn" id="bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="position: static; color: var(--accent-text); background: none;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="var(--accent-strong)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? 'var(--accent-strong)' : 'none'}">
                     <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
                   </svg>
                 </div>
@@ -3344,7 +3344,7 @@ window.renderMeetupList = function () {
               <div>
                 <div class="meetup-date">${getFeedDateString(m)}</div>
                 <div class="meetup-title">${m.title}</div>
-                <div class="meetup-location-preview" style="display:flex; align-items:center;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;flex-shrink:0;margin-right:4px;"></i>${m.shortLocation}</div>
+                <div class="meetup-location-preview" style="display:flex; align-items:center;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:var(--muted);flex-shrink:0;margin-right:4px;"></i>${m.shortLocation}</div>
                 <div class="meetup-desc">${m.desc}</div>
               </div>
               <div style="margin-top: 16px;">
@@ -3392,7 +3392,7 @@ window.renderMeetupList = function () {
 // ── 챕터 메타 · 답변 그리드 ──────────────────────────────
 function getLikedBadgeHTML(pageId) {
   const isLiked = window.likedPages && window.likedPages[pageId];
-  return `<span class="card-liked-badge" style="visibility: ${isLiked ? 'visible' : 'hidden'}; position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: #888; pointer-events: none;">♥</span>`;
+  return `<span class="card-liked-badge" style="visibility: ${isLiked ? 'visible' : 'hidden'}; position: absolute; bottom: 8px; right: 8px; font-size: 10px; color: var(--muted); pointer-events: none;">♥</span>`;
 }
 
 // Chapter names + the particle that follows them, so the lock copy reads
@@ -3413,7 +3413,7 @@ window.isChapterUnlockedForViewer = function (chapNum) {
 
 window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profileObj) {
   let html = '';
-  const chapColors = { 1: '#F0F7D4', 2: '#F7EDE3', 3: '#EDE3F5' };
+  const chapColors = { 1: 'var(--chap-1-bg)', 2: 'var(--chap-2-bg)', 3: 'var(--chap-3-bg)' };
 
   // The viewer lock only ever applies to someone else's book. 'myProfile' is
   // the profile tab, 'preview' is my own book seen as others would see it —
@@ -3460,19 +3460,19 @@ window.renderAnswersGrid = function (answersObj, isCurrentUser, profileId, profi
       const pageId = `${pidStr}_Q${q.id}`;
       if (ans) {
         if (isCurrentUser) {
-          const chapBg = chapColors[q.chapter] || '#FAFAF8';
+          const chapBg = chapColors[q.chapter] || 'var(--wash-2)';
           gHtml += `
             <div class="grid-square answered-text answer-card-thumb interactable"
                  data-page-id="${pageId}"
                  style="border-radius:12px; background: ${chapBg};">
-               <div class="q-num" style="position:absolute; top:10px; left:10px; color:#aaa;">Q.${q.id}</div>
-               <div class="answer-preview" style="color:#555; padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(formatAnswerText(ans.text, q))}</div>
+               <div class="q-num" style="position:absolute; top:10px; left:10px; color:var(--ink-40);">Q.${q.id}</div>
+               <div class="answer-preview" style="color:var(--ink-soft); padding: 28px 10px 10px 10px; text-align:left; width:100%; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;">${applyHighlights(formatAnswerText(ans.text, q))}</div>
                ${getLikedBadgeHTML(pageId)}
             </div>
           `;
         } else {
           const bgStyle = ans.polaroid ? `background-image: url('${ans.polaroid}'); background-size: cover; background-position: center; filter: blur(12px) brightness(0.85);` : '';
-          const chapBg = chapColors[q.chapter] || '#FAFAF8';
+          const chapBg = chapColors[q.chapter] || 'var(--wash-2)';
           gHtml += `
             <div ${viewerLocked ? '' : `data-page-id="${pageId}"`} class="teaser-card" style="background: ${chapBg};">
                ${ans.polaroid ? `<div style="position:absolute; top:0; left:0; width:100%; height:100%; ${bgStyle} z-index:1;"></div>` : ''}
@@ -3557,9 +3557,9 @@ window.openInputModal = function (qId) {
   } else if (q.type === 'multiple-choice') {
     const selected = Array.isArray(existingAns) ? existingAns : [];
     inputHTML = `
-        <div style="font-size:13px; color:#999; margin-bottom:12px;">정확히 ${q.limit}개를 선택해주세요.</div>
+        <div style="font-size:13px; color:var(--muted); margin-bottom:12px;">정확히 ${q.limit}개를 선택해주세요.</div>
         <div class="choice-group" id="ans-${q.id}" data-limit="${q.limit}" style="display:flex; flex-wrap:wrap; gap:8px;">
-          ${q.options.map(opt => `<button class="choice-pill ${selected.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${q.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid #eee; background:#FAFAF8; font-size:14px; color:#666; transition:0.2s;">${opt}</button>`).join('')}
+          ${q.options.map(opt => `<button class="choice-pill ${selected.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${q.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid var(--border); background:var(--wash-2); font-size:14px; color:var(--muted-deep); transition:0.2s;">${opt}</button>`).join('')}
         </div>`;
   } else if (q.type === 'compound') {
     const answers = typeof existingAns === 'object' ? existingAns : {};
@@ -3573,9 +3573,9 @@ window.openInputModal = function (qId) {
           </div>`;
       } else if (sq.type === 'multiple-choice') {
         const selArr = Array.isArray(answers[sq.id]) ? answers[sq.id] : [];
-        inputHTML += `<div style="font-size:13px; color:#999; margin-bottom:12px;">정확히 ${sq.limit}개를 선택해주세요.</div>
+        inputHTML += `<div style="font-size:13px; color:var(--muted); margin-bottom:12px;">정확히 ${sq.limit}개를 선택해주세요.</div>
           <div class="choice-group sub-q" data-sqid="${sq.id}" data-limit="${sq.limit}" style="display:flex; flex-wrap:wrap; gap:8px;">
-            ${sq.options.map(opt => `<button class="choice-pill ${selArr.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${sq.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid #eee; background:#FAFAF8; font-size:14px; color:#666; transition:0.2s;">${opt}</button>`).join('')}
+            ${sq.options.map(opt => `<button class="choice-pill ${selArr.includes(opt) ? 'selected' : ''}" onclick="toggleMultipleChoice(this, '${opt}', ${sq.limit})" style="padding:8px 14px; border-radius:100px; border:1px solid var(--border); background:var(--wash-2); font-size:14px; color:var(--muted-deep); transition:0.2s;">${opt}</button>`).join('')}
           </div>`;
       } else if (sq.type === 'choice') {
         inputHTML += `<div class="sub-q-group sub-q" data-sqid="${sq.id}">
@@ -3713,7 +3713,7 @@ window.renderBasicInfoRows = function (p, isMine, isPreview = false) {
     }
 
     const displayValue = hasValue ? f.value : '---';
-    const valStyle = hasValue ? 'color: #2C2C2A;' : 'color: #ddd;';
+    const valStyle = hasValue ? 'color: var(--ink);' : 'color: var(--ink-40);';
     const rowStyle = idx === fields.length - 1 ? 'border-bottom: none;' : '';
 
     html += `
@@ -3781,7 +3781,7 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
              ${i === 0 ? '<div class="photo-main-badge">대표</div>' : ''}
            </div>`
         : `<div class="photo-slot empty" onclick="window.addMyPhoto()">
-             <i data-lucide="plus" style="width:22px;height:22px;color:#C2C2C0;"></i>
+             <i data-lucide="plus" style="width:22px;height:22px;color:var(--ink-40);"></i>
            </div>`;
     }).join('');
     return `<div class="my-photo-grid" id="my-photo-grid">${slots}</div>`;
@@ -3796,7 +3796,7 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
   const buildCarousel = (phs, indicator) => {
     if (!phs.length) {
       return `<div class="prof-header">
-        <div class="prof-header-banner is-empty"><i data-lucide="camera" style="width:40px;height:40px;color:#C2C2C0;"></i></div>
+        <div class="prof-header-banner is-empty"><i data-lucide="camera" style="width:40px;height:40px;color:var(--ink-40);"></i></div>
       </div>`;
     }
     // 대표 사진(사진1)은 원형 썸네일 전용이다. 배너와 라이트박스는 사진2부터 —
@@ -3886,15 +3886,15 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
         <div class="profile-section-title">나의 챕터</div>
         <div class="info-card" style="padding-bottom: 24px;">
           <!-- Benefit Dashboard -->
-          <div style="margin-bottom:24px; padding:16px; background:#F8FAFE; border-radius:12px; border:1px solid #E8EEFB;">
-            <div style="font-size:13px; color:#666; margin-bottom:4px;">
+          <div style="margin-bottom:24px; padding:16px; background:var(--wash-2); border-radius:12px; border:1px solid var(--border);">
+            <div style="font-size:13px; color:var(--muted-deep); margin-bottom:4px;">
               📖 이번 주 열람 가능한 프로필북
               <span style="font-size:13px; font-weight:700; color:var(--text-dark); background: linear-gradient(transparent 60%, rgba(226,255,116,0.7) 60%); padding: 0 3px;">
                 ${benefitCount}권
               </span>
             </div>
 
-            <div style="font-size:12px; color:#9B72CC; margin-top:8px; font-weight:500;">
+            <div style="font-size:12px; color:var(--accent-text); margin-top:8px; font-weight:500;">
               ${chapters.some(cl => cl.count < 9)
         ? '한 Chapter를 완성할 때마다 +1권 열람할 수 있어요'
         : '세 Chapter를 모두 완성했어요. 최대 6권 ✨'}
@@ -3903,9 +3903,9 @@ window.getProfileDetailedHTML = function (p, isMine, isPreview = false, showEdit
 
            ${chapters.map(ch => `
              <div class="chapter-row" style="display:flex; align-items:center; gap:12px; padding:10px 0;">
-                <div class="chapter-label" style="font-size:13px; font-weight:600; color:#444; white-space:nowrap; flex-shrink:0;">Chapter ${ch.num} · ${ch.label}</div>
+                <div class="chapter-label" style="font-size:13px; font-weight:600; color:var(--muted-deep); white-space:nowrap; flex-shrink:0;">Chapter ${ch.num} · ${ch.label}</div>
                 <div class="chapter-track" style="flex:1; margin:0;"><div class="chapter-fill" style="width: ${ch.pct}%;"></div></div>
-                <div class="chapter-pct" style="font-size:12px; color:#888; flex-shrink:0; width:30px; text-align:right;">${ch.count}/9</div>
+                <div class="chapter-pct" style="font-size:12px; color:var(--muted); flex-shrink:0; width:30px; text-align:right;">${ch.count}/9</div>
              </div>
            `).join('')}
            ${c1Count >= 8 ? `<div class="chapter-badge" style="margin-top:8px;">나를 아는 사람 ✨</div>` : ''}
@@ -4082,7 +4082,7 @@ window.refreshPhotoGrid = function () {
            ${i === 0 ? '<div class="photo-main-badge">대표</div>' : ''}
          </div>`
       : `<div class="photo-slot empty" onclick="window.addMyPhoto()">
-           <i data-lucide="plus" style="width:22px;height:22px;color:#C2C2C0;"></i>
+           <i data-lucide="plus" style="width:22px;height:22px;color:var(--ink-40);"></i>
          </div>`;
   }).join('');
   if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -4253,8 +4253,8 @@ window.openCreateMeetupModal = function (editId) {
   const minOpts = ['00분', '30분'];
   const ageOpts = ['20대 초반', '20대 중반', '20대 후반', '30대 초반', '30대 중반', '30대 후반', '40대 초반', '40대 중반', '40대 후반', '50대 이상'];
 
-  const LBL = 'font-size:14px; font-weight:600; color:#888; margin-bottom:12px; margin-top:24px; display:block;';
-  const INP = 'background:#fff; border:1px solid #E8E4DF; border-radius:12px; padding:12px 16px; width:100%; font-size:15px; box-sizing:border-box; outline:none;';
+  const LBL = 'font-size:14px; font-weight:600; color:var(--muted); margin-bottom:12px; margin-top:24px; display:block;';
+  const INP = 'background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 16px; width:100%; font-size:15px; box-sizing:border-box; outline:none;';
 
   mc.innerHTML = `
     <div class="modal fade-in active" style="z-index:200; background:var(--bg-color);">
@@ -4288,7 +4288,7 @@ window.openCreateMeetupModal = function (editId) {
   ).join('')}
         </div>
         <input type="hidden" id="create-meetup-region" value="" />
-        <div style="font-size:13px; font-weight:500; color:#888; margin-bottom:8px;">상세 장소 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
+        <div style="font-size:13px; font-weight:500; color:var(--muted); margin-bottom:8px;">상세 장소 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
         <input type="text" id="create-meetup-location-detail" style="${INP} margin-bottom:8px;" placeholder="예) 홍대입구역 근처, 강남역 카페" />
         <label style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted); margin-bottom:32px; cursor:pointer;">
           <input type="checkbox" id="create-meetup-location-private" style="width:16px; height:16px; accent-color:var(--primary); cursor:pointer;" />
@@ -4304,7 +4304,7 @@ window.openCreateMeetupModal = function (editId) {
             <button type="button" onclick="nextMeetupMonth()" style="background:none; border:none; cursor:pointer; padding:4px; display:flex; align-items:center;"><i data-lucide="chevron-right" style="width:20px; color:var(--text-muted);"></i></button>
           </div>
           <div class="calendar-grid" id="create-meetup-calendar-grid">
-            <div class="calendar-day-header" style="color:#FF6B6B;">일</div>
+            <div class="calendar-day-header" style="color:var(--danger);">일</div>
             <div class="calendar-day-header">월</div><div class="calendar-day-header">화</div>
             <div class="calendar-day-header">수</div><div class="calendar-day-header">목</div>
             <div class="calendar-day-header">금</div><div class="calendar-day-header">토</div>
@@ -4335,8 +4335,8 @@ window.openCreateMeetupModal = function (editId) {
         <div style="${LBL}">사진 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
         <div id="meetup-image-preview" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
         <input type="file" id="meetup-image-input" accept="image/*" multiple style="display:none;" onchange="handleMeetupImageSelect(this)" />
-        <button type="button" id="meetup-image-add-btn" onclick="document.getElementById('meetup-image-input').click()" style="display:flex; align-items:center; gap:6px; padding:10px 16px; border:1.5px dashed #C89FDB; border-radius:12px; background:none; color:#9B72CC; font-size:14px; cursor:pointer; margin-bottom:24px;">
-          <i data-lucide="plus" style="width:16px;height:16px;stroke:#9B72CC;"></i> 사진 추가
+        <button type="button" id="meetup-image-add-btn" onclick="document.getElementById('meetup-image-input').click()" style="display:flex; align-items:center; gap:6px; padding:10px 16px; border:1.5px dashed var(--accent-soft); border-radius:12px; background:none; color:var(--accent-text); font-size:14px; cursor:pointer; margin-bottom:24px;">
+          <i data-lucide="plus" style="width:16px;height:16px;stroke:var(--accent-strong);"></i> 사진 추가
         </button>
 
         <!-- 참여 조건 -->
@@ -4369,7 +4369,7 @@ window.openCreateMeetupModal = function (editId) {
 
         <div style="font-size:13px; font-weight:600; color:var(--text-muted); margin-bottom:8px;">태그 <span style="font-weight:400; font-size:12px;">(선택사항)</span></div>
         <input type="text" id="create-meetup-tags" style="${INP} margin-bottom:8px;" placeholder="예) 스없, 일스, 반려동물 환영 — 콤마(,)로 구분" oninput="updateTagPreview()" />
-        <div id="tag-preview" style="min-height:20px; font-size:13px; color:#9B7FD4; margin-bottom:24px; word-break:break-all; line-height:1.6;"></div>
+        <div id="tag-preview" style="min-height:20px; font-size:13px; color:var(--accent-text); margin-bottom:24px; word-break:break-all; line-height:1.6;"></div>
 
         <!-- 참여비 -->
         <div id="create-meetup-fee-wrapper" style="margin-bottom:24px;">
@@ -4411,7 +4411,7 @@ window.openCreateMeetupModal = function (editId) {
         <div id="create-meetup-links-section" style="display:none; margin-bottom:24px;">
           <div style="${LBL} margin-top:0;">링크 <span style="font-weight:400; font-size:13px;">(선택사항)</span></div>
           <div id="create-meetup-links-list"></div>
-          <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed #E8E4DF; border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
+          <button type="button" onclick="addMeetupLink()" id="create-meetup-links-add-btn" style="background:none; border:1px dashed var(--border); border-radius:12px; padding:10px 0; width:100%; color:var(--text-muted); font-size:14px; cursor:pointer;">+ 링크 추가</button>
           <div style="font-size:12px; color:var(--text-muted); margin-top:8px;">최대 2개 추가 가능</div>
         </div>
 
@@ -4567,16 +4567,16 @@ window.renderMeetupCalendar = function (year, month) {
     cell.textContent = d;
     const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     if (isPast) {
-      cell.style.cssText = 'color:#CCC; cursor:default;';
+      cell.style.cssText = 'color:var(--ink-40); cursor:default;';
     } else if (window._selectedCalDate === dateStr) {
-      cell.style.cssText = 'background:var(--primary); color:#fff; border-radius:50%; cursor:pointer;';
+      cell.style.cssText = 'background:var(--primary); color:var(--on-accent); border-radius:50%; cursor:pointer;';
       cell.onclick = () => window.selectMeetupCalDate(year, month, d);
     } else {
       cell.style.cssText = 'cursor:pointer;';
       cell.onclick = () => window.selectMeetupCalDate(year, month, d);
     }
-    if (date.getDay() === 0) cell.style.color = isPast ? '#FFBBBB' : '#FF6B6B';
-    if (window._selectedCalDate === dateStr) cell.style.cssText = 'background:var(--primary); color:#fff; border-radius:50%; cursor:pointer;';
+    if (date.getDay() === 0) cell.style.color = isPast ? 'var(--ink-40)' : 'var(--danger)';
+    if (window._selectedCalDate === dateStr) cell.style.cssText = 'background:var(--primary); color:var(--on-accent); border-radius:50%; cursor:pointer;';
     gridEl.appendChild(cell);
   }
 };
@@ -4610,7 +4610,7 @@ window.initAgeSlider = function () {
       #age-range-from::-webkit-slider-thumb, #age-range-to::-webkit-slider-thumb {
         pointer-events: all; -webkit-appearance: none; appearance: none;
         width: 22px; height: 22px; border-radius: 50%;
-        background: var(--primary, #E87B4B); border: 2px solid #fff;
+        background: var(--accent-soft); border: 2px solid var(--surface);
         box-shadow: 0 1px 4px rgba(0,0,0,.2); cursor: pointer;
       }
     `;
@@ -4757,7 +4757,7 @@ window.addMeetupLink = function () {
   const item = document.createElement('div');
   item.className = 'meetup-link-item';
   item.dataset.idx = idx;
-  item.style.cssText = 'background:#F9F9F9; border-radius:12px; padding:14px; margin-bottom:10px;';
+  item.style.cssText = 'background:var(--wash-2); border-radius:12px; padding:14px; margin-bottom:10px;';
   item.innerHTML = `
     <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
       ${['메인', '인증', '소셜', '기타'].map(t => `<div class="filter-chip link-type-chip" style="border-radius:999px; padding:4px 12px; font-size:13px;" onclick="selectLinkType(this,'${idx}')">${t}</div>`).join('')}
@@ -5846,7 +5846,7 @@ window.openProfileModal = function (profileId, fromChat = false, opts = null) {
        <button id="prof-page-fab" class="prof-fab" aria-label="${alreadyPaged ? '이미 하트를 보낸 프로필북' : '하트와 한마디 보내기'}"
                ${alreadyPaged ? 'data-sent="1"' : ''} onclick="window.openHeartComposeSheet(${profileId})">
          <span class="prof-fab-hearticon" aria-hidden="true">
-           <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:22px; height:22px; color:#fff;"></i>
+           <i data-lucide="heart" id="prof-fab-icon" ${alreadyPaged ? 'fill="#fff"' : ''} style="width:22px; height:22px; color:var(--on-accent);"></i>
            <i data-lucide="message-circle" class="prof-fab-bubble" aria-hidden="true"></i>
          </span>
        </button>
@@ -6647,9 +6647,9 @@ window.openMeetupParticipantPreview = function (meetupId, profileId, level) {
   })() : '';
 
   const noteHTML = level >= 2
-    ? `<div style="margin-top:32px; background:#F8F4FF; border-radius:16px; padding:20px; text-align:center;">
-         <div style="font-size:15px; font-weight:600; color:#9B72CC;">💜 더 알아보려면 매칭이 필요해요</div>
-         <div style="font-size:13px; color:#AAA; margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
+    ? `<div style="margin-top:32px; background:var(--accent-wash); border-radius:16px; padding:20px; text-align:center;">
+         <div style="font-size:15px; font-weight:600; color:var(--accent-text);">💜 더 알아보려면 매칭이 필요해요</div>
+         <div style="font-size:13px; color:var(--ink-40); margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
        </div>`
     : `<div style="margin-top:32px; font-size:13px; color:var(--text-muted); text-align:center; line-height:1.6;">
          참여하면 '나에 대해'까지 볼 수 있어요
@@ -6936,11 +6936,11 @@ window.openMeetupDetail = function (id) {
        <div class="app-header" style="background:var(--bg-color); justify-content: space-between;">
          <button class="back-btn" onclick="closeModal(); if(currentTab==='meetups') renderMeetupList();"><i data-lucide="chevron-left" style="width:28px;"></i></button>
          <div style="display: flex; align-items: center;">
-           <button onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="background: none; border: none; cursor: pointer; color: #9B72CC; display:flex; align-items:center; justify-content:center; padding: 6px; margin-right: 8px;">
+           <button onclick="event.stopPropagation(); window.openMeetupShareSheet(${m.id})" style="background: none; border: none; cursor: pointer; color: var(--accent-text); display:flex; align-items:center; justify-content:center; padding: 6px; margin-right: 8px;">
              <i data-lucide="share" style="width: 24px; height: 24px;"></i>
            </button>
-           <button id="detail-bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="background: none; border: none; cursor: pointer; color: #9B72CC; display:flex; align-items:center; justify-content:center;">
-              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? '#9B72CC' : 'none'}">
+           <button id="detail-bm-${m.id}" onclick="event.stopPropagation(); toggleBookmark(${m.id})" style="background: none; border: none; cursor: pointer; color: var(--accent-text); display:flex; align-items:center; justify-content:center;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="${window.bookmarkedMoims[m.id] ? 'var(--accent-strong)' : 'none'}">
                  <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
               </svg>
            </button>
@@ -6967,12 +6967,12 @@ window.openMeetupDetail = function (id) {
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
                 ${addressGated ? `<div class="address-reveal-card-sub">참여 ${MEETUP_APPROVAL_ENABLED ? '확정' : '신청'} 후 공개되는 장소입니다</div>` : ''}
               </div>` : `
-              <div class="meetup-location-preview" style="margin-bottom:12px; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.shortLocation}<span class="join-locked-note">상세 주소는 참여 확정 후 공개돼요</span></div>`}
+              <div class="meetup-location-preview" style="margin-bottom:12px; font-size:15px; color:var(--muted-deep);"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:var(--muted);vertical-align:middle;margin-right:4px;"></i>${m.shortLocation}<span class="join-locked-note">상세 주소는 참여 확정 후 공개돼요</span></div>`}
               ${m.kakaoLink ? `<div onclick="window.open('${m.kakaoLink}', '_blank')" style="margin-bottom:8px; background:#FEE500; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
                 <span style="font-size:18px;">💬</span>
                 <div style="flex:1;">
-                  <div style="font-size:13px; font-weight:700; color:#3A1D1D;">오픈채팅방 입장하기</div>
-                  <div style="font-size:11px; color:#7A5C00; margin-top:2px;">카카오 오픈채팅</div>
+                  <div style="font-size:13px; font-weight:700; color:var(--danger);">오픈채팅방 입장하기</div>
+                  <div style="font-size:11px; color:var(--warning-ink); margin-top:2px;">카카오 오픈채팅</div>
                 </div>
               </div>
               ${MEETUP_APPROVAL_ENABLED ? `<div class="join-nickname-tip" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
@@ -6983,16 +6983,16 @@ window.openMeetupDetail = function (id) {
                 <div class="address-reveal-card-title"><i data-lucide="map-pin" style="width:16px;"></i> 장소 안내</div>
                 <div class="address-reveal-card-text" style="white-space: pre-wrap;">${m.fullAddress}</div>
               </div>`
-    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:#666;"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}${addressGated ? `<span class="join-locked-note">정확한 주소는 참여 ${MEETUP_APPROVAL_ENABLED ? '확정' : '신청'} 후 공개돼요</span>` : ''}</div>`
+    : `<div class="meetup-location-preview" style="margin-bottom:${showAgeRange ? '8px' : '24px'}; font-size:15px; color:var(--muted-deep);"><i data-lucide="map-pin" style="width:14px;height:14px;stroke:var(--muted);vertical-align:middle;margin-right:4px;"></i>${isCommunity ? (m.location || m.shortLocation) : m.shortLocation}${addressGated ? `<span class="join-locked-note">정확한 주소는 참여 ${MEETUP_APPROVAL_ENABLED ? '확정' : '신청'} 후 공개돼요</span>` : ''}</div>`
     }
 
-          ${showAgeRange ? `<div style="font-size:14px; color:#888; margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:#888;vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
+          ${showAgeRange ? `<div style="font-size:14px; color:var(--muted); margin-bottom:24px; display:flex; align-items:center;"><i data-lucide="users" style="width:14px;height:14px;stroke:var(--muted);vertical-align:middle;margin-right:4px;"></i>${m.ageRange}</div>` : ''}
 
           <!-- New Info Fields -->
           ${!isCommunity && showFee ? `
-          <div style="margin-bottom: 32px; border-top: 1px solid #EEE; padding-top: 20px;">
+          <div style="margin-bottom: 32px; border-top: 1px solid var(--border); padding-top: 20px;">
             <div style="display:flex;">
-              <div style="width:80px; font-size:14px; color:#888;">참여비</div>
+              <div style="width:80px; font-size:14px; color:var(--muted);">참여비</div>
               <div style="font-size:14px; color:var(--text-dark); font-weight:500;">${m.fee}</div>
             </div>
           </div>
@@ -7000,7 +7000,7 @@ window.openMeetupDetail = function (id) {
           
           <!-- Host Section (Conditional) -->
           ${!isPrivate && (!isEvent || m.host?.isPublic) ? `
-          <div style="display:flex; align-items:center; margin-bottom: 32px; padding: 16px; background:#F9F9F9; border-radius:16px;">
+          <div style="display:flex; align-items:center; margin-bottom: 32px; padding: 16px; background:var(--wash-2); border-radius:16px;">
              ${isGroup ?
         `<div style="width:48px; height:48px; border-radius:12px; background-image:url('${m.hostLogo}'); background-size:cover; background-position:center;"></div>` :
         `<div class="attendee-avatar" style="width:48px; height:48px; background-image:url('${MOCK_PROFILES.find(p => p.name === m.hostName)?.image || MOCK_PROFILES[0].image}'); background-size:cover; background-position:center top;"></div>`
@@ -7010,7 +7010,7 @@ window.openMeetupDetail = function (id) {
                   HOST: ${m.host?.name || m.hostName}
                   ${!isGroup ? getRoleBadgeHTML(MOCK_PROFILES.find(p => p.name === m.hostName)?.role) : ''}
                 </div>
-                <div style="font-size:13px; color:#777; margin-top:2px;">${m.host?.bio || m.hostBio}</div>
+                <div style="font-size:13px; color:var(--muted-deep); margin-top:2px;">${m.host?.bio || m.hostBio}</div>
              </div>
           </div>
           ` : ''}
@@ -7039,13 +7039,13 @@ window.openMeetupDetail = function (id) {
           const iconImg = link.platform === 'X'
             ? `<img src="https://cdn.simpleicons.org/x/000000" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">`
             : `<img src="https://cdn.simpleicons.org/instagram/E1306C" style="width:14px;height:14px;vertical-align:middle;margin-right:4px;">`;
-          return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer;">
-                  <span style="font-size:12px; font-weight:600; color:#888; flex-shrink:0; min-width:36px;">${link.type}</span>
+          return `<div onclick="window.open('${url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer;">
+                  <span style="font-size:12px; font-weight:600; color:var(--muted); flex-shrink:0; min-width:36px;">${link.type}</span>
                   <span style="font-size:14px; color:var(--primary); text-decoration:underline; display:flex; align-items:center;">${iconImg}@${link.handle}</span>
                 </div>`;
         }
-        return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border-color); cursor:pointer; overflow:hidden;">
-                <span style="font-size:12px; font-weight:600; color:#888; flex-shrink:0; min-width:36px;">${link.type}</span>
+        return `<div onclick="window.open('${link.url}','_blank')" style="display:flex; align-items:center; gap:8px; padding:10px 0; border-bottom:1px solid var(--border); cursor:pointer; overflow:hidden;">
+                <span style="font-size:12px; font-weight:600; color:var(--muted); flex-shrink:0; min-width:36px;">${link.type}</span>
                 <span style="font-size:14px; color:var(--primary); text-decoration:underline; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${link.url}</span>
               </div>`;
       }).join('')}
@@ -7054,7 +7054,7 @@ window.openMeetupDetail = function (id) {
 
           <!-- Hashtags -->
           <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:40px;">
-            ${(m.tags || []).map(tag => `<div style="padding:4px 10px; border:1px solid #C89FDB; color:#9B72CC; border-radius:100px; font-size:12px; font-weight:500;">${tag}</div>`).join('')}
+            ${(m.tags || []).map(tag => `<div style="padding:4px 10px; border:1px solid var(--accent-soft); color:var(--accent-text); border-radius:100px; font-size:12px; font-weight:500;">${tag}</div>`).join('')}
           </div>
           
           ${isCommunity ? `
@@ -7062,8 +7062,8 @@ window.openMeetupDetail = function (id) {
             <div style="font-size:15px; font-weight:600; margin-bottom:12px;">호스트</div>
             <div class="attendee-stack" style="flex-wrap: wrap; gap:12px;">
                ${organizerImgs.length > 0
-        ? organizerImgs.map(url => `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid #9B72CC; outline-offset:2px; background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')
-        : `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid #9B72CC; outline-offset:2px; background-image:url('${isGroup ? m.hostLogo : (MOCK_PROFILES.find(p => p.name === m.hostName)?.image || m.hostImage || MOCK_PROFILES[0].image)}');background-size:cover;background-position:center top;"></div>`}
+        ? organizerImgs.map(url => `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid var(--accent-strong); outline-offset:2px; background-image:url('${url}');background-size:cover;background-position:center top;"></div>`).join('')
+        : `<div class="attendee-avatar" style="width:40px; height:40px; margin-left:0; border:none; outline:2.5px solid var(--accent-strong); outline-offset:2px; background-image:url('${isGroup ? m.hostLogo : (MOCK_PROFILES.find(p => p.name === m.hostName)?.image || m.hostImage || MOCK_PROFILES[0].image)}');background-size:cover;background-position:center top;"></div>`}
             </div>
           </div>
           ` : (isEvent && m.showParticipants === false) ? `` : `
@@ -7077,7 +7077,7 @@ window.openMeetupDetail = function (id) {
             <div class="attendee-stack" style="flex-wrap: wrap; gap:12px;">
                ${showHostThumb ? (() => {
                  const hp = MOCK_PROFILES.find(x => x.name === m.hostName);
-                 return `<div class="attendee-avatar is-host" ${hp ? `onclick="window.openMeetupAttendee(${m.id}, ${hp.id})"` : ''} style="width:40px; height:40px; margin-left:0; border: none; outline: 2.5px solid #9B72CC; outline-offset: 2px; background-image:url('${hp?.image || m.hostImage || MOCK_PROFILES[0].image}'); background-size:cover; background-position:center top;"></div>`;
+                 return `<div class="attendee-avatar is-host" ${hp ? `onclick="window.openMeetupAttendee(${m.id}, ${hp.id})"` : ''} style="width:40px; height:40px; margin-left:0; border: none; outline: 2.5px solid var(--accent-strong); outline-offset: 2px; background-image:url('${hp?.image || m.hostImage || MOCK_PROFILES[0].image}'); background-size:cover; background-position:center top;"></div>`;
                })() : ''}
                ${(m.participants || []).map(url => {
                  const pp = MOCK_PROFILES.find(x => x.image === url);
@@ -7091,9 +7091,9 @@ window.openMeetupDetail = function (id) {
 
           <!-- Rules Section -->
           ${!isCommunity ? `
-          <div style="margin-top:24px; padding:20px; background:#F0F0F0; border-radius:16px;">
-            <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:#555;">주의사항</div>
-            <div style="font-size:14px; color:#666; line-height:1.5;">${m.rules || '매너 있는 참여 부탁드립니다.'}</div>
+          <div style="margin-top:24px; padding:20px; background:var(--wash-2); border-radius:16px;">
+            <div style="font-size:14px; font-weight:700; margin-bottom:8px; color:var(--ink-soft);">주의사항</div>
+            <div style="font-size:14px; color:var(--muted-deep); line-height:1.5;">${m.rules || '매너 있는 참여 부탁드립니다.'}</div>
           </div>
           ` : ''}
 
@@ -7102,18 +7102,18 @@ window.openMeetupDetail = function (id) {
           <div style="margin-top:40px;">
             <div style="font-size:16px; font-weight:700; margin-bottom:16px;">이전 후기</div>
             ${m.reviews.map(rev => `
-              <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid #EEE;">
+              <div style="margin-bottom:16px; padding-bottom:16px; border-bottom:1px solid var(--border);">
                 <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                  <span style="font-size:12px; color:#AAA;">${rev.date}</span>
+                  <span style="font-size:12px; color:var(--ink-40);">${rev.date}</span>
                 </div>
-                <div style="font-size:14px; color:#666; line-height:1.4;">${rev.text}</div>
+                <div style="font-size:14px; color:var(--muted-deep); line-height:1.4;">${rev.text}</div>
               </div>
             `).join('')}
           </div>
           ` : ''}
 
        </div>
-       <div class="modal-fixed-bottom" style="display:block; z-index: 110; padding: 16px 24px; background: white; border-top: 1px solid #EEE;">
+       <div class="modal-fixed-bottom" style="display:block; z-index: 110; padding: 16px 24px; background: var(--surface); border-top: 1px solid var(--border);">
           ${(() => {
             // 정원이 찬 경우에만 막는다. 시작 전까지는 언제든 신청할 수 있다.
             // 내가 연 모임에 내가 신청할 일은 없다.
@@ -7126,7 +7126,7 @@ window.openMeetupDetail = function (id) {
               : isFullNow ? '정원이 찼어요'
               : '참여하기';
             const dead = m.cancelled || iAmHost || isApplied || m.disableRSVP || meetupStarted || isFullNow;
-            const mainBtn = `<button id="detail-rsvp-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: ${dead ? '#CCC' : '#9B72CC'}; color: white; font-size: 16px; font-weight: 600; border: none; cursor: ${dead ? 'default' : 'pointer'}; pointer-events: ${dead ? 'none' : 'auto'};" onclick="window.handleMeetupApply(${m.id})">${label}</button>`;
+            const mainBtn = `<button id="detail-rsvp-btn" style="width: 100%; padding: 16px; border-radius: 14px; background: ${dead ? 'var(--disabled-fill)' : 'var(--accent-fill)'}; color: white; font-size: 16px; font-weight: 600; border: none; cursor: ${dead ? 'default' : 'pointer'}; pointer-events: ${dead ? 'none' : 'auto'};" onclick="window.handleMeetupApply(${m.id})">${label}</button>`;
             // 참여했으면 되돌릴 길이 있어야 한다. 상태만 보여주고 끝내지 않는다.
             if (!isApplied || m.cancelled) return mainBtn;
             return `${mainBtn}
@@ -7184,17 +7184,17 @@ window.showApplySubmitted = function (meetupId) {
         <div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 12px;">
           <div style="font-size: 48px; text-align: center;">${approving ? '📮' : '🎉'}</div>
           <div style="font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;">${approving ? '신청이 접수됐어요' : '참여 완료'}</div>
-          <div style="font-size: 14px; color: #999; text-align: center;">${escapeHTML(m.title)}</div>
+          <div style="font-size: 14px; color: var(--muted); text-align: center;">${escapeHTML(m.title)}</div>
           ${approving ? `
           <div class="apply-steps">
             <div class="apply-step"><span class="apply-step-no">1</span><span>아래 버튼으로 오픈채팅방에 들어가세요</span></div>
             <div class="apply-step"><span class="apply-step-no">2</span><span>채팅방 닉네임을 <b>'${nick}'</b>으로 바꿔주세요</span></div>
             <div class="apply-step"><span class="apply-step-no">3</span><span>호스트가 확인하고 승인하면 참여가 확정돼요</span></div>
           </div>` : `<div style="height:12px;"></div>`}
-          ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: #3A1D1D; font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
+          ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: var(--danger); font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
         </div>
         <div style="width: 100%; padding-bottom: 40px;">
-          <button onclick="openMeetupDetail(${m.id})" style="width: 100%; padding: 14px; border-radius: 24px; background: #F0F0F0; color: #555; font-size: 15px; font-weight: 600; border: none; cursor: pointer;">돌아가기</button>
+          <button onclick="openMeetupDetail(${m.id})" style="width: 100%; padding: 14px; border-radius: 24px; background: var(--wash-2); color: var(--ink-soft); font-size: 15px; font-weight: 600; border: none; cursor: pointer;">돌아가기</button>
         </div>
       </div>
     </div>
@@ -7221,7 +7221,7 @@ window.toggleBookmark = function (id) {
     void bmBtn.offsetWidth; // trigger reflow
     bmBtn.classList.add('meetup-btn-pop');
     const svg = bmBtn.querySelector('svg');
-    if (svg) svg.setAttribute('fill', isBookmarked ? '#9B72CC' : 'none');
+    if (svg) svg.setAttribute('fill', isBookmarked ? 'var(--accent-strong)' : 'none');
   }
 
   // Sync Detail Modal Icon
@@ -7231,7 +7231,7 @@ window.toggleBookmark = function (id) {
     void detailBtn.offsetWidth; // trigger reflow
     detailBtn.classList.add('meetup-btn-pop');
     const svg = detailBtn.querySelector('svg');
-    if (svg) svg.setAttribute('fill', isBookmarked ? '#9B72CC' : 'none');
+    if (svg) svg.setAttribute('fill', isBookmarked ? 'var(--accent-strong)' : 'none');
   }
 
   // Sync internal object state for logic elsewhere
@@ -7340,7 +7340,7 @@ window.openBookHeartDetail = function (heartId) {
           <div style="font-size:12px; color:var(--text-muted);">${age}세 · ${escapeHTML(dist)}</div>
         </div>
         <button type="button" style="background:none; border:none; padding:0; cursor:pointer;" onclick="closeAnswerCard(); openProfileFromModal(${p.id}, 'messages')" aria-label="프로필 보기">
-          <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p.image}'); background-size:cover; background-position:center; background-color:#EDE0FF;"></div>
+          <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p.image}'); background-size:cover; background-position:center; background-color:var(--accent-wash);"></div>
         </button>
       </div>
       <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
@@ -7429,14 +7429,14 @@ window.openArchiveUnlockSheet = function () {
 
   const sheet = document.createElement('div');
   sheet.id = 'archive-unlock-sheet';
-  sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:#FFF;border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
+  sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
   sheet.innerHTML = `
-    <div style="width:36px;height:4px;background:#E8E8E8;border-radius:4px;margin:0 auto 22px;"></div>
-    <div style="font-size:18px;font-weight:700;color:#2C2C2A;margin-bottom:8px;">지난 하트 다시 열기</div>
-    <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">1개월이 지난 하트 ${archived.length}개를 24시간 동안 다시 보고 답장할 수 있어요.</div>
-    <div style="font-size:12px;color:#AAA;text-align:center;margin-bottom:16px;">₩2,900 · 1회 (24시간)</div>
-    <button id="archive-unlock-go" style="width:100%;padding:15px;background:#9B72CC;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">24시간 열기</button>
-    <button id="archive-unlock-later" style="width:100%;padding:12px;background:transparent;color:#AAA;border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
+    <div style="width:36px;height:4px;background:var(--hairline-strong);border-radius:4px;margin:0 auto 22px;"></div>
+    <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px;">지난 하트 다시 열기</div>
+    <div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;">1개월이 지난 하트 ${archived.length}개를 24시간 동안 다시 보고 답장할 수 있어요.</div>
+    <div style="font-size:12px;color:var(--ink-40);text-align:center;margin-bottom:16px;">₩2,900 · 1회 (24시간)</div>
+    <button id="archive-unlock-go" style="width:100%;padding:15px;background:var(--accent-fill);color:var(--on-accent);border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">24시간 열기</button>
+    <button id="archive-unlock-later" style="width:100%;padding:12px;background:transparent;color:var(--ink-40);border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
   `;
   document.body.appendChild(backdrop);
   document.body.appendChild(sheet);
@@ -7471,14 +7471,14 @@ window.openMatchIntroModal = function (profileId, isQurated = false, from = 'mes
       <div class="match-intro-modal fade-in" style="overflow: hidden; display: flex; flex-direction: column;">
         <div class="chat-header" style="position: relative; width: 100%; z-index: 3001; background: transparent; justify-content: center; padding: 12px 20px; border-bottom: none; min-height: 60px;">
           <button class="modal-fixed-close" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0;" onclick="closeAnswerCard(); switchTab('messages')">
-            <i data-lucide="x" style="color:#333; width:28px;"></i>
+            <i data-lucide="x" style="color:var(--ink); width:28px;"></i>
           </button>
           <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-            <div style="font-size:16px; font-weight:700; color:#333;">${otherProfile.name}</div>
+            <div style="font-size:16px; font-weight:700; color:var(--ink);">${otherProfile.name}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${otherAge}세 ・ ${otherDistLabel}</div>
           </div>
           <button onclick="openProfileFromModal(${otherProfile.id}, '${from}')" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;">
-            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${otherProfile.image}'); background-size:cover; background-position:center; background-color:#EDE0FF; border:1px solid rgba(0,0,0,0.08);"></div>
+            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${otherProfile.image}'); background-size:cover; background-position:center; background-color:var(--accent-wash); border:1px solid rgba(0,0,0,0.08);"></div>
           </button>
         </div>
 
@@ -7495,13 +7495,13 @@ window.openMatchIntroModal = function (profileId, isQurated = false, from = 'mes
 
           ${!isQurated ? `
           <div class="match-options fade-in" id="regular-match-options-${match.id}" style="animation-delay: 1s; display:flex; flex-direction:column; margin-top:auto; margin-bottom:0; padding:0 4px 24px; gap:10px; position:relative; z-index:10; overflow:visible;">
-            <button id="btn-step1-meetup-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
+            <button id="btn-step1-meetup-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid var(--accent-soft); background:var(--surface); color:var(--accent-text); width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
               📅 함께 참여할 수 있는 모임이 있어요
             </button>
-            <button id="btn-step1-date-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
+            <button id="btn-step1-date-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid var(--accent-soft); background:var(--surface); color:var(--accent-text); width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
               ✨ 둘만의 만남을 제안해볼까요?
             </button>
-            <button id="btn-step1-chat-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
+            <button id="btn-step1-chat-${match.id}" style="padding:14px 20px; font-size:14px; border-radius:14px; border:1.5px solid var(--accent-soft); background:var(--surface); color:var(--accent-text); width:100%; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:left;">
               💬 먼저 대화를 나눠볼게요
             </button>
           </div>
@@ -7509,7 +7509,7 @@ window.openMatchIntroModal = function (profileId, isQurated = false, from = 'mes
 
         </div>
 
-        <div class="match-intro-input-wrap fade-in" style="animation-delay: 1.5s; position: relative; background: white; width: 100%; padding: 12px 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid #EEE; display: flex; flex-direction: column;">
+        <div class="match-intro-input-wrap fade-in" style="animation-delay: 1.5s; position: relative; background: var(--surface); width: 100%; padding: 12px 16px; padding-bottom: max(16px, env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; flex-direction: column;">
           <div id="match-intro-preview-container"></div>
           <div style="display: flex; align-items: center; gap: 10px; width: 100%;">
             <input type="text" class="match-intro-input" placeholder="첫 메시지를 건네보세요" id="match-intro-input-field">
@@ -7545,13 +7545,13 @@ window.renderMatchStep1 = function (matchId) {
   const container = document.getElementById(`regular-match-options-${matchId}`);
   if (!container) return;
   container.innerHTML = `
-      <button id="btn-step1-meetup-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid #C89FDB; background: white; color: #9B72CC; width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
+      <button id="btn-step1-meetup-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid var(--accent-soft); background: var(--surface); color: var(--accent-text); width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
         📅 함께 참여할 수 있는 모임이 있어요
       </button>
-      <button id="btn-step1-date-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid #C89FDB; background: white; color: #9B72CC; width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
+      <button id="btn-step1-date-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid var(--accent-soft); background: var(--surface); color: var(--accent-text); width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
         ✨ 둘만의 만남을 제안해볼까요?
       </button>
-      <button id="btn-step1-chat-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid #C89FDB; background: white; color: #9B72CC; width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
+      <button id="btn-step1-chat-${matchId}" style="padding: 12px 16px; font-size: 14px; border-radius: 12px; border: 1.5px solid var(--accent-soft); background: var(--surface); color: var(--accent-text); width: 100%; cursor: pointer; font-family: 'Pretendard', sans-serif;">
         💬 먼저 대화를 나눠볼게요
       </button>
     `;
@@ -7571,15 +7571,15 @@ window.renderMatchStep2a = function (matchId, selectedId = null) {
   const meetupsHTML = meetups.map((m) => {
     const isSelected = m.id === selectedId;
     return `
-      <div style="background:white; border-radius:14px; border:1.5px solid ${isSelected ? '#9B72CC' : '#EEE'}; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);" 
+      <div style="background:var(--surface); border-radius:14px; border:1.5px solid ${isSelected ? 'var(--accent-strong)' : 'var(--border)'}; padding:14px 16px; margin-bottom:8px; display:flex; align-items:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);" 
            onclick="openMeetupDetail(${m.id})">
         <div style="flex:1; text-align: left;">
-          <div style="font-size:11px; color:#9B72CC; margin-bottom:4px;">${m.type}</div>
-          <div style="font-size:15px; font-weight:600; color:#333; margin-bottom:4px;">${m.title}</div>
+          <div style="font-size:11px; color:var(--accent-text); margin-bottom:4px;">${m.type}</div>
+          <div style="font-size:15px; font-weight:600; color:var(--ink); margin-bottom:4px;">${m.title}</div>
           <div style="font-size:12px; color:var(--text-muted);">📍 ${m.shortLocation} · ${m.date}</div>
           <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">👥 ${m.currentCap}/${m.maxCap}명</div>
         </div>
-        <div style="width:24px; height:24px; border-radius:50%; border:2px solid #C89FDB; display:flex; align-items:center; justify-content:center; margin-left:12px; flex-shrink:0; background:${isSelected ? '#9B72CC' : 'white'};"
+        <div style="width:24px; height:24px; border-radius:50%; border:2px solid var(--accent-soft); display:flex; align-items:center; justify-content:center; margin-left:12px; flex-shrink:0; background:${isSelected ? 'var(--accent-strong)' : 'white'};"
              onclick="event.stopPropagation(); window.renderMatchStep2a(${matchId}, ${isSelected ? 'null' : m.id})">
           ${isSelected ? '<i data-lucide="check" style="width:14px; height:14px; color:white;"></i>' : ''}
         </div>
@@ -7589,12 +7589,12 @@ window.renderMatchStep2a = function (matchId, selectedId = null) {
 
   container.innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <button onclick="window.renderMatchStep1(${matchId})" style="background: none; border: none; color: #9B72CC; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
+        <button onclick="window.renderMatchStep1(${matchId})" style="background: none; border: none; color: var(--accent-text); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
       </div>
       <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; text-align:center;">p.M이 두 분께 어울릴 것 같은 모임을 골랐어요 ☺️</div>
       ${meetupsHTML}
       <button id="btn-propose-meetup" ${!selectedId ? 'disabled' : ''} 
-              style="display:block; width:100%; padding:14px; border-radius:14px; border:none; background:${selectedId ? '#9B72CC' : '#EEE'}; color:${selectedId ? 'white' : '#AAA'}; font-size:15px; font-weight:600; cursor:${selectedId ? 'pointer' : 'default'}; margin-top:12px;"
+              style="display:block; width:100%; padding:14px; border-radius:14px; border:none; background:${selectedId ? 'var(--accent-strong)' : 'var(--border)'}; color:${selectedId ? 'white' : 'var(--ink-40)'}; font-size:15px; font-weight:600; cursor:${selectedId ? 'pointer' : 'default'}; margin-top:12px;"
               onclick="window.proposeMeetup(${matchId}, ${selectedId})">
         이 모임 제안하기
       </button>
@@ -7624,12 +7624,12 @@ window.proposeMeetup = function (matchId, meetupId) {
 
   if (previewContainer && input) {
     previewContainer.innerHTML = `
-      <div onclick="openMeetupDetail(${m.id})" style="cursor: pointer; background: white; border: 1px solid #EEE; border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; position: relative;" class="fade-in">
+      <div onclick="openMeetupDetail(${m.id})" style="cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px; margin-bottom: 12px; position: relative;" class="fade-in">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:4px;">
-          <div style="font-size:11px; color:#9B72CC; font-weight: 600;">${m.type}</div>
-          <div onclick="event.stopPropagation(); window.clearMeetupProposal();" style="cursor:pointer; color:#AAA;"><i data-lucide="x" style="width:14px;"></i></div>
+          <div style="font-size:11px; color:var(--accent-text); font-weight: 600;">${m.type}</div>
+          <div onclick="event.stopPropagation(); window.clearMeetupProposal();" style="cursor:pointer; color:var(--ink-40);"><i data-lucide="x" style="width:14px;"></i></div>
         </div>
-        <div style="font-size:14px; font-weight:700; color:#333; margin-bottom:4px;">${m.title}</div>
+        <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px;">${m.title}</div>
         <div style="font-size:12px; color:var(--text-muted);">📍 ${m.shortLocation} · ${m.date}</div>
       </div>
     `;
@@ -7649,12 +7649,12 @@ window.renderMatchStep2b = function (matchId) {
   const options = ['☕ 카페', '🍽 식사', '🍺 술 한 잔', '💡 기타 제안'];
   container.innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <button id="btn-step2b-back-${matchId}" style="background: none; border: none; color: #9B72CC; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
+        <button id="btn-step2b-back-${matchId}" style="background: none; border: none; color: var(--accent-text); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
       </div>
       <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; text-align:center;">어떤 만남을 제안하시겠어요?</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         ${options.map((opt, i) => `
-          <button id="btn-step2b-opt-${matchId}-${i}" style="display:block; width:100%; padding:12px; border-radius:999px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; font-size:14px; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:center;">
+          <button id="btn-step2b-opt-${matchId}-${i}" style="display:block; width:100%; padding:12px; border-radius:999px; border:1.5px solid var(--accent-soft); background:var(--surface); color:var(--accent-text); font-size:14px; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:center;">
             ${opt}
           </button>
         `).join('')}
@@ -7676,12 +7676,12 @@ window.renderMatchStep3 = function (type, matchId) {
   const dates = ['이번 주말', '다음 주말', '평일 저녁', '날짜 직접 제안'];
   container.innerHTML = `
       <div style="display: flex; align-items: center; margin-bottom: 12px;">
-        <button id="btn-step3-back-${matchId}" style="background: none; border: none; color: #9B72CC; font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
+        <button id="btn-step3-back-${matchId}" style="background: none; border: none; color: var(--accent-text); font-size: 13px; font-weight: 600; cursor: pointer; padding: 0;">← 뒤로</button>
       </div>
       <div style="font-size:13px; color:var(--text-muted); margin-bottom:12px; text-align:center;">언제가 좋으세요?</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
         ${dates.map((date, i) => `
-          <button id="btn-step3-date-${matchId}-${i}" style="display:block; width:100%; padding:12px; border-radius:999px; border:1.5px solid #C89FDB; background:white; color:#9B72CC; font-size:14px; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:center;">
+          <button id="btn-step3-date-${matchId}-${i}" style="display:block; width:100%; padding:12px; border-radius:999px; border:1.5px solid var(--accent-soft); background:var(--surface); color:var(--accent-text); font-size:14px; cursor:pointer; font-family:'Pretendard',sans-serif; text-align:center;">
             ${date}
           </button>
         `).join('')}
@@ -7804,7 +7804,7 @@ window.triggerPostMeetingCheckin = function () {
         `;
     } else if (window._pmCheckinState === 'end') {
       content = `
-          <div class="pm-bubble" style="background:#FFF0F0;">
+          <div class="pm-bubble" style="background:var(--danger-bg);">
             서로 좋은 시간이었지만 지금은 인연이 아닌 것 같다고 하셨어요.<br/>좋은 분 만나시길 바란다고 전해달라 하셨어요 ☺️
           </div>
           <div style="margin-top: 24px; width: 100%; text-align: center;">
@@ -7823,9 +7823,9 @@ window.triggerPostMeetingCheckin = function () {
     amc.innerHTML = `
         <div class="match-intro-modal fade-in" style="background: var(--bg-color);">
           <div class="modal-fixed-close" style="top:24px; left:24px; z-index:3001;" onclick="closeAnswerCard()">
-            <i data-lucide="x" style="color:#333;"></i>
+            <i data-lucide="x" style="color:var(--ink);"></i>
           </div>
-          <div style="padding: 80px 24px 24px; font-weight:700; font-size:18px; color:#C89FDB;">p.M 체크인</div>
+          <div style="padding: 80px 24px 24px; font-weight:700; font-size:18px; color:var(--accent-text);">p.M 체크인</div>
           
           <div class="match-intro-pm" style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; background:transparent; box-shadow:none;">
             <div class="pm-message-row fade-in" style="align-items:flex-end;">
@@ -7869,9 +7869,9 @@ window.openPMFollowup = function (meetupId) {
   const shell = (bodyHTML) => `
     <div class="match-intro-modal fade-in" style="background: var(--bg-color);">
       <div class="modal-fixed-close" style="top:24px; left:24px; z-index:3001;" onclick="closeAnswerCard()">
-        <i data-lucide="x" style="color:#333;"></i>
+        <i data-lucide="x" style="color:var(--ink);"></i>
       </div>
-      <div style="padding: 80px 24px 8px; font-weight:700; font-size:18px; color:#C89FDB;">p.M</div>
+      <div style="padding: 80px 24px 8px; font-weight:700; font-size:18px; color:var(--accent-text);">p.M</div>
       <div style="padding: 0 24px 4px; font-size:12px; color:var(--text-muted);">${escapeHTML(m.title)}</div>
       <div class="match-intro-pm" style="flex:1; min-height:0; overflow-y:auto; background:transparent; box-shadow:none; padding:16px 0 24px;">
         <div class="pm-message-row fade-in">
@@ -7889,13 +7889,13 @@ window.openPMFollowup = function (meetupId) {
       : people.map(p => `
         <button type="button" class="pm-followup-row" data-pid="${p.id}"
           onclick="window._pmFollowupToggle(${p.id}, this)"
-          style="display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:#FFF; border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
-          <span style="width:36px; height:36px; border-radius:50%; flex-shrink:0; background-image:url('${p.image}'); background-size:cover; background-position:center top; background-color:#EDE0FF;"></span>
+          style="display:flex; align-items:center; gap:12px; width:100%; text-align:left; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:10px 12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
+          <span style="width:36px; height:36px; border-radius:50%; flex-shrink:0; background-image:url('${p.image}'); background-size:cover; background-position:center top; background-color:var(--accent-wash);"></span>
           <span style="flex:1; min-width:0;">
             <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${escapeHTML(p.name || '')}</span>
             <span style="font-size:12px; color:var(--text-muted); margin-left:6px;">${getAge(p.birthYear)}세</span>
           </span>
-          <span class="pm-followup-check" style="width:22px; height:22px; border-radius:50%; border:2px solid #C89FDB; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:#FFF; background:transparent;"></span>
+          <span class="pm-followup-check" style="width:22px; height:22px; border-radius:50%; border:2px solid var(--accent-soft); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--on-accent); background:transparent;"></span>
         </button>`).join('');
     amc.innerHTML = shell(`
       <div class="pm-bubble">어제 만남은 어땠어요? 함께한 분들 중 더 알고 싶은 사람이 있다면 골라주세요. 여러 명 골라도 되고, 지금 안 골라도 돼요 ☺️</div>
@@ -7920,13 +7920,13 @@ window.openPMFollowup = function (meetupId) {
           const name = escapeHTML(p ? p.name : '그분');
           if (r.status === 'unlocked') {
             return `<button type="button" onclick="closeAnswerCard(); window.openProfileModal(${Number(r.profileId)}, false, { source:'pm', meetupId:'${String(meetupId)}' })"
-              style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#FFF; border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
+              style="display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:12px; margin-bottom:8px; cursor:pointer; font-family:inherit;">
               <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${name}</span>
-              <span style="font-size:13px; color:#9B72CC; font-weight:600;">지금 볼 수 있어요 →</span>
+              <span style="font-size:13px; color:var(--accent-text); font-weight:600;">지금 볼 수 있어요 →</span>
             </button>`;
           }
           const hoursLeft = Math.max(0, Math.ceil((r.unlockAt - now) / 3600000));
-          return `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#F6F4F0; border-radius:14px; padding:12px; margin-bottom:8px;">
+          return `<div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:var(--wash-2); border-radius:14px; padding:12px; margin-bottom:8px;">
             <span style="font-size:14px; font-weight:600; color:var(--text-dark);">${name}</span>
             <span style="font-size:12px; color:var(--text-muted);">약 ${hoursLeft}시간 뒤 공개</span>
           </div>`;
@@ -7947,10 +7947,10 @@ window.openPMFollowup = function (meetupId) {
     const on = s.has(pid);
     const check = el.querySelector('.pm-followup-check');
     if (check) {
-      check.style.background = on ? '#9B72CC' : 'transparent';
+      check.style.background = on ? 'var(--accent-strong)' : 'transparent';
       check.textContent = on ? '✓' : '';
     }
-    el.style.borderColor = on ? '#9B72CC' : 'var(--border)';
+    el.style.borderColor = on ? 'var(--accent-strong)' : 'var(--border)';
     window._pmFollowupSyncConfirm();
   };
 
@@ -8016,41 +8016,41 @@ window.openGroupSidePanel = function (chatId) {
   overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:200;display:flex;justify-content:flex-end;';
 
   const hostHTML = host ? `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0EDE8;">
-      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${host.image}');background-size:cover;background-color:#EDE0FF;flex-shrink:0;"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${host.image}');background-size:cover;background-color:var(--accent-wash);flex-shrink:0;"></div>
       <div style="flex:1;">
-        <span style="font-size:13px;font-weight:600;color:#333;">${host.name}</span>
-        <span style="font-size:11px;color:#999;margin-left:4px;">${getAge(host.birthYear)}세</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">${host.name}</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px;">${getAge(host.birthYear)}세</span>
       </div>
-      <span style="font-size:10px;color:#9B72CC;background:#EDE4F7;padding:2px 8px;border-radius:20px;font-weight:600;">호스트</span>
+      <span style="font-size:10px;color:var(--accent-text);background:var(--accent-wash);padding:2px 8px;border-radius:20px;font-weight:600;">호스트</span>
     </div>` : '';
 
   const partsHTML = parts.map(pp => `
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #F0EDE8;">
-      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${pp.image}');background-size:cover;background-color:#EDE0FF;flex-shrink:0;"></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="width:32px;height:32px;border-radius:50%;background-image:url('${pp.image}');background-size:cover;background-color:var(--accent-wash);flex-shrink:0;"></div>
       <div>
-        <span style="font-size:13px;font-weight:600;color:#333;">${pp.name}</span>
-        <span style="font-size:11px;color:#999;margin-left:4px;">${getAge(pp.birthYear)}세</span>
+        <span style="font-size:13px;font-weight:600;color:var(--ink);">${pp.name}</span>
+        <span style="font-size:11px;color:var(--muted);margin-left:4px;">${getAge(pp.birthYear)}세</span>
       </div>
     </div>`).join('');
 
   overlay.innerHTML = `
     <div onclick="closeGroupSidePanel()" style="position:absolute;inset:0;background:rgba(0,0,0,0.3);"></div>
     <div style="position:relative;width:80%;max-width:300px;height:100%;background:var(--bg-color);overflow-y:auto;z-index:1;animation:slideInRight 0.25s ease-out;display:flex;flex-direction:column;">
-      <div style="padding:20px 16px 12px;border-bottom:1px solid #F0EDE8;">
-        <div style="font-size:15px;font-weight:700;color:#333;margin-bottom:6px;">${c.title}</div>
+      <div style="padding:20px 16px 12px;border-bottom:1px solid var(--border);">
+        <div style="font-size:15px;font-weight:700;color:var(--ink);margin-bottom:6px;">${c.title}</div>
         ${meetup ? `
-          <div style="font-size:12px;color:#666;margin-bottom:2px;">📍 ${meetup.shortLocation || ''}</div>
-          <div style="font-size:12px;color:#666;margin-bottom:2px;">📅 ${meetup.date || ''}</div>
-          <div style="font-size:12px;color:#666;">${(parts.length + (host ? 1 : 0))}명 참여 중</div>
+          <div style="font-size:12px;color:var(--muted-deep);margin-bottom:2px;">📍 ${meetup.shortLocation || ''}</div>
+          <div style="font-size:12px;color:var(--muted-deep);margin-bottom:2px;">📅 ${meetup.date || ''}</div>
+          <div style="font-size:12px;color:var(--muted-deep);">${(parts.length + (host ? 1 : 0))}명 참여 중</div>
         ` : ''}
       </div>
-      <div style="padding:12px 16px;border-bottom:1px solid #F0EDE8;">
-        <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:8px;">공지사항</div>
-        <div style="font-size:13px;color:${meetup?.notice ? '#333' : '#BBB'};">${meetup?.notice || '공지사항이 없어요'}</div>
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:8px;">공지사항</div>
+        <div style="font-size:13px;color:${meetup?.notice ? 'var(--ink)' : 'var(--ink-40)'};">${meetup?.notice || '공지사항이 없어요'}</div>
       </div>
       <div style="padding:12px 16px;flex:1;">
-        <div style="font-size:11px;font-weight:600;color:#999;margin-bottom:4px;">참여자</div>
+        <div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:4px;">참여자</div>
         ${hostHTML}${partsHTML}
       </div>
     </div>
@@ -8078,27 +8078,27 @@ function openGroupChat(chatId) {
             <i data-lucide="chevron-left" style="width:28px;"></i>
           </button>
           <div style="display:flex; flex-direction:column; align-items:center;">
-            <div style="font-size:16px; font-weight:700; color:#333;">${chat.title}</div>
+            <div style="font-size:16px; font-weight:700; color:var(--ink);">${chat.title}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${totalCount}명 참여 중</div>
           </div>
-          <button onclick="openGroupSidePanel('${chatId}')" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border:none; background:none; cursor:pointer; padding:0; color:#555;">
+          <button onclick="openGroupSidePanel('${chatId}')" style="position: absolute; right: 20px; top: 50%; transform: translateY(-50%); border:none; background:none; cursor:pointer; padding:0; color:var(--ink-soft);">
             <i data-lucide="more-horizontal" style="width:22px; height:22px;"></i>
           </button>
         </div>
         <div class="chat-scroller" id="group-chat-scroller">
           ${chat.messages.map(msg => {
             if (msg.type === 'system') {
-              return `<div style="text-align:center; font-size:12px; color:#AAA; padding:8px 16px;">${msg.text}</div>`;
+              return `<div style="text-align:center; font-size:12px; color:var(--ink-40); padding:8px 16px;">${msg.text}</div>`;
             }
             if (msg.type === 'host' || msg.type === 'participant') {
               return `
                 <div style="display:flex; align-items:flex-start; gap:8px;">
-                  <div style="width:34px;height:34px;border-radius:50%;background-image:url('${msg.image}');background-size:cover;background-position:center;flex-shrink:0;background-color:#EDE0FF;"></div>
+                  <div style="width:34px;height:34px;border-radius:50%;background-image:url('${msg.image}');background-size:cover;background-position:center;flex-shrink:0;background-color:var(--accent-wash);"></div>
                   <div>
                     <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:600;">${msg.name}${msg.type === 'host' ? ' · 호스트' : ''}</div>
                     <div style="display:flex;align-items:flex-end;gap:6px;">
                       <div class="chat-bubble received" style="margin:0;">${msg.text}</div>
-                      ${msg.time ? `<div style="font-size:10px;color:#BBB;white-space:nowrap;">${msg.time}</div>` : ''}
+                      ${msg.time ? `<div style="font-size:10px;color:var(--ink-40);white-space:nowrap;">${msg.time}</div>` : ''}
                     </div>
                   </div>
                 </div>`;
@@ -8157,20 +8157,20 @@ function openGroupChat(chatId) {
         </div>
         <div class="scroll-y" style="flex:1; padding:0 24px;">
           ${host ? `
-          <div style="padding:16px 0; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${host.id}, '${cId}')">
+          <div style="padding:16px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${host.id}, '${cId}')">
             <div style="width:48px;height:48px;border-radius:50%;background-image:url('${host.image}');background-size:cover;background-position:center;flex-shrink:0;"></div>
             <div style="flex:1;">
-              <div style="font-size:15px;font-weight:600;color:#333;">${host.name}</div>
+              <div style="font-size:15px;font-weight:600;color:var(--ink);">${host.name}</div>
               <div style="font-size:12px;color:var(--text-muted);">${getAge(host.birthYear)}세</div>
             </div>
-            <span style="font-size:12px;font-weight:600;color:#9B72CC;background:#F0E6FF;padding:3px 8px;border-radius:20px;">호스트</span>
+            <span style="font-size:12px;font-weight:600;color:var(--accent-text);background:var(--accent-wash);padding:3px 8px;border-radius:20px;">호스트</span>
           </div>
           ` : ''}
           ${parts.map(pp => `
-          <div style="padding:16px 0; border-bottom:1px solid var(--border-color); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${pp.id}, '${cId}')">
+          <div style="padding:16px 0; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; cursor:pointer;" onclick="openLimitedProfile(${pp.id}, '${cId}')">
             <div style="width:48px;height:48px;border-radius:50%;background-image:url('${pp.image}');background-size:cover;background-position:center;flex-shrink:0;"></div>
             <div>
-              <div style="font-size:15px;font-weight:600;color:#333;">${pp.name}</div>
+              <div style="font-size:15px;font-weight:600;color:var(--ink);">${pp.name}</div>
               <div style="font-size:12px;color:var(--text-muted);">${getAge(pp.birthYear)}세</div>
             </div>
           </div>
@@ -8204,7 +8204,7 @@ window.openLimitedProfile = function (profileId, chatId) {
   const infoRowsHTML = limitedFields.map((f, idx) => `
     <div class="info-row" style="${idx === limitedFields.length - 1 ? 'border-bottom:none;' : ''}">
       <div class="info-label">${f.label}</div>
-      <div class="info-val" style="color:#2C2C2A;">${f.value}</div>
+      <div class="info-val" style="color:var(--ink);">${f.value}</div>
     </div>
   `).join('');
 
@@ -8219,7 +8219,7 @@ window.openLimitedProfile = function (profileId, chatId) {
       </div>
       <div class="scroll-y" style="flex:1;">
         <div style="padding-bottom:120px;">
-          <div class="prof-modal-photo" style="position:relative; height:450px; overflow:hidden; background:#EEE;">
+          <div class="prof-modal-photo" style="position:relative; height:450px; overflow:hidden; background:var(--wash-2);">
             <div style="position:absolute;inset:0;background-image:url('${p.image}');background-size:cover;background-position:center;${blurStyle}"></div>
             ${p.photoPrivate ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;"><div style="background:rgba(0,0,0,0.5);padding:12px 24px;border-radius:14px;color:white;font-size:14px;font-weight:600;">🔒 매칭 후 공개</div></div>` : ''}
           </div>
@@ -8246,9 +8246,9 @@ window.openLimitedProfile = function (profileId, chatId) {
             <div class="info-card">${infoRowsHTML}</div>
             ` : ''}
 
-            <div style="margin-top:32px; background:#F8F4FF; border-radius:16px; padding:20px; text-align:center;">
-              <div style="font-size:15px; font-weight:600; color:#9B72CC;">💜 더 알아보려면 매칭이 필요해요</div>
-              <div style="font-size:13px; color:#AAA; margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
+            <div style="margin-top:32px; background:var(--accent-wash); border-radius:16px; padding:20px; text-align:center;">
+              <div style="font-size:15px; font-weight:600; color:var(--accent-text);">💜 더 알아보려면 매칭이 필요해요</div>
+              <div style="font-size:13px; color:var(--ink-40); margin-top:6px;">챕터 답변과 추가 사진은 매칭 후 공개돼요</div>
             </div>
           </div>
         </div>
@@ -8285,17 +8285,17 @@ window.openChat = function (chatId) {
         <div class="chat-header" style="position: relative; justify-content: center; padding: calc(12px + var(--safe-top)) 20px 12px; min-height: 60px;">
           <button class="back-btn" onclick="switchTab('messages')" style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); padding: 0;"><i data-lucide="chevron-left" style="width:28px;"></i></button>
           <div class="chat-header-user-info" style="display:flex; flex-direction:column; align-items:center;">
-            <div style="font-size:16px; font-weight:700; color:#333;">${chat.name}</div>
+            <div style="font-size:16px; font-weight:700; color:var(--ink);">${chat.name}</div>
             <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">${ageDistText}</div>
           </div>
           <button onclick="openProfileForChat(${p?.id || 0}, ${chatId})" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:none; border:none; padding:0; cursor:pointer;">
-            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; background-color:#EDE0FF; border:1px solid rgba(0,0,0,0.08);"></div>
+            <div style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; background-color:var(--accent-wash); border:1px solid rgba(0,0,0,0.08);"></div>
           </button>
         </div>
         ${sharedMeetup ? `
-        <div id="shared-meetup-banner" style="background:#EDE4F7; padding:10px 16px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
-          <span style="font-size:13px; color:#333; flex:1; cursor:pointer; line-height:1.3;" onclick="openMeetupDetail(${sharedMeetup.id})">📅 ${sharedMeetup.title} · ${sharedMeetup.date || ''}</span>
-          <button onclick="document.getElementById('shared-meetup-banner').remove()" style="background:none; border:none; cursor:pointer; color:#999; padding:0; font-size:18px; flex-shrink:0; line-height:1;">×</button>
+        <div id="shared-meetup-banner" style="background:var(--accent-wash); padding:10px 16px; display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span style="font-size:13px; color:var(--ink); flex:1; cursor:pointer; line-height:1.3;" onclick="openMeetupDetail(${sharedMeetup.id})">📅 ${sharedMeetup.title} · ${sharedMeetup.date || ''}</span>
+          <button onclick="document.getElementById('shared-meetup-banner').remove()" style="background:none; border:none; cursor:pointer; color:var(--muted); padding:0; font-size:18px; flex-shrink:0; line-height:1;">×</button>
         </div>
         ` : ''}
 
@@ -8306,12 +8306,12 @@ window.openChat = function (chatId) {
         const meetup = MOCK_MEETUPS.find(x => x.id === m.meetupId);
         if (meetup) {
           meetupHTML = `
-                  <div onclick="openMeetupDetail(${meetup.id})" style="cursor: pointer; background: white; border: 1px solid #EEE; border-radius: 12px; padding: 12px; margin-bottom: 4px; max-width: 260px; align-self: flex-end; text-align: left; position: relative;">
-                    <div style="font-size:11px; color:#9B72CC; margin-bottom:4px;">${meetup.type}</div>
-                    <div style="font-size:14px; font-weight:700; color:#333; margin-bottom:4px;">${meetup.title}</div>
+                  <div onclick="openMeetupDetail(${meetup.id})" style="cursor: pointer; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 4px; max-width: 260px; align-self: flex-end; text-align: left; position: relative;">
+                    <div style="font-size:11px; color:var(--accent-text); margin-bottom:4px;">${meetup.type}</div>
+                    <div style="font-size:14px; font-weight:700; color:var(--ink); margin-bottom:4px;">${meetup.title}</div>
                     <div style="font-size:12px; color:var(--text-muted);">📍 ${meetup.shortLocation} · ${meetup.date}</div>
                     <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">👥 ${meetup.currentCap}/${meetup.maxCap}명</div>
-                    <div style="font-size: 11px; color: #9B72CC; font-weight: 600; text-align: right; margin-top: 8px;">자세히 보기 →</div>
+                    <div style="font-size: 11px; color: var(--accent-text); font-weight: 600; text-align: right; margin-top: 8px;">자세히 보기 →</div>
                   </div>
                 `;
         }
@@ -8320,7 +8320,7 @@ window.openChat = function (chatId) {
         const isConsecutive = idx > 0 && chat.messages[idx - 1].type === 'received';
         const avatarHTML = isConsecutive
           ? `<div style="width:32px; flex-shrink:0;"></div>`
-          : `<div onclick="openProfileForChat(${p?.id || 0}, ${chatId})" style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; flex-shrink:0; background-color:#EDE0FF; cursor:pointer;"></div>`;
+          : `<div onclick="openProfileForChat(${p?.id || 0}, ${chatId})" style="width:32px; height:32px; border-radius:50%; background-image:url('${p?.image || ''}'); background-size:cover; background-position:center; flex-shrink:0; background-color:var(--accent-wash); cursor:pointer;"></div>`;
         return `
               ${meetupHTML}
               <div style="display:flex; align-items:flex-start; gap:8px;">
@@ -8386,8 +8386,8 @@ function renderMyMeetingsTab(tabName) {
   const tabBarHtml = tabs.map(t => `
     <button onclick="renderMyMeetingsTab('${t}')" style="
       flex:1; background:none; border:none; padding:12px 0; font-size:14px; font-weight:600; cursor:pointer;
-      color:${t === tabName ? '#9B72CC' : 'var(--text-muted)'};
-      border-bottom:${t === tabName ? '2px solid #9B72CC' : '2px solid transparent'};
+      color:${t === tabName ? 'var(--accent-text)' : 'var(--text-muted)'};
+      border-bottom:${t === tabName ? '2px solid var(--accent-strong)' : '2px solid transparent'};
     ">${tabLabels[t]}</button>
   `).join('');
 
@@ -8401,14 +8401,14 @@ function renderMyMeetingsTab(tabName) {
       bodyHtml = samples.map(m => `
         <div onclick="openMeetupDetail(${m.id})" style="
           display:flex; justify-content:space-between; align-items:center;
-          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+          padding:16px 0; border-bottom:1px solid var(--border); cursor:pointer;
         ">
           <div>
             <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark);">${m.title}</div>
             <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
           </div>
           <span style="
-            background:#E8F5E9; color:#4CAF50; border-radius:999px;
+            background:var(--success-bg); color:var(--success); border-radius:999px;
             padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px;
           ">확정 ✓</span>
         </div>
@@ -8422,14 +8422,14 @@ function renderMyMeetingsTab(tabName) {
       bodyHtml = saved.map(m => `
         <div onclick="openMeetupDetail(${m.id})" style="
           display:flex; justify-content:space-between; align-items:center;
-          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+          padding:16px 0; border-bottom:1px solid var(--border); cursor:pointer;
         ">
           <div style="flex:1; min-width:0;">
             <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.title}</div>
             <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
           </div>
           <span style="
-            background:#F3EEFF; color:#9B72CC; border-radius:999px;
+            background:var(--accent-wash); color:var(--accent-text); border-radius:999px;
             padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px; flex-shrink:0;
           ">북마크 ♥</span>
         </div>
@@ -8443,14 +8443,14 @@ function renderMyMeetingsTab(tabName) {
       bodyHtml = mine.map(m => `
         <div onclick="openMeetupDetail(${m.id})" style="
           display:flex; justify-content:space-between; align-items:center;
-          padding:16px 0; border-bottom:1px solid var(--border-color); cursor:pointer;
+          padding:16px 0; border-bottom:1px solid var(--border); cursor:pointer;
         ">
           <div style="flex:1; min-width:0;">
             <div style="font-weight:700; font-size:15px; margin-bottom:4px; color:var(--text-dark); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${m.title}</div>
             <div style="font-size:13px; color:var(--text-muted);">${m.date} · ${m.shortLocation}</div>
           </div>
           <span style="
-            background:${m.cancelled ? '#F1EFEF' : '#E8F5E9'}; color:${m.cancelled ? '#8A8587' : '#4CAF50'}; border-radius:999px;
+            background:${m.cancelled ? 'var(--wash-2)' : 'var(--success-bg)'}; color:${m.cancelled ? 'var(--muted)' : 'var(--success)'}; border-radius:999px;
             padding:2px 8px; font-size:12px; font-weight:600; white-space:nowrap; margin-left:12px; flex-shrink:0;
           ">${m.cancelled ? '취소됨' : '주최 ✓'}</span>
         </div>
@@ -8459,7 +8459,7 @@ function renderMyMeetingsTab(tabName) {
   }
 
   content.innerHTML = `
-    <div style="display:flex; border-bottom:1px solid var(--border-color);">${tabBarHtml}</div>
+    <div style="display:flex; border-bottom:1px solid var(--border);">${tabBarHtml}</div>
     <div style="padding:0 24px 40px;">${bodyHtml}</div>
   `;
 }
@@ -8500,7 +8500,7 @@ window.toggleSavedMeetups = function () {
   const icon = document.getElementById('meetup-collection-toggle-icon');
   if (btn && icon) {
     btn.style.background = window.showSavedMeetups ? 'rgba(155,114,204,0.1)' : 'none';
-    icon.setAttribute('fill', window.showSavedMeetups ? '#9B72CC' : 'none');
+    icon.setAttribute('fill', window.showSavedMeetups ? 'var(--accent-strong)' : 'none');
   }
 
   renderMeetupList();
@@ -8632,7 +8632,7 @@ window.showMutualMatchOverlay = function (p) {
   const otherDistLabel = formatDistanceLabel(p);
 
   overlay.innerHTML = `
-    <div style="font-size:22px; font-weight:700; color:#9B72CC; margin-bottom:60px;">on the same page ♥︎</div>
+    <div style="font-size:22px; font-weight:700; color:var(--accent-text); margin-bottom:60px;">on the same page ♥︎</div>
 
     <div style="position:relative; width:296px; height:220px; display:flex; align-items:center; justify-content:center; gap:20px; margin-bottom:40px;">
 
@@ -8640,16 +8640,16 @@ window.showMutualMatchOverlay = function (p) {
       <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:0; pointer-events:none;">
         <div style="animation:orbitSpin 12s linear infinite;">
           <svg width="300" height="220" viewBox="0 0 300 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <ellipse cx="150" cy="110" rx="145" ry="105" stroke="#C89FDB" stroke-width="1" opacity="0.6"/>
-            <text x="295" y="114" fill="#C89FDB" font-size="14" text-anchor="middle" dominant-baseline="middle" opacity="0.8">✦</text>
+            <ellipse cx="150" cy="110" rx="145" ry="105" stroke="var(--accent-soft)" stroke-width="1" opacity="0.6"/>
+            <text x="295" y="114" fill="var(--accent-soft)" font-size="14" text-anchor="middle" dominant-baseline="middle" opacity="0.8">✦</text>
           </svg>
         </div>
       </div>
 
       <!-- My Profile -->
-      <div class="saved-book-cover" style="width:120px; height:180px; background:#F0F0EE; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; z-index:1; animation:bookFloat 3s ease-in-out infinite;">
+      <div class="saved-book-cover" style="width:120px; height:180px; background:var(--wash-2); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; z-index:1; animation:bookFloat 3s ease-in-out infinite;">
         <div class="book-spine" style="background:linear-gradient(to right, #DDD, rgba(0,0,0,0.05)); width:6px;"></div>
-        ${typeof userProfilePhoto !== 'undefined' && userProfilePhoto ? `<div style="position:absolute; inset:0; background-image:url('${userProfilePhoto}'); background-size:cover; background-position:center;"></div>` : `<span style="font-size:24px; font-weight:700; color:#CCC;">나</span>`}
+        ${typeof userProfilePhoto !== 'undefined' && userProfilePhoto ? `<div style="position:absolute; inset:0; background-image:url('${userProfilePhoto}'); background-size:cover; background-position:center;"></div>` : `<span style="font-size:24px; font-weight:700; color:var(--ink-40);">나</span>`}
         <div class="book-overlay"></div>
       </div>
 
@@ -8977,7 +8977,7 @@ window._sendBookHeart = function (pid) {
   const fabSvg = document.getElementById('prof-fab-icon');
   if (fabSvg) {
     const path = fabSvg.querySelector('path');
-    if (path) { path.setAttribute('fill', '#fff'); path.setAttribute('stroke', 'none'); }
+    if (path) { path.setAttribute('fill', 'var(--on-accent)'); path.setAttribute('stroke', 'none'); }
   }
   const fab = document.getElementById('prof-page-fab');
   if (fab) {
@@ -9727,11 +9727,11 @@ window.renderDiscoverTab = function () {
 
   const weeklyUndecided = dailyProfiles.filter(p => !(pagedSet?.has(p.id) ?? false) && !(passedSet?.has(p.id) ?? false)).length;
   let headerHTML = `<div class="tab-header">${getTabHeaderHTML('발견', '가치관, 취향이 맞는 사람을 만나보세요', `
-    <span style="font-size:12px; font-weight:600; color:#9B72CC; background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
-    <button onclick="window.openDiscoverFilterSheet()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: ${_dfActive ? '#fff' : '#9B72CC'}; background:${_dfActive ? '#9B72CC' : 'none'}; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+    <span style="font-size:12px; font-weight:600; color:var(--accent-text); background:rgba(155,114,204,0.1); border-radius:20px; padding:4px 10px;">이번 주 ${weeklyUndecided}권 남음</span>
+    <button onclick="window.openDiscoverFilterSheet()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: ${_dfActive ? 'var(--on-accent)' : 'var(--accent-text)'}; background:${_dfActive ? 'var(--accent-strong)' : 'none'}; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
       <i data-lucide="sliders-horizontal" style="width: 22px; height: 22px;"></i>
     </button>
-    <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: #9B72CC; display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
+    <button onclick="window.openLibraryPage()" style="background: none; border: none; cursor: pointer; border-radius:50%; width:40px; height:40px; color: var(--accent-text); display:flex; align-items:center; justify-content:center; transition: background 0.2s;">
       <i data-lucide="library" style="width: 24px; height: 24px;"></i>
     </button>
   `)}</div>`;
@@ -9742,8 +9742,8 @@ window.renderDiscoverTab = function () {
       <div class="discover-tab-container" style="align-items:center;text-align:center;height:calc(100vh - 100px); height:calc(100dvh - 100px);overflow-y:auto;padding-bottom:32px;">
         <i data-lucide="search-x" style="width:48px;height:48px;color:var(--text-muted);opacity:0.5;margin-bottom:24px;margin-top:40px;"></i>
         <p style="font-size:17px;font-weight:700;margin-bottom:8px;">필터 조건에 맞는<br>프로필이 없어요</p>
-        <p style="color:#8E8E8A;font-size:14px;margin-bottom:24px;">조건을 조정해보세요</p>
-        <button onclick="window.openDiscoverFilterSheet()" style="border:1.5px solid #9B72CC;color:#9B72CC;background:transparent;border-radius:24px;padding:10px 28px;font-size:14px;font-family:inherit;cursor:pointer;">필터 수정</button>
+        <p style="color:var(--muted);font-size:14px;margin-bottom:24px;">조건을 조정해보세요</p>
+        <button onclick="window.openDiscoverFilterSheet()" style="border:1.5px solid var(--accent-strong);color:var(--accent-text);background:transparent;border-radius:24px;padding:10px 28px;font-size:14px;font-family:inherit;cursor:pointer;">필터 수정</button>
       </div>
     `;
     if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -9800,14 +9800,14 @@ window.renderDiscoverTab = function () {
         <div class="discover-tab-container" id="discover-empty-state" style="align-items: center; text-align: center; height: calc(100vh - 100px); height: calc(100dvh - 100px); overflow-y:auto; padding-bottom:32px;">
           <i data-lucide="moon" style="width: 48px; height: 48px; color: var(--text-muted); opacity: 0.5; margin-bottom: 24px; margin-top: 32px;"></i>
           <p style="margin-bottom: 6px; font-size: 20px; font-weight: 700;">이번 주 프로필북을 모두 읽었어요.</p>
-          <p style="color: #8E8E8A; margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
-          <p style="color: #9B72CC; font-size:14px; font-weight:600; margin-bottom:0;">${nextMondayStr}</p>
+          <p style="color: var(--muted); margin-bottom: 4px; font-size: 15px;">다음 월요일에 새로운 프로필북이 도착해요</p>
+          <p style="color: var(--accent-text); font-size:14px; font-weight:600; margin-bottom:0;">${nextMondayStr}</p>
 
           ${P_QURATED_ENABLED ? `
           <div class="p-qurated-promo-card" style="margin-top:24px;">
-            <div style="font-size: 14px; font-weight: 700; color: #9B72CC; margin-bottom: 6px;">p.Qurated</div>
-            <div style="font-size: 13px; color: #888; margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
-            <div onclick="window.openQuratedPage()" style="font-size: 13px; font-weight: 700; color: #9B72CC; cursor: pointer;">자세히 보기</div>
+            <div style="font-size: 14px; font-weight: 700; color: var(--accent-text); margin-bottom: 6px;">p.Qurated</div>
+            <div style="font-size: 13px; color: var(--muted); margin-bottom: 12px; line-height: 1.4;">Q가 당신에게 딱 맞는 사람을 소개해드려요.</div>
+            <div onclick="window.openQuratedPage()" style="font-size: 13px; font-weight: 700; color: var(--accent-text); cursor: pointer;">자세히 보기</div>
           </div>
           ` : ''}
 
@@ -9946,8 +9946,8 @@ window.openReceivedHeartsList = function () {
   let listHTML;
   if (all.length === 0) {
     listHTML = `<div style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; height:50vh;">
-      <p style="font-size:15px; color:#2C2C2A; font-weight:600; margin-bottom:8px;">아직 받은 하트가 없어요</p>
-      <p style="font-size:13px; color:#8E8E8A;">프로필북을 정성껏 채우면 하트가 도착해요</p>
+      <p style="font-size:15px; color:var(--ink); font-weight:600; margin-bottom:8px;">아직 받은 하트가 없어요</p>
+      <p style="font-size:13px; color:var(--muted);">프로필북을 정성껏 채우면 하트가 도착해요</p>
     </div>`;
   } else {
     const unlocked = isArchiveUnlocked();
@@ -10009,9 +10009,9 @@ window.renderSavedBox = function () {
   if (savedProfiles.length === 0) {
     gridHTML = `
         <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding: 40px; text-align:center; height:60vh;">
-          <i data-lucide="heart" style="width:48px; height:48px; color:#EEE; margin-bottom:16px;"></i>
-          <p style="font-size:15px; color:#2C2C2A; font-weight:600; margin-bottom:8px;">아직 담은 프로필북이 없어요</p>
-          <p style="font-size:13px; color:#8E8E8A;">마음에 드는 분께 Page her를 눌러보세요</p>
+          <i data-lucide="heart" style="width:48px; height:48px; color:var(--ink-40); margin-bottom:16px;"></i>
+          <p style="font-size:15px; color:var(--ink); font-weight:600; margin-bottom:8px;">아직 담은 프로필북이 없어요</p>
+          <p style="font-size:13px; color:var(--muted);">마음에 드는 분께 Page her를 눌러보세요</p>
         </div>
       `;
   } else {
@@ -10038,12 +10038,12 @@ window.renderSavedBox = function () {
 
   contentArea.innerHTML = `
       <div class="app-header">
-        <button class="icon-btn" onclick="renderDiscoverTab()" style="background:none; border:none; color:#2C2C2A;">
+        <button class="icon-btn" onclick="renderDiscoverTab()" style="background:none; border:none; color:var(--ink);">
           <i data-lucide="chevron-left" style="width:28px; height:28px;"></i>
         </button>
         <h2 style="margin:0; flex:1; text-align:center; margin-left:8px;">보관함</h2>
-        <button class="icon-btn" style="background:none; border:none; color:#9B72CC;">
-          <i data-lucide="heart" fill="#9B72CC" style="width:24px;"></i>
+        <button class="icon-btn" style="background:none; border:none; color:var(--accent-text);">
+          <i data-lucide="heart" fill="var(--accent-strong)" style="width:24px;"></i>
         </button>
       </div>
       <div class="scroll-y" style="height: calc(100vh - 140px); height: calc(100dvh - 140px - var(--safe-top)); padding-top: 20px;">
@@ -10414,8 +10414,8 @@ window.confirmIdentity = async function (btn) {
     window.basicInfoComplete = !!window.currentUserRow?.basic_info_complete;
 
     btn.innerHTML = '인증 완료 ✓';
-    btn.style.borderColor = '#4CAF50';
-    btn.style.color = '#4CAF50';
+    btn.style.borderColor = 'var(--success)';
+    btn.style.color = 'var(--success)';
     setTimeout(() => navigateTo('onboarding-1'), 1000);
   } catch (err) {
     // No alert() — it hides the only useful information. Everything the
@@ -10433,8 +10433,8 @@ window.confirmIdentity = async function (btn) {
     // Inline, non-blocking feedback so the screen still reacts to the tap.
     btn.disabled = false;
     btn.innerHTML = '인증 실패 — 다시 시도';
-    btn.style.borderColor = '#E05B5B';
-    btn.style.color = '#E05B5B';
+    btn.style.borderColor = 'var(--danger)';
+    btn.style.color = 'var(--danger)';
     setTimeout(() => {
       btn.innerHTML = originalLabel;
       btn.style.borderColor = '';
@@ -10521,7 +10521,7 @@ function startApp() {
   const splash = createScreen('splash', `
   <!-- Book spine: text reads top→bottom (writing-mode: vertical-lr) -->
   <div class="splash-spine">
-    <span class="splash-spine-logo">p<svg viewBox="0 0 24 24" width="8" height="8" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:-1px;left:-4px;transform:rotate(135deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#C89FDB"/></svg>2</span>
+    <span class="splash-spine-logo">p<svg viewBox="0 0 24 24" width="8" height="8" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:-1px;left:-4px;transform:rotate(135deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="var(--accent-soft)"/></svg>2</span>
     <span class="splash-spine-tagline" style="font-weight:600;">On the same page</span>
     <span class="splash-spine-studio" style="font-weight:600;">versa studio</span>
   </div>
@@ -10532,7 +10532,7 @@ function startApp() {
     <div class="splash-tagline-top" style="font-weight:600;">On the same page</div>
     <!-- CENTER: logo, fills remaining height -->
     <div class="splash-logo-wrap">
-      <div class="cover-logo">p<svg class="logo-heart" viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:4px;left:-3px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#E2FF74"/></svg>2</div>
+      <div class="cover-logo">p<svg class="logo-heart" viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:baseline;position:relative;top:4px;left:-3px;transform:rotate(45deg);margin:0 1px;"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="var(--lime)"/></svg>2</div>
     </div>
     <!-- BOTTOM: studio -->
     <div class="splash-studio" style="font-weight:600;">versa<br>studio</div>
@@ -10908,10 +10908,10 @@ function buildInviteCardHTML(card, i, nowMs) {
         <div class="envelope-content">
           <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">${card.used_by ? 'INVITED' : 'EXPIRED'}</div>
           <div class="invite-circle">
-            <i data-lucide="heart" style="width:20px; height:20px; color:#999;"></i>
+            <i data-lucide="heart" style="width:20px; height:20px; color:var(--muted);"></i>
           </div>
-          <div style="color:#888; font-size:13px; font-family:monospace;">${card.code}</div>
-          <div style="color:#999; font-size:12px;">만료됨</div>
+          <div style="color:var(--muted); font-size:13px; font-family:monospace;">${card.code}</div>
+          <div style="color:var(--muted); font-size:12px;">만료됨</div>
         </div>
       </div>
     `;
@@ -10940,7 +10940,7 @@ function buildInviteCardHTML(card, i, nowMs) {
         <div class="envelope-content">
           <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
           <div class="invite-circle">
-            <i data-lucide="heart" style="width:20px; height:20px; color:#9B7FD4;"></i>
+            <i data-lucide="heart" style="width:20px; height:20px; color:var(--accent-text);"></i>
           </div>
           <button class="use-invite-btn" onclick="window.activateInvite(${i})">사용하기</button>
         </div>
@@ -10956,7 +10956,7 @@ function buildInviteCardHTML(card, i, nowMs) {
       <div class="envelope-content">
         <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
         <div class="invite-circle">
-          <i data-lucide="heart" style="width:20px; height:20px; color:#CCC;"></i>
+          <i data-lucide="heart" style="width:20px; height:20px; color:var(--ink-40);"></i>
         </div>
         <button class="use-invite-btn" disabled style="opacity:0.5; cursor:default;">준비 중</button>
       </div>
@@ -11116,13 +11116,13 @@ window.openLibraryPage = function () {
         <div style="position:absolute;bottom:0;left:0;width:100%;height:55%;background:linear-gradient(to top,rgba(0,0,0,0.65),transparent);z-index:3;"></div>
         <div onclick="event.stopPropagation();window._openPlus2Prompt()"
              style="position:absolute;top:8px;left:12px;z-index:6;background:rgba(155,114,204,0.75);backdrop-filter:blur(4px);border-radius:20px;padding:4px 9px;cursor:pointer;">
-          <span style="font-size:10px;color:#fff;font-weight:600;">되살리기 🔒</span>
+          <span style="font-size:10px;color:var(--on-accent);font-weight:600;">되살리기 🔒</span>
         </div>
         <div style="position:absolute;top:8px;right:8px;z-index:6;background:rgba(0,0,0,0.45);border-radius:20px;padding:2px 7px;">
-          <span style="font-size:9px;color:#E2FF74;font-weight:700;letter-spacing:0.04em;">p.2+</span>
+          <span style="font-size:9px;color:var(--lime);font-weight:700;letter-spacing:0.04em;">p.2+</span>
         </div>
         <div style="position:absolute;bottom:${bio ? '30px' : '12px'};left:0;width:100%;padding:0 10px 0 14px;box-sizing:border-box;z-index:4;">
-          <div style="font-size:15px;font-weight:700;color:#fff;">${p.name}</div>
+          <div style="font-size:15px;font-weight:700;color:var(--on-accent);">${p.name}</div>
           <div style="font-size:11px;color:rgba(255,255,255,0.75);margin-top:1px;">${age}세 · 서울</div>
         </div>
         ${bio ? `<div style="position:absolute;bottom:10px;left:14px;right:10px;z-index:4;font-size:10px;color:rgba(255,255,255,0.55);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">"${bio}"</div>` : ''}
@@ -11151,20 +11151,20 @@ window.openLibraryPage = function () {
 
     const sheet = document.createElement('div');
     sheet.id = 'lib-plus2-sheet';
-    sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:#FFF;border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
+    sheet.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:9000;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 24px 44px;box-shadow:0 -8px 32px rgba(0,0,0,0.15);animation:sheetUp 0.25s ease-out;';
     sheet.innerHTML = `
-      <div style="width:36px;height:4px;background:#E8E8E8;border-radius:4px;margin:0 auto 22px;"></div>
-      <div style="font-size:18px;font-weight:700;color:#2C2C2A;margin-bottom:8px;">되살리기는 p.2+ 기능이에요</div>
-      <div style="font-size:14px;color:#888;line-height:1.7;margin-bottom:20px;">지나간 프로필북을 다시 Page할 수 있어요.</div>
-      <div style="background:#F5EFFE;border-radius:12px;padding:16px;margin-bottom:18px;">
-        <div style="font-size:11px;font-weight:700;color:#9B72CC;margin-bottom:8px;letter-spacing:0.06em;">P.2+ 혜택</div>
-        <div style="font-size:13px;color:#555;line-height:2;">지나간 프로필북 되살리기<br>광고 제거</div>
+      <div style="width:36px;height:4px;background:var(--hairline-strong);border-radius:4px;margin:0 auto 22px;"></div>
+      <div style="font-size:18px;font-weight:700;color:var(--ink);margin-bottom:8px;">되살리기는 p.2+ 기능이에요</div>
+      <div style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px;">지나간 프로필북을 다시 Page할 수 있어요.</div>
+      <div style="background:var(--accent-wash);border-radius:12px;padding:16px;margin-bottom:18px;">
+        <div style="font-size:11px;font-weight:700;color:var(--accent-text);margin-bottom:8px;letter-spacing:0.06em;">P.2+ 혜택</div>
+        <div style="font-size:13px;color:var(--ink-soft);line-height:2;">지나간 프로필북 되살리기<br>광고 제거</div>
       </div>
-      <div style="font-size:12px;color:#AAA;text-align:center;margin-bottom:16px;">₩5,900 / 주 &nbsp;·&nbsp; ₩17,900 / 월 &nbsp;·&nbsp; ₩39,900 / 3개월</div>
+      <div style="font-size:12px;color:var(--ink-40);text-align:center;margin-bottom:16px;">₩5,900 / 주 &nbsp;·&nbsp; ₩17,900 / 월 &nbsp;·&nbsp; ₩39,900 / 3개월</div>
       <button onclick="document.getElementById('lib-plus2-sheet')?.remove(); document.getElementById('lib-plus2-backdrop')?.remove();"
-              style="width:100%;padding:15px;background:#9B72CC;color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">구독하기</button>
+              style="width:100%;padding:15px;background:var(--accent-fill);color:var(--on-accent);border:none;border-radius:14px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;">구독하기</button>
       <button onclick="document.getElementById('lib-plus2-sheet')?.remove(); document.getElementById('lib-plus2-backdrop')?.remove();"
-              style="width:100%;padding:12px;background:transparent;color:#AAA;border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
+              style="width:100%;padding:12px;background:transparent;color:var(--ink-40);border:none;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px;">나중에</button>
     `;
     document.body.appendChild(backdrop);
     document.body.appendChild(sheet);
@@ -11219,9 +11219,9 @@ window.openQuratedPage = function () {
            <div style="width: 48px;"></div>
          </div>
          <div style="text-align: center;">
-           <i data-lucide="check-circle" style="width: 48px; height: 48px; color: #9B72CC; margin-bottom: 16px; margin: 0 auto; display: block;"></i>
-           <div style="font-size: 20px; font-weight: 700; color: #333; margin-bottom: 8px;">신청이 완료됐어요 ☺️</div>
-           <div style="font-size: 15px; color: #888;">Q가 곧 연락드릴게요.</div>
+           <i data-lucide="check-circle" style="width: 48px; height: 48px; color: var(--accent-text); margin-bottom: 16px; margin: 0 auto; display: block;"></i>
+           <div style="font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 8px;">신청이 완료됐어요 ☺️</div>
+           <div style="font-size: 15px; color: var(--muted);">Q가 곧 연락드릴게요.</div>
          </div>
       </div>
     `;
@@ -11242,29 +11242,29 @@ window.openQuratedPage = function () {
          
          <!-- Top Section -->
          <div class="qurated-top-section">
-           <div style="font-size: 24px; font-weight: 800; color: #9B72CC; margin-bottom: 4px;">p.Qurated</div>
-           <div style="font-size: 15px; color: #333; font-weight: 600; margin-bottom: 6px;">진심으로 맞는 사람을 찾고 있다면</div>
-           <div style="font-size: 12px; color: #999; background: #F5F5F5; padding: 2px 8px; border-radius: 4px;">by p.2</div>
+           <div style="font-size: 24px; font-weight: 800; color: var(--accent-text); margin-bottom: 4px;">p.Qurated</div>
+           <div style="font-size: 15px; color: var(--ink); font-weight: 600; margin-bottom: 6px;">진심으로 맞는 사람을 찾고 있다면</div>
+           <div style="font-size: 12px; color: var(--muted); background: var(--wash-2); padding: 2px 8px; border-radius: 4px;">by p.2</div>
          </div>
          
          <!-- Service Intro -->
          <div style="margin: 32px 0;">
-           <div style="font-size: 15px; line-height: 1.6; color: #555; text-align: center; margin-bottom: 24px;">
+           <div style="font-size: 15px; line-height: 1.6; color: var(--ink-soft); text-align: center; margin-bottom: 24px;">
              Q가 당신의 프로필북을 직접 읽고<br>
              가장 잘 맞을 한 사람을 골라드려요.
            </div>
            
-           <div style="display: flex; flex-direction: column; gap: 12px; background: #F8F0FC; padding: 20px; border-radius: 16px;">
+           <div style="display: flex; flex-direction: column; gap: 12px; background: var(--accent-wash); padding: 20px; border-radius: 16px;">
              <div class="qurated-feature-row">
-               <i data-lucide="sparkles" style="width: 18px; color: #9B72CC;"></i>
+               <i data-lucide="sparkles" style="width: 18px; color: var(--accent-text);"></i>
                <span>알고리즘이 아닌 Q가 직접 큐레이션</span>
              </div>
              <div class="qurated-feature-row">
-               <i data-lucide="book-open" style="width: 18px; color: #9B72CC;"></i>
+               <i data-lucide="book-open" style="width: 18px; color: var(--accent-text);"></i>
                <span>프로필북 기반의 더욱 깊이 있는 매칭</span>
              </div>
              <div class="qurated-feature-row">
-               <i data-lucide="coffee" style="width: 18px; color: #9B72CC;"></i>
+               <i data-lucide="coffee" style="width: 18px; color: var(--accent-text);"></i>
                <span>오프라인 만남까지 주선해드려요</span>
              </div>
            </div>
@@ -11272,39 +11272,39 @@ window.openQuratedPage = function () {
          
          <!-- Plan Selection -->
          <div style="margin-bottom: 32px;">
-           <div style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #333;">플랜 선택</div>
+           <div style="font-size: 16px; font-weight: 700; margin-bottom: 16px; color: var(--ink);">플랜 선택</div>
            
            <div id="plan-basic" class="qurated-plan-card" onclick="window.selectQuratedPlan('basic')">
-             <div style="font-size: 18px; font-weight: 700; color: #333; margin-bottom: 4px;">Q.Edition</div>
-             <div style="font-size: 16px; font-weight: 600; color: #333; margin-bottom: 12px;">월 100,000원</div>
-             <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: #666; line-height: 1.6;">
+             <div style="font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 4px;">Q.Edition</div>
+             <div style="font-size: 16px; font-weight: 600; color: var(--ink); margin-bottom: 12px;">월 100,000원</div>
+             <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: var(--muted-deep); line-height: 1.6;">
                <li>주 1권 큐레이티드 프로필북</li>
                <li>오프라인 만남 월 1회 주선</li>
              </ul>
-             <button id="btn-basic" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #E5E5E5; background: white; color: #333; font-size: 14px; font-weight: 600; cursor: pointer;">선택하기</button>
+             <button id="btn-basic" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface); color: var(--ink); font-size: 14px; font-weight: 600; cursor: pointer;">선택하기</button>
            </div>
            
            <div id="plan-premium" class="qurated-plan-card premium" onclick="window.selectQuratedPlan('premium')">
-             <div style="font-size: 18px; font-weight: 700; color: #9B72CC; margin-bottom: 4px;">Q.Edition+</div>
-             <div style="font-size: 16px; font-weight: 600; color: #9B72CC; margin-bottom: 12px;">월 300,000원</div>
-             <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: #666; line-height: 1.6;">
+             <div style="font-size: 18px; font-weight: 700; color: var(--accent-text); margin-bottom: 4px;">Q.Edition+</div>
+             <div style="font-size: 16px; font-weight: 600; color: var(--accent-text); margin-bottom: 12px;">월 300,000원</div>
+             <ul style="padding-left: 20px; margin-bottom: 16px; font-size: 14px; color: var(--muted-deep); line-height: 1.6;">
                <li>주 3권 큐레이티드 프로필북</li>
                <li>오프라인 만남 주 1회 주선</li>
              </ul>
-             <button id="btn-premium" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid #9B72CC; background: #9B72CC; color: white; font-size: 14px; font-weight: 600; cursor: pointer;">선택하기</button>
+             <button id="btn-premium" style="width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid var(--accent-strong); background: var(--accent-fill); color: white; font-size: 14px; font-weight: 600; cursor: pointer;">선택하기</button>
            </div>
          </div>
          
          <!-- Bottom Notice -->
-         <div style="font-size: 12px; color: #999; text-align: center; line-height: 1.5; margin-bottom: 24px;">
+         <div style="font-size: 12px; color: var(--muted); text-align: center; line-height: 1.5; margin-bottom: 24px;">
            신청 후 Q가 직접 연락드려요.<br>
            검토까지 영업일 기준 2~3일 소요됩니다.
          </div>
          
        </div>
        
-       <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: white; border-top: 1px solid #EEE;">
-         <button id="qurated-submit-btn" onclick="window.submitQuratedApplication()" style="display: block; width: 100%; padding: 16px; border-radius: 16px; background: #9B72CC; color: white; font-size: 16px; font-weight: 600; border: none; cursor: pointer; opacity: 0.5; pointer-events: none; transition: opacity 0.2s;">
+       <div style="position: absolute; bottom: 0; left: 0; width: 100%; padding: 16px 20px; padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--surface); border-top: 1px solid var(--border);">
+         <button id="qurated-submit-btn" onclick="window.submitQuratedApplication()" style="display: block; width: 100%; padding: 16px; border-radius: 16px; background: var(--accent-fill); color: white; font-size: 16px; font-weight: 600; border: none; cursor: pointer; opacity: 0.5; pointer-events: none; transition: opacity 0.2s;">
            신청하기
          </button>
        </div>
@@ -11334,47 +11334,47 @@ window.openDiscoverFilterSheet = function () {
 
   const sheet = document.createElement('div');
   sheet.id = 'discover-filter-sheet';
-  sheet.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:#fff;border-radius:20px 20px 0 0;padding:24px 24px 40px;box-sizing:border-box;z-index:600;animation:sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards;max-height:90%;overflow-y:auto;';
+  sheet.style.cssText = 'position:absolute;bottom:0;left:0;width:100%;background:var(--surface);border-radius:20px 20px 0 0;padding:24px 24px 40px;box-sizing:border-box;z-index:600;animation:sheetUp 0.28s cubic-bezier(0.22,1,0.36,1) forwards;max-height:90%;overflow-y:auto;';
   sheet.innerHTML = `
-    <div style="width:40px;height:4px;background:#E0D8F0;border-radius:2px;margin:0 auto 20px;"></div>
-    <div style="font-size:16px;font-weight:700;color:#2C2C2A;margin-bottom:20px;">발견 필터</div>
+    <div style="width:40px;height:4px;background:var(--accent-soft);border-radius:2px;margin:0 auto 20px;"></div>
+    <div style="font-size:16px;font-weight:700;color:var(--ink);margin-bottom:20px;">발견 필터</div>
 
-    <div style="font-size:13px;font-weight:600;color:#555;margin-bottom:8px;">선호 나이대</div>
+    <div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-bottom:8px;">선호 나이대</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span id="df-age-label" style="font-size:14px;font-weight:700;color:#9B72CC;">${DECADE_POINTS[amin]} ~ ${DECADE_POINTS[amax]}</span>
+      <span id="df-age-label" style="font-size:14px;font-weight:700;color:var(--accent-text);">${DECADE_POINTS[amin]} ~ ${DECADE_POINTS[amax]}</span>
     </div>
     <div style="position:relative;height:36px;margin-bottom:4px;">
-      <div style="position:absolute;top:50%;left:0;right:0;height:4px;background:#EDE0FF;border-radius:2px;transform:translateY(-50%);"></div>
-      <div id="df-range-fill" style="position:absolute;top:50%;height:4px;background:#9B72CC;border-radius:2px;transform:translateY(-50%);left:${(amin/9)*100}%;right:${100-(amax/9)*100}%;"></div>
+      <div style="position:absolute;top:50%;left:0;right:0;height:4px;background:var(--accent-wash);border-radius:2px;transform:translateY(-50%);"></div>
+      <div id="df-range-fill" style="position:absolute;top:50%;height:4px;background:var(--accent-fill);border-radius:2px;transform:translateY(-50%);left:${(amin/9)*100}%;right:${100-(amax/9)*100}%;"></div>
       <input type="range" id="df-min-slider" min="0" max="9" value="${amin}" step="1"
         style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2;"
         oninput="window._dfSliderInput('min',+this.value)">
       <input type="range" id="df-max-slider" min="0" max="9" value="${amax}" step="1"
         style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:3;"
         oninput="window._dfSliderInput('max',+this.value)">
-      <div id="df-thumb-min" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#9B72CC;box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amin/9)*100}%;pointer-events:none;z-index:4;"></div>
-      <div id="df-thumb-max" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:#9B72CC;box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amax/9)*100}%;pointer-events:none;z-index:4;"></div>
+      <div id="df-thumb-min" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--accent-fill);box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amin/9)*100}%;pointer-events:none;z-index:4;"></div>
+      <div id="df-thumb-max" style="position:absolute;top:50%;transform:translate(-50%,-50%);width:20px;height:20px;border-radius:50%;background:var(--accent-fill);box-shadow:0 2px 6px rgba(155,114,204,0.4);left:${(amax/9)*100}%;pointer-events:none;z-index:4;"></div>
     </div>
 
-    <div style="font-size:13px;font-weight:600;color:#555;margin-top:24px;margin-bottom:12px;">선호 성향</div>
+    <div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-top:24px;margin-bottom:12px;">선호 성향</div>
     <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px;" id="df-role-chips">
       ${roleOptions.map(r => `
         <div class="filter-chip${roles.includes(r.key) ? ' selected' : ''}" onclick="window._dfToggleRole('${r.key}')">${r.label}</div>
       `).join('')}
     </div>
 
-    <div style="font-size:13px;font-weight:600;color:#555;margin-top:24px;margin-bottom:8px;">거리</div>
+    <div style="font-size:13px;font-weight:600;color:var(--ink-soft);margin-top:24px;margin-bottom:8px;">거리</div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-      <span id="df-dist-label" style="font-size:14px;font-weight:700;color:#9B72CC;">${dist >= 200 ? '제한 없음' : '최대 ' + dist + 'km'}</span>
+      <span id="df-dist-label" style="font-size:14px;font-weight:700;color:var(--accent-text);">${dist >= 200 ? '제한 없음' : '최대 ' + dist + 'km'}</span>
     </div>
     <input type="range" id="df-dist-slider" min="0" max="200" step="10" value="${dist}"
-      style="width:100%;accent-color:#9B72CC;cursor:pointer;"
+      style="width:100%;accent-color:var(--accent-text);cursor:pointer;"
       oninput="window._dfDistInput(+this.value)">
-    <div style="display:flex;justify-content:space-between;font-size:11px;color:#aaa;margin-top:2px;"><span>0km</span><span>200km+</span></div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-40);margin-top:2px;"><span>0km</span><span>200km+</span></div>
 
     <div style="display:flex;gap:10px;margin-top:28px;">
-      <button onclick="window._dfReset()" style="flex:1;padding:12px;border:1.5px solid #E0D8F0;border-radius:24px;background:#fff;font-size:14px;font-family:inherit;color:#888;cursor:pointer;">초기화</button>
-      <button onclick="window._dfApply()" style="flex:2;padding:12px;border:none;border-radius:24px;background:#9B72CC;font-size:14px;font-family:inherit;color:#fff;font-weight:600;cursor:pointer;">적용</button>
+      <button onclick="window._dfReset()" style="flex:1;padding:12px;border:1.5px solid var(--accent-soft);border-radius:24px;background:var(--surface);font-size:14px;font-family:inherit;color:var(--muted);cursor:pointer;">초기화</button>
+      <button onclick="window._dfApply()" style="flex:2;padding:12px;border:none;border-radius:24px;background:var(--accent-fill);font-size:14px;font-family:inherit;color:var(--on-accent);font-weight:600;cursor:pointer;">적용</button>
     </div>
   `;
 
@@ -11510,15 +11510,15 @@ window.openMeetupShareSheet = function (meetupId) {
 
   sheet.innerHTML = `
     <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:4000; display:flex; flex-direction:column; justify-content:flex-end;" onclick="this.parentNode.innerHTML=''">
-      <div style="background:white; border-radius:20px 20px 0 0; padding:24px 24px 40px 24px; width:100%; animation: slideUp 0.3s ease-out;" onclick="event.stopPropagation()">
+      <div style="background:var(--surface); border-radius:20px 20px 0 0; padding:24px 24px 40px 24px; width:100%; animation: slideUp 0.3s ease-out;" onclick="event.stopPropagation()">
         <div style="font-size:16px; font-weight:700; margin-bottom:16px; text-align:center;">이 모임 공유하기</div>
-        <div onclick="document.getElementById('share-sheet-container').innerHTML=''; window.openShareMatchSelector(${meetupId});" style="padding:16px; font-size:15px; border-bottom:1px solid #EEE; cursor:pointer;">
+        <div onclick="document.getElementById('share-sheet-container').innerHTML=''; window.openShareMatchSelector(${meetupId});" style="padding:16px; font-size:15px; border-bottom:1px solid var(--border); cursor:pointer;">
           💬 메시지로 공유
         </div>
-        <div onclick="document.getElementById('share-sheet-container').innerHTML=''; window.shareMeetupLink(${meetupId});" style="padding:16px; font-size:15px; border-bottom:1px solid #EEE; cursor:pointer;">
+        <div onclick="document.getElementById('share-sheet-container').innerHTML=''; window.shareMeetupLink(${meetupId});" style="padding:16px; font-size:15px; border-bottom:1px solid var(--border); cursor:pointer;">
           🔗 링크로 공유
         </div>
-        <div onclick="document.getElementById('share-sheet-container').innerHTML=''" style="padding:16px; font-size:15px; color:#888; text-align:center; cursor:pointer; margin-top:8px;">
+        <div onclick="document.getElementById('share-sheet-container').innerHTML=''" style="padding:16px; font-size:15px; color:var(--muted); text-align:center; cursor:pointer; margin-top:8px;">
           취소
         </div>
       </div>
@@ -11554,7 +11554,7 @@ window.openShareMatchSelector = function (meetupId) {
 
   sheet.innerHTML = `
     <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:4000; display:flex; flex-direction:column; justify-content:flex-end;" onclick="this.parentNode.innerHTML=''">
-      <div style="background:white; border-radius:20px 20px 0 0; padding:24px 24px 40px 24px; width:100%; max-height:80vh; display:flex; flex-direction:column; animation: slideUp 0.3s ease-out;" onclick="event.stopPropagation()">
+      <div style="background:var(--surface); border-radius:20px 20px 0 0; padding:24px 24px 40px 24px; width:100%; max-height:80vh; display:flex; flex-direction:column; animation: slideUp 0.3s ease-out;" onclick="event.stopPropagation()">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <div style="font-size:16px; font-weight:700;">누구에게 공유할까요?</div>
           <button onclick="document.getElementById('share-match-container').innerHTML=''" style="background:none; border:none; padding:0; cursor:pointer;"><i data-lucide="x" style="width:24px;"></i></button>
@@ -11563,9 +11563,9 @@ window.openShareMatchSelector = function (meetupId) {
           ${MATCHED_PROFILES.map(match => {
     const p = MOCK_PROFILES.find(pr => pr.id === match.id) || MOCK_PROFILES[0];
     return `
-              <div onclick="document.getElementById('share-match-container').innerHTML=''; closeModal(); openMatchIntroModal(${match.id}); setTimeout(() => window.proposeMeetup(${match.id}, ${meetupId}), 300);" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #EEE; cursor:pointer;">
+              <div onclick="document.getElementById('share-match-container').innerHTML=''; closeModal(); openMatchIntroModal(${match.id}); setTimeout(() => window.proposeMeetup(${match.id}, ${meetupId}), 300);" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); cursor:pointer;">
                 <div style="width:40px; height:40px; border-radius:50%; background-image:url('${p.image}'); background-size:cover; background-position:center; margin-right:12px;"></div>
-                <div style="flex:1; font-size:15px; font-weight:600; color:#333;">${p.name}</div>
+                <div style="flex:1; font-size:15px; font-weight:600; color:var(--ink);">${p.name}</div>
               </div>
             `;
   }).join('')}

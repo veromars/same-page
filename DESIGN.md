@@ -64,7 +64,10 @@ p.2에는 아직 문서화된 컴포넌트 키트가 없다. impeccable을 리�
   - **p.2+ 초대 봉투**: 봉투 몸통은 두 테마 모두 `--invite-purple #9B7FD4` (빛나는 오브젝트). 안쪽 카드·'공유' 버튼(`--invite-btn`: 라 딥퍼플 / 다 라벤더)·'사용됨'(`--invite-used`)만 테마 대응. **컴포넌트 자체 디자인 리프레시는 별도 태스크.**
   - **teaser 카드**: `.gradient-*` 클래스는 미사용이라 제거. 실제 배경은 `app.js` `chapColors[chapter]` 인라인 → app.js 색 마이그레이션에서.
   - `.discover-like-fab`: 미사용(♥는 `.prof-fab`로 이전). 토큰만 맞춰둠.
-- `app.js` — 색 리터럴(`#9B72CC` 91회, `var(--primary)` 18회 등) 미착수. CSS 클래스로 이관 우선.
+- `app.js` — **색 리터럴 마이그레이션 완료** (raw hex 380 → 10). 인라인 `style=` 문자열의 hex를 `var(--토큰)`으로 치환 (CSS 클래스 이관은 범위가 커서 다음 기회에). 남은 10개: 책등 6색(`SPINE_COLORS` — 유저 ID 해시, 유지), 카카오 `#FEE500` ×2, 책등 폴백 그라데이션 `#DDD`, SVG 하트 `fill="#fff"`. `color: white` ~15개는 사진/미디어 위라 유지.
+  - 챕터 색(`--chap-1/2/3` + `-bg`) 신설. `chapColors` 객체 3개 → 토큰. 챕터 커버 그라데이션은 `CHAP → transparent` 로 (중간 pale·흰색 stop 제거 — 다크 자동 적응).
+  - SVG `fill="var(--토큰)"` / `setAttribute('fill', 'var(...)')` 는 현행 브라우저에서 정상 resolve 확인.
+- **다크 활성화 남음:** `tokens.css` `@media (prefers-color-scheme)` 주석 해제 + 앱 설정에 라이트/다크/시스템 토글. 그 시점에 전 화면 시각 QA (현재는 인증 게이트로 화면별 확인 미완).
 
 ### 3.1a 상태색 (확정 — `tokens.css`)
 

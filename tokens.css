@@ -72,6 +72,11 @@
   --accent-bright:    #C89FDB;                     /* 두 테마 모두 밝게 읽히는 라벤더 — 활성 탭 아이콘, 안읽음 점 */
   --frost:         rgba(255, 255, 255, 0.12);   /* 잠긴 미리보기 프로스티드 오버레이 */
 
+  /* ── 챕터 색 (Ch.1 나 / Ch.2 사랑 / Ch.3 관계) — 밝은 장식 악센트 ── */
+  --chap-1:     #E8FF90;   --chap-1-bg: #F0F7D4;
+  --chap-2:     #FFD5BD;   --chap-2-bg: #F7EDE3;
+  --chap-3:     #D3B2E2;   --chap-3-bg: #EDE3F5;
+
   /* ── p.2+ 초대 봉투 — 자체 팔레트 (책 오브젝트처럼 브랜드 물성) ── */
   --invite-purple:    #9B7FD4;   /* 봉투 몸통 (두 테마 유지) */
   --invite-flap:      #8A6FC4;   /* 봉투 flap */
@@ -158,6 +163,10 @@
   --surface-2:            #2B2731;
   --frost:             rgba(255, 255, 255, 0.04);
 
+  --chap-1: #E8FF90;   --chap-1-bg: #2C3020;
+  --chap-2: #FFD5BD;   --chap-2-bg: #302823;
+  --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
+
   --invite-purple:     #9B7FD4;
   --invite-flap:       #8A6FC4;
   --invite-btn:        #8D64BC;   /* 다크 안쪽 카드 위에서는 딥퍼플이 안 보임 → 라벤더 채움 */
@@ -237,6 +246,10 @@
     --accent-bright:        #C9A8E0;
     --surface-2:            #2B2731;
     --frost:             rgba(255, 255, 255, 0.04);
+
+    --chap-1: #E8FF90;   --chap-1-bg: #2C3020;
+    --chap-2: #FFD5BD;   --chap-2-bg: #302823;
+    --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
 
     --invite-purple:     #9B7FD4;
     --invite-flap:       #8A6FC4;
