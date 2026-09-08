@@ -12,3 +12,5 @@ node_modules/
 
 # Impeccable critique 스냅샷 — 스크린샷 위주로 무거워서 저장소에 두지 않는다
 .impeccable/critique/
+.agents/
+skills-lock.json
