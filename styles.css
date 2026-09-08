@@ -5113,6 +5113,49 @@ p {
   outline-offset: 3px;
 }
 
+/* ── 프로필 상세 몰입형 헤더 ──────────────────────────────
+   상단 사진을 화면 맨 위(상태바 뒤)까지 꽉 채우고, 닫기·차단
+   버튼을 사진 위에 얹는다. 가운데 이름은 바로 아래 큰 이름과
+   겹치므로 감춘다. */
+.modal--prof-immersive {
+  padding-top: 0;
+}
+.modal--prof-immersive .app-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  background: transparent;
+  padding: calc(10px + var(--safe-top)) 14px 10px;
+  pointer-events: none;
+}
+.modal--prof-immersive .app-header > div {
+  display: none;
+}
+.modal--prof-immersive .app-header .back-btn,
+.modal--prof-immersive .app-header .profile-block-btn {
+  pointer-events: auto;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(28, 24, 26, 0.42);
+  color: #FFF;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.modal--prof-immersive .app-header .back-btn svg,
+.modal--prof-immersive .app-header .profile-block-btn svg {
+  width: 20px !important;
+  height: 20px !important;
+}
+
 /* ── 사진 라이트박스 ─────────────────────────────────── */
 .photo-lightbox {
   /* 화면 전체를 덮어야 한다. app-container 기준 absolute로는 상·하단이

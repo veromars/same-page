@@ -5809,8 +5809,8 @@ window.openProfileModal = function (profileId, fromChat = false, opts = null) {
   const alreadyPaged = pagedSet?.has('p' + profileId) ?? false;
 
   mc.innerHTML = `
-    <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
-       <div class="app-header" style="background:var(--bg-color); flex-shrink:0;">
+    <div class="modal modal--prof-immersive fade-in active" style="z-index: 100; background: var(--bg-color); display:flex; flex-direction:column; height:100%;">
+       <div class="app-header">
          <button class="back-btn" aria-label="${fromChat ? '뒤로' : '닫기'}" onclick="closeModal()">
            <i data-lucide="${fromChat ? 'chevron-left' : 'x'}" style="width:28px;"></i>
          </button>
