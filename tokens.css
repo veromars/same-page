@@ -1,0 +1,292 @@
+/* ══════════════════════════════════════════════════════════════════
+   p.2 디자인 토큰 — 라이트 / 다크 단일 소스
+   ------------------------------------------------------------------
+   색은 전부 여기서만 정의한다. 페이지 CSS(styles.css)·컴포넌트·JS 에
+   생 hex/rgba 를 타이핑하지 않는다 (DESIGN.md §3 "Token Or Nothing").
+
+   다크는 값만 다시 선언한다. 알파 파생 토큰(--ink-40 등)은 var(--ink-rgb)
+   를 참조하므로 --ink-rgb 하나만 바꾸면 같이 따라온다.
+   전환은 즉시 — DESIGN.md §5 "One Animation".
+
+   라벤더: 2026-09-08 결정. hue 304 고정, 명도로 역할 분리.
+     --accent-text  #8960B8  페이퍼 위 글자·아이콘·링크 (본문 AA 4.5)
+     --accent-fill  #8D64BC  흰 글자를 얹는 채움 (버튼·FAB)
+     --accent-strong#9B72CC  큰 텍스트·보더·강조 면 (현행값 유지)
+     --accent-soft  #C89FDB  배경 면 전용 (위에 Ink 만)
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light;
+
+  /* ── 표면 ── */
+  --paper:        #FAF9F6;                     /* 앱 기본 그라운드 */
+  --paper-rgb:    250, 249, 246;
+  --surface:      #FFFFFF;                     /* 카드·시트 (마이그레이션 시 off-white 검토) */
+  --ground:       #BFB4C8;                     /* 랜딩 — 책이 놓인 바닥 */
+  --ground-rgb:   191, 180, 200;
+  --sheet:        #F7F2E6;                     /* 랜딩 — 종이 앞면 */
+  --sheet-2:      #EFE8D8;
+  --sheet-3:      #E7DFCC;
+  --sheet-edge:   #F2EEE5;
+  --sheet-sheen:  rgba(255, 255, 255, 0.55);
+  --border:       #F0EBEF;                     /* 기존 실선 보더 */
+  --surface-2:    #F3F0EE;                     /* 카드 안 한 단계 들어간 면 (편집 행·비활성 입력) */
+
+  /* ── 잉크 ── */
+  --ink:          #2D2A2B;
+  --ink-rgb:      45, 42, 43;
+  --ink-soft:     #46423f;
+  --ink-softer:   #33302f;
+  --muted:        #858082;                     /* 캡션·메타 (3.7:1 — 비필수 텍스트) */
+  --muted-deep:   #6E696B;                     /* 읽어야 하는 보조 텍스트 (5.1:1 AA) */
+  --ink-40:       rgba(var(--ink-rgb), 0.40);
+  --ink-55:       rgba(var(--ink-rgb), 0.55);
+  --ink-60:       rgba(var(--ink-rgb), 0.60);
+  --hairline:     rgba(var(--ink-rgb), 0.14);
+  --hairline-strong: rgba(var(--ink-rgb), 0.28);
+  --wash:         rgba(var(--ink-rgb), 0.03);
+  --wash-2:       rgba(var(--ink-rgb), 0.05);
+
+  /* ── 라벤더 ── */
+  --accent-text:       #8960B8;
+  --accent-fill:       #8D64BC;
+  --accent-fill-hover: #7350A6;
+  --accent-strong:     #9B72CC;
+  --accent-soft:       #C89FDB;
+  --accent-soft-15:    rgba(200, 159, 219, 0.15);   /* 구 --primary-transparent */
+  --on-accent:         #fff;                        /* --accent-fill 위 글자 */
+  --on-bright:         #2D2A2B;                     /* Lime/Peach 등 밝은 면 위 글자 — 테마 불변 */
+  --disabled-fill:     #D3D1C7;                     /* 비활성 버튼 채움 */
+
+  /* ── 보조 악센트 (DESIGN.md §3.3) ── */
+  --blush:  #E0A6C7;                            /* 구 --secondary */
+  --lime:   #E2FF74;                            /* 하이라이터 — 면으로만 */
+  --peach:  #FFD5BD;
+  --hl-lime:  rgba(226, 255, 116, 0.55);
+  --hl-lav:   rgba(200, 159, 219, 0.34);
+  --hl-peach: rgba(255, 213, 189, 0.62);
+
+  --accent-wash:   #F4F0F9;                     /* 아주 옅은 라벤더 면 (프로모 카드 등) */
+  --overlay-pill:  rgba(255, 255, 255, 0.92);   /* 카드 위 프로스티드 알약 배경 */
+  --shadow-accent: 0 8px 24px rgba(141, 100, 188, 0.35);  /* 라벤더 소프트 글로우 */
+  --accent-bright:    #C89FDB;                     /* 두 테마 모두 밝게 읽히는 라벤더 — 활성 탭 아이콘, 안읽음 점 */
+  --frost:         rgba(255, 255, 255, 0.12);   /* 잠긴 미리보기 프로스티드 오버레이 */
+
+  /* ── 챕터 색 (Ch.1 나 / Ch.2 사랑 / Ch.3 관계) — 밝은 장식 악센트 ── */
+  --chap-1:     #E8FF90;   --chap-1-bg: #F0F7D4;
+  --chap-2:     #FFD5BD;   --chap-2-bg: #F7EDE3;
+  --chap-3:     #D3B2E2;   --chap-3-bg: #EDE3F5;
+
+  /* ── p.2+ 초대 봉투 — 자체 팔레트 (책 오브젝트처럼 브랜드 물성) ── */
+  --invite-purple:    #9B7FD4;   /* 봉투 몸통 (두 테마 유지) */
+  --invite-flap:      #8A6FC4;   /* 봉투 flap */
+  --invite-btn:       #4A3060;   /* 안쪽 카드 '공유' 채움 — 흰 글자 */
+  --invite-btn-line:  rgba(155, 127, 212, 0.45);
+  --invite-btn-wash:  rgba(155, 127, 212, 0.08);
+  --invite-used:      #D8D0E8;   /* 사용된 봉투 (바랜 회보라) */
+  --invite-used-flap: #C8BFD8;
+
+  /* ── 상태색 — 거절은 빨강으로 겁주지 않는다 (DESIGN.md §7). 부드러운 계열. ── */
+  --danger:        #9A5C5C;   /* 거절·취소 텍스트/아이콘 (4.9:1) */
+  --danger-bg:     #F5EFEF;
+  --danger-line:   #E4D4D4;
+  --danger-strong: #C43C36;   /* 되돌릴 수 없는 파괴적 액션 전용 (계정 탈퇴 등, 4.9:1) */
+  --success:       #3E8046;   /* 완료·확정 텍스트 (4.6:1) */
+  --success-bg:    #EDF7ED;
+  --success-line:  #C7E3C7;
+  --warning:       #E0A030;   /* 대기 상태 점 (장식) */
+  --warning-ink:   #7A5C00;   /* 대기 안내 텍스트 (5.9:1) */
+  --warning-bg:    #FFF6E3;
+  --warning-line:  #F0DCB0;
+  --warning-urgent: #FF9E93;  /* '마감 임박' 코랄 채움 — 위에 --on-bright(잉크) */
+
+  /* ── 랜딩 전용 ── */
+  --on-ground:      rgba(250, 249, 246, 0.62);
+  --on-ground-dim:  rgba(250, 249, 246, 0.50);
+  --cover-hint:     rgba(var(--ink-rgb), 0.42);
+  --band-bg:        #2D2A2B;
+  --band-fg:        #F7F2E6;
+  --book-lime:      #E2FF74;
+  --book-mid:       #C8B8D0;
+  --book-lilac:     #C89FDB;
+  --book-studio:    #B36AE2;
+  --book-shadow-rgb: 45, 42, 43;
+  --shadow-page: 0 26px 46px -16px rgba(var(--ink-rgb), 0.32),
+                 0 6px 14px rgba(var(--ink-rgb), 0.08);
+  /* 카드·시트 높이감. 다크는 검정 그림자가 안 보여서 얇은 링으로 면을 띄운다. */
+  --shadow-card: 0 4px 12px rgba(var(--ink-rgb), 0.04);
+  --shadow-pop:  0 14px 36px -8px rgba(var(--ink-rgb), 0.14),
+                 0 4px 12px rgba(var(--ink-rgb), 0.05);
+
+  /* ── 타이포 ── */
+  --sans:  "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --serif: "Noto Serif KR", serif;
+}
+
+/* ══ 다크 — 명시 선택 ══════════════════════════════════════════════ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --paper:        #1B1920;
+  --paper-rgb:    27, 25, 32;
+  --surface:      #232029;
+  --ground:       #1B1920;
+  --ground-rgb:   27, 25, 32;
+  --sheet:        #272430;
+  --sheet-2:      #211F2A;
+  --sheet-3:      #1C1A23;
+  --sheet-edge:   #2E2B38;
+  --sheet-sheen:  rgba(255, 255, 255, 0.045);
+  --border:       rgba(236, 230, 234, 0.14);
+
+  --ink:          #ECE6EA;
+  --ink-rgb:      236, 230, 234;
+  --ink-soft:     #C5BFC7;
+  --ink-softer:   #D6D0D8;
+  --muted:        #9A9498;
+  --muted-deep:   #A29BA1;
+  --ink-40:       rgba(var(--ink-rgb), 0.45);
+  --ink-55:       rgba(var(--ink-rgb), 0.62);
+  --ink-60:       rgba(var(--ink-rgb), 0.66);
+  --hairline-strong: rgba(var(--ink-rgb), 0.26);
+  --wash:         rgba(var(--ink-rgb), 0.045);
+  --wash-2:       rgba(var(--ink-rgb), 0.07);
+
+  --accent-text:       #C9A8E0;
+  --accent-fill:       #8D64BC;
+  --accent-fill-hover: #9A77CC;
+  --accent-strong:     #B892D6;
+  --accent-soft:       #483D5A;
+  --accent-soft-15:    rgba(200, 159, 219, 0.14);
+  --on-bright:         #2D2A2B;
+  --disabled-fill:     #35323C;
+  --accent-wash:       #2A2632;
+  --overlay-pill:      rgba(38, 36, 48, 0.92);
+  --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
+  --accent-bright:        #C9A8E0;
+  --surface-2:            #2B2731;
+  --frost:             rgba(255, 255, 255, 0.04);
+
+  --chap-1: #E8FF90;   --chap-1-bg: #2C3020;
+  --chap-2: #FFD5BD;   --chap-2-bg: #302823;
+  --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
+
+  --invite-purple:     #9B7FD4;
+  --invite-flap:       #8A6FC4;
+  --invite-btn:        #8D64BC;   /* 다크 안쪽 카드 위에서는 딥퍼플이 안 보임 → 라벤더 채움 */
+  --invite-btn-line:   rgba(201, 168, 224, 0.40);
+  --invite-btn-wash:   rgba(201, 168, 224, 0.10);
+  --invite-used:       #332E3E;
+  --invite-used-flap:  #3E3849;
+
+  --danger:        #D99F9F;
+  --danger-bg:     #2C2427;
+  --danger-line:   #54474A;
+  --danger-strong: #E8938D;
+  --success:       #86CE91;
+  --success-bg:    #1F2A20;
+  --success-line:  #3B5540;
+  --warning:       #E8AC44;
+  --warning-ink:   #D9B876;
+  --warning-bg:    #332C1B;
+  --warning-line:  #574B33;
+  --warning-urgent: #E88778;
+
+  --on-ground:      rgba(236, 230, 234, 0.55);
+  --on-ground-dim:  rgba(236, 230, 234, 0.40);
+  --band-bg:        #100F14;
+  --band-fg:        #C5BFC7;
+  --book-shadow-rgb: 0, 0, 0;
+  --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
+                 0 0 0 1px rgba(var(--ink-rgb), 0.05);
+  --shadow-card: 0 0 0 1px rgba(var(--ink-rgb), 0.08),
+                 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-pop:  0 0 0 1px rgba(var(--ink-rgb), 0.10),
+                 0 18px 44px -8px rgba(0, 0, 0, 0.66);
+}
+
+/* ══ 다크 — OS 설정 자동 추종 ══════════════════════════════════════
+   색상 모드 = '시스템'(기본)일 때 OS 설정을 따른다. 사용자가 설정에서
+   라이트/다크를 명시하면 :root[data-theme=...] 이 이 블록을 이긴다. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    color-scheme: dark;
+
+    --paper:        #1B1920;
+    --paper-rgb:    27, 25, 32;
+    --surface:      #232029;
+    --ground:       #1B1920;
+    --ground-rgb:   27, 25, 32;
+    --sheet:        #272430;
+    --sheet-2:      #211F2A;
+    --sheet-3:      #1C1A23;
+    --sheet-edge:   #2E2B38;
+    --sheet-sheen:  rgba(255, 255, 255, 0.045);
+    --border:       rgba(236, 230, 234, 0.14);
+
+    --ink:          #ECE6EA;
+    --ink-rgb:      236, 230, 234;
+    --ink-soft:     #C5BFC7;
+    --ink-softer:   #D6D0D8;
+    --muted:        #9A9498;
+    --muted-deep:   #A29BA1;
+    --ink-40:       rgba(var(--ink-rgb), 0.45);
+    --ink-55:       rgba(var(--ink-rgb), 0.62);
+    --ink-60:       rgba(var(--ink-rgb), 0.66);
+    --hairline-strong: rgba(var(--ink-rgb), 0.26);
+    --wash:         rgba(var(--ink-rgb), 0.045);
+    --wash-2:       rgba(var(--ink-rgb), 0.07);
+
+    --accent-text:       #C9A8E0;
+    --accent-fill:       #8D64BC;
+    --accent-fill-hover: #9A77CC;
+    --accent-strong:     #B892D6;
+    --accent-soft:       #483D5A;
+    --accent-soft-15:    rgba(200, 159, 219, 0.14);
+    --on-bright:         #2D2A2B;
+    --disabled-fill:     #35323C;
+    --accent-wash:       #2A2632;
+    --overlay-pill:      rgba(38, 36, 48, 0.92);
+    --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
+    --accent-bright:        #C9A8E0;
+    --surface-2:            #2B2731;
+    --frost:             rgba(255, 255, 255, 0.04);
+
+    --chap-1: #E8FF90;   --chap-1-bg: #2C3020;
+    --chap-2: #FFD5BD;   --chap-2-bg: #302823;
+    --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
+
+    --invite-purple:     #9B7FD4;
+    --invite-flap:       #8A6FC4;
+    --invite-btn:        #8D64BC;
+    --invite-btn-line:   rgba(201, 168, 224, 0.40);
+    --invite-btn-wash:   rgba(201, 168, 224, 0.10);
+    --invite-used:       #332E3E;
+    --invite-used-flap:  #3E3849;
+
+    --danger:        #D99F9F;
+    --danger-bg:     #2C2427;
+    --danger-line:   #54474A;
+    --danger-strong: #E8938D;
+    --success:       #86CE91;
+    --success-bg:    #1F2A20;
+    --success-line:  #3B5540;
+    --warning:       #E8AC44;
+    --warning-ink:   #D9B876;
+    --warning-bg:    #332C1B;
+    --warning-line:  #574B33;
+    --warning-urgent: #E88778;
+
+    --on-ground:      rgba(236, 230, 234, 0.55);
+    --on-ground-dim:  rgba(236, 230, 234, 0.40);
+    --band-bg:        #100F14;
+    --band-fg:        #C5BFC7;
+    --book-shadow-rgb: 0, 0, 0;
+    --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
+                   0 0 0 1px rgba(var(--ink-rgb), 0.05);
+    --shadow-card: 0 0 0 1px rgba(var(--ink-rgb), 0.08),
+                   0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-pop:  0 0 0 1px rgba(var(--ink-rgb), 0.10),
+                   0 18px 44px -8px rgba(0, 0, 0, 0.66);
+  }
+}
