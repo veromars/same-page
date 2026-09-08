@@ -113,6 +113,10 @@
   --book-shadow-rgb: 45, 42, 43;
   --shadow-page: 0 26px 46px -16px rgba(var(--ink-rgb), 0.32),
                  0 6px 14px rgba(var(--ink-rgb), 0.08);
+  /* 카드·시트 높이감. 다크는 검정 그림자가 안 보여서 얇은 링으로 면을 띄운다. */
+  --shadow-card: 0 4px 12px rgba(var(--ink-rgb), 0.04);
+  --shadow-pop:  0 14px 36px -8px rgba(var(--ink-rgb), 0.14),
+                 0 4px 12px rgba(var(--ink-rgb), 0.05);
 
   /* ── 타이포 ── */
   --sans:  "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
@@ -195,6 +199,10 @@
   --book-shadow-rgb: 0, 0, 0;
   --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
                  0 0 0 1px rgba(var(--ink-rgb), 0.05);
+  --shadow-card: 0 0 0 1px rgba(var(--ink-rgb), 0.08),
+                 0 8px 24px rgba(0, 0, 0, 0.5);
+  --shadow-pop:  0 0 0 1px rgba(var(--ink-rgb), 0.10),
+                 0 18px 44px -8px rgba(0, 0, 0, 0.66);
 }
 
 /* ══ 다크 — OS 설정 자동 추종 ══════════════════════════════════════
@@ -276,5 +284,9 @@
     --book-shadow-rgb: 0, 0, 0;
     --shadow-page: 0 24px 44px -18px rgba(0, 0, 0, 0.62),
                    0 0 0 1px rgba(var(--ink-rgb), 0.05);
+    --shadow-card: 0 0 0 1px rgba(var(--ink-rgb), 0.08),
+                   0 8px 24px rgba(0, 0, 0, 0.5);
+    --shadow-pop:  0 0 0 1px rgba(var(--ink-rgb), 0.10),
+                   0 18px 44px -8px rgba(0, 0, 0, 0.66);
   }
 }
