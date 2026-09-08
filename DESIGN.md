@@ -57,15 +57,25 @@ p.2에는 아직 문서화된 컴포넌트 키트가 없다. impeccable을 리�
 
 ### 3.1 이행 상태
 
-- `tokens.css` — 신설 완료. 라이트 전체 + 다크 세트(`prefers-color-scheme` 블록은 마이그레이션 완료까지 주석 처리).
+- `tokens.css` — 완료. 라이트 전체 + `[data-theme="dark"]` 세트. `@media (prefers-color-scheme)` 블록은 앱 다크 정식 출시까지 주석 처리.
 - 랜딩 `index.html` — 시맨틱 토큰 + 다크 완료. 인라인 미러(자립용), 값은 `tokens.css` 와 일치.
-- 앱 `app/index.html` — `tokens.css` 배선 + FOUC 가드 완료. 다크 토글은 미출시.
-- 앱 `styles.css` — `:root` 를 별칭 블록으로 축소(`--bg-color`→`--paper` 등). `--primary` 계열 57+회 사용은 화면 단위로 `var(--accent-*)` 로 교체 중. 생 hex 363회(고유 102종)도 화면별로.
-- `app.js` — 색 리터럴(`#9B72CC` 91회 등) 미착수. CSS 클래스로 이관 우선.
+- 앱 `app/index.html` — `tokens.css` 배선 + FOUC 가드 완료. 다크 토글 UI 미출시.
+- 앱 `styles.css` — **생 hex 마이그레이션 완료** (449 → 34). `:root` 는 app.js 용 별칭 4개(`--bg-color`/`--text-dark`/`--text-muted`/`--primary`)만. 남은 34개는 의도적 보류: 사진/미디어 레이어 위 흰 글자, `.book-card` 폴백, 라이트박스 배경, **p.2+ 초대 봉투**(`.state-*` — 자체 팔레트, 다크 전용 디자인 필요), **teaser 그라데이션 카드**(3색), `.discover-like-fab` ♥(다크에서 `--accent-soft` 뒤집힘). 각 `TODO(다크)` 주석.
+- `app.js` — 색 리터럴(`#9B72CC` 91회, `var(--primary)` 18회 등) 미착수. CSS 클래스로 이관 우선.
 
-### 3.1a 상태색 (제안 — 마이그레이션 시 확정)
+### 3.1a 상태색 (확정 — `tokens.css`)
 
-현행 `#4CAF50`(성공) `#E05B5B`(에러)는 페이퍼 위 본문 AA 실패. `tokens.css` 제안값: `--success #2F7D34` (4.9:1 ✓) / `--danger #C0453F` (4.8:1 ✓, 흰 글자 5.0:1 ✓). 다크: `--success #86CE91` / `--danger #F09B9B`.
+현행 `#4CAF50`/`#E05B5B` 는 페이퍼 위 AA 실패. **거절은 빨강으로 겁주지 않는다(§7)** — 부드러운 계열로.
+
+| 토큰 | 라이트 | 다크 | 용도 |
+|---|---|---|---|
+| `--danger` | `#9A5C5C` (4.9:1) | `#D99F9F` | 거절·취소 텍스트/아이콘 |
+| `--danger-bg` / `--danger-line` | `#F5EFEF` / `#E4D4D4` | `#2C2427` / `#54474A` | 취소 배너 면·선 |
+| `--success` | `#3E8046` (4.6:1) | `#86CE91` | 완료·확정 텍스트 |
+| `--success-bg` / `--success-line` | `#EDF7ED` / `#C7E3C7` | `#1F2A20` / `#3B5540` | 확정 상태 면·선 |
+| `--warning` | `#E0A030` | `#E8AC44` | 대기 상태 점 (장식) |
+| `--warning-ink` | `#7A5C00` (5.9:1) | `#D9B876` | 대기 안내 텍스트 |
+| `--warning-bg` / `--warning-line` | `#FFF6E3` / `#F0DCB0` | `#332C1B` / `#574B33` | 대기 상태 면·선 |
 
 ### 3.2 Ground / Ink
 

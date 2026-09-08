@@ -30,6 +30,7 @@
   --sheet-edge:   #F2EEE5;
   --sheet-sheen:  rgba(255, 255, 255, 0.55);
   --border:       #F0EBEF;                     /* 기존 실선 보더 */
+  --surface-2:    #F3F0EE;                     /* 카드 안 한 단계 들어간 면 (편집 행·비활성 입력) */
 
   /* ── 잉크 ── */
   --ink:          #2D2A2B;
@@ -70,10 +71,17 @@
   --shadow-accent: 0 8px 24px rgba(141, 100, 188, 0.35);  /* 라벤더 소프트 글로우 */
   --accent-bright:    #C89FDB;                     /* 두 테마 모두 밝게 읽히는 라벤더 — 활성 탭 아이콘, 안읽음 점 */
 
-  /* ── 상태색 (제안 — 마이그레이션 시 확정. 현행 #4CAF50/#E05B5B 는 본문 AA 실패) ── */
-  --success: #2F7D34;
-  --danger:  #C0453F;
-  --on-status: #fff;
+  /* ── 상태색 — 거절은 빨강으로 겁주지 않는다 (DESIGN.md §7). 부드러운 계열. ── */
+  --danger:        #9A5C5C;   /* 거절·취소 텍스트/아이콘 (4.9:1) */
+  --danger-bg:     #F5EFEF;
+  --danger-line:   #E4D4D4;
+  --success:       #3E8046;   /* 완료·확정 텍스트 (4.6:1) */
+  --success-bg:    #EDF7ED;
+  --success-line:  #C7E3C7;
+  --warning:       #E0A030;   /* 대기 상태 점 (장식) */
+  --warning-ink:   #7A5C00;   /* 대기 안내 텍스트 (5.9:1) */
+  --warning-bg:    #FFF6E3;
+  --warning-line:  #F0DCB0;
 
   /* ── 랜딩 전용 ── */
   --on-ground:      rgba(250, 249, 246, 0.62);
@@ -135,9 +143,18 @@
   --overlay-pill:      rgba(38, 36, 48, 0.92);
   --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
   --accent-bright:        #C9A8E0;
+  --surface-2:            #2B2731;
 
-  --success: #86CE91;
-  --danger:  #F09B9B;
+  --danger:        #D99F9F;
+  --danger-bg:     #2C2427;
+  --danger-line:   #54474A;
+  --success:       #86CE91;
+  --success-bg:    #1F2A20;
+  --success-line:  #3B5540;
+  --warning:       #E8AC44;
+  --warning-ink:   #D9B876;
+  --warning-bg:    #332C1B;
+  --warning-line:  #574B33;
 
   --on-ground:      rgba(236, 230, 234, 0.55);
   --on-ground-dim:  rgba(236, 230, 234, 0.40);
@@ -195,9 +212,18 @@
     --overlay-pill:      rgba(38, 36, 48, 0.92);
     --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
     --accent-bright:        #C9A8E0;
+    --surface-2:            #2B2731;
 
-    --success: #86CE91;
-    --danger:  #F09B9B;
+    --danger:        #D99F9F;
+    --danger-bg:     #2C2427;
+    --danger-line:   #54474A;
+    --success:       #86CE91;
+    --success-bg:    #1F2A20;
+    --success-line:  #3B5540;
+    --warning:       #E8AC44;
+    --warning-ink:   #D9B876;
+    --warning-bg:    #332C1B;
+    --warning-line:  #574B33;
 
     --on-ground:      rgba(236, 230, 234, 0.55);
     --on-ground-dim:  rgba(236, 230, 234, 0.40);

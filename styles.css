@@ -1,23 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Jost:wght@300&family=Noto+Serif+KR:wght@300;400;500&family=Poppins:wght@300;400;700&display=swap');
 
-/* 색 토큰은 tokens.css 로 이동했다. 이 :root 는 (1) 기존 이름을 새
-   시맨틱 토큰으로 잇는 별칭, (2) 아직 마이그레이션 안 된 값, (3) 색이
-   아닌 항목(--glass, --safe-top)만 남긴다.
-   화면 단위로 var(--primary) → var(--accent-*) 로 옮기고, 끝나면
-   아래 별칭 블록을 지운다. (DESIGN.md §3) */
+/* 색은 tokens.css 에서만 정의한다 (DESIGN.md §3). 이 :root 는
+   (1) app.js 가 아직 쓰는 옛 이름을 새 토큰으로 잇는 별칭,
+   (2) 색이 아닌 항목만 남긴다.
+   styles.css 의 생 hex 마이그레이션은 완료 (미디어 레이어·p.2+ 봉투·
+   teaser 그라데이션 제외). app.js 리터럴은 별도. */
 :root {
-  /* 별칭 — 값·용도 1:1, 라이트에서 시각 변화 없음. 다크 대응은 tokens.css 가 함 */
-  --bg-color: var(--paper);
-  --text-dark: var(--ink);
-  --text-muted: var(--muted);
-  /* --surface, --border 는 tokens.css 가 직접 제공 (여기서 재선언하지 않는다) */
-
-  /* 미마이그레이션 — 화면별로 교체. 다크에서는 아직 안 따라온다 */
-  --primary: #BCA0CE;              /* → 대부분 var(--accent-soft) / 일부 var(--accent-strong) */
-  --primary-light: #D8BFD8;        /* → var(--accent-soft) */
-  --primary-transparent: var(--accent-soft-15);
-  --secondary: var(--blush);
-  --pass-lilac: #C9A8E0;           /* → 상황에 따라 var(--accent-text) (다크) */
+  /* 별칭 — app.js 에서만 참조. styles.css 는 시맨틱 토큰을 직접 쓴다. */
+  --bg-color:    var(--paper);
+  --text-dark:   var(--ink);
+  --text-muted:  var(--muted);
+  --primary:     var(--accent-soft);   /* app.js 18곳 — 대부분 장식 면 */
 
   /* 색 아님 — 유지 */
   --glass: rgba(255, 255, 255, 0.8);
@@ -45,7 +38,7 @@
 
 body {
   font-family: 'Pretendard', 'Outfit', -apple-system, sans-serif;
-  background-color: #E2DFDF;
+  background-color: var(--surface-2);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -289,7 +282,7 @@ p {
 @keyframes inviteCodeAutofill {
   0% {
     background: rgba(226, 255, 116, 0.85);
-    border-color: var(--primary);
+    border-color: var(--accent-soft);
   }
   100% {
     background: var(--surface);
@@ -302,7 +295,7 @@ p {
 }
 
 .input-field::placeholder {
-  color: #C4C4C4;
+  color: var(--ink-40);
 }
 
 /* Header */
@@ -618,8 +611,8 @@ p {
 }
 
 .quiz-option.selected {
-  border-color: var(--primary);
-  background: var(--primary-transparent);
+  border-color: var(--accent-text);
+  background: var(--accent-soft-15);
 }
 
 .intent-option {
@@ -639,9 +632,9 @@ p {
 }
 
 .intent-option.selected {
-  background: #FAF7FF;
-  border-color: var(--primary);
-  border-left: 5px solid var(--primary);
+  background: var(--accent-wash);
+  border-color: var(--accent-text);
+  border-left: 5px solid var(--accent-text);
 }
 
 
@@ -667,14 +660,14 @@ p {
 }
 
 .tag-pill.selected {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
-  border-color: var(--primary);
+  border-color: var(--accent-text);
 }
 
 .tag-pill.disabled {
   background: var(--wash);
-  color: #BBB;
+  color: var(--ink-40);
   border-color: var(--border);
   cursor: default;
 }
@@ -701,7 +694,7 @@ p {
 }
 
 .interest-counter.ready {
-  color: var(--primary);
+  color: var(--accent-text);
 }
 
 /* Decade Slider (Onboarding Step 5) */
@@ -715,7 +708,7 @@ p {
   text-align: left;
   font-size: 18px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--accent-text);
   margin-bottom: 24px;
 }
 
@@ -731,7 +724,7 @@ p {
   position: absolute;
   top: 0;
   height: 100%;
-  background: var(--primary);
+  background: var(--accent-strong);
   border-radius: 2px;
   transition: all 0.15s ease;
 }
@@ -741,7 +734,7 @@ p {
   top: -12px;
   width: 2px;
   height: 28px;
-  background: var(--primary);
+  background: var(--accent-strong);
   z-index: 2;
 }
 
@@ -768,7 +761,7 @@ p {
   width: 24px;
   height: 24px;
   background: var(--surface);
-  border: 2px solid var(--primary);
+  border: 2px solid var(--accent-strong);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   cursor: grab;
@@ -813,6 +806,8 @@ p {
   pointer-events: none;
 }
 
+/* TODO(다크): 3색 그라데이션 카드 — 다크 대응값 필요. 배경 위 텍스트는
+   .teaser-*.on-dark 라 이미 흰색. 다크 컴포넌트 패스에서 재설계. */
 .teaser-card.gradient-lilac {
   background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%);
 }
@@ -920,7 +915,7 @@ p {
   text-align: center;
   font-size: 20px;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--accent-text);
   margin-bottom: 24px;
 }
 
@@ -936,7 +931,7 @@ p {
   position: absolute;
   top: 0;
   height: 100%;
-  background: var(--primary);
+  background: var(--accent-strong);
   border-radius: 3px;
 }
 
@@ -946,7 +941,7 @@ p {
   width: 28px;
   height: 28px;
   background: var(--surface);
-  border: 2px solid var(--primary);
+  border: 2px solid var(--accent-strong);
   border-radius: 50%;
   transform: translate(-50%, -50%);
   cursor: grab;
@@ -970,20 +965,20 @@ p {
   flex: 1;
   height: 48px;
   border-radius: 12px;
-  border: 1.5px solid var(--primary);
+  border: 1.5px solid var(--accent-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--accent-text);
   cursor: pointer;
   background: var(--surface);
   transition: all 0.2s;
 }
 
 .role-pill-multi.active {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
 }
 
@@ -1086,7 +1081,7 @@ p {
 }
 
 .private-bg {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  background: linear-gradient(135deg, var(--accent-fill), var(--accent-soft));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -1146,7 +1141,7 @@ p {
 
 .card-tag {
   background: var(--surface);
-  border: 1px solid #E0D8F0;
+  border: 1px solid var(--accent-soft);
   border-radius: 20px;
   padding: 4px 12px;
   font-size: 12px;
@@ -1166,7 +1161,7 @@ p {
 .ans-label {
   font-size: 12px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--accent-text);
   margin-bottom: 12px;
 }
 
@@ -1228,7 +1223,7 @@ p {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--accent-fill);
   border: none;
   box-shadow: 0 4px 12px rgba(188, 160, 206, 0.5);
   display: flex;
@@ -1305,7 +1300,7 @@ p {
   height: 52px;
   border-radius: 26px;
   background: var(--surface);
-  border: 1.5px solid #E0D8D0;
+  border: 1.5px solid var(--hairline-strong);
   color: var(--muted-deep);
   font-family: 'Poppins', sans-serif;
   font-weight: 300;
@@ -1338,7 +1333,7 @@ p {
   left: 52%;
   transform: translate(-50%, -50%);
   font-size: 34px;
-  color: #070708;
+  color: var(--ink);
   opacity: 0.85;
   background: none;
   border: none;
@@ -1411,7 +1406,7 @@ p {
 }
 
 .unanswered {
-  border: 1px dashed #D3D1C7;
+  border: 1px dashed var(--hairline-strong);
   background: var(--surface);
   align-items: center;
   justify-content: center;
@@ -1424,7 +1419,7 @@ p {
   left: 10px;
   font-size: 10px;
   font-weight: 500;
-  color: #9E9A94;
+  color: var(--muted);
 }
 
 .grid-ans-text {
@@ -1531,8 +1526,8 @@ p {
 }
 
 .meetup-item-rsvpd {
-  background: #FAF7FF;
-  border-left: 3px solid var(--primary);
+  background: var(--accent-wash);
+  border-left: 3px solid var(--accent-soft);
 }
 
 .meetup-header {
@@ -1542,8 +1537,8 @@ p {
 }
 
 .meetup-chip {
-  background: var(--primary-transparent);
-  color: var(--primary);
+  background: var(--accent-soft-15);
+  color: var(--accent-text);
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
@@ -1554,7 +1549,7 @@ p {
 
 .meetup-date {
   font-size: 13px;
-  color: var(--primary);
+  color: var(--accent-text);
   font-weight: 600;
   margin-bottom: 6px;
 }
@@ -1616,8 +1611,8 @@ p {
 
 .rsvp-btn {
   background: var(--surface);
-  border: 1px solid var(--primary);
-  color: var(--primary);
+  border: 1px solid var(--accent-soft);
+  color: var(--accent-text);
   padding: 6px 16px;
   border-radius: 100px;
   font-weight: 600;
@@ -1627,15 +1622,15 @@ p {
 }
 
 .rsvp-btn.rsvpd {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
-  border-color: var(--primary);
+  border-color: var(--accent-soft);
 }
 
 .rsvp-btn:disabled {
   border-color: var(--hairline);
-  color: #A0A0A0;
-  background: #F5F5F5;
+  color: var(--ink-40);
+  background: var(--surface-2);
   cursor: not-allowed;
 }
 
@@ -1676,14 +1671,14 @@ p {
 }
 
 .filter-chip.selected {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
-  border: 1px solid var(--primary);
+  border: 1px solid var(--accent-text);
 }
 
 /* Detail Screen Address Secret Block */
 .address-reveal-card {
-  background: #F0EBF8;
+  background: var(--accent-wash);
   padding: 16px 20px;
   border-radius: 16px;
   margin-bottom: 32px;
@@ -1692,7 +1687,7 @@ p {
 .address-reveal-card-title {
   font-size: 13px;
   font-weight: 700;
-  color: var(--primary);
+  color: var(--accent-text);
   margin-bottom: 8px;
   display: flex;
   align-items: center;
@@ -1718,7 +1713,7 @@ p {
   position: absolute;
   top: 0;
   right: 0;
-  background: #C9A8E0;
+  background: var(--accent-fill);
   color: var(--on-accent);
   padding: 4px 10px;
   border-radius: 0 20px 0 12px;
@@ -1745,7 +1740,7 @@ p {
 .meetup-ending-soon-badge {
   display: inline-flex;
   align-items: center;
-  background: #FF8A80;
+  background: var(--danger);
   color: var(--on-accent);
   padding: 2px 6px;
   border-radius: 4px;
@@ -1766,7 +1761,7 @@ p {
 
 .progress-fill {
   height: 100%;
-  background: var(--primary);
+  background: var(--accent-strong);
   border-radius: 10px;
   transition: width 0.3s ease;
 }
@@ -1778,7 +1773,7 @@ p {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
   display: flex;
   justify-content: center;
@@ -1870,8 +1865,8 @@ p {
 .msg-source {
   display: inline-block;
   font-size: 10px;
-  background: var(--primary-transparent);
-  color: var(--primary);
+  background: var(--accent-soft-15);
+  color: var(--accent-text);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
@@ -1946,7 +1941,7 @@ p {
 
 .chat-bubble.sent {
   align-self: flex-end;
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
   border-radius: 16px 0 16px 16px;
 }
@@ -1979,7 +1974,7 @@ p {
 
 .chat-input:focus {
   outline: none;
-  border-color: var(--primary);
+  border-color: var(--accent-text);
 }
 
 .card-bio {
@@ -1995,7 +1990,7 @@ p {
   display: inline-flex;
   align-items: center;
   background: rgba(188, 160, 206, 0.15);
-  color: var(--primary);
+  color: var(--accent-text);
   padding: 6px 12px;
   border-radius: 12px;
   font-size: 14px;
@@ -2097,7 +2092,7 @@ p {
 }
 
 .calendar-day.selected {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(188, 160, 206, 0.4);
@@ -2147,7 +2142,7 @@ p {
 }
 
 .picker-item.active {
-  color: var(--primary);
+  color: var(--accent-text);
   font-weight: 700;
   font-size: 17px;
 }
@@ -2184,7 +2179,7 @@ p {
 
 .info-row .info-val {
   font-size: 13px;
-  color: var(--primary);
+  color: var(--accent-text);
   font-weight: 500;
   text-align: right;
   max-width: 60%;
@@ -2221,7 +2216,7 @@ p {
 
 .chapter-fill {
   height: 100%;
-  background: var(--primary);
+  background: var(--accent-strong);
 }
 
 .chapter-pct {
@@ -2235,7 +2230,7 @@ p {
   display: inline-flex;
   align-items: center;
   background: rgba(188, 160, 206, 0.15);
-  color: var(--primary);
+  color: var(--accent-text);
   padding: 4px 10px;
   border-radius: 12px;
   font-size: 11px;
@@ -2762,7 +2757,7 @@ p {
   top: 0;
   left: 0;
   height: 100%;
-  background: var(--primary);
+  background: var(--accent-strong);
   transition: width 0.3s ease;
 }
 
@@ -2774,14 +2769,14 @@ p {
 
 /* Choice Pill Styles for Modal */
 .choice-pill:hover {
-  border-color: var(--primary);
+  border-color: var(--accent-text);
   background: rgba(188, 160, 206, 0.05);
 }
 
 .choice-pill.selected {
-  border-color: var(--primary) !important;
+  border-color: var(--accent-text) !important;
   background: rgba(188, 160, 206, 0.1) !important;
-  color: var(--primary) !important;
+  color: var(--accent-text) !important;
   font-weight: 700;
 }
 
@@ -2861,7 +2856,7 @@ p {
   width: 100%;
   height: 52px;
   background: var(--surface);
-  border: 1.5px solid var(--pass-lilac);
+  border: 1.5px solid var(--accent-soft);
   border-radius: 12px;
   color: var(--text-dark);
   font-size: 16px;
@@ -2875,7 +2870,7 @@ p {
 }
 
 .telecom-btn:active {
-  background: #F8F4FC;
+  background: var(--accent-wash);
 }
 
 .date-selects {
@@ -2902,7 +2897,7 @@ p {
 .date-selects select {
   width: 100%;
   height: 52px;
-  border: 1.5px solid #C9A8E0;
+  border: 1.5px solid var(--accent-soft);
   border-radius: 12px;
   background: var(--surface);
   color: var(--ink);
@@ -3003,7 +2998,7 @@ p {
 
 .book-divider {
   border: none;
-  border-top: 1px solid #EEEBE6;
+  border-top: 1px solid var(--border);
   margin: 28px 0 32px;
 }
 
@@ -3017,20 +3012,20 @@ p {
   flex: 1;
   height: 48px;
   border-radius: 24px;
-  border: 1.5px solid var(--primary);
+  border: 1.5px solid var(--accent-soft);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 15px;
   font-weight: 600;
-  color: var(--primary);
+  color: var(--accent-text);
   cursor: pointer;
   background: transparent;
   transition: all 0.2s;
 }
 
 .role-pill.active {
-  background: var(--primary);
+  background: var(--accent-fill);
   color: var(--on-accent);
 }
 
@@ -3042,7 +3037,7 @@ p {
 
 .tooltip-box {
   background: var(--surface);
-  border: 0.5px solid var(--primary);
+  border: 0.5px solid var(--accent-soft);
   border-radius: 12px;
   padding: 12px 16px;
   font-size: 14px;
@@ -3147,7 +3142,7 @@ p {
   align-items: flex-start;
   gap: 12px;
   padding: 16px 20px;
-  border-bottom: 1px solid #F8F6F2;
+  border-bottom: 1px solid var(--border);
   border-left: 3px solid transparent;
 }
 
@@ -3156,8 +3151,8 @@ p {
 }
 
 .notif-item.unread {
-  background: var(--primary-transparent);
-  border-left-color: var(--primary);
+  background: var(--accent-soft-15);
+  border-left-color: var(--accent-bright);
 }
 
 .notif-icon {
@@ -3229,7 +3224,7 @@ p {
 
 .post-onboarding-sub {
   font-size: 15px;
-  color: #858082;
+  color: var(--muted);
   margin-bottom: 28px;
 }
 
@@ -3302,7 +3297,7 @@ p {
   width: 160px;
   height: 160px;
   border-radius: 50%;
-  border: 2px dashed #D1D1D1;
+  border: 2px dashed var(--hairline-strong);
   background: var(--wash);
   display: flex;
   flex-direction: column;
@@ -3429,7 +3424,7 @@ p {
 }
 
 .qurated-apply-btn {
-  background: #F4F0F9;
+  background: var(--accent-wash);
   color: var(--accent-text);
   border: none;
   padding: 8px 16px;
@@ -3485,9 +3480,9 @@ p {
 
 .invite-share-btn {
   width: 100%;
-  background: #F7F4F0;
+  background: var(--surface-2);
   color: var(--ink);
-  border: 1px solid #ECEAE4;
+  border: 1px solid var(--border);
   padding: 14px;
   border-radius: 12px;
   font-size: 14px;
@@ -3508,7 +3503,7 @@ p {
   justify-content: space-between;
   align-items: center;
   padding: 18px 20px;
-  border-bottom: 1px solid #F7F4F0;
+  border-bottom: 1px solid var(--border);
   font-size: 15px;
   color: var(--ink);
   cursor: pointer;
@@ -3519,7 +3514,7 @@ p {
 }
 
 .settings-row i {
-  color: #CCC;
+  color: var(--ink-40);
   width: 18px;
   height: 18px;
 }
@@ -3546,7 +3541,7 @@ p {
 }
 
 .footer-link.danger {
-  color: #E53935;
+  color: var(--danger);
 }
 
 /* =========================================
@@ -3743,7 +3738,7 @@ p {
 }
 
 .pm-bubble {
-  background: #F4F4F4;
+  background: var(--surface-2);
   padding: 12px 16px;
   border-radius: 16px;
   border-top-left-radius: 4px;
@@ -3888,8 +3883,8 @@ p {
 }
 
 .photo-slot.empty {
-  background: #F4F3F0;
-  border: 1.5px dashed #D0CEC8;
+  background: var(--surface-2);
+  border: 1.5px dashed var(--hairline-strong);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3897,7 +3892,7 @@ p {
 }
 
 .photo-slot.empty:active {
-  background: #EEEDE9;
+  background: var(--wash-2);
 }
 
 .photo-delete-btn {
@@ -4001,7 +3996,7 @@ p {
 }
 
 .prof-fab[data-sent="1"] {
-  background: #C6ABDE;
+  background: var(--accent-soft);
   box-shadow: 0 4px 16px rgba(155, 114, 204, 0.25);
 }
 
@@ -4056,9 +4051,9 @@ p {
 }
 
 .lib-tab.active {
-  color: var(--primary);
+  color: var(--accent-text);
   font-weight: 700;
-  border-bottom: 2.5px solid var(--primary);
+  border-bottom: 2.5px solid var(--accent-text);
 }
 
 .lib-grid {
@@ -4162,6 +4157,9 @@ p {
   flex-shrink: 0;
 }
 
+/* TODO(다크): p.2+ 초대 봉투 카드 (.state-used/active/unused) — 자체 보라
+   미니팔레트(#9B7FD4 #4A3060 #8A6FC4 #D8D0E8 #1a1a1a). 봉투 일러스트라
+   토큰 치환이 아니라 다크 전용 디자인이 필요. 다크 컴포넌트 패스에서. */
 /* State: Used */
 .state-used {
   background: #D8D0E8;
@@ -4301,7 +4299,7 @@ p {
 }
 .qurated-plan-card.selected {
   border-width: 2px;
-  background: #F8F0FC;
+  background: var(--accent-wash);
 }
 .qurated-plan-card.premium {
   border-color: var(--accent-text);
@@ -4458,7 +4456,7 @@ p {
 }
 
 .bridge-cta:hover {
-  background: #7C55A8;
+  background: var(--accent-fill-hover);
 }
 
 .bridge-card .book-spine-soft {
@@ -4705,7 +4703,7 @@ p {
 .sheet-grabber {
   width: 40px;
   height: 4px;
-  background: #E4DEE8;
+  background: var(--hairline-strong);
   border-radius: 2px;
   margin: 0 auto 16px;
 }
@@ -5114,7 +5112,7 @@ p {
   gap: 12px;
   padding: 16px;
   background: rgba(137, 96, 184, 0.08);
-  border: 1px solid #F0EBEF;
+  border: 1px solid var(--border);
   border-radius: 14px;
 }
 
@@ -5195,7 +5193,7 @@ p {
   border: none;
   padding: 0;
   margin: 0;
-  background-color: #EDEAE5;
+  background-color: var(--surface-2);
   background-size: cover;
   background-position: center;
   cursor: pointer;
@@ -5206,7 +5204,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F0F0EE;
+  background: var(--surface-2);
   cursor: default;
 }
 
@@ -5242,7 +5240,7 @@ p {
   border-radius: 50%;
   /* 페이퍼 링으로 배너에서 떼어놓는다. 그림자 대신 테두리 — 헤어라인 우선. */
   border: 4px solid var(--bg-color);
-  background-color: #EDEAE5;
+  background-color: var(--surface-2);
   background-size: cover;
   background-position: center;
   cursor: pointer;
@@ -5511,7 +5509,7 @@ p {
 }
 
 .edit-field .input-field:disabled {
-  background: #F3F0F1;
+  background: var(--surface-2);
   color: var(--muted);
   cursor: default;
 }
@@ -5757,7 +5755,7 @@ p {
 
 .profile-badge--relationship {
   background: rgba(137, 96, 184, 0.12);
-  color: #6E4E96;
+  color: var(--accent-text);
 }
 
 /* ── 나의 페이지 — 챕터 탭 ─────────────────────────────
@@ -5811,7 +5809,7 @@ p {
   display: block;
   height: 100%;
   border-radius: 4px;
-  background: var(--primary);
+  background: var(--accent-strong);
 }
 
 .chapter-tab .chapter-pct {
@@ -5863,13 +5861,13 @@ p {
 }
 
 .join-status-card.is-pending {
-  background: #FFF6E3;
-  border: 1px solid #F0DCB0;
+  background: var(--warning-bg);
+  border: 1px solid var(--warning-line);
 }
 
 .join-status-card.is-confirmed {
-  background: #EDF7ED;
-  border: 1px solid #C7E3C7;
+  background: var(--success-bg);
+  border: 1px solid var(--success-line);
 }
 
 .join-status-title {
@@ -5885,7 +5883,7 @@ p {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #E0A030;
+  background: var(--warning);
 }
 
 .join-status-body {
@@ -5966,9 +5964,9 @@ p {
   margin-bottom: 12px;
   padding: 10px 12px;
   border-radius: 10px;
-  background: #FFF6E3;
+  background: var(--warning-bg);
   font-size: 12px;
-  color: #7A5C00;
+  color: var(--warning-ink);
   word-break: keep-all;
 }
 
@@ -5993,7 +5991,7 @@ p {
   height: 40px;
   flex-shrink: 0;
   border-radius: 50%;
-  background-color: #EDEAE5;
+  background-color: var(--surface-2);
   background-size: cover;
   background-position: center top;
 }
@@ -6029,7 +6027,7 @@ p {
 }
 
 .applicant-approve:disabled {
-  background: #D8D5D6;
+  background: var(--disabled-fill);
   cursor: default;
 }
 
@@ -6042,7 +6040,7 @@ p {
   flex-shrink: 0;
   font-size: 13px;
   font-weight: 600;
-  color: #5A9C5E;
+  color: var(--success);
 }
 
 /* 신청 직후 안내 — 카톡방 입장과 닉네임 변경이 승인의 전제다. */
@@ -6085,9 +6083,9 @@ p {
   margin-bottom: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: #F5EFEF;
-  border: 1px solid #E4D4D4;
-  color: #9A5C5C;
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-line);
+  color: var(--danger);
   font-size: 14px;
   font-weight: 600;
   word-break: keep-all;
@@ -6120,8 +6118,8 @@ p {
 }
 
 .host-action-btn.is-danger {
-  color: #9A5C5C;
-  border-color: #E4D4D4;
+  color: var(--danger);
+  border-color: var(--danger-line);
 }
 
 .host-action-btn:focus-visible {
@@ -6157,10 +6155,10 @@ p {
   flex-shrink: 0;
   min-height: 36px;
   padding: 8px 14px;
-  border: 1px solid #E4D4D4;
+  border: 1px solid var(--danger-line);
   border-radius: 10px;
   background: transparent;
-  color: #9A5C5C;
+  color: var(--danger);
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -6291,7 +6289,7 @@ p {
 }
 
 .nickname-save:disabled {
-  background: #E4E1E2;
+  background: var(--disabled-fill);
   color: var(--ink-40);
   cursor: default;
 }
@@ -6312,7 +6310,7 @@ p {
   border: none;
   border-radius: 12px;
   background: transparent;
-  color: #9A5C5C;
+  color: var(--danger);
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
