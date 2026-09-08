@@ -1740,8 +1740,8 @@ p {
 .meetup-ending-soon-badge {
   display: inline-flex;
   align-items: center;
-  background: var(--danger);
-  color: var(--on-accent);
+  background: var(--warning-urgent);
+  color: var(--on-bright);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 11px;
@@ -3541,7 +3541,7 @@ p {
 }
 
 .footer-link.danger {
-  color: var(--danger);
+  color: var(--danger-strong);
 }
 
 /* =========================================

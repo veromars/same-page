@@ -75,6 +75,7 @@
   --danger:        #9A5C5C;   /* 거절·취소 텍스트/아이콘 (4.9:1) */
   --danger-bg:     #F5EFEF;
   --danger-line:   #E4D4D4;
+  --danger-strong: #C43C36;   /* 되돌릴 수 없는 파괴적 액션 전용 (계정 탈퇴 등, 4.9:1) */
   --success:       #3E8046;   /* 완료·확정 텍스트 (4.6:1) */
   --success-bg:    #EDF7ED;
   --success-line:  #C7E3C7;
@@ -82,6 +83,7 @@
   --warning-ink:   #7A5C00;   /* 대기 안내 텍스트 (5.9:1) */
   --warning-bg:    #FFF6E3;
   --warning-line:  #F0DCB0;
+  --warning-urgent: #FF9E93;  /* '마감 임박' 코랄 채움 — 위에 --on-bright(잉크) */
 
   /* ── 랜딩 전용 ── */
   --on-ground:      rgba(250, 249, 246, 0.62);
@@ -148,6 +150,7 @@
   --danger:        #D99F9F;
   --danger-bg:     #2C2427;
   --danger-line:   #54474A;
+  --danger-strong: #E8938D;
   --success:       #86CE91;
   --success-bg:    #1F2A20;
   --success-line:  #3B5540;
@@ -155,6 +158,7 @@
   --warning-ink:   #D9B876;
   --warning-bg:    #332C1B;
   --warning-line:  #574B33;
+  --warning-urgent: #E88778;
 
   --on-ground:      rgba(236, 230, 234, 0.55);
   --on-ground-dim:  rgba(236, 230, 234, 0.40);
@@ -217,6 +221,7 @@
     --danger:        #D99F9F;
     --danger-bg:     #2C2427;
     --danger-line:   #54474A;
+    --danger-strong: #E8938D;
     --success:       #86CE91;
     --success-bg:    #1F2A20;
     --success-line:  #3B5540;
@@ -224,6 +229,7 @@
     --warning-ink:   #D9B876;
     --warning-bg:    #332C1B;
     --warning-line:  #574B33;
+    --warning-urgent: #E88778;
 
     --on-ground:      rgba(236, 230, 234, 0.55);
     --on-ground-dim:  rgba(236, 230, 234, 0.40);
