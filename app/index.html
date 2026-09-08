@@ -9,10 +9,11 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 
-  <!-- 색상 모드 — 저장된 명시 선택을 첫 페인트 전에 반영 (FOUC 방지).
-       다크 정식 출시 전까지는 localStorage 'p2-theme'='dark' 를 직접 넣은
-       경우(개발/테스트)에만 켜진다. tokens.css 의 prefers-color-scheme 블록은
-       마이그레이션 완료 시 주석 해제. -->
+  <!-- 색상 모드 — 저장된 명시 선택(설정 → 색상 모드)을 첫 페인트 전에 반영해
+       FOUC 방지. 명시 선택이 없으면 data-theme 를 비워두고, tokens.css 의
+       @media (prefers-color-scheme) 가 OS 설정을 따른다.
+       app.js window.applyColorMode() 가 meta[theme-color] 동기화와
+       설정 세그먼트 상태를 맡는다. -->
   <script>
     try {
       var _t = localStorage.getItem('p2-theme');

@@ -10,7 +10,7 @@
   --bg-color:    var(--paper);
   --text-dark:   var(--ink);
   --text-muted:  var(--muted);
-  --primary:     var(--accent-soft);   /* app.js 18곳 — 대부분 장식 면 */
+  --primary:     var(--accent-text);   /* app.js — 대부분 텍스트·아이콘·체크박스. 채움(달력 pill)은 app.js 에서 --accent-fill 직접 지정 */
 
   /* 색 아님 — 유지 */
   --glass: rgba(255, 255, 255, 0.8);
@@ -4057,7 +4057,7 @@ p {
 /* Library Screen */
 .lib-tab-bar {
   display: flex;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border);
   background: var(--bg-color);
   margin-top: 16px;
 }

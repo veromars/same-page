@@ -4614,14 +4614,14 @@ window.renderMeetupCalendar = function (year, month) {
     if (isPast) {
       cell.style.cssText = 'color:var(--ink-40); cursor:default;';
     } else if (window._selectedCalDate === dateStr) {
-      cell.style.cssText = 'background:var(--primary); color:var(--on-accent); border-radius:50%; cursor:pointer;';
+      cell.style.cssText = 'background:var(--accent-fill); color:var(--on-accent); border-radius:50%; cursor:pointer;';
       cell.onclick = () => window.selectMeetupCalDate(year, month, d);
     } else {
       cell.style.cssText = 'cursor:pointer;';
       cell.onclick = () => window.selectMeetupCalDate(year, month, d);
     }
     if (date.getDay() === 0) cell.style.color = isPast ? 'var(--ink-40)' : 'var(--danger)';
-    if (window._selectedCalDate === dateStr) cell.style.cssText = 'background:var(--primary); color:var(--on-accent); border-radius:50%; cursor:pointer;';
+    if (window._selectedCalDate === dateStr) cell.style.cssText = 'background:var(--accent-fill); color:var(--on-accent); border-radius:50%; cursor:pointer;';
     gridEl.appendChild(cell);
   }
 };
@@ -7025,8 +7025,8 @@ window.openMeetupDetail = function (id) {
               ${m.kakaoLink ? `<div onclick="window.open('${m.kakaoLink}', '_blank')" style="margin-bottom:8px; background:#FEE500; border-radius:14px; padding:14px 16px; display:flex; align-items:center; gap:10px; cursor:pointer;">
                 <span style="font-size:18px;">💬</span>
                 <div style="flex:1;">
-                  <div style="font-size:13px; font-weight:700; color:var(--danger);">오픈채팅방 입장하기</div>
-                  <div style="font-size:11px; color:var(--warning-ink); margin-top:2px;">카카오 오픈채팅</div>
+                  <div style="font-size:13px; font-weight:700; color:var(--on-bright);">오픈채팅방 입장하기</div>
+                  <div style="font-size:11px; color:var(--on-bright); opacity:0.72; margin-top:2px;">카카오 오픈채팅</div>
                 </div>
               </div>
               ${MEETUP_APPROVAL_ENABLED ? `<div class="join-nickname-tip" style="margin-bottom:${showAgeRange ? '8px' : '24px'};">
@@ -7245,7 +7245,7 @@ window.showApplySubmitted = function (meetupId) {
             <div class="apply-step"><span class="apply-step-no">2</span><span>채팅방 닉네임을 <b>'${nick}'</b>으로 바꿔주세요</span></div>
             <div class="apply-step"><span class="apply-step-no">3</span><span>호스트가 확인하고 승인하면 참여가 확정돼요</span></div>
           </div>` : `<div style="height:12px;"></div>`}
-          ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: var(--danger); font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
+          ${m.kakaoLink ? `<button onclick="window.open('${m.kakaoLink}', '_blank')" style="width: 100%; padding: 16px; border-radius: 14px; background: #FEE500; color: var(--on-bright); font-size: 15px; font-weight: 700; border: none; cursor: pointer;">💬 오픈채팅방 입장하기</button>` : ''}
         </div>
         <div style="width: 100%; padding-bottom: 40px;">
           <button onclick="openMeetupDetail(${m.id})" style="width: 100%; padding: 14px; border-radius: 24px; background: var(--wash-2); color: var(--ink-soft); font-size: 15px; font-weight: 600; border: none; cursor: pointer;">돌아가기</button>
