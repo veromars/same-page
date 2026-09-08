@@ -806,19 +806,9 @@ p {
   pointer-events: none;
 }
 
-/* TODO(다크): 3색 그라데이션 카드 — 다크 대응값 필요. 배경 위 텍스트는
-   .teaser-*.on-dark 라 이미 흰색. 다크 컴포넌트 패스에서 재설계. */
-.teaser-card.gradient-lilac {
-  background: linear-gradient(135deg, #F3E8FF 0%, #E9D5FF 100%);
-}
-
-.teaser-card.gradient-lavender {
-  background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
-}
-
-.teaser-card.gradient-cream {
-  background: linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);
-}
+/* .teaser-card.gradient-{lilac,lavender,cream} 는 제거됨 — 미사용.
+   실제 카드 배경은 app.js 가 chapColors[chapter] 를 인라인으로 넣는다
+   (다크 대응은 app.js 색 마이그레이션에서). */
 
 .teaser-frosted-overlay {
   position: absolute;
@@ -827,7 +817,7 @@ p {
   width: 100%;
   height: 100%;
   backdrop-filter: blur(4px);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--frost);
   pointer-events: none;
 }
 
@@ -3869,7 +3859,7 @@ p {
 
 /* 지금 놓으면 여기로 간다 */
 .photo-slot.filled.drop-target {
-  outline: 2.5px solid #9B7FD4;
+  outline: 2.5px solid var(--accent-strong);
   outline-offset: -2px;
   box-shadow: 0 0 0 4px rgba(155, 127, 212, 0.18);
 }
@@ -3954,7 +3944,7 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(155, 114, 204, 0.45);
+  box-shadow: var(--shadow-accent);
   z-index: 150;
   transition: transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
@@ -3997,7 +3987,7 @@ p {
 
 .prof-fab[data-sent="1"] {
   background: var(--accent-soft);
-  box-shadow: 0 4px 16px rgba(155, 114, 204, 0.25);
+  box-shadow: none;
 }
 
 /* 하트 한마디 시트 */
@@ -4157,21 +4147,21 @@ p {
   flex-shrink: 0;
 }
 
-/* TODO(다크): p.2+ 초대 봉투 카드 (.state-used/active/unused) — 자체 보라
-   미니팔레트(#9B7FD4 #4A3060 #8A6FC4 #D8D0E8 #1a1a1a). 봉투 일러스트라
-   토큰 치환이 아니라 다크 전용 디자인이 필요. 다크 컴포넌트 패스에서. */
+/* p.2+ 초대 봉투 — 봉투 몸통은 두 테마 모두 보라(--invite-purple), 다크
+   위에서 빛나는 오브젝트. 안쪽 카드·버튼·'사용됨' 상태만 테마 대응.
+   NOTE: 이 컴포넌트는 디자인 리프레시 예정 (별도 태스크). */
 /* State: Used */
 .state-used {
-  background: #D8D0E8;
+  background: var(--invite-used);
   border: none;
   box-shadow: none;
 }
-.state-used .envelope-flap { background: #C8BFD8; }
+.state-used .envelope-flap { background: var(--invite-used-flap); }
 .state-used .invite-circle { background: rgba(0,0,0,0.1); }
 
 /* State: Active */
 .state-active {
-  background: #9B7FD4;
+  background: var(--invite-purple);
   padding: 14px;
   justify-content: space-between;
 }
@@ -4187,7 +4177,7 @@ p {
   box-shadow: 0 4px 12px rgba(0,0,0,0.10);
 }
 .invite-inner-label {
-  color: #9B7FD4;
+  color: var(--accent-text);
   font-size: 10px;
   letter-spacing: 0.15em;
   font-weight: 600;
@@ -4198,7 +4188,7 @@ p {
   font-family: monospace;
   font-size: 20px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--ink);
   margin: 4px 0 2px;
   letter-spacing: 1px;
 }
@@ -4216,9 +4206,9 @@ p {
   flex-shrink: 0;
 }
 .invite-btn-copy {
-  border: 1.5px solid rgba(155,127,212,0.45);
-  background: rgba(155,127,212,0.08);
-  color: #4A3060;
+  border: 1.5px solid var(--invite-btn-line);
+  background: var(--invite-btn-wash);
+  color: var(--accent-text);
   border-radius: 100px;
   font-size: 13px;
   padding: 9px;
@@ -4227,7 +4217,7 @@ p {
   font-weight: 500;
 }
 .invite-btn-share {
-  background: #4A3060;
+  background: var(--invite-btn);
   color: var(--on-accent);
   border-radius: 100px;
   font-size: 13px;
@@ -4240,9 +4230,9 @@ p {
 
 /* State: Unused */
 .state-unused {
-  background: #9B7FD4;
+  background: var(--invite-purple);
 }
-.state-unused .envelope-flap { background: #8A6FC4; }
+.state-unused .envelope-flap { background: var(--invite-flap); }
 .state-unused .invite-circle { background: var(--surface); }
 .invite-number {
   color: rgba(255,255,255,0.9);
@@ -4290,7 +4280,7 @@ p {
 }
 .qurated-plan-card {
   background: var(--surface);
-  border: 1.5px solid #E0D0F0;
+  border: 1.5px solid var(--accent-soft);
   border-radius: 16px;
   padding: 20px;
   margin-bottom: 16px;
@@ -4499,17 +4489,16 @@ p {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  /* DESIGN.md: Lavender 채움 위에는 Ink 하트. 흰 하트는 2.23:1로 통과 못 한다.
-     TODO(다크): --accent-soft 가 다크에서 어두워지므로 이 조합은 다크 컴포넌트
-     패스에서 재검토 (DESIGN.md §5: 흰 하트 원하면 채움을 --accent-fill 로). */
-  background: #C89FDB;
-  color: #2D2A2B;
+  /* 참고: 이 컴포넌트는 현재 미사용 (발견탭 ♥는 프로필 상세 .prof-fab 으로 이전).
+     되살릴 경우를 대비해 토큰만 맞춰둔다 — 라벤더 채움 + 흰 하트 (DESIGN.md §5). */
+  background: var(--accent-fill);
+  color: var(--on-accent);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 40;
-  box-shadow: 0 4px 16px rgba(200, 159, 219, 0.45);
+  box-shadow: var(--shadow-accent);
   transition: transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
 }

@@ -70,6 +70,16 @@
   --overlay-pill:  rgba(255, 255, 255, 0.92);   /* 카드 위 프로스티드 알약 배경 */
   --shadow-accent: 0 8px 24px rgba(141, 100, 188, 0.35);  /* 라벤더 소프트 글로우 */
   --accent-bright:    #C89FDB;                     /* 두 테마 모두 밝게 읽히는 라벤더 — 활성 탭 아이콘, 안읽음 점 */
+  --frost:         rgba(255, 255, 255, 0.12);   /* 잠긴 미리보기 프로스티드 오버레이 */
+
+  /* ── p.2+ 초대 봉투 — 자체 팔레트 (책 오브젝트처럼 브랜드 물성) ── */
+  --invite-purple:    #9B7FD4;   /* 봉투 몸통 (두 테마 유지) */
+  --invite-flap:      #8A6FC4;   /* 봉투 flap */
+  --invite-btn:       #4A3060;   /* 안쪽 카드 '공유' 채움 — 흰 글자 */
+  --invite-btn-line:  rgba(155, 127, 212, 0.45);
+  --invite-btn-wash:  rgba(155, 127, 212, 0.08);
+  --invite-used:      #D8D0E8;   /* 사용된 봉투 (바랜 회보라) */
+  --invite-used-flap: #C8BFD8;
 
   /* ── 상태색 — 거절은 빨강으로 겁주지 않는다 (DESIGN.md §7). 부드러운 계열. ── */
   --danger:        #9A5C5C;   /* 거절·취소 텍스트/아이콘 (4.9:1) */
@@ -146,6 +156,15 @@
   --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
   --accent-bright:        #C9A8E0;
   --surface-2:            #2B2731;
+  --frost:             rgba(255, 255, 255, 0.04);
+
+  --invite-purple:     #9B7FD4;
+  --invite-flap:       #8A6FC4;
+  --invite-btn:        #8D64BC;   /* 다크 안쪽 카드 위에서는 딥퍼플이 안 보임 → 라벤더 채움 */
+  --invite-btn-line:   rgba(201, 168, 224, 0.40);
+  --invite-btn-wash:   rgba(201, 168, 224, 0.10);
+  --invite-used:       #332E3E;
+  --invite-used-flap:  #3E3849;
 
   --danger:        #D99F9F;
   --danger-bg:     #2C2427;
@@ -217,6 +236,15 @@
     --shadow-accent:     0 8px 24px rgba(141, 100, 188, 0.5);
     --accent-bright:        #C9A8E0;
     --surface-2:            #2B2731;
+    --frost:             rgba(255, 255, 255, 0.04);
+
+    --invite-purple:     #9B7FD4;
+    --invite-flap:       #8A6FC4;
+    --invite-btn:        #8D64BC;
+    --invite-btn-line:   rgba(201, 168, 224, 0.40);
+    --invite-btn-wash:   rgba(201, 168, 224, 0.10);
+    --invite-used:       #332E3E;
+    --invite-used-flap:  #3E3849;
 
     --danger:        #D99F9F;
     --danger-bg:     #2C2427;

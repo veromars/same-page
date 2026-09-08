@@ -60,7 +60,10 @@ p.2에는 아직 문서화된 컴포넌트 키트가 없다. impeccable을 리�
 - `tokens.css` — 완료. 라이트 전체 + `[data-theme="dark"]` 세트. `@media (prefers-color-scheme)` 블록은 앱 다크 정식 출시까지 주석 처리.
 - 랜딩 `index.html` — 시맨틱 토큰 + 다크 완료. 인라인 미러(자립용), 값은 `tokens.css` 와 일치.
 - 앱 `app/index.html` — `tokens.css` 배선 + FOUC 가드 완료. 다크 토글 UI 미출시.
-- 앱 `styles.css` — **생 hex 마이그레이션 완료** (449 → 34). `:root` 는 app.js 용 별칭 4개(`--bg-color`/`--text-dark`/`--text-muted`/`--primary`)만. 남은 34개는 의도적 보류: 사진/미디어 레이어 위 흰 글자, `.book-card` 폴백, 라이트박스 배경, **p.2+ 초대 봉투**(`.state-*` — 자체 팔레트, 다크 전용 디자인 필요), **teaser 그라데이션 카드**(3색), `.discover-like-fab` ♥(다크에서 `--accent-soft` 뒤집힘). 각 `TODO(다크)` 주석.
+- 앱 `styles.css` — **생 hex 마이그레이션 완료** (449 → 15). `:root` 는 app.js 용 별칭 4개(`--bg-color`/`--text-dark`/`--text-muted`/`--primary`)만. 남은 15개는 미디어 레이어(사진 위 흰 글자, `.book-card` 폴백 `#333`, 라이트박스 `#181617`) — 테마 무관.
+  - **p.2+ 초대 봉투**: 봉투 몸통은 두 테마 모두 `--invite-purple #9B7FD4` (빛나는 오브젝트). 안쪽 카드·'공유' 버튼(`--invite-btn`: 라 딥퍼플 / 다 라벤더)·'사용됨'(`--invite-used`)만 테마 대응. **컴포넌트 자체 디자인 리프레시는 별도 태스크.**
+  - **teaser 카드**: `.gradient-*` 클래스는 미사용이라 제거. 실제 배경은 `app.js` `chapColors[chapter]` 인라인 → app.js 색 마이그레이션에서.
+  - `.discover-like-fab`: 미사용(♥는 `.prof-fab`로 이전). 토큰만 맞춰둠.
 - `app.js` — 색 리터럴(`#9B72CC` 91회, `var(--primary)` 18회 등) 미착수. CSS 클래스로 이관 우선.
 
 ### 3.1a 상태색 (확정 — `tokens.css`)
@@ -126,7 +129,7 @@ Ink on Lime 12.52:1 ✓ · Ink on Peach 10.33:1 ✓
 
 **The White-On-Purple Needs Fill Rule.** 흰 글자를 보라 위에 얹을 때는 반드시 `--accent-fill`(`#8D64BC`)을 쓴다. `--accent-strong`(`#9B72CC`) 위의 흰 글자는 3.70:1로 통과하지 못한다.
 
-**The ♥ Button Is Ink-On-Soft Rule.** 플로팅 ♥ 버튼을 `--accent-soft` 채움으로 할 경우 하트는 **Ink**다 (6.29:1). 흰 하트를 쓰려면 채움을 `--accent-fill`로 바꾼다.
+**The ♥ Button Is Fill-With-White Rule.** 하트 쪽지 버튼(`.prof-fab`)은 `--accent-fill`(`#8D64BC`) 채움 + **흰 하트**다. (2026-09 결정 — `--accent-soft`는 다크에서 어두워져 잉크 하트가 안 보임. 소프트+잉크 조합 폐기.) 이미 보낸 상태(`[data-sent]`)만 `--accent-soft`로 채도를 낮춘다.
 
 **The No-Pure Rule.** 순백(`#FFFFFF`)을 페이지 그라운드로 쓰지 않는다. 종이는 Paper다. (텍스트 색으로서의 흰색은 `--accent-fill` 위에서만.)
 
@@ -235,7 +238,7 @@ Ink on Lime 12.52:1 ✓ · Ink on Peach 10.33:1 ✓
 - **지금 이 순간** — 무드 한 마디, 즉시 반영.
 - **5축 10문항** — "나는 A vs B" 이항 선택, 중간값 없음.
 - **Page Heart** — 챕터 개별 페이지의 익명 ♥. 감상 표현이지 관심 신호가 아니다. 개수는 프로필 소유자 본인만 보고, 알고리즘에 반영되지 않는다.
-- **하트 쪽지 버튼** — 프로필 상세페이지 전용 FAB. 56px 원형, Lavender 채움, **하트 + 말풍선 결합 아이콘**. 프로필북을 열람한 뒤에만 활성. 탭 시 한마디 입력 시트(선택 입력, 비워도 전송) + "하트 보내기" 전송 버튼. 이미 보낸 상대에게는 채도 낮춘 비활성 상태(`background #C6ABDE`). 발견탭 Floating ♥의 대체 컴포넌트.
+- **하트 쪽지 버튼** — 프로필 상세페이지 전용 FAB. 56px 원형, `--accent-fill` 채움 + 흰 아이콘, **하트 + 말풍선 결합 아이콘**. 프로필북을 열람한 뒤에만 활성. 탭 시 한마디 입력 시트(선택 입력, 비워도 전송) + "하트 보내기" 전송 버튼. 이미 보낸 상대에게는 `--accent-soft` 채움(비활성). 발견탭 Floating ♥의 대체 컴포넌트.
 
 ### 모임 (Meetups)
 
