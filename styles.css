@@ -4678,11 +4678,25 @@ p {
 .discover-like-fab:focus-visible,
 .close-book-link:focus-visible,
 .close-book-sheet .sheet-btn:focus-visible,
+.confirm-sheet .sheet-btn:focus-visible,
 .reactions-intro-btn:focus-visible,
 .bridge-cta:focus-visible {
   outline: 2px solid #8960B8;
   outline-offset: 3px;
   border-radius: 14px;
+}
+
+/* 시트가 열리며 취소 버튼으로 포커스를 옮길 때(탭·클릭으로 연 경우), UA 기본
+   포커스 링 — 어느 디자인 시스템에도 속하지 않는 파란 후광 — 을 지운다.
+   키보드로 버튼까지 이동한 사용자는 위 :focus-visible 규칙으로 팔레트 링을 받는다. */
+.confirm-sheet .sheet-btn:focus:not(:focus-visible),
+.close-book-sheet .sheet-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* 다이얼로그 본체는 포커스를 받아 스크린리더 진입점 역할만 한다 — 링은 없다. */
+.confirm-sheet:focus {
+  outline: none;
 }
 
 .discover-like-fab:focus-visible {

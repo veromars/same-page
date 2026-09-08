@@ -5043,6 +5043,7 @@ window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, on
   sheet.setAttribute('role', 'dialog');
   sheet.setAttribute('aria-modal', 'true');
   sheet.setAttribute('aria-labelledby', 'confirm-sheet-title');
+  sheet.tabIndex = -1;
   sheet.innerHTML = `
     <div class="sheet-grabber" aria-hidden="true"></div>
     <h2 class="confirm-sheet-title" id="confirm-sheet-title">${escapeHTML(title || '')}</h2>
@@ -5072,7 +5073,9 @@ window.openConfirmSheet = function ({ title, body, confirmLabel, cancelLabel, on
     onConfirm && onConfirm(v);
   });
   if (afterRender) afterRender(sheet);
-  requestAnimationFrame(() => sheet.querySelector('#confirm-sheet-cancel')?.focus());
+  // 포커스는 액션 버튼이 아니라 다이얼로그 본체로 옮긴다 — 스크린리더가 제목을
+  // 읽고, 열자마자 버튼에 UA 포커스 링이 씌워지지 않는다.
+  requestAnimationFrame(() => sheet.focus());
 };
 
 window.handleCancelMeetup = function (id) {
