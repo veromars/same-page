@@ -3023,19 +3023,23 @@ window.switchTab = function (tabName) {
       ${_dbgItem('window.__debugAgeBookHearts()', '하트30일')}
       ${_dbgItem('window.__debugResetArchive()', '아카잠금')}
     </span>`;
+    // 받은 하트 스트립 — 대화가 시작된 상대(matched)·덮은 하트·지난 하트는 뺀다.
+    // 다 열람해도 섹션과 '전체 보기'는 남는다: 좋아요를 준 사람은 사라지지 않는다.
     const _freshHearts = receivedBookHearts()
-      .filter(h => h.status === 'unread' && !isBookHeartClosed(h) && !isBookHeartArchived(h));
+      .filter(h => !isBookHeartClosed(h) && !isBookHeartArchived(h));
+    const _hasUnreadHeart = _freshHearts.some(h => h.status === 'unread');
     const _freshHeartsHTML = _freshHearts.length === 0 ? '' : `
         <div style="display: flex; justify-content: space-between; align-items: baseline; padding-right: 24px;">
-          <div class="matches-section-title" style="margin-bottom: 0;">새로운 하트</div>
+          <div class="matches-section-title" style="margin-bottom: 0;">받은 하트</div>
           <div onclick="openReceivedHeartsList()" style="font-size: 13px; color: #9B72CC; font-weight: 600; cursor: pointer;">전체 보기 →</div>
         </div>
         <div class="matches-scroll-container" style="margin-top: 12px;">
           ${_freshHearts.map(h => {
       const p = MOCK_PROFILES.find(pr => pr.id === h.senderId) || MOCK_PROFILES[0];
       const spineColor = getMatchSpineColor(p.id);
+      const isUnread = h.status === 'unread';
       return `
-            <div class="match-thumbnail-wrap" onclick="openBookHeartDetail('${h.id}')">
+            <div class="match-thumbnail-wrap${isUnread ? '' : ' is-read'}" onclick="openBookHeartDetail('${h.id}')">
               <div class="match-thumbnail saved-book-cover" style="box-shadow:-2px 0 4px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.18); border-radius:4px; border-left:3px solid ${spineColor};">
                 <div class="book-bg-photo" style="background-image: url('${p.image}'); filter: blur(1.5px); transform: scale(1.08);"></div>
                 <div class="book-overlay"></div>
@@ -3048,7 +3052,7 @@ window.switchTab = function (tabName) {
               <div class="match-thumbnail-heart">
                 <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
               </div>
-              <div class="match-new-dot"></div>
+              ${isUnread ? '<div class="match-new-dot"></div>' : ''}
             </div>
           `;
     }).join('')}
@@ -7357,6 +7361,9 @@ window.openBookHeartDetail = function (heartId) {
   initPhotoCarousels();
 };
 
+// 받은 하트에 하트로 답하면 곧 상호 매칭이다. 대화방을 미리 만들거나
+// '하트를 보냈어요' 같은 메시지를 자동 전송하지 않는다 — 발견탭에서 서로
+// 하트가 오갔을 때와 똑같이, 매칭 축하 화면 → p.M 첫 대화 순서로 간다.
 window.replyWithHeart = function (heartId) {
   const h = bookHearts.find(x => x.id === heartId);
   if (!h) return;
@@ -7366,20 +7373,12 @@ window.replyWithHeart = function (heartId) {
   h.status = 'matched';
   persistBookHearts();
 
-  const newChatId = MOCK_CHATS.length + 1;
-  MOCK_CHATS.unshift({
-    id: newChatId, name: p.name, image: p.image,
-    source: '받은 하트', score: '새로운 하트', preview: '하트를 보냈어요 ♥',
-    time: '방금 전', isNew: true, isUnread: false,
-    messages: [
-      ...(h.message ? [{ text: h.message, type: 'received' }] : []),
-      { text: '하트를 보냈어요 ♥', type: 'sent' },
-    ],
-  });
+  if (!MATCHED_PROFILES.find(m => m.id === p.id)) {
+    MATCHED_PROFILES.unshift({ id: p.id, name: p.name, image: p.image, isNew: true, answers: p.answers });
+  }
 
   closeAnswerCard();
-  switchTab('messages');
-  setTimeout(() => openChat(newChatId), 100);
+  showMutualMatchOverlay(p);
 };
 
 window.closeBookHeart = function (heartId) {
@@ -9874,11 +9873,9 @@ window.renderDiscoverTab = function () {
           </div>
           <div class="book-cover-content">
             <div class="book-meta-bar">
-              <span class="book-meta-no">No. ${getAge(p.birthYear)}</span>
-              <span class="book-meta-facts">
-                <span class="book-meta-dist">${distanceLabel}</span>
-                <span class="book-meta-role">${getRoleShort(p.role)}</span>
-              </span>
+              <span class="book-meta-cell book-meta-no">No. ${getAge(p.birthYear)}</span>
+              <span class="book-meta-cell book-meta-dist">${distanceLabel}</span>
+              <span class="book-meta-cell book-meta-role">${getRoleShort(p.role)}</span>
             </div>
             <div class="book-spacer-top"></div>
             <div class="book-title">${p.name}</div>
@@ -9887,7 +9884,6 @@ window.renderDiscoverTab = function () {
           </div>
           <div class="book-bg-photo" style="background-image: url('${p.image}')"></div>
           <div class="book-overlay"></div>
-          ${i === 0 ? `<button type="button" class="close-book-link" aria-label="${p.name} 책 덮기 — 다시 보이지 않게 하기" onclick="event.stopPropagation(); window.confirmCloseBook('${item.id}')">책 덮기</button>` : ''}
         </div>
       `;
   }

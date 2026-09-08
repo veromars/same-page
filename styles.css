@@ -2414,25 +2414,32 @@ p {
   padding: 0;
 }
 
+/* 상단 메타바 — 좌(No.) · 중(거리) · 우(성향) 3열 균등 배치.
+   '책 덮기'가 표지에서 빠지면서 우측 여백을 되찾아 좌우 대칭으로. */
 .book-meta-bar {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px 14px 0 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: baseline;
+  padding: 16px 24px 0;
   font-family: 'Jost', sans-serif;
   font-weight: 300;
   letter-spacing: 0.05em;
 }
 
-.book-meta-no {
+.book-meta-cell {
   font-size: 13px;
+}
+
+.book-meta-no {
+  text-align: left;
 }
 
 .book-meta-dist {
-  font-size: 13px;
+  text-align: center;
 }
 
 .book-meta-role {
-  font-size: 13px;
+  text-align: right;
 }
 
 .book-spacer-top {
@@ -3566,6 +3573,11 @@ p {
   cursor: pointer;
 }
 
+/* 이미 열어본 하트 — 목록엔 남지만 새 하트보다 물러난다. */
+.match-thumbnail-wrap.is-read {
+  opacity: 0.55;
+}
+
 .match-thumbnail {
   width: 100%;
   height: 100%;
@@ -4504,43 +4516,6 @@ p {
   fill: currentColor;
 }
 
-/* ── 책 덮기 — 보조적 ────────────────────────────────── */
-/* 카드 우측 상단 구석. 아이콘 버튼이 아니라 맨 텍스트다. */
-.close-book-link {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 6;
-  appearance: none;
-  -webkit-appearance: none;
-  background: none;
-  border: none;
-  padding: 6px 2px 6px 10px;
-  font-family: 'Pretendard', -apple-system, system-ui, sans-serif;
-  font-size: 12px;
-  font-weight: 400;
-  line-height: 1;
-  color: rgba(255, 255, 255, 0.72);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  cursor: pointer;
-  text-shadow: 0 1px 3px rgba(45, 42, 43, 0.55);
-}
-
-.close-book-link:hover,
-.close-book-link:focus-visible {
-  color: #FFF;
-}
-
-/* 메타바는 이제 두 덩어리다: 왼쪽 No. / 오른쪽 거리·성향.
-   우측 상단 구석은 '책 덮기'에 내준다. */
-.book-meta-facts {
-  display: flex;
-  align-items: baseline;
-  gap: 12px;
-  margin-right: 56px;
-}
 
 /* ── 책 덮기 확인 ────────────────────────────────────── */
 /* 확인 시트는 '책 덮기'만의 것이 아니게 됐다 — 모임 취소도 같은 무게의
@@ -4678,7 +4653,6 @@ p {
 /* 포커스 링은 브라우저 표면이다 — 두면 어느 디자인 시스템에도 속하지 않는
    파란 후광이 뜬다. 이번에 추가한 컨트롤에는 팔레트에서 그린다. */
 .discover-like-fab:focus-visible,
-.close-book-link:focus-visible,
 .close-book-sheet .sheet-btn:focus-visible,
 .confirm-sheet .sheet-btn:focus-visible,
 .reactions-intro-btn:focus-visible,
@@ -4703,11 +4677,6 @@ p {
 
 .discover-like-fab:focus-visible {
   border-radius: 50%;
-}
-
-.close-book-link:focus-visible {
-  outline-offset: 2px;
-  border-radius: 4px;
 }
 
 
