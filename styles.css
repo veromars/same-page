@@ -2931,11 +2931,15 @@ p {
   width: 100%;
   height: 100%;
   z-index: 210;
-  /* 불투명 페이퍼 바탕 — 안 그러면 background:transparent 라 뒤 프로필북
-     그리드가 비쳐 보였다. 챕터색은 왼쪽 엣지 그라데이션(app.js 인라인
-     background-image)으로만 얹는다 — 전체를 틴트로 채우지 않는다.
-     라이트·다크는 --paper 토큰(tokens.css)이 알아서. */
-  background-color: var(--paper);
+  /* 랜딩 종이(.page)와 같은 결 — 따뜻한 크림 바탕 + 상단 광 + 미세 섬유
+     질감. 불투명이라 뒤 그리드도 안 비친다. 챕터색은 app.js 가 인라인
+     --chap-edge-grad 로 왼쪽 엣지에만 얹는다(맨 위 레이어).
+     라이트·다크는 --sheet / --sheet-sheen 토큰(tokens.css)이 대응. */
+  background-color: var(--sheet);
+  background-image:
+    var(--chap-edge-grad, none),
+    radial-gradient(130% 90% at 50% -10%, var(--sheet-sheen), transparent 55%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)' opacity='0.35'/%3E%3C/svg%3E");
   display: flex;
   flex-direction: column;
   overflow: hidden;
