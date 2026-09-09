@@ -8755,6 +8755,10 @@ window.showMutualMatchOverlay = function (p) {
   const otherSpineColor = getSpineColor(p.id);
   const otherAge = getAge(p.birthYear);
   const otherDistLabel = formatDistanceLabel(p);
+  // 내 표지도 상대 표지처럼 대표 사진으로. 프로필북과 같은 소스
+  // (myPhotos 1번 슬롯) + 셋업에서 막 고른 값 폴백.
+  const myCoverPhoto = (window.myPhotos || []).find(Boolean)
+    || (typeof userProfilePhoto !== 'undefined' && userProfilePhoto) || null;
 
   overlay.innerHTML = `
     <div style="font-size:22px; font-weight:700; color:var(--accent-text); margin-bottom:60px;">on the same page ♥︎</div>
@@ -8774,7 +8778,7 @@ window.showMutualMatchOverlay = function (p) {
       <!-- My Profile -->
       <div class="saved-book-cover" style="width:120px; height:180px; background:var(--wash-2); border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; z-index:1; animation:bookFloat 3s ease-in-out infinite;">
         <div class="book-spine" style="background:linear-gradient(to right, #DDD, rgba(0,0,0,0.05)); width:6px;"></div>
-        ${typeof userProfilePhoto !== 'undefined' && userProfilePhoto ? `<div style="position:absolute; inset:0; background-image:url('${userProfilePhoto}'); background-size:cover; background-position:center;"></div>` : `<span style="font-size:24px; font-weight:700; color:var(--ink-40);">나</span>`}
+        ${myCoverPhoto ? `<div style="position:absolute; inset:0; background-image:url('${myCoverPhoto}'); background-size:cover; background-position:center;"></div>` : `<span style="font-size:24px; font-weight:700; color:var(--ink-40);">나</span>`}
         <div class="book-overlay"></div>
       </div>
 
