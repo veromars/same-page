@@ -10,6 +10,15 @@ window.getColorMode = function () {
     return (v === 'light' || v === 'dark') ? v : 'system';
   } catch (e) { return 'system'; }
 };
+// iOS 홈스크린(standalone)에서 상태바는 불투명하게 그려지고 그 색은
+// meta[theme-color] 를 따라간다. 화면마다 상단 콘텐츠 색이 다르므로
+// (스플래시=책 표지 그라데이션, 그 외=페이퍼) 여기서 화면 전환 때 갱신해
+// 상태바 밑에 경계선처럼 보이던 색 단차를 없앤다. null = 페이퍼로 복귀.
+window._statusBarTint = null;
+window.setStatusBarTint = function (color) {
+  window._statusBarTint = color || null;
+  window.applyColorMode();
+};
 window.applyColorMode = function () {
   var root = document.documentElement;
   var mode = window.getColorMode();
@@ -17,7 +26,7 @@ window.applyColorMode = function () {
   else root.removeAttribute('data-theme');
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    var bg = getComputedStyle(root).getPropertyValue('--paper').trim();
+    var bg = window._statusBarTint || getComputedStyle(root).getPropertyValue('--paper').trim();
     if (bg) meta.setAttribute('content', bg);
   }
   window.syncThemeSeg();
@@ -1581,6 +1590,8 @@ function navigateTo(screenId) {
   if (currentElem) {
     currentElem.classList.remove('active');
     if (currentElem.id === 'splash') {
+      // 스플래시용 상태바 색을 페이퍼색으로 되돌린다.
+      if (window.setStatusBarTint) window.setStatusBarTint(null);
       currentElem.style.transition = 'opacity 0.5s ease';
       currentElem.style.opacity = '0';
       setTimeout(() => currentElem.remove(), 500);
@@ -10595,6 +10606,13 @@ function startApp() {
   splash.classList.add('active');
   splash.classList.remove('hidden-right');
   appContainer.appendChild(splash);
+
+  // 상태바를 스플래시 표지색과 맞춘다 — 그라데이션 중간값(--book-mid).
+  // navigateTo() 가 스플래시를 걷어낼 때 페이퍼색으로 되돌린다.
+  try {
+    var _splashTint = getComputedStyle(document.documentElement).getPropertyValue('--book-mid').trim();
+    if (window.setStatusBarTint) window.setStatusBarTint(_splashTint || '#C8B8D0');
+  } catch (e) {}
 
   let transitioned = false;
   const doTransition = () => {
