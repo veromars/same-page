@@ -1778,7 +1778,7 @@ function renderScreen(screenId) {
       ${getProfileSetupProgressBarHTML(1)}
       <div class="content-padding scroll-y">
         <h1 style="margin-top: 20px;">프로필 사진</h1>
-        <div class="setup-photo-circle" onclick="alert('사진 선택 기능은 다음 단계에서 구현됩니다.')">
+        <div class="setup-photo-circle" id="setup-photo-circle" onclick="pickProfileSetupPhoto()">
           <i data-lucide="camera" style="width:40px; color:var(--ink-40);"></i>
           <div class="setup-photo-label">프로필 사진을 추가해주세요</div>
         </div>
@@ -1960,6 +1960,7 @@ function renderScreen(screenId) {
   if (screenElem && appContainer) {
     appContainer.appendChild(screenElem);
     if (typeof lucide !== 'undefined') lucide.createIcons();
+    if (screenId === 'profile-setup-1' && window.renderSetupPhotoCircle) window.renderSetupPhotoCircle();
     setTimeout(() => {
       const currentElem = document.querySelector('.screen.active');
       if (currentElem) {
@@ -2885,7 +2886,15 @@ window.dismissPostOnboardingModal = function () {
 };
 
 window.skipSetupToDiscover = function () {
-  switchTab('discover');
+  // 프로필 셋업은 각 화면이 독립 .screen 이라 #main-content 가 없어
+  // switchTab() 만으로는 아무 일도 안 일어난다. main 을 먼저 띄운다.
+  // 프로필북은 미완성으로 남고, 카드 상세를 열면 컨텍스트 게이트가 뜬다.
+  if (document.getElementById('main-content')) {
+    switchTab('discover');
+    return;
+  }
+  navigateTo('main');
+  setTimeout(() => switchTab('discover'), 300);
 };
 
 window.finalizeProfile = function () {
@@ -4194,6 +4203,57 @@ window.addMyPhoto = function () {
   });
 
   input.click();
+};
+
+// 온보딩 직후 프로필 셋업 1단계 — 대표 사진 한 장. addMyPhoto 와 같은 방식
+// (그때그때 input[type=file] 을 만들어 쓴다)이되, 여기선 1장만 받아
+// userProfilePhoto + myPhotos 대표 슬롯에 넣는다.
+window.pickProfileSetupPhoto = function () {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+
+  input.addEventListener('change', () => {
+    const file = (input.files || [])[0];
+    if (!file) { input.remove(); return; }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const url = e.target.result;
+      if (!Array.isArray(window.myPhotos)) window.myPhotos = [];
+      // 이전에 고른 셋업 사진은 교체 (중복 방지)
+      if (userProfilePhoto) window.myPhotos = window.myPhotos.filter(p => p !== userProfilePhoto);
+      window.myPhotos = window.myPhotos.filter(p => p !== url);
+      userProfilePhoto = url;
+      window.myPhotos.unshift(url); // 1번 슬롯 = 대표
+      window.renderSetupPhotoCircle();
+      input.remove();
+    };
+    reader.onerror = () => input.remove();
+    reader.readAsDataURL(file);
+  });
+
+  input.click();
+};
+
+// 셋업 원형을 현재 userProfilePhoto 상태에 맞춰 그린다. 화면 재진입 시에도
+// 고른 사진이 남아 보이도록 renderScreen() 마지막에서 한 번 호출된다.
+window.renderSetupPhotoCircle = function () {
+  const el = document.getElementById('setup-photo-circle');
+  if (!el) return;
+  if (userProfilePhoto) {
+    el.style.backgroundImage = `url('${userProfilePhoto}')`;
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.style.border = '3px solid var(--lime)';
+    el.innerHTML = `<div class="setup-photo-label" style="margin-top:0; color:#fff; font-weight:700; background:rgba(0,0,0,0.5); padding:6px 14px; border-radius:100px;">사진 변경</div>`;
+  } else {
+    el.style.backgroundImage = '';
+    el.style.border = '';
+    el.innerHTML = `<i data-lucide="camera" style="width:40px; color:var(--ink-40);"></i><div class="setup-photo-label">프로필 사진을 추가해주세요</div>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  }
 };
 
 // 드래그로 순서 바꾸기. 1번 슬롯에 온 사진이 곧 대표가 된다 — 대표를 따로
