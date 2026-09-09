@@ -145,8 +145,8 @@
       --on-ground:     rgba(236, 230, 234, 0.55);
       --on-ground-dim: rgba(236, 230, 234, 0.40);
 
-      --band-bg:     #100F14;
-      --band-fg:     #C5BFC7;
+      --band-bg:     #F1EBE1;               /* 다크: 밝은 종이 리본으로 반전 */
+      --band-fg:     #23212B;
 
       --book-shadow-rgb: 0, 0, 0;
 
@@ -190,8 +190,8 @@
         --on-ground:     rgba(236, 230, 234, 0.55);
         --on-ground-dim: rgba(236, 230, 234, 0.40);
 
-        --band-bg:     #100F14;
-        --band-fg:     #C5BFC7;
+        --band-bg:     #F1EBE1;              /* 다크: 밝은 종이 리본으로 반전 */
+        --band-fg:     #23212B;
 
         --book-shadow-rgb: 0, 0, 0;
 
@@ -675,6 +675,11 @@
     }
     @keyframes marquee { to { transform: translateX(-50%); } }
 
+    /* 아웃트로 띠 — CTA 종이 바로 위에 붙여 윗변 경계선을 덮는다.
+       띠가 위로 올라오도록 z-index, 아래 종이를 1px 물어 이음매 제거. */
+    .marquee-outro { margin-bottom: 0; position: relative; z-index: 1; }
+    .marquee-outro + .cta-block.page { margin-top: -1px; }
+
     /* ── 프리풋 CTA (마지막 종이) ──────────────────────────
        상단은 히어로처럼 라벤더 바닥 → 크림색 종이로 그라데이션 (여백 넉넉).
        하단·옆의 종이 겹침 가장자리·그림자는 다른 페이지처럼 그대로. */
@@ -1001,6 +1006,15 @@
     </section>
 
   </main>
+
+  <!-- 아웃트로 띠 — 히어로 뒤 띠와 짝을 이루는 챕터 마무리.
+       마지막 종이(CTA) 윗변 경계선을 덮도록 바로 위에 붙인다. -->
+  <section class="marquee marquee-outro" aria-label="p.2 — on the same page.">
+    <div class="marquee-track">
+      <span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span>
+      <span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span><span>p.2 — on the same page.</span>
+    </div>
+  </section>
 
   <section class="cta-block reveal page">
     <span class="logo" aria-label="p.2">p<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="currentColor"/></svg>2</span>
