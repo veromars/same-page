@@ -2931,7 +2931,10 @@ p {
   width: 100%;
   height: 100%;
   z-index: 210;
-  background: transparent;
+  /* 불투명 바탕 — 안 그러면 뒤 그리드가 비쳐 보인다. 챕터별 옅은 색
+     (--chap-N-bg, 라이트·다크 각각 tokens.css)을 app.js 인라인으로 얹고,
+     여기선 폴백만. background-image(챕터색 왼쪽 엣지)는 인라인에서 준다. */
+  background-color: var(--paper);
   display: flex;
   flex-direction: column;
   overflow: hidden;
