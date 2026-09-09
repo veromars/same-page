@@ -2363,14 +2363,14 @@ window.openAnswerRevealModal = function (profileId, qId) {
 
     const gradients = {
       cover: {
-        1: 'linear-gradient(to right, var(--chap-1) 0%, transparent 55%)',
-        2: 'linear-gradient(to right, var(--chap-2) 0%, transparent 55%)',
-        3: 'linear-gradient(to right, var(--chap-3) 0%, transparent 55%)'
+        1: 'linear-gradient(to right, var(--chap-1-edge) 0%, transparent 55%)',
+        2: 'linear-gradient(to right, var(--chap-2-edge) 0%, transparent 55%)',
+        3: 'linear-gradient(to right, var(--chap-3-edge) 0%, transparent 55%)'
       },
       answer: {
-        1: 'linear-gradient(to right, var(--chap-1) 0%, transparent 25%)',
-        2: 'linear-gradient(to right, var(--chap-2) 0%, transparent 25%)',
-        3: 'linear-gradient(to right, var(--chap-3) 0%, transparent 25%)'
+        1: 'linear-gradient(to right, var(--chap-1-edge) 0%, transparent 25%)',
+        2: 'linear-gradient(to right, var(--chap-2-edge) 0%, transparent 25%)',
+        3: 'linear-gradient(to right, var(--chap-3-edge) 0%, transparent 25%)'
       }
     };
     const bgGradient = isCover ? gradients.cover[chapterNum] : gradients.answer[chapterNum];
