@@ -2388,7 +2388,7 @@ window.openAnswerRevealModal = function (profileId, qId) {
     ` : '';
 
     amc.innerHTML = `
-      <div id="nb-modal" class="book-page-modal" style="background-color: var(--chap-${chapterNum}-bg); background-image: ${bgGradient}; touch-action: pan-y;">
+      <div id="nb-modal" class="book-page-modal" style="background-image: ${bgGradient}; touch-action: pan-y;">
         <!-- Header -->
         <div class="book-page-header">
           <button class="answer-card-close" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--ink-40);display:flex;align-items:center;z-index:9999;pointer-events:auto;">
