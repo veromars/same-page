@@ -177,9 +177,9 @@
   --chap-2: #FFD5BD;   --chap-2-bg: #302823;
   --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
   /* near-black 위 저알파 워시 — 라이트의 파스텔과 같은 은은함 */
-  --chap-1-edge: rgba(232, 255, 144, 0.13);
-  --chap-2-edge: rgba(255, 213, 189, 0.13);
-  --chap-3-edge: rgba(211, 178, 226, 0.15);
+  --chap-1-edge: rgba(232, 255, 144, 0.18);
+  --chap-2-edge: rgba(255, 213, 189, 0.18);
+  --chap-3-edge: rgba(211, 178, 226, 0.2);
 
   --invite-purple:     #9B7FD4;
   --invite-flap:       #8A6FC4;
@@ -266,9 +266,9 @@
     --chap-2: #FFD5BD;   --chap-2-bg: #302823;
     --chap-3: #D3B2E2;   --chap-3-bg: #2A2632;
     /* near-black 위 저알파 워시 — 라이트의 파스텔과 같은 은은함 */
-    --chap-1-edge: rgba(232, 255, 144, 0.13);
-    --chap-2-edge: rgba(255, 213, 189, 0.13);
-    --chap-3-edge: rgba(211, 178, 226, 0.15);
+    --chap-1-edge: rgba(232, 255, 144, 0.18);
+    --chap-2-edge: rgba(255, 213, 189, 0.18);
+    --chap-3-edge: rgba(211, 178, 226, 0.2);
 
     --invite-purple:     #9B7FD4;
     --invite-flap:       #8A6FC4;
