@@ -4154,12 +4154,15 @@ p {
 /* p.2+ 초대 봉투 — 실물 봉투 카드. 종이(그라데이션·크림·잉크)는 두 테마
    모두 같은 값 — var(--invite-*), tokens.css 참조. 페이지 크롬(헤더·안내
    문구)만 앱 테마를 따른다. */
-.invite-card-slot { position: relative; width: 100%; }
+/* 모든 슬롯이 같은 높이(140px)를 가져야 그리드 행이 상태 조합과 무관하게
+   항상 나란히 맞는다 — 봉투(128px)는 이 셀의 바닥에 붙이고, 활성 상태의
+   카드·공유 버튼은 그 위에 겹쳐 배치한다 (레퍼런스 140/128 비율 그대로). */
+.invite-card-slot { position: relative; width: 100%; height: 140px; }
 
 /* 봉투 몸체 공용 지오메트리 — 봉인/사용됨 상태에서 카드 자체가 이 클래스. */
 .envelope-card {
-  position: relative;
-  width: 100%;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
   height: 128px;
   border-radius: 14px;
   overflow: hidden;
@@ -4272,13 +4275,9 @@ p {
 .use-invite-btn:active { background: rgba(255,255,255,0.42); }
 .use-invite-btn:disabled { cursor: default; }
 
-/* State: 활성 (봉투에서 카드가 나와 코드가 보임). 슬롯에 고정 높이를 주고
-   카드·버튼을 봉투 위에 절대배치로 겹쳐 — 공유 버튼이 봉투 입구 안쪽
-   (sealed 상태의 .envelope-cta와 같은 bottom:16px)에 앉는다. */
-.invite-card-slot.state-active {
-  position: relative;
-  height: 172px;
-}
+/* State: 활성 (봉투에서 카드가 나와 코드가 보임). 슬롯 높이는 이미 공용
+   140px — 카드·버튼을 그 위에 절대배치로 겹친다. 공유 버튼은 봉투 입구
+   안쪽(sealed 상태의 .envelope-cta와 같은 bottom:16px)에 앉는다. */
 .envelope-pocket {
   position: absolute;
   bottom: 0; left: 0; right: 0;
