@@ -5564,9 +5564,16 @@ window.selectProfileEditTab = function (key) {
   panel.innerHTML = renderProfileEditPanel(key);
   if (typeof lucide !== 'undefined') lucide.createIcons();
   window.bindChapterTabKeys();
-  // 섹션을 바꿨는데 이전 섹션에서 내려둔 스크롤에 남아 있으면 엉뚱한 데서 시작한다.
+  // 탭을 누른 자리에서 그대로 탭만 바뀌어야 한다 — 맨 위로 되돌리지 않는다.
+  // 다만 새 탭 내용이 더 짧아 지금 스크롤이 콘텐츠 밖(빈 여백)으로 나가면
+  // 그 최대치까지만 당겨준다.
   const sc = document.getElementById('profile-edit-body');
-  if (sc) sc.scrollTop = 0;
+  if (sc) {
+    requestAnimationFrame(() => {
+      const max = Math.max(0, sc.scrollHeight - sc.clientHeight);
+      if (sc.scrollTop > max) sc.scrollTop = max;
+    });
+  }
   panel.classList.remove('is-swapping');
   void panel.offsetWidth;
   panel.classList.add('is-swapping');
