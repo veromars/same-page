@@ -11037,8 +11037,13 @@ const INVITE_P2_MARK_PATH = '<path d="M427 479Q493 479 546.0 513.5Q599 548 629.5
 // fill/stroke set via the `style` attribute, not the bare SVG presentation
 // attribute — Safari/WebKit doesn't reliably resolve var() when it's typed
 // directly into fill="…", but a style="fill:…" declaration always does.
+//
+// width/height are also spelled out as real attributes (not left to CSS
+// `width:auto` deriving them from the viewBox) — without an intrinsic size,
+// some WebKit builds box the svg at a UA-default width far wider than the
+// card, and envelope-card's overflow:hidden then clips it at the card edge.
 function inviteMarkSVG(color, opacity) {
-  return `<svg viewBox="0 0 1482 1017" role="img" aria-label="p.2" style="fill:${color}; opacity:${opacity == null ? 1 : opacity};">${INVITE_P2_MARK_PATH}</svg>`;
+  return `<svg viewBox="0 0 1482 1017" width="22" height="15" role="img" aria-label="p.2" style="fill:${color}; opacity:${opacity == null ? 1 : opacity};">${INVITE_P2_MARK_PATH}</svg>`;
 }
 
 const INVITE_ARROW_ICON = '<svg width="7" height="7" viewBox="0 0 10 10"><path d="M1 5h8M6 1l4 4-4 4" style="stroke:var(--invite-ink);" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
