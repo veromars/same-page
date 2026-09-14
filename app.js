@@ -5235,7 +5235,7 @@ window.notifyMeetupParticipants = notifyMeetupParticipants;
 // ── 설정 페이지 ────────────────────────────────────────
 // 예전에는 내 프로필 화면 하단에 인라인으로 붙어 있었다. 프로필은 남에게
 // 보여줄 내용이고 설정은 나만 쓰는 도구라, 같은 스크롤에 있을 이유가 없다.
-// 닉네임 · 생년월일 · 성향 · 연애 상태 · 찾는 것.
+// 닉네임 · 생년월일 · 성향 · 연애 상태.
 // 프로필 '내용'이 아니라 계정의 뼈대라서 수정 화면이 아니라 설정에 둔다.
 window.closeSettingsPage = function () {
   // 저장하지 않은 닉네임 초안은 그냥 버린다. 확정은 '저장' 버튼에만 있다.
@@ -5246,7 +5246,6 @@ window.closeSettingsPage = function () {
 function getBasicsFormHTML() {
   const nickOk = window.canChangeNickname();
   const birthText = `${userBirthDate.year}년 ${userBirthDate.month}월 ${userBirthDate.day}일`;
-  const seekingLabel = (SEEKING_INTENTS.find(o => o.key === userSeekingIntent) || {}).label || '';
 
   return `
     <div class="edit-field">
@@ -5286,15 +5285,6 @@ function getBasicsFormHTML() {
         <div class="role-pill${userRelationshipStatus === o.key ? ' active' : ''}" onclick="selectRelationshipStatus('${o.key}', this)">${o.label}</div>
       `).join('')}
     </div>
-
-    <h3 class="basics-heading">p.2에서 찾는 것</h3>
-    ${isPartnered()
-      ? `<div class="edit-section-note">연애 중이거나 결혼하신 분께는 "친구/네트워크가 생겼으면 해요"로 표시돼요.</div>`
-      : `<div class="role-pills is-stacked">
-          ${SEEKING_INTENTS.map(o => `
-            <div class="role-pill${userSeekingIntent === o.key ? ' active' : ''}" onclick="window.selectSeekingFromBasics('${o.key}')">${o.label}</div>
-          `).join('')}
-        </div>`}
   `;
 }
 window.getBasicsFormHTML = getBasicsFormHTML;
@@ -5331,15 +5321,9 @@ window.saveNickname = function () {
   window.showToast('닉네임을 저장했어요');
 };
 
-window.selectSeekingFromBasics = function (key) {
-  userSeekingIntent = key;
-  persistOnboardingChoices();
-  window.renderBasicsForm();
-};
-
 // 설정 리스트의 '기본 사항' 행 → 서브 에디터로 연다. 닉네임·생년월일·성향·
-// 연애 상태·찾는 것. .settings-basics 컨테이너를 그대로 써서 renderBasicsForm이
-// 찾아 다시 그릴 수 있게 한다.
+// 연애 상태. .settings-basics 컨테이너를 그대로 써서 renderBasicsForm이
+// 찾아 다시 그릴 수 있게 한다. '찾는 것'은 내 프로필북 수정 쪽으로 옮겼다.
 window.openBasicsEditor = function () {
   openSubEditor('기본 사항', `<div class="settings-basics">${getBasicsFormHTML()}</div>`);
 };
@@ -5474,6 +5458,12 @@ function getProfileEditFormHTML() {
 
   return `
     <div class="profile-edit-form">
+      <label class="edit-field">
+        <span class="edit-field-label">한마디</span>
+        <input type="text" class="input-field" id="edit-bio" maxlength="40"
+          placeholder="${escapeAttr(DEFAULT_BIO)}" value="${escapeAttr(userBio)}"
+          oninput="window.updateProfileField('bio', this.value)" />
+      </label>
       <div class="pe-tabs" role="tablist" aria-label="편집할 항목">
         ${PROFILE_EDIT_TABS.map(t => {
           const on = t.key === active;
@@ -5491,11 +5481,12 @@ function getProfileEditFormHTML() {
   `;
 }
 
-// 네 섹션 순서. 가벼운 것부터 무거운 것 순 — 관심사·한마디는 한 번에 끝나고
-// 나에 대해는 8칸, 나의 페이지는 27문항이다.
+// 네 섹션 순서. 가벼운 것부터 무거운 것 순 — 관심사·찾는 것은 한 번에 끝나고
+// 나에 대해는 8칸, 나의 페이지는 27문항이다. 한마디는 탭이 아니라 사진 아래
+// 고정 필드로 옮겨서 여기엔 없다.
 const PROFILE_EDIT_TABS = [
   { key: 'tags', label: '관심사' },
-  { key: 'bio', label: '한마디' },
+  { key: 'seeking', label: '찾는 것' },
   { key: 'about', label: '나에 대해' },
   { key: 'pages', label: '나의 페이지' },
 ];
@@ -5518,15 +5509,19 @@ function renderProfileEditPanel(key) {
     `;
   }
 
-  if (key === 'bio') {
+  if (key === 'seeking') {
+    // 연애 중·기혼이면 고를 게 하나뿐이라(applyRelationshipConstraints가
+    // community로 고정) 선택지 대신 안내문만 보여준다.
+    if (isPartnered()) {
+      return `<div class="edit-section-note">연애 중이거나 결혼하신 분께는 "친구/네트워크가 생겼으면 해요"로 표시돼요.</div>`;
+    }
     return `
-      <p class="sub-editor-note">프로필 상단에 한 줄로 걸리는 문장이에요.</p>
-      <label class="edit-field">
-        <span class="edit-field-label">한마디</span>
-        <input type="text" class="input-field" id="edit-bio" maxlength="40"
-          placeholder="${escapeAttr(DEFAULT_BIO)}" value="${escapeAttr(userBio)}"
-          oninput="window.updateProfileField('bio', this.value)" />
-      </label>
+      <p class="sub-editor-note">지금 마음에 가까운 쪽으로 골라주세요.</p>
+      <div class="role-pills is-stacked">
+        ${SEEKING_INTENTS.map(o => `
+          <div class="role-pill${userSeekingIntent === o.key ? ' active' : ''}" onclick="window.selectSeekingFromProfileEdit('${o.key}')">${o.label}</div>
+        `).join('')}
+      </div>
     `;
   }
 
@@ -5626,6 +5621,15 @@ window.toggleProfileTag = function (el, tagName) {
     counter.classList.toggle('ready', userTags.length >= 3);
   }
   persistOnboardingChoices();
+};
+
+// '찾는 것' 탭 전용. 탭 전환이 아니라 탭 안의 선택지라 selectProfileEditTab이
+// 아니라 이 패널만 다시 그린다 (toggleProfileTag와 같은 패턴).
+window.selectSeekingFromProfileEdit = function (key) {
+  userSeekingIntent = key;
+  persistOnboardingChoices();
+  const panel = document.getElementById('pe-panel');
+  if (panel) panel.innerHTML = renderProfileEditPanel('seeking');
 };
 
 // ── 개별 항목 편집 화면 ────────────────────────────────
