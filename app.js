@@ -11034,11 +11034,14 @@ const INVITE_TINT_ANGLES = [122, 148, 104, 158, 130, 112];
 // p.2 wordmark, canonical outline path (assets/logo/p2-logo.svg) inlined so
 // its fill can be recolored per envelope state without an extra asset request.
 const INVITE_P2_MARK_PATH = '<path d="M427 479Q493 479 546.0 513.5Q599 548 629.5 613.5Q660 679 660 768Q660 857 629.5 922.5Q599 988 546.0 1022.5Q493 1057 427 1057Q372 1057 332.5 1034.5Q293 1012 272 973V1320H50V486H272V563Q293 524 332.5 501.5Q372 479 427 479ZM353 673Q317 673 294.0 698.0Q271 723 271 768Q271 813 294.0 838.0Q317 863 353 863Q389 863 412.0 838.0Q435 813 435 768Q435 723 412.0 698.0Q389 673 353 673Z"/><path transform="translate(783.0 995.0) rotate(45) scale(11.291667) translate(-12 -11.9)" d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/><path d="M1305 539Q1305 515 1294.5 502.0Q1284 489 1267 489Q1247 489 1235.5 509.5Q1224 530 1227 572H1012Q1015 479 1052.5 419.0Q1090 359 1150.0 331.0Q1210 303 1282 303Q1410 303 1469.5 364.5Q1529 426 1529 522Q1529 623 1464.5 711.5Q1400 800 1303 861H1532V1040H1015V873Q1149 773 1227.0 691.5Q1305 610 1305 539Z"/>';
+// fill/stroke set via the `style` attribute, not the bare SVG presentation
+// attribute — Safari/WebKit doesn't reliably resolve var() when it's typed
+// directly into fill="…", but a style="fill:…" declaration always does.
 function inviteMarkSVG(color, opacity) {
-  return `<svg viewBox="0 0 1482 1017" fill="${color}" role="img" aria-label="p.2" style="opacity:${opacity == null ? 1 : opacity};">${INVITE_P2_MARK_PATH}</svg>`;
+  return `<svg viewBox="0 0 1482 1017" role="img" aria-label="p.2" style="fill:${color}; opacity:${opacity == null ? 1 : opacity};">${INVITE_P2_MARK_PATH}</svg>`;
 }
 
-const INVITE_ARROW_ICON = '<svg width="7" height="7" viewBox="0 0 10 10"><path d="M1 5h8M6 1l4 4-4 4" stroke="var(--invite-ink)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const INVITE_ARROW_ICON = '<svg width="7" height="7" viewBox="0 0 10 10"><path d="M1 5h8M6 1l4 4-4 4" style="stroke:var(--invite-ink);" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function inviteSealedGradient(angle) {
   return `linear-gradient(${angle}deg, var(--invite-deep) 0%, var(--invite-lav) 30%, var(--invite-cream) 80%)`;

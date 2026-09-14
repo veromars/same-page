@@ -4272,27 +4272,25 @@ p {
 .use-invite-btn:active { background: rgba(255,255,255,0.42); }
 .use-invite-btn:disabled { cursor: default; }
 
-/* State: 활성 (봉투에서 카드가 나와 코드가 보임). 절대배치로 고정 높이
-   래퍼를 강제하는 대신, 카드가 봉투 입구 위로 겹쳐 보이도록 음수
-   margin으로 끌어올린다 — 그리드 셀 높이가 유동적이어도 안전하다. */
+/* State: 활성 (봉투에서 카드가 나와 코드가 보임). 슬롯에 고정 높이를 주고
+   카드·버튼을 봉투 위에 절대배치로 겹쳐 — 공유 버튼이 봉투 입구 안쪽
+   (sealed 상태의 .envelope-cta와 같은 bottom:16px)에 앉는다. */
 .invite-card-slot.state-active {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
+  height: 172px;
 }
 .envelope-pocket {
-  position: relative;
-  width: 100%;
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
   height: 128px;
   border-radius: 14px;
   overflow: hidden;
   box-shadow: 0 10px 24px rgba(179, 106, 226, 0.22);
 }
 .envelope-peek-card {
-  position: relative;
+  position: absolute;
+  top: 0; left: 8%; right: 8%;
   z-index: 3;
-  width: 84%;
-  margin-bottom: -18px;
   background: var(--invite-cream);
   box-shadow: 0 14px 30px rgba(26,20,35,0.22);
   padding: 8px 14px;
@@ -4325,14 +4323,9 @@ p {
   letter-spacing: -0.2px;
 }
 .invite-actions {
-  position: relative;
+  position: absolute;
+  bottom: 16px; left: 12px; right: 12px;
   z-index: 3;
-  width: 86%;
-  margin: 16px auto 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
 }
 .invite-btn-share {
   width: 100%;
