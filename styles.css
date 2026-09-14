@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300&family=Noto+Serif+KR:wght@300;400;500&family=Poppins:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300&family=Noto+Serif+KR:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 /* 색은 tokens.css 에서만 정의한다 (DESIGN.md §3). 이 :root 는
    (1) app.js 가 아직 쓰는 옛 이름을 새 토큰으로 잇는 별칭,
@@ -4110,12 +4110,25 @@ p {
   margin-bottom: 24px;
 }
 .invite-count-text {
-  font-size: 15px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-size: 14px;
   font-weight: 600;
   color: var(--ink);
+  letter-spacing: -0.3px;
 }
-.invite-count-text span {
+.invite-count-text .invite-count-num {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
   color: var(--accent-text);
+}
+.invite-count-text .invite-count-of {
+  font-family: 'Poppins', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-40);
 }
 .invite-progress-bg {
   width: 100%;
@@ -4126,7 +4139,7 @@ p {
 }
 .invite-progress-fill {
   height: 100%;
-  background: var(--accent-strong);
+  background: linear-gradient(90deg, var(--invite-lav), var(--invite-deep));
   border-radius: 2px;
   transition: width 0.3s ease;
 }
@@ -4134,168 +4147,238 @@ p {
 .invite-slots-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 10px;
   margin-bottom: 32px;
 }
 
-.invite-card-slot {
-  aspect-ratio: 3/4;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 12px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
+/* p.2+ 초대 봉투 — 실물 봉투 카드. 종이(그라데이션·크림·잉크)는 두 테마
+   모두 같은 값 — var(--invite-*), tokens.css 참조. 페이지 크롬(헤더·안내
+   문구)만 앱 테마를 따른다. */
+.invite-card-slot { position: relative; width: 100%; }
 
-/* Envelope flap shared */
-.envelope-flap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  pointer-events: none;
-  z-index: 0;
-}
-.envelope-flap-top {
-  top: 0;
-  height: 44%;
-  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
-}
-.envelope-flap-bottom {
-  bottom: 0;
-  height: 44%;
-  clip-path: polygon(0% 100%, 100% 100%, 50% 0%);
-}
-.envelope-content {
+/* 봉투 몸체 공용 지오메트리 — 봉인/사용됨 상태에서 카드 자체가 이 클래스. */
+.envelope-card {
   position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  height: 100%;
   width: 100%;
-  padding: 12px;
+  height: 128px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(179, 106, 226, 0.22);
 }
-.invite-circle {
-  width: 40px;
-  height: 40px;
+.envelope-rim {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: calc(52% + 4px);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(180deg, var(--invite-cream) 0%, rgba(253,251,245,0.5) 100%);
+}
+.envelope-flap-sheen {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 52%;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: linear-gradient(160deg, rgba(255,255,255,0.22), rgba(255,255,255,0));
+}
+.envelope-seam-l {
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 52%; height: 48%;
+  clip-path: polygon(0 100%, 0 0, 100% 100%);
+  background: rgba(0,0,0,0.05);
+}
+.envelope-seam-r {
+  position: absolute;
+  right: 0; bottom: 0;
+  width: 52%; height: 48%;
+  clip-path: polygon(100% 100%, 100% 0, 0 100%);
+  background: rgba(0,0,0,0.04);
+}
+.envelope-mark {
+  position: absolute;
+  top: 6px; left: 0; right: 0;
+  text-align: center;
+  z-index: 3;
+  line-height: 0;
+}
+.envelope-mark svg { height: 15px; width: auto; }
+
+.icon-chip {
+  width: 18px; height: 18px;
   border-radius: 50%;
+  background: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-/* p.2+ 초대 봉투 — 봉투 몸통은 두 테마 모두 보라(--invite-purple), 다크
-   위에서 빛나는 오브젝트. 안쪽 카드·버튼·'사용됨' 상태만 테마 대응.
-   NOTE: 이 컴포넌트는 디자인 리프레시 예정 (별도 태스크). */
-/* State: Used */
-.state-used {
-  background: var(--invite-used);
-  border: none;
-  box-shadow: none;
+/* State: 봉인/미사용 */
+.envelope-leaf {
+  position: absolute;
+  top: 26px; left: 19.2%; right: 19.2%;
+  height: 43px;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  background: var(--invite-cream);
 }
-.state-used .envelope-flap { background: var(--invite-used-flap); }
-.state-used .invite-circle { background: rgba(0,0,0,0.1); }
-
-/* State: Active */
-.state-active {
-  background: var(--invite-purple);
-  padding: 14px;
-  justify-content: space-between;
-}
-.invite-inner-card {
-  background: var(--surface);
-  border-radius: 12px;
-  padding: 20px 20px 16px;
-  width: 100%;
+.envelope-labels {
+  position: absolute;
+  top: 20%; left: 0; right: 0;
+  padding-top: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.10);
+}
+.envelope-labels .en {
+  font-family: 'Poppins', sans-serif;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--invite-deep);
+}
+.envelope-labels .to {
+  margin-top: 6px;
+  font-family: 'Noto Serif KR', serif;
+  font-style: italic;
+  font-weight: 500;
+  font-size: 8px;
+  color: var(--invite-deep);
+  letter-spacing: 0.5px;
+}
+.envelope-cta {
+  position: absolute;
+  bottom: 16px; left: 12px; right: 12px;
+  z-index: 2;
+}
+.use-invite-btn {
+  width: 100%;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.28);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  color: var(--invite-ink);
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: -0.1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.use-invite-btn:active { background: rgba(255,255,255,0.42); }
+.use-invite-btn:disabled { cursor: default; }
+
+/* State: 활성 (봉투에서 카드가 나와 코드가 보임). 절대배치로 고정 높이
+   래퍼를 강제하는 대신, 카드가 봉투 입구 위로 겹쳐 보이도록 음수
+   margin으로 끌어올린다 — 그리드 셀 높이가 유동적이어도 안전하다. */
+.invite-card-slot.state-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.envelope-pocket {
+  position: relative;
+  width: 100%;
+  height: 128px;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 10px 24px rgba(179, 106, 226, 0.22);
+}
+.envelope-peek-card {
+  position: relative;
+  z-index: 3;
+  width: 84%;
+  margin-bottom: -18px;
+  background: var(--invite-cream);
+  box-shadow: 0 14px 30px rgba(26,20,35,0.22);
+  padding: 8px 14px;
+  text-align: center;
 }
 .invite-inner-label {
-  color: var(--accent-text);
-  font-size: 10px;
-  letter-spacing: 0.15em;
-  font-weight: 600;
-  text-align: center;
-  width: 100%;
+  font-family: 'Poppins', sans-serif;
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--invite-deep);
 }
 .invite-code {
-  font-family: monospace;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--ink);
-  margin: 4px 0 2px;
-  letter-spacing: 1px;
+  margin-top: 6px;
+  font-family: 'Noto Serif KR', serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--invite-ink);
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 .invite-timer {
-  font-size: 12px;
-  color: var(--muted);
   margin-top: 4px;
+  font-family: 'Pretendard', sans-serif;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: rgba(26,20,35,0.5);
+  letter-spacing: -0.2px;
 }
 .invite-actions {
+  position: relative;
+  z-index: 3;
+  width: 86%;
+  margin: 16px auto 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  width: 100%;
-  margin-top: 10px;
-  flex-shrink: 0;
-}
-.invite-btn-copy {
-  border: 1.5px solid var(--invite-btn-line);
-  background: var(--invite-btn-wash);
-  color: var(--accent-text);
-  border-radius: 100px;
-  font-size: 13px;
-  padding: 9px;
-  cursor: pointer;
-  width: 100%;
-  font-weight: 500;
+  align-items: center;
 }
 .invite-btn-share {
-  background: var(--invite-btn);
-  color: var(--on-accent);
-  border-radius: 100px;
-  font-size: 13px;
-  padding: 10px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
   width: 100%;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
+  background: var(--invite-ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: 12.5px;
+  letter-spacing: -0.1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.28);
 }
 
-/* State: Unused */
-.state-unused {
-  background: var(--invite-purple);
+/* State: 사용됨/만료 (무채색) */
+.state-used .envelope-rim {
+  background: linear-gradient(180deg, rgba(253,250,247,0.92), rgba(252,250,246,0.92));
 }
-.state-unused .envelope-flap { background: var(--invite-flap); }
-.state-unused .invite-circle { background: var(--surface); }
-.invite-number {
-  color: rgba(255,255,255,0.9);
-  font-size: 13px;
+.invite-used-tag {
+  position: absolute;
+  top: 26px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.25em;
+  color: rgba(26,20,35,0.32);
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 2;
+  pointer-events: none;
 }
-.use-invite-btn {
-  background: rgba(255,255,255,0.2);
-  border: none;
-  color: var(--on-accent);
-  border-radius: 100px;
-  padding: 8px 16px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  width: 100%;
-  transition: all 0.2s;
-}
-.use-invite-btn:active {
-  background: rgba(255,255,255,0.3);
+.invite-used-code {
+  position: absolute;
+  bottom: 20px; left: 0; right: 0;
+  text-align: center;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(26,20,35,0.45);
+  letter-spacing: -0.2px;
 }
 
 /* Notice */

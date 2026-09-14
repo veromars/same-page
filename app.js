@@ -11027,27 +11027,64 @@ function stopInviteCountdown() {
   }
 }
 
-const _inviteOrdSuffix = n => { const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); };
+// Envelope paper gradient cycles through these angles by slot index for
+// subtle hand-folded variation — never a hue change, always the same purple.
+const INVITE_TINT_ANGLES = [122, 148, 104, 158, 130, 112];
+
+// p.2 wordmark, canonical outline path (assets/logo/p2-logo.svg) inlined so
+// its fill can be recolored per envelope state without an extra asset request.
+const INVITE_P2_MARK_PATH = '<path d="M427 479Q493 479 546.0 513.5Q599 548 629.5 613.5Q660 679 660 768Q660 857 629.5 922.5Q599 988 546.0 1022.5Q493 1057 427 1057Q372 1057 332.5 1034.5Q293 1012 272 973V1320H50V486H272V563Q293 524 332.5 501.5Q372 479 427 479ZM353 673Q317 673 294.0 698.0Q271 723 271 768Q271 813 294.0 838.0Q317 863 353 863Q389 863 412.0 838.0Q435 813 435 768Q435 723 412.0 698.0Q389 673 353 673Z"/><path transform="translate(783.0 995.0) rotate(45) scale(11.291667) translate(-12 -11.9)" d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z"/><path d="M1305 539Q1305 515 1294.5 502.0Q1284 489 1267 489Q1247 489 1235.5 509.5Q1224 530 1227 572H1012Q1015 479 1052.5 419.0Q1090 359 1150.0 331.0Q1210 303 1282 303Q1410 303 1469.5 364.5Q1529 426 1529 522Q1529 623 1464.5 711.5Q1400 800 1303 861H1532V1040H1015V873Q1149 773 1227.0 691.5Q1305 610 1305 539Z"/>';
+function inviteMarkSVG(color, opacity) {
+  return `<svg viewBox="0 0 1482 1017" fill="${color}" role="img" aria-label="p.2" style="opacity:${opacity == null ? 1 : opacity};">${INVITE_P2_MARK_PATH}</svg>`;
+}
+
+const INVITE_ARROW_ICON = '<svg width="7" height="7" viewBox="0 0 10 10"><path d="M1 5h8M6 1l4 4-4 4" stroke="var(--invite-ink)" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function inviteSealedGradient(angle) {
+  return `linear-gradient(${angle}deg, var(--invite-deep) 0%, var(--invite-lav) 30%, var(--invite-cream) 80%)`;
+}
+function inviteUsedGradient(angle) {
+  return `linear-gradient(${angle}deg, var(--invite-used-from) 0%, var(--invite-used-mid) 35%, var(--invite-cream) 80%)`;
+}
+
+// Sealed envelope — closed flap, waxed p.2 mark, "INVITATION / TO." peeking
+// through the flap's point, glass CTA. Shared by the idle state and the
+// disabled "no row yet" placeholder.
+function buildInviteSealedHTML(i, angle, ctaHTML) {
+  return `
+    <div class="envelope-card" style="background:${inviteSealedGradient(angle)};">
+      <div class="envelope-rim"></div>
+      <div class="envelope-flap-sheen"></div>
+      <div class="envelope-mark">${inviteMarkSVG('var(--invite-deep)')}</div>
+      <div class="envelope-leaf"></div>
+      <div class="envelope-labels">
+        <div class="en">Invitation</div>
+        <div class="to">TO.</div>
+      </div>
+      <div class="envelope-seam-l"></div>
+      <div class="envelope-seam-r"></div>
+      <div class="envelope-cta">${ctaHTML}</div>
+    </div>
+  `;
+}
 
 // One slot's markup, keyed by index so a single card can be swapped in place
 // without redrawing the grid around it. The root element carries
 // data-invite-slot, which is what refreshInviteCardSlot looks up.
 function buildInviteCardHTML(card, i, nowMs) {
-  const num = i + 1;
   const state = window.getInviteCardState(card, nowMs);
+  const angle = INVITE_TINT_ANGLES[i % INVITE_TINT_ANGLES.length];
 
   if (state === 'expired') {
     return `
-      <div class="invite-card-slot state-used" data-invite-slot="${i}">
-        <div class="envelope-flap envelope-flap-top"></div>
-        <div class="envelope-flap envelope-flap-bottom"></div>
-        <div class="envelope-content">
-          <div style="letter-spacing:0.2em; color:rgba(255,255,255,0.6); font-size:13px; font-weight:600;">${card.used_by ? 'INVITED' : 'EXPIRED'}</div>
-          <div class="invite-circle">
-            <i data-lucide="heart" style="width:20px; height:20px; color:var(--muted);"></i>
-          </div>
-          <div style="color:var(--muted); font-size:13px; font-family:monospace;">${card.code}</div>
-          <div style="color:var(--muted); font-size:12px;">만료됨</div>
+      <div class="invite-card-slot" data-invite-slot="${i}">
+        <div class="envelope-card state-used" style="background:${inviteUsedGradient(angle)};">
+          <div class="envelope-rim"></div>
+          <div class="envelope-seam-l"></div>
+          <div class="envelope-seam-r"></div>
+          <div class="envelope-mark">${inviteMarkSVG('var(--invite-ink)', 0.35)}</div>
+          <div class="invite-used-tag">${card.used_by ? 'Invited' : 'Expired'}</div>
+          <div class="invite-used-code">${card.code}</div>
         </div>
       </div>
     `;
@@ -11056,48 +11093,34 @@ function buildInviteCardHTML(card, i, nowMs) {
   if (state === 'active') {
     return `
       <div class="invite-card-slot state-active" data-invite-slot="${i}">
-        <div class="invite-inner-card">
-          <div class="invite-inner-label">INVITATION</div>
+        <div class="envelope-peek-card">
+          <div class="invite-inner-label">Invitation</div>
           <div class="invite-code">${card.code}</div>
           <div class="invite-timer" data-invite-expires="${card.expires_at}">${window.formatInviteRemaining(card.expires_at, nowMs)}</div>
         </div>
+        <div class="envelope-pocket" style="background:${inviteSealedGradient(angle)};">
+          <div class="envelope-rim"></div>
+          <div class="envelope-flap-sheen"></div>
+          <div class="envelope-seam-l"></div>
+          <div class="envelope-seam-r"></div>
+        </div>
         <div class="invite-actions">
-          <button class="invite-btn-share" onclick="event.stopPropagation(); window.shareInvite('${card.code}'); return false;">공유하기</button>
+          <button class="invite-btn-share" onclick="event.stopPropagation(); window.shareInvite('${card.code}'); return false;">
+            <span class="icon-chip">${INVITE_ARROW_ICON}</span>공유하기
+          </button>
         </div>
       </div>
     `;
   }
 
   if (state === 'idle') {
-    return `
-      <div class="invite-card-slot state-unused" data-invite-slot="${i}">
-        <div class="envelope-flap envelope-flap-top"></div>
-        <div class="envelope-flap envelope-flap-bottom"></div>
-        <div class="envelope-content">
-          <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
-          <div class="invite-circle">
-            <i data-lucide="heart" style="width:20px; height:20px; color:var(--accent-text);"></i>
-          </div>
-          <button class="use-invite-btn" onclick="window.activateInvite(${i})">사용하기</button>
-        </div>
-      </div>
-    `;
+    const cta = `<button class="use-invite-btn" onclick="window.activateInvite(${i})"><span class="icon-chip">${INVITE_ARROW_ICON}</span>사용하기</button>`;
+    return `<div class="invite-card-slot" data-invite-slot="${i}">${buildInviteSealedHTML(i, angle, cta)}</div>`;
   }
 
   // No row for this slot.
-  return `
-    <div class="invite-card-slot state-unused" data-invite-slot="${i}" style="opacity:0.45;">
-      <div class="envelope-flap envelope-flap-top"></div>
-      <div class="envelope-flap envelope-flap-bottom"></div>
-      <div class="envelope-content">
-        <div class="invite-number">${_inviteOrdSuffix(num)} Invitation</div>
-        <div class="invite-circle">
-          <i data-lucide="heart" style="width:20px; height:20px; color:var(--ink-40);"></i>
-        </div>
-        <button class="use-invite-btn" disabled style="opacity:0.5; cursor:default;">준비 중</button>
-      </div>
-    </div>
-  `;
+  const cta = `<button class="use-invite-btn" disabled style="opacity:0.5;"><span class="icon-chip">${INVITE_ARROW_ICON}</span>준비 중</button>`;
+  return `<div class="invite-card-slot" data-invite-slot="${i}" style="opacity:0.45;">${buildInviteSealedHTML(i, angle, cta)}</div>`;
 }
 
 // Redraws exactly one card from its current row. Everything else on the page —
@@ -11133,21 +11156,24 @@ window.openInvitePage = async function () {
       <div class="modal fade-in active" style="z-index: 100; background: var(--bg-color);">
          <div class="app-header" style="background:var(--bg-color);">
            <button class="back-btn" onclick="closeModal()"><i data-lucide="chevron-left" style="width:28px;"></i></button>
-           <div style="font-weight: 700; font-size: 16px;">초대장</div>
+           <div style="font-weight: 500; font-size: 18px; letter-spacing: -0.3px;">초대장</div>
            <div style="width: 48px;"></div>
          </div>
-         
+
          <div class="scroll-y" style="padding: 16px 20px 40px;">
            <!-- Top Summary -->
            <div class="invite-summary-bar">
-             <div class="invite-count-text">초대한 친구 <span>${usedCount}</span> / 10</div>
+             <div class="invite-count-text">
+               <span>초대한 친구</span>
+               <span><span class="invite-count-num">${usedCount}</span><span class="invite-count-of"> / 10</span></span>
+             </div>
              <div class="invite-progress-bg">
                <div class="invite-progress-fill" style="width: ${progressPercent}%;"></div>
              </div>
            </div>
            
            <!-- Invite Grid -->
-           <div class="invite-slots-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:16px;">
+           <div class="invite-slots-grid">
              ${cardsHTML}
            </div>
            
