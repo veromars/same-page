@@ -5517,9 +5517,16 @@ function renderProfileEditPanel(key) {
     }
     return `
       <p class="sub-editor-note">지금 마음에 가까운 쪽으로 골라주세요.</p>
-      <div class="role-pills is-stacked">
+      <div class="seeking-options" role="radiogroup" aria-label="p.2에서 찾는 것">
         ${SEEKING_INTENTS.map(o => `
-          <div class="role-pill${userSeekingIntent === o.key ? ' active' : ''}" onclick="window.selectSeekingFromProfileEdit('${o.key}')">${o.label}</div>
+          <button type="button" role="radio" aria-checked="${userSeekingIntent === o.key}"
+            class="seeking-option${userSeekingIntent === o.key ? ' active' : ''}"
+            onclick="window.selectSeekingFromProfileEdit('${o.key}')">
+            <span>${o.label}</span>
+            <span class="seeking-option-check" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </span>
+          </button>
         `).join('')}
       </div>
     `;

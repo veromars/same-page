@@ -6355,15 +6355,74 @@ p {
 
 .settings-basics .edit-field:first-child { margin-top: 0; }
 
-/* 찾는 것 세 줄은 가로로 세우면 글자가 잘린다. */
-.role-pills.is-stacked {
+/* '찾는 것' — 문장 길이의 선택지 3개. role-pill(캡슐형, 짧은 라벨 전용)은
+   문장을 욱여넣으면 뚱뚱해 보여서 쓰지 않는다 — input-field와 같은 반경의
+   선택 가능한 행 목록으로, 체크 표시로 선택 상태를 나타낸다. */
+.seeking-options {
+  display: flex;
   flex-direction: column;
-  align-items: stretch;
+  gap: 8px;
+}
+
+.seeking-option {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--text-dark);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.seeking-option-check {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.seeking-option.active {
+  border-color: var(--accent-text);
+  background: var(--accent-wash);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.seeking-option.active .seeking-option-check {
+  border-color: var(--accent-fill);
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+.seeking-option:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .pe-tab { transition: none; }
   .pe-panel.is-swapping { animation: none; }
+  .seeking-option { transition: none; }
+  .seeking-option-check { transition: none; }
 }
 
 /* ── 닉네임 — 명시적 저장 ────────────────────────────
