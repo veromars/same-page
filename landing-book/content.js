@@ -1,0 +1,108 @@
+const volumes=[
+  {
+    "title": "같은 페이지에\n있다는 것.",
+    "en": "On the\nsame page.",
+    "label": "THE PHILOSOPHY",
+    "short": "같은 페이지",
+    "cover": "#E2FF74",
+    "ink": "#29242a",
+    "bg": "#f0f5d3",
+    "desc": "p.2는 앱이 아니라 책입니다.",
+    "copy": "사용자는 독자이자 저자이고, 만남은 같은 책을 읽는 것에서 시작됩니다. 표지만 보고 넘기지 않도록, 처음부터 그렇게 설계했어요.",
+    "note": "취향과 가치관이 맞는 이들의\n느슨하고 또 깊은 연결.",
+    "detail": "안전한 네트워크 안에서 누구나 가볍게 시작하되, 원하는 사람은 얼마든 깊이 들어갈 수 있는 공간.",
+    "tint": "#f0f5d3"
+  },
+  {
+    "title": "나를 읽는\n시간.",
+    "en": "A book\nabout you.",
+    "label": "THE PROFILE BOOK",
+    "short": "프로필북",
+    "cover": "#eef3a0",
+    "ink": "#29242a",
+    "bg": "#f5f1d7",
+    "desc": "드러내고 싶은 만큼.",
+    "copy": "글, 혹은 사진으로 원하는 방식으로. 깊이는 요구가 아니라 선택지입니다. 사진과 소개로 시작하고, 원하면 27문항까지 더 깊게.",
+    "note": "한 사람을,\n한 권의 책처럼.",
+    "detail": "무엇을 좋아하는지, 어떤 사랑을 원하는지, 함께하는 삶을 어떻게 그리는지. 나만의 속도로 나의 이야기를 담아보세요.",
+    "tint": "#f5f1d7"
+  },
+  {
+    "title": "월요일의\n작은 발견.",
+    "en": "Monday\nmorning\npages.",
+    "label": "WEEKLY DISCOVERY",
+    "short": "주간 발견",
+    "cover": "#FFD5BD",
+    "ink": "#29242a",
+    "bg": "#f9e8d9",
+    "desc": "주 3–6권의 프로필북.",
+    "copy": "월요일 오전 7시, 새로운 프로필북이 도착합니다. 무한 스크롤 대신 끝까지 읽을 수 있는 분량으로.",
+    "note": "더 많이 넘기기보다,\n조금 더 깊이 읽기.",
+    "detail": "나와 맞는 사람과 모임을 발견하고, 같은 속도와 온도로 소통하도록. 너무 가볍지만은 않은 연결을 생각합니다.",
+    "tint": "#f9e8d9"
+  },
+  {
+    "title": "마음이\n머문 자리.",
+    "en": "A quiet\nkind of\nconnection.",
+    "label": "A MUTUAL CONNECTION",
+    "short": "마음의 연결",
+    "cover": "#eac3cc",
+    "ink": "#29242a",
+    "bg": "#f3e4e5",
+    "desc": "마음이 가면, 조용히 표시합니다.",
+    "copy": "♥로 북마크하고, 상대도 같은 마음일 때 비로소 연결됩니다.",
+    "note": "같은 문장에서\n마음이 만나는 순간.",
+    "detail": "서로를 읽는 시간, 마음을 알아가는 시간을 충분히 가져보세요.",
+    "tint": "#f3e4e5"
+  },
+  {
+    "title": "책 밖에서\n만나요.",
+    "en": "Together,\nin real life.",
+    "label": "GATHERINGS & COMMUNITY",
+    "short": "모임",
+    "cover": "#C89FDB",
+    "ink": "#29242a",
+    "bg": "#eaddef",
+    "desc": "실제로 만나는 자리.",
+    "copy": "소모임과 행사를 탐색하고 참여합니다. 앱 안의 연결이 앱 밖의 만남으로 이어지도록.",
+    "note": "마음 가는 모임에서,\n새로운 인연으로.",
+    "detail": "같이 좋아하는 것을 나누며, 글로는 알 수 없었던 서로의 모습을 발견해요.",
+    "tint": "#eaddef"
+  },
+  {
+    "title": "당신의\n첫 페이지.",
+    "en": "Your next\nchapter.",
+    "label": "BY INVITATION",
+    "short": "초대 안내",
+    "cover": "#C89FDB",
+    "ink": "#29242a",
+    "bg": "#eee3f0",
+    "desc": "작은 초대에서 시작하는 연결.",
+    "copy": "p.2는 초대코드가 있어야 가입할 수 있습니다. 지인 또는 커뮤니티에서 받은 초대코드로 가입해 주세요.",
+    "note": "서두르지 않아도 되는,\n당신만의 시작.",
+    "detail": "초대가 없다면 아래 안내에서 요청할 수 있어요.",
+    "tint": "#eee3f0",
+    "body": "<h3>작은 초대에서 시작하는 연결.</h3><p>p.2는 초대코드가 있어야 가입할 수 있습니다. 지인 또는 커뮤니티에서 받은 초대코드로 가입해 주세요.</p><div class=\"invitation\" id=\"request-invite\"><h3>초대가 필요하신가요?</h3><p>p.2 계정을 팔로우하고 DM을 보내주세요.<br>확인 후 초대코드를 보내드립니다.</p><a href=\"https://instagram.com/page2.social\" target=\"_blank\" rel=\"noopener noreferrer\">Instagram ↗</a><a href=\"https://x.com/page2.social\" target=\"_blank\" rel=\"noopener noreferrer\">X ↗</a></div>"
+  },
+  {
+    "title": "당신의 속도로,",
+    "en": "Begin at\nyour pace.",
+    "label": "GETTING STARTED",
+    "short": "시작 안내",
+    "note": "첫 페이지는,\n가볍게.",
+    "cover": "#C89FDB",
+    "tint": "#eee3f0",
+    "body": "<div class=\"getting-started\"><h3>시작하는 방법.</h3><ol><li><strong>초대</strong><span>초대코드로 가입하기</span></li><li><strong>프로필북</strong><span>내 프로필북 만들기</span></li><li><strong>주간 발견</strong><span>매주 새로운 프로필북 만나기</span></li><li><strong>모임</strong><span>관심 있는 모임에 참여하기</span></li></ol></div><div class=\"faq\"><details><summary>앱스토어에 있나요?</summary><p>지금은 웹에서 클로즈드 베타로 먼저 열고 있어요. 정식 iOS · Android 앱은 준비 중이며, 출시되면 page2.social에서 안내합니다.</p></details></div>"
+  },
+  {
+    "title": "함께 페이지를\n넘겨갈 사람.",
+    "en": "A story\nwe share.",
+    "label": "ON THE SAME PAGE",
+    "short": "마지막 페이지",
+    "note": "",
+    "cover": "#C89FDB",
+    "tint": "#eee3f0",
+    "body": "<p>같은 페이지에 있다는 것,<br>취향과 가치관이 맞는 사람을 만난다는 것.</p><p>함께 페이지를 넘겨갈 사람을 만나는 것.</p><footer class=\"colophon\"><img src=\"/landing-book/assets/logo/p2-logo-ink.svg\" alt=\"p.2\"><span>on the same page.</span><a href=\"mailto:hello@page2.social\">문의 ↗</a><small>© 2026 FONDLY STUDIO</small></footer>"
+  }
+];
+export {volumes};
